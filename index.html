@@ -2761,7 +2761,7 @@ async function doOCR(imageDataUrl, file) {
     const accessToken = tokenData.access_token;
 
     // 2. 压缩图片
-    const compressedBase64 = await compressImage(imageDataUrl, 1200);
+    const compressedBase64 = await compressImage(imageDataUrl, 1600);
     const imgBase64 = compressedBase64.replace(/^data:image\/\w+;base64,/, '');
 
     // 3. 调用通用文字识别（高精度版）
@@ -2797,6 +2797,7 @@ function compressImage(dataUrl, maxSize) {
     const img = new Image();
     img.onload = function() {
       let w = img.width, h = img.height;
+      // 保留更高分辨率（1600px），路单文字多需要细节
       if (w > maxSize || h > maxSize) {
         if (w > h) { h = h * maxSize / w; w = maxSize; }
         else { w = w * maxSize / h; h = maxSize; }
@@ -2804,8 +2805,33 @@ function compressImage(dataUrl, maxSize) {
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
+      // 白底（抗反光/阴影干扰）
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, w, h);
       ctx.drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
+      // 自动对比度增强（保留彩色，提升文字清晰度）
+      try {
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const d = imageData.data;
+        // 计算亮度范围，做线性拉伸
+        let min = 255, max = 0;
+        for (let i = 0; i < d.length; i += 4) {
+          const lum = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+          if (lum < min) min = lum;
+          if (lum > max) max = lum;
+        }
+        const range = max - min;
+        if (range > 20 && range < 220) {
+          const scale = 255 / range;
+          for (let i = 0; i < d.length; i += 4) {
+            d[i] = Math.max(0, Math.min(255, (d[i] - min) * scale));
+            d[i+1] = Math.max(0, Math.min(255, (d[i+1] - min) * scale));
+            d[i+2] = Math.max(0, Math.min(255, (d[i+2] - min) * scale));
+          }
+          ctx.putImageData(imageData, 0, 0);
+        }
+      } catch(e) {}
+      resolve(canvas.toDataURL('image/jpeg', 0.92));
     };
     img.src = dataUrl;
   });
@@ -3794,7 +3820,7 @@ async function doStoreOCR(imageDataUrl) {
     const tokenData = await tokenResp.json();
     if (!tokenData.access_token) throw new Error('获取token失败');
     const accessToken = tokenData.access_token;
-    const compressedBase64 = await compressImage(imageDataUrl, 1200);
+    const compressedBase64 = await compressImage(imageDataUrl, 1600);
     const imgBase64 = compressedBase64.replace(/^data:image\/\w+;base64,/, '');
     const ocrResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=${accessToken}`), {
       method: 'POST',
