@@ -2782,11 +2782,11 @@ function parseOcrResult(ocrData) {
   // 2. 找表头中要识别的列索引（按抬头决定找哪一列）
   // 不同抬头的单据，要识别的列名不同：面包路单→面包筐，冷藏/冷冻→物流篮，常温→物流箱
   const TARGET_COLS = {
-    0: ['面包筐', '鲜食筐'],         // 鲜食筐
-    1: ['面包筐'],                   // 面包筐
-    2: ['物流篮', '物流箱', '物流筐'],  // 低温筐
-    3: ['物流篮', '物流箱', '物流筐'],  // 冷冻筐
-    4: ['物流箱', '物流筐', '整箱数量', '整箱']  // 常温筐
+    0: ['鲜食筐', '面包筐', '发货', '发出'],     // 鲜食筐（手写单也支持）
+    1: ['面包筐', '发货', '发出'],               // 面包筐
+    2: ['物流篮', '物流箱', '物流筐', '发货', '发出'],  // 低温筐
+    3: ['物流篮', '物流箱', '物流筐', '发货', '发出'],  // 冷冻筐
+    4: ['物流箱', '物流筐', '整箱数量', '整箱', '发货', '发出']  // 常温筐
   };
   const targetCols = TARGET_COLS[goodsIdx] || ['物流箱', '物流筐', '物流篮', '整箱数量'];
   let logisticsColIdx = -1;
@@ -2862,8 +2862,18 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
           }
       }
     }
-    // 取识别到的目标列（已按抬头确定）；若未找到则取发出区第1列
-    const li = (nums[logisticsColIdx] !== undefined ? nums[logisticsColIdx] : (nums[0] || 0));
+    // 取识别到的目标列；若未找到或值异常（疑似代号/时间），则取nums中合理的发出数量
+    // 合理范围：1-999 的数字（排除 6 位店代号、时间 HHMM）
+    let li = 0;
+    if (logisticsColIdx >= 0 && nums[logisticsColIdx] !== undefined && nums[logisticsColIdx] < 1000) {
+      li = nums[logisticsColIdx];
+    } else {
+      // 兜底：从末尾往前找第一个合理数字（1-999）
+      for (let i = nums.length - 1; i >= 0; i--) {
+        if (nums[i] > 0 && nums[i] < 1000) { li = nums[i]; break; }
+      }
+      if (!li && nums[0] !== undefined && nums[0] < 1000) li = nums[0];
+    }
     rows.push({ code: s.code, name: s.name, nums: [li], _rawNums: nums.slice() });
   });
 
@@ -3630,7 +3640,7 @@ function parseStoreOcr(words) {
     const t = String(w).trim();
     if (!t) continue;
     // 行内提取编号（必须从行首开始匹配；HN 前缀可选：HN04-01 / 04-01 / 4-1 均可；避免店名中的「7-11」被误判）
-    const m = t.match(/^(HN)?0*(\d{1,2})[\-–]0*(\d{1,2})/i);
+    const m = t.match(/^(HN|W|HR|MV|MC|WO)?0*(\d{1,2})[\-–]0*(\d{1,2})/i);
     if (m) {
       const code = parseInt(m[2], 10) + '-' + parseInt(m[3], 10);
       // 编号之后的内容 = 店名候选：去行首/末尾时间、数量、噪音词
