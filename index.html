@@ -7,6 +7,14 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>物流筐收发管理系统</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="物流筐">
+<meta name="theme-color" content="#065A82">
 <script src="./筐位库存管理_files/xlsx.full.min.js.下载"></script>
 <style>
 :root {
@@ -803,9 +811,10 @@ body {
         <button class="home-btn" onclick="switchPage('summary')"><div class="hb-icon">📈</div>汇总</button>
         <button class="home-btn" onclick="switchPage('reconcile')"><div class="hb-icon">🔄</div>对账</button>
       </div>
-      <!-- 第四行：使用说明 -->
+      <!-- 第四行：使用说明/添加到主屏幕 -->
       <div class="home-grid-row">
         <button class="home-btn" onclick="switchPage('settings')"><div class="hb-icon">❓</div>使用说明</button>
+        <button class="home-btn" onclick="installApp()"><div class="hb-icon">📱</div>添加到主屏幕</button>
       </div>
     </div>
   </div>
@@ -1444,6 +1453,25 @@ body {
     </div>
     <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">重置后该用户密码变为 <b>12345678</b>，用户登录后可自行修改</div>
     <button class="btn btn-danger" onclick="doAdminReset()">🔄 重置该用户密码</button>
+  </div>
+</div>
+
+<!-- 添加到主屏幕引导弹窗 -->
+<div class="store-ocr-modal" id="installModal" onclick="closeInstallModal()">
+  <div class="store-ocr-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">📱 添加到主屏幕</span>
+      <button onclick="closeInstallModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:13px;line-height:1.9;color:var(--text);">
+      <div style="margin-bottom:8px;">按下面的步骤操作（苹果手机）：</div>
+      <div><b>①</b> 点底部 <b>「分享」</b> 按钮 <span style="background:#f0f7ff;padding:2px 8px;border-radius:6px;font-size:12px;">□↑</span></div>
+      <div><b>②</b> 向下滑动，找到 <b>「添加到主屏幕」</b></div>
+      <div><b>③</b> 点 <b>「添加」</b> → 桌面出现图标，像 App 一样用</div>
+      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px;margin-top:12px;font-size:12.5px;color:#7c5a00;">
+        💡 安卓手机：浏览器菜单里点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b> 即可。
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2142,6 +2170,29 @@ function openPhotoInputModal() {
 function closePhotoInputModal() {
   document.getElementById('photoInputModal').classList.remove('show');
 }
+// ======== 添加到主屏幕（PWA） ========
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+function installApp() {
+  // Android/Chrome：触发原生安装提示
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+    return;
+  }
+  // iOS Safari 等：显示引导教程
+  const modal = document.getElementById('installModal');
+  if (modal) modal.classList.add('show');
+}
+function closeInstallModal() {
+  const modal = document.getElementById('installModal');
+  if (modal) modal.classList.remove('show');
+}
+
 function backToHomeWizard() {
   document.getElementById('manualForm').style.display = 'none';
   document.getElementById('homeWizard').style.display = 'block';
