@@ -2779,16 +2779,16 @@ function parseOcrResult(ocrData) {
     if (goodsIdx >= 0) break;
   }
 
-  // 2. 找表头中"整箱数量"和"物流箱"的列索引
+  // 2. 找表头中"整箱数量"和"物流箱/物流篮/物流筐"的列索引
   let wholeColIdx = -1;
   let logisticsColIdx = -1;
-  let colKeywords = ['整箱', '物流箱', '物流筐', '低温', '常温', '保温', '冷冻', '鲜食', '面包', '数量', '筐', '箱'];
+  let colKeywords = ['整箱', '物流箱', '物流筐', '物流篮', '低温', '常温', '保温', '冷冻', '鲜食', '面包', '数量', '筐', '箱'];
   let colCnt = 0;
   for (const w of words) {
     const tokens = w.split(/\s+/);
     for (const t of tokens) {
       if (colKeywords.some(k => t.includes(k))) {
-        // 精确查找"整箱数量"和"物流箱"
+        // 精确查找"整箱数量"和"物流箱/篮/筐"
         if ((t.includes('整箱') || t.includes('整箱数量')) && wholeColIdx < 0) {
           wholeColIdx = colCnt;
           // 复合词如"整箱数量物流箱"中：整箱是当前列，物流箱是下一列
@@ -2796,7 +2796,7 @@ function parseOcrResult(ocrData) {
           if (lIdx >= 0 && logisticsColIdx < 0) {
             logisticsColIdx = colCnt + 1;
           }
-        } else if ((t.includes('物流箱') || t.includes('物流筐')) && logisticsColIdx < 0) {
+        } else if ((t.includes('物流箱') || t.includes('物流筐') || t.includes('物流篮')) && logisticsColIdx < 0) {
           logisticsColIdx = colCnt;
         }
         colCnt++;
@@ -2804,9 +2804,9 @@ function parseOcrResult(ocrData) {
     }
     if (wholeColIdx >= 0 && logisticsColIdx >= 0) break;
   }
-  // 兜底：logisticsColIdx 默认 1（整箱之后的列）
+  // 兜底
   if (wholeColIdx < 0) wholeColIdx = 0;
-  if (logisticsColIdx < 0) logisticsColIdx = 1;
+  if (logisticsColIdx < 0) logisticsColIdx = wholeColIdx + 1;
 
   // 3. 用 parseStoreOcr 提取所有门店（处理分行、错字等情况）
   const stores = parseStoreOcr(words);
@@ -2867,7 +2867,11 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
       }
     }
     // 只取物流箱列
-    const li = (nums[logisticsColIdx] !== undefined ? nums[logisticsColIdx] : (nums[0] || 0));
+    // 优先取"物流箱/篮/筐"列；否则取"整箱"列；都没有则取发出区第1列数字
+    let li;
+    if (logisticsColIdx >= 0 && nums[logisticsColIdx] !== undefined) li = nums[logisticsColIdx];
+    else if (wholeColIdx >= 0 && nums[wholeColIdx] !== undefined) li = nums[wholeColIdx];
+    else li = nums[0] || 0;
     rows.push({ code: s.code, name: s.name, nums: [li], _rawNums: nums.slice() });
   });
 
