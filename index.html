@@ -2869,7 +2869,7 @@ function parseOcrResult(ocrData) {
   if (stores.length === 0) {
     // 兜底：直接按行解析（OCR 把整行作为一个 word）
     for (const w of words) {
-      const m = w.match(/^(HN|W|HR|MV|MC|WO)?0*(\d{1,2})[\-–]0*(\d{1,2})/i);
+      const m = w.match(/^(HN|W|HR|MV|MC|WO)?\s*0*(\d{1,2})\s*[\-–−_]\s*0*(\d{1,2})\b/i);
       if (!m) continue;
       if (/合计/.test(w)) continue;
       const code = parseInt(m[2], 10) + '-' + parseInt(m[3], 10);
@@ -2892,7 +2892,7 @@ function parseOcrResult(ocrData) {
     const codeStr = s.code.replace('-', '\\-');
     for (const w of words) {
       if (w.match(new RegExp(codeStr))) {
-        const m = w.match(/^(HN|W|HR|MV|MC|WO)?0*(\d{1,2})[\-–]0*(\d{1,2})/i);
+        const m = w.match(/^(HN|W|HR|MV|MC|WO)?\s*0*(\d{1,2})\s*[\-–−_]\s*0*(\d{1,2})\b/i);
         if (m) {
           let rest = w.slice(m.index + m[0].length).trim();
           rest = rest.replace(/^\s*\d{1,2}[:：]\d{2}(?:[:：]\d{2})?\s*/, '').trim(); // 去时间
@@ -2911,7 +2911,7 @@ function parseOcrResult(ocrData) {
       if (pos >= 0) {
 for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
             // 下一行编号(43-05 / HN43-05 / W011-02 / HR42-03)直接停止，且不把编号里的数字收进去
-            if (/^[A-Z]*\d{1,3}[\-–]\d{1,3}\b/i.test(words[j])) break;
+            if (/^[A-Z]*\s*\d{1,3}\s*[\-–−_]\s*\d{1,3}(?=\s|$)/i.test(words[j])) break;
             const m2 = words[j].match(/\d+/g);
             if (m2) {
               if (/^\d{1,2}[:：]\d{2}/.test(words[j])) continue;
