@@ -875,7 +875,7 @@ body {
     </div>
 
     <div class="card">
-      <div class="form-label" style="margin-bottom:8px;">📊 今日概览</div>
+      <div class="form-label" style="margin-bottom:8px;">📊 今日各筐统计（全部门店）</div>
       <div id="todayOverview"></div>
     </div>
   </div>
@@ -2575,7 +2575,8 @@ function renderTodayOverview() {
   const today = todayStr();
   const data = loadData();
   const names = loadGoodsNames();
-  const todayRecords = data.filter(r => r.date === today && r.storeIdx === currentStoreIdx);
+  // 今日全部门店的记录（不再限定当前店面）
+  const todayRecords = data.filter(r => r.date === today);
   const container = document.getElementById('todayOverview');
   if (todayRecords.length === 0) {
     container.innerHTML = '<div class="empty">今日暂无记录</div>';
