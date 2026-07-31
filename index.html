@@ -1406,9 +1406,16 @@ body {
       <span style="font-weight:600;font-size:15px;">🛠️ 管理员面板</span>
       <button onclick="closeAdminModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
     </div>
+    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:12px;color:#15803d;">👥 注册人数</div>
+        <div style="font-size:28px;font-weight:700;color:#15803d;" id="adminUserCount">-</div>
+      </div>
+      <button class="btn btn-outline" style="width:auto;padding:8px 14px;font-size:12px;display:inline-block;" onclick="loadAdminStats()">📊 刷新统计</button>
+    </div>
     <div class="form-group">
       <label class="form-label">管理员密钥</label>
-      <input type="password" class="form-input" id="adminKeyInput" placeholder="输入管理员密钥">
+      <input type="password" class="form-input" id="adminKeyInput" placeholder="输入管理员密钥" onchange="loadAdminStats()">
     </div>
     <div class="form-group">
       <label class="form-label">用户手机号</label>
@@ -1857,8 +1864,30 @@ async function doForgotReset() {
 }
 
 // 管理员
-function openAdminModal() { document.getElementById('adminModal').classList.add('show'); }
+function openAdminModal() { document.getElementById('adminModal').classList.add('show'); loadAdminStats(); }
 function closeAdminModal() { document.getElementById('adminModal').classList.remove('show'); }
+// 管理员统计：注册人数
+async function loadAdminStats() {
+  const adminKey = document.getElementById('adminKeyInput').value;
+  if (!adminKey) return;
+  try {
+    const resp = await fetch('/admin/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey })
+    });
+    const result = await resp.json();
+    const el = document.getElementById('adminUserCount');
+    if (result.ok) {
+      if (el) el.textContent = result.count;
+    } else {
+      if (el) el.textContent = '-';
+    }
+  } catch (e) {
+    const el = document.getElementById('adminUserCount');
+    if (el) el.textContent = '-';
+  }
+}
 async function doAdminReset() {
   const adminKey = document.getElementById('adminKeyInput').value;
   const phone = document.getElementById('adminPhone').value.trim();
