@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>筐位库存管理</title>
+<title>物流筐收发管理系统</title>
 <script src="./筐位库存管理_files/xlsx.full.min.js.下载"></script>
 <style>
 :root {
@@ -770,7 +770,7 @@ body {
 <body>
 
 <div class="header">
-  <h1>📦 筐位库存管理</h1>
+  <h1>📦 物流筐收发管理系统</h1>
   <div class="date-today" id="todayLabel"></div>
 </div>
 
@@ -1554,7 +1554,7 @@ function saveStoreConfig(cfg) {
   localStorage.setItem(STORE_KEY, JSON.stringify(cfg));
   scheduleCloudBackup();
 }
-// 默认百度OCR密钥（应用：库存管理 / AppID 134982254 / 通用文字识别高精度版）— 已预置，本机开箱即用
+// 默认百度OCR密钥（应用：物流筐收发管理系统 / AppID 134982254 / 通用文字识别高精度版）— 已预置，本机开箱即用
 const DEFAULT_OCR_KEYS = { apiKey: 'iswwim5FqTQx8jVSjtJaFaIa', secretKey: 'sh3ji9lbaBNunDyHJTRfkbdUrh4xCZuZ' };
 
 // 本机 CORS 代理（同源，绕开浏览器跨域拦截；python proxy_server.py 提供）
