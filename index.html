@@ -1494,6 +1494,26 @@ body {
   </div>
 </div>
 
+<!-- 新用户欢迎引导弹窗（首次打开自动弹出） -->
+<div class="store-ocr-modal" id="welcomeModal">
+  <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:340px;text-align:center;">
+    <div style="font-size:40px;margin-bottom:8px;">👋</div>
+    <div style="font-weight:700;font-size:18px;margin-bottom:6px;">欢迎使用 物流筐收发管理系统</div>
+    <div style="font-size:13px;color:var(--text-light);margin-bottom:14px;">帮你把每个筐的去向记得清清楚楚</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.8;margin-bottom:16px;text-align:left;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;">
+      <b>第一次用，建议先做 3 件事：</b><br>
+      ① 📱 把软件加到手机桌面（像App一样用）<br>
+      ② 🏪 设置你要记的店面<br>
+      ③ 🔑 设置密码（防止数据丢失）<br>
+      <span style="color:var(--text-light);font-size:12px;">详细步骤看「使用说明」，每一步都写得清清楚楚</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="closeWelcome(true)">📖 查看使用说明</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="closeWelcome(false)">🚀 开始使用</button>
+    </div>
+  </div>
+</div>
+
 <!-- 语音录入弹窗 -->
 <div class="store-ocr-modal" id="voiceInputModal" onclick="closeVoiceInputModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
@@ -2189,6 +2209,21 @@ function openPhotoInputModal() {
 function closePhotoInputModal() {
   document.getElementById('photoInputModal').classList.remove('show');
 }
+// ======== 新用户欢迎引导（首次打开自动弹出） ========
+function initWelcome() {
+  try {
+    if (localStorage.getItem('kuanwei_welcome_seen')) return;
+    const m = document.getElementById('welcomeModal');
+    if (m) m.classList.add('show');
+  } catch(e) {}
+}
+function closeWelcome(goTutorial) {
+  try { localStorage.setItem('kuanwei_welcome_seen', '1'); } catch(e) {}
+  const m = document.getElementById('welcomeModal');
+  if (m) m.classList.remove('show');
+  if (goTutorial) switchPage('settings');
+}
+
 // ======== 添加到主屏幕（PWA） ========
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -4191,6 +4226,8 @@ function clearAllData() {
 initRecordPage();
 initGoodsFilter();
 initSummaryPage();
+// 新用户首次打开自动弹出欢迎引导（含使用说明入口）
+initWelcome();
 // 云备份恢复（清缓存/换手机后自动从云端拉取数据）
 restoreFromCloud();
 // 默认对账日期范围
