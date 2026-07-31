@@ -2763,14 +2763,35 @@ async function doOCR(imageDataUrl, file) {
     // 2. 压缩图片
     const compressedBase64 = await compressImage(imageDataUrl, 1600);
     const imgBase64 = compressedBase64.replace(/^data:image\/\w+;base64,/, '');
+    const imgEnc = encodeURIComponent(imgBase64);
 
-    // 3. 调用通用文字识别（高精度版）
-    const ocrResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=${accessToken}`), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `image=${encodeURIComponent(imgBase64)}&language_type=CHN_ENG&detect_direction=true&paragraph=false&probability=false`
-    });
-    const ocrData = await ocrResp.json();
+    // 3. 优先用「表格识别」专用 API（路单是表格结构，识别率更高）
+    let ocrData = null;
+    try {
+      const tblResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/table?access_token=${accessToken}`), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `image=${imgEnc}`
+      });
+      const tblData = await tblResp.json();
+      if (tblData.tables_result && tblData.tables_result.length > 0) {
+        // 表格识别成功：转换为 words 列表供现有解析器使用
+        const converted = convertTableResult(tblData);
+        if (converted && converted.length > 0) {
+          ocrData = { words_result: converted.map(w => ({ words: w })) };
+        }
+      }
+    } catch(e) { /* 表格识别失败则走通用 */ }
+
+    // 4. 表格识别不可用时回退到通用高精度版
+    if (!ocrData) {
+      const ocrResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=${accessToken}`), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `image=${imgEnc}&language_type=CHN_ENG&detect_direction=true&paragraph=false&probability=false`
+      });
+      ocrData = await ocrResp.json();
+    }
 
     hideLoading();
 
@@ -2778,10 +2799,10 @@ async function doOCR(imageDataUrl, file) {
       throw new Error(ocrData.error_msg || '识别失败');
     }
 
-    // 4. 解析识别结果
+    // 5. 解析识别结果
     parseOcrResult(ocrData);
 
-    // 5. 识别完成，关闭拍照弹窗，只保留结果弹窗
+    // 6. 识别完成，关闭拍照弹窗，只保留结果弹窗
     closePhotoInputModal();
 
   } catch(error) {
@@ -2790,6 +2811,31 @@ async function doOCR(imageDataUrl, file) {
     showToast('识别失败: ' + error.message);
     closePhotoInputModal();
   }
+}
+
+// 表格识别结果 → words 列表（供现有解析器复用）
+function convertTableResult(tblData) {
+  const words = [];
+  const tables = tblData.tables_result || [];
+  for (const table of tables) {
+    const body = table.body || [];
+    if (!body.length) continue;
+    // 按行分组
+    const rows = {};
+    for (const cell of body) {
+      const rk = (cell.row_start === undefined ? 0 : cell.row_start) + '-' + (cell.row_end === undefined ? 0 : cell.row_end);
+      if (!rows[rk]) rows[rk] = [];
+      rows[rk].push({ c: cell.col_start || 0, t: (cell.words || '').replace(/\n/g, ' ') });
+    }
+    // 把每个单元格按列顺序拼成行字符串
+    Object.keys(rows).sort((a, b) => parseInt(a.split('-')[0]) - parseInt(b.split('-')[0]))
+      .forEach(rk => {
+        const cells = rows[rk].sort((a, b) => a.c - b.c);
+        const line = cells.map(x => x.t.trim()).join(' ').trim();
+        if (line) words.push(line);
+      });
+  }
+  return words;
 }
 
 function compressImage(dataUrl, maxSize) {
