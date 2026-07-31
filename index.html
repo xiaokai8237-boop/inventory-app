@@ -2928,7 +2928,6 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
     rows: rows.map(r => ({ ...r, nums: r.nums.slice() })),
     _rawTotalNums: totalNums,
     totalNums: totalFiltered.slice(),
-    wholeColIdx,
     logisticsColIdx,
     rawText: words.join('\n'),
     words: words.slice(0, 30), // 供 debug
