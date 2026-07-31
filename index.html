@@ -1347,11 +1347,14 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 function showLoading(text) {
-  document.getElementById('loadingText').textContent = text || '处理中…';
-  document.getElementById('loadingOverlay').classList.add('show');
+  const txt = document.getElementById('loadingText');
+  const ov = document.getElementById('loadingOverlay');
+  if (txt) txt.textContent = text || '处理中…';
+  if (ov) ov.classList.add('show');
 }
 function hideLoading() {
-  document.getElementById('loadingOverlay').classList.remove('show');
+  const ov = document.getElementById('loadingOverlay');
+  if (ov) ov.classList.remove('show');
 }
 
 // ======== 店面 chip 切换（手动录入页） ========
