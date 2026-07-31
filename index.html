@@ -2895,10 +2895,10 @@ function parseOcrResult(ocrData) {
   if (stores.length === 0) {
     // 兜底：直接按行解析（OCR 把整行作为一个 word）
     for (const w of words) {
-      const m = w.match(/^(HN|W|HR|MV|MC|WO)?\s*0*(\d{1,2})\s*[\-–−_]\s*0*(\d{1,2})\b/i);
+      const m = w.match(/^[A-Za-z]*\s*0*(\d{1,3})\s*[\-–−_]\s*0*(\d{1,3})\b/i);
       if (!m) continue;
       if (/合计/.test(w)) continue;
-      const code = parseInt(m[2], 10) + '-' + parseInt(m[3], 10);
+      const code = parseInt(m[1], 10) + '-' + parseInt(m[2], 10);
       let rest = w.slice(m.index + m[0].length).trim();
       rest = rest.replace(/^\s*\d{1,2}[:：]\d{2}(?:[:：]\d{2})?\s*/, '').trim(); // 去行首时间
       const tokens = rest.split(/\s+/).filter(Boolean);
@@ -2918,8 +2918,9 @@ function parseOcrResult(ocrData) {
     const codeStr = s.code.replace('-', '\\-');
     for (const w of words) {
       if (w.match(new RegExp(codeStr))) {
-        const m = w.match(/^(HN|W|HR|MV|MC|WO)?\s*0*(\d{1,2})\s*[\-–−_]\s*0*(\d{1,2})\b/i);
+        const m = w.match(/^[A-Za-z]*\s*0*(\d{1,3})\s*[\-–−_]\s*0*(\d{1,3})\b/i);
         if (m) {
+          const code = parseInt(m[1], 10) + '-' + parseInt(m[2], 10);
           let rest = w.slice(m.index + m[0].length).trim();
           rest = rest.replace(/^\s*\d{1,2}[:：]\d{2}(?:[:：]\d{2})?\s*/, '').trim(); // 去时间
           const ms = rest.match(/\d+/g) || [];
@@ -3125,10 +3126,32 @@ function confirmOcrResult() {
     const qty = parseInt(inp?.value || '0');
     if (!qty || qty <= 0) return;
     let storeIdx = -1;
+    // 店名模糊匹配：去除常见 OCR 错认字（店/分/总/路）+ 一致性匹配
+    const normName = (s) => String(s || '').replace(/[店分总路 ]/g, '');
+    const rNameNorm = normName(r.name);
+    const rCodeNorm = String(r.code || '').replace(/^[A-Za-z]+/, '').toLowerCase();
     for (let si = 0; si < cfgAll.length; si++) {
       const s = cfgAll[si];
-      if (s.name === r.name || (s.aliases && s.aliases.includes(r.code)) || (s.aliases && s.aliases.includes(r.name))) {
-        storeIdx = si; break;
+      // 1) 店名完全匹配
+      if (s.name === r.name) { storeIdx = si; break; }
+      // 2) 标准化后匹配（容错"店"字等）
+      if (rNameNorm && normName(s.name) === rNameNorm) { storeIdx = si; break; }
+      // 3) 店名包含关系（防 OCR 截断）
+      if (rNameNorm && normName(s.name).includes(rNameNorm) && rNameNorm.length >= 4) { storeIdx = si; break; }
+      // 4) 别名匹配（原始）
+      if (s.aliases && (s.aliases.includes(r.code) || s.aliases.includes(r.name))) { storeIdx = si; break; }
+      // 5) 别名模糊匹配
+      if (s.aliases) {
+        const aliasMatch = s.aliases.some(a => {
+          const an = normName(a);
+          return an === rNameNorm || (an.includes(rNameNorm) && rNameNorm.length >= 4);
+        });
+        if (aliasMatch) { storeIdx = si; break; }
+      }
+      // 6) 编号归一化后匹配别名（HR42-01 和 HR42-01 + OCR 前缀错认归一化）
+      if (s.aliases && rCodeNorm) {
+        const codeMatch = s.aliases.some(a => String(a).replace(/^[A-Za-z]+/, '').toLowerCase() === rCodeNorm);
+        if (codeMatch) { storeIdx = si; break; }
       }
     }
     if (storeIdx < 0) { unmatched++; return; }
@@ -3761,10 +3784,10 @@ function parseStoreOcr(words) {
   for (const w of words) {
     const t = String(w).trim();
     if (!t) continue;
-    // 行内提取编号（必须从行首开始匹配；HN 前缀可选：HN04-01 / 04-01 / 4-1 均可；避免店名中的「7-11」被误判）
-    const m = t.match(/^(HN|W|HR|MV|MC|WO)?0*(\d{1,2})[\-–]0*(\d{1,2})/i);
+    // 行内提取编号（任意字母前缀：HR/HN/HF/MV/W 等都会被 OCR 误认）
+    const m = t.match(/^[A-Za-z]*0*(\d{1,3})[\-–−]0*(\d{1,3})/i);
     if (m) {
-      const code = parseInt(m[2], 10) + '-' + parseInt(m[3], 10);
+      const code = parseInt(m[1], 10) + '-' + parseInt(m[2], 10);
       // 编号之后的内容 = 店名候选：去行首/末尾时间、数量、噪音词
       let rest = cleanStoreName(t.slice(m.index + m[0].length));
       if (rest) {
