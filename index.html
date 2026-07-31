@@ -1,0 +1,3161 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)https://planner-pts-homework-truly.trycloudflare.com/ -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>筐位库存管理</title>
+<script src="./筐位库存管理_files/xlsx.full.min.js.下载"></script>
+<style>
+:root {
+  --bg: #f0f5fa;
+  --card-bg: #ffffff;
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --danger: #ef4444;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --text: #1e293b;
+  --text-light: #94a3b8;
+  --border: #e2e8f0;
+}
+* {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  max-width: 500px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding-bottom: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* 顶部 */
+.header {
+  background: #fff;
+  color: var(--text);
+  padding: 18px 16px 12px;
+  text-align: center;
+  position: sticky;
+  top: 0; z-index: 100;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.header h1 { font-size: 18px; font-weight: 700; color: var(--primary); }
+.header .date-today { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+
+/* Tab */
+.tabs {
+  display: flex;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 56px; z-index: 99;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0 10px;
+  font-size: 14px;
+  color: var(--text-light);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all .2s;
+}
+.tab.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+  font-weight: 600;
+}
+.page { display: none; padding: 12px; }
+.page.active { display: block; }
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+
+/* 表单 */
+.form-group { margin-bottom: 14px; }
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.form-input, .form-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 16px;
+  background: #f8fafc;
+  outline: none;
+  transition: all .2s;
+}
+.form-input:focus, .form-select:focus {
+  border-color: var(--primary);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+}
+
+/* 筐列表录入 */
+.goods-input-list .goods-input-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.goods-input-item .gi-name {
+  flex: 0 0 80px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: right;
+}
+.goods-input-item .gi-in, .goods-input-item .gi-out {
+  flex: 1;
+}
+.goods-input-item .gi-in input, .goods-input-item .gi-out input {
+  width: 100%;
+  padding: 10px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+}
+.goods-input-item .gi-in input { border-color: #c8e6c9; }
+.goods-input-item .gi-out input { border-color: #ffcdd2; }
+.goods-input-item .gi-in input:focus { border-color: var(--success); }
+.goods-input-item .gi-out input:focus { border-color: var(--danger); }
+
+/* 店面 chip 列表 */
+.store-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.store-chip {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .2s;
+  color: var(--text);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.store-chip:active { transform: scale(.96); }
+.store-chip.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+.store-chip .chip-alias { margin-left: 4px; font-size: 12px; color: #94a3b8; }
+
+/* 透明 toast（大字号，醒目） */
+.transparent-toast {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,.5);
+  color: #fff;
+  padding: 16px 28px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity .25s;
+  text-align: center;
+  max-width: 80%;
+  line-height: 1.4;
+  pointer-events: none;
+}
+.transparent-toast.show { opacity: 1; }
+.goods-input-item .gi-lbl {
+  font-size: 11px;
+  color: var(--text-light);
+  text-align: center;
+  margin-top: 2px;
+}
+
+/* 按钮 */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59,130,246,.25);
+}
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-success { background: var(--success); color: #fff; }
+.btn-outline {
+  background: #f8fafc;
+  border: 1.5px solid var(--border);
+  color: var(--text);
+}
+.btn-outline:active { background: #f1f5f9; }
+.btn-warning { background: var(--warning); color: #fff; }
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+}
+.btn-row .btn { flex: 1; }
+
+/* 语音按钮 */
+.voice-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all .2s;
+}
+.voice-btn:active { transform: scale(.97); }
+.voice-btn.recording { animation: pulse 1s infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .6; }
+}
+.voice-in { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+.voice-out { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+
+/* 拍照区 */
+.photo-section {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.photo-section .photo-hint {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+.photo-preview {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 8px;
+  display: none;
+}
+.ocr-result {
+  margin-top: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 14px;
+  display: none;
+}
+.ocr-result .ocr-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid #eee;
+}
+.ocr-result .ocr-row:last-child { border-bottom: none; }
+
+/* 统计卡片 */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.stat-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  border: 1px solid var(--border);
+}
+.stat-card .stat-name { font-size: 13px; color: var(--text-light); margin-bottom: 6px; }
+.stat-card .stat-vals { display: flex; gap: 16px; justify-content: center; }
+.stat-card .stat-val { font-size: 20px; font-weight: 700; }
+.stat-card .stat-val.in { color: var(--success); }
+.stat-card .stat-val.out { color: var(--danger); }
+.stat-card .stat-lbl { font-size: 11px; color: var(--text-light); }
+
+/* 历史记录 */
+.record-item {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+  border: 1px solid #f1f5f9;
+}
+.record-item .record-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.record-item .record-date { font-size: 14px; font-weight: 600; }
+.record-item .record-meta { font-size: 12px; color: var(--text-light); }
+.record-item .record-qty { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 13px; }
+.record-item .qty-tag { display: inline-flex; align-items: center; gap: 4px; }
+.record-item .qty-tag .qname { color: var(--text-light); }
+.record-item .qty-tag .qin { color: var(--success); font-weight: 600; }
+.record-item .qty-tag .qout { color: var(--danger); font-weight: 600; }
+.del-btn {
+  font-size: 12px;
+  color: var(--text-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all .15s;
+}
+.del-btn:active { background: #fef2f2; color: var(--danger); }
+
+/* 汇总表 */
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.summary-table th {
+  padding: 10px 8px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--text-light);
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+}
+.summary-table td {
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+}
+.summary-table td.in { color: var(--success); font-weight: 600; }
+.summary-table td.out { color: var(--danger); font-weight: 600; }
+.summary-table .total-row {
+  font-weight: 700;
+  background: #f8fafc;
+}
+.summary-table .total-row td {
+  border-top: 2px solid var(--border);
+  border-bottom: none;
+}
+
+/* 设置页 */
+.goods-list .goods-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.goods-item .idx {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.goods-item input {
+  flex: 1;
+  padding: 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+/* 店面管理卡片 */
+.store-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.store-card .sc-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.store-card .sc-idx {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.store-card .sc-name {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  outline: none;
+  background: #fafafa;
+  transition: border-color .2s;
+}
+.store-card .sc-name:focus { border-color: var(--primary); background: #fff; }
+.store-card .sc-del {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: 1.5px solid #ffcdd2;
+  background: #fff;
+  color: var(--danger);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.store-card .sc-del:active { background: #ffebee; }
+.store-card .sc-alias-label {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.store-card .sc-aliases {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.store-card .sc-alias {
+  background: #eaf3fc;
+  color: var(--primary-dark);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.store-card .sc-alias .sc-x {
+  cursor: pointer;
+  color: var(--danger);
+  font-weight: 700;
+  line-height: 1;
+  font-size: 14px;
+}
+.store-card .sc-alias .sc-x:active { transform: scale(1.2); }
+.store-card .sc-add {
+  display: flex; gap: 6px; margin-top: 10px;
+}
+.store-card .sc-add input {
+  flex: 1;
+  padding: 9px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s;
+}
+.store-card .sc-add input:focus { border-color: var(--primary); }
+.store-card .sc-add button {
+  flex: 0 0 auto;
+  padding: 9px 16px;
+  font-size: 13px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.store-card .sc-add button:active { opacity: .85; }
+.store-card .sc-empty {
+  font-size: 12px;
+  color: var(--text-light);
+  padding: 4px 0;
+}
+
+/* 店面管理：批量导入区 */
+.import-zone {
+  border: 2px dashed var(--primary);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 4px;
+  background: #f7fbff;
+}
+.import-zone .iz-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.import-zone .iz-tip {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* 对账 */
+.compare-result {
+  margin-top: 10px;
+}
+.compare-result .diff-row {
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  background: #fff3cd;
+  border-left: 3px solid var(--warning);
+}
+.compare-result .diff-row.match {
+  background: #d4edda;
+  border-left-color: var(--success);
+}
+.compare-result .diff-row .diff-date { flex: 0 0 70px; font-weight: 600; }
+.compare-result .diff-row .diff-goods { flex: 0 0 70px; }
+.compare-result .diff-row .diff-vals { flex: 1; }
+.compare-result .diff-row .diff-vals .dv-mine { color: var(--primary); }
+.compare-result .diff-row .diff-vals .dv-his { color: var(--text-light); }
+.compare-result .diff-row .diff-vals .dv-gap { color: var(--danger); font-weight: 700; }
+
+/* 空状态 */
+.empty {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,.78);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity .3s;
+  pointer-events: none;
+  max-width: 80%;
+  text-align: center;
+}
+.toast.show { opacity: 1; }
+
+/* 语音识别浮层 */
+.voice-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 9998;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+}
+.voice-overlay.show { display: flex; }
+.voice-overlay .voice-icon {
+  font-size: 48px;
+  animation: pulse 1s infinite;
+}
+.voice-overlay .voice-text {
+  color: #fff;
+  font-size: 16px;
+  text-align: center;
+  max-width: 80%;
+  min-height: 24px;
+}
+.voice-overlay .voice-transcript {
+  color: #ffd700;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  max-width: 85%;
+  min-height: 30px;
+}
+.voice-overlay .voice-stop {
+  margin-top: 10px;
+  padding: 10px 30px;
+  border: none;
+  border-radius: 20px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+/* OCR loading */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,.65);
+  z-index: 9998;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 18px;
+}
+.loading-overlay.show { display: flex; }
+.loading-overlay .spinner {
+  width: 54px; height: 54px;
+  border: 5px solid rgba(255,255,255,.2);
+  border-top: 5px solid #4fc3f7;
+  border-radius: 50%;
+  animation: spin .9s linear infinite;
+  box-shadow: 0 0 30px rgba(79,195,247,.3);
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.loading-overlay .bar-track {
+  width: 75%;
+  max-width: 260px;
+  height: 6px;
+  background: rgba(255,255,255,.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.loading-overlay .bar-fill {
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(90deg, #4fc3f7, #29b6f6, #039be5);
+  border-radius: 3px;
+  animation: barSweep 1.4s ease-in-out infinite;
+}
+@keyframes barSweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(calc(330%)); }
+}
+.loading-overlay .loading-text { color: #fff; font-size: 15px; font-weight: 500; letter-spacing: .5px; }
+
+/* 店面拍照识别弹窗 */
+.store-ocr-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); z-index: 9998; align-items: center; justify-content: center; }
+.store-ocr-modal.show { display: flex; }
+.store-ocr-content { background: var(--card-bg); border-radius: 12px; padding: 14px; max-width: 95%; width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+.store-ocr-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+
+/* 首页按钮网格 */
+.home-grid-row {
+  display: flex;
+  gap: 12px;
+}
+.home-grid-row .home-btn {
+  flex: 1;
+  padding: 20px 0;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  line-height: 1.5;
+  color: var(--text);
+}
+.home-grid-row .home-btn:active { transform: scale(.96); }
+.home-grid-row .home-btn .hb-icon { font-size: 28px; margin-bottom: 4px; }
+
+/* 管理面板通用 */
+.manage-panel { display: none; }
+.manage-panel .panel-header {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.manage-panel .panel-header .back-btn {
+  background: none; border: none; font-size: 16px; cursor: pointer;
+  padding: 6px 10px; color: var(--primary); font-weight: 600;
+}
+.manage-panel .panel-header .panel-title {
+  flex: 1; text-align: center; font-size: 14px; font-weight: 600;
+}
+
+/* 库存追踪 */
+.track-row {
+  display: flex; gap: 6px; align-items: center; margin-bottom: 8px;
+}
+.track-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.track-tbl th { background: #f0f0f0; padding: 7px 4px; text-align: center; font-weight: 600; }
+.track-tbl td { padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--border); }
+
+/* 备份页 */
+.backup-step {
+  background: #f8f9fa; border-radius: 8px; padding: 10px; margin-bottom: 8px;
+  font-size: 13px; line-height: 1.7;
+}
+.backup-step .step-num {
+  display: inline-flex; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--primary); color: #fff; font-size: 11px; font-weight: 600;
+  align-items: center; justify-content: center; margin-right: 6px;
+}
+.backup-step .step-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.backup-step .step-detail { color: var(--text-light); font-size: 12px; }
+
+/* 筐删除弹窗 */
+.gd-modal { display: none; position: fixed; top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:9998;align-items:center;justify-content:center; }
+.gd-modal.show { display:flex; }
+.gd-content { background:var(--card-bg); border-radius:12px; padding:14px; max-width:320px; width:90%; box-shadow:0 4px 20px rgba(0,0,0,.3); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📦 筐位库存管理</h1>
+  <div class="date-today" id="todayLabel"></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-page="record">首页</div>
+  <div class="tab" data-page="history">记录</div>
+  <div class="tab" data-page="summary">汇总</div>
+  <div class="tab" data-page="reconcile">对账</div>
+  <div class="tab" data-page="settings">使用说明</div>
+</div>
+
+<!-- ========== 录入页（首页向导 + 手动录入） ========== -->
+<div class="page active" id="page-record">
+
+  <!-- === 首页向导（默认显示） === -->
+  <div id="homeWizard">
+    <div class="card" style="text-align:center;padding:16px 14px;">
+      <div style="font-size:16px;font-weight:600;margin-bottom:16px;">选择操作</div>
+      <!-- 第一行：发出/回收/数据备份 -->
+      <div class="home-grid-row" style="margin-bottom:10px;">
+        <button class="home-btn" onclick="manualEntry('in')"><div class="hb-icon">📤</div>发出</button>
+        <button class="home-btn" onclick="manualEntry('out')"><div class="hb-icon">📥</div>回收</button>
+        <button class="home-btn" onclick="openBackupPanel()"><div class="hb-icon">💾</div>数据备份</button>
+      </div>
+      <!-- 第二行：店面管理/框名设置/库存追踪 -->
+      <div class="home-grid-row">
+        <button class="home-btn" onclick="openStorePanel()"><div class="hb-icon">🏪</div>店面管理</button>
+        <button class="home-btn" onclick="openGoodsPanel()"><div class="hb-icon">📦</div>框名设置</button>
+        <button class="home-btn" onclick="openTrackPanel()"><div class="hb-icon">📊</div>库存追踪</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === 手动录入表单（点击手动录入后显示） === -->
+  <div id="manualForm" style="display:none;">
+
+    <div class="card" style="padding:10px 12px;">
+      <div style="display:flex;align-items:center;">
+        <button onclick="backToHomeWizard()" style="background:none;border:none;font-size:16px;cursor:pointer;padding:6px 10px;color:var(--primary);font-weight:600;">← 返回</button>
+        <span style="flex:1;text-align:center;font-size:14px;font-weight:600;" id="manualHeaderLabel">发出 - 手动录入</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">🏪 店面（点击切换）</label>
+        <div class="store-chip-list" id="recordStoreChips"></div>
+        <select class="form-select" id="recordStore" onchange="onRecordStoreChange()" style="display:none;"></select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">📅 日期</label>
+        <input type="date" class="form-input" id="recordDate" onchange="reloadRecordInputs()">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="form-label" style="margin-bottom:10px;">✍️ 手动录入</div>
+      <div class="goods-input-list" id="goodsInputList"><div class="goods-input-item" style="font-size:11px;color:var(--text-light);border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:6px;"><div class="gi-name">筐名</div><div style="flex:1;text-align:center;">发出</div><div style="flex:1;text-align:center;">回收</div></div>
+        <div class="goods-input-item">
+          <div class="gi-name">鲜食筐</div>
+          <div class="gi-in"><input type="number" id="giIn0" placeholder="0" min="0" inputmode="numeric" data-idx="0"></div>
+          <div class="gi-out"><input type="number" id="giOut0" placeholder="0" min="0" inputmode="numeric" data-idx="0"></div>
+        </div>
+        <div class="goods-input-item">
+          <div class="gi-name">面包筐</div>
+          <div class="gi-in"><input type="number" id="giIn1" placeholder="0" min="0" inputmode="numeric" data-idx="1"></div>
+          <div class="gi-out"><input type="number" id="giOut1" placeholder="0" min="0" inputmode="numeric" data-idx="1"></div>
+        </div>
+        <div class="goods-input-item">
+          <div class="gi-name">低温筐</div>
+          <div class="gi-in"><input type="number" id="giIn2" placeholder="0" min="0" inputmode="numeric" data-idx="2"></div>
+          <div class="gi-out"><input type="number" id="giOut2" placeholder="0" min="0" inputmode="numeric" data-idx="2"></div>
+        </div>
+        <div class="goods-input-item">
+          <div class="gi-name">冷冻筐</div>
+          <div class="gi-in"><input type="number" id="giIn3" placeholder="0" min="0" inputmode="numeric" data-idx="3"></div>
+          <div class="gi-out"><input type="number" id="giOut3" placeholder="0" min="0" inputmode="numeric" data-idx="3"></div>
+        </div>
+        <div class="goods-input-item">
+          <div class="gi-name">常温筐</div>
+          <div class="gi-in"><input type="number" id="giIn4" placeholder="0" min="0" inputmode="numeric" data-idx="4"></div>
+          <div class="gi-out"><input type="number" id="giOut4" placeholder="0" min="0" inputmode="numeric" data-idx="4"></div>
+        </div></div>
+      <button class="btn btn-primary" style="margin-top:8px;" onclick="saveManualRecord()">保存当日记录</button>
+    </div>
+
+    <div class="card" style="text-align:center;padding:16px 14px;">
+      <div class="form-label" style="margin-bottom:12px;">📲 快捷录入</div>
+      <div class="home-grid-row">
+        <button class="home-btn" onclick="openVoiceInputModal()"><div class="hb-icon">🎤</div>语音录入</button>
+        <button class="home-btn" onclick="openPhotoInputModal()"><div class="hb-icon">📸</div>拍照识别</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-light);margin-top:10px;">
+        语音或拍照识别后，自动填到当前「<span id="entryModeLabel">发出</span>」输入列
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="form-label" style="margin-bottom:8px;">📊 今日概览</div>
+      <div id="todayOverview"></div>
+    </div>
+  </div>
+
+  <!-- === 店面管理面板 === -->
+  <div class="manage-panel" id="storeManagePanel">
+    <div class="card panel-header">
+      <button class="back-btn" onclick="backFromStorePanel()">← 返回</button>
+      <span class="panel-title">🏪 店面管理</span>
+    </div>
+    <div class="card">
+      <div style="font-size:15px;font-weight:700;margin-bottom:10px;color:var(--text);">🏪 我的店面 <span style="font-size:13px;color:var(--primary);font-weight:600;">(<span id="storeCount">0</span>)</span></div>
+      <div id="storeListPanel"></div>
+      <button class="btn btn-primary" style="margin-top:6px;" onclick="addStoreFromPanel()">➕ 新增店面</button>
+      <div class="import-zone" style="margin-top:16px;">
+        <div class="iz-title">📸 批量导入店面</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('storeOcrFile').click()">📷 拍照</button>
+          <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('storeOcrAlbum').click()">🖼️ 相册选</button>
+        </div>
+        <input type="file" id="storeOcrFile" accept="image/*" capture="environment" style="display:none" onchange="handleStorePhoto(event)">
+        <input type="file" id="storeOcrAlbum" accept="image/*" style="display:none" onchange="handleStorePhoto(event)">
+        <div class="iz-tip">拍「配送路单店面表」类表格（含 HN40-01 编号），识别后可在弹窗里逐条修正再保存</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === 框名管理面板 === -->
+  <div class="manage-panel" id="goodsManagePanel">
+    <div class="card panel-header">
+      <button class="back-btn" onclick="backFromGoodsPanel()">← 返回</button>
+      <span class="panel-title">📦 框名设置</span>
+    </div>
+    <div class="card">
+      <div id="goodsListPanel"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="showAddGoodsModal()">➕ 新增框类型</button>
+        <button class="btn btn-outline" style="flex:1;color:var(--danger);" onclick="showDeleteGoodsModal()">🗑️ 删除框类型</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === 库存追踪面板 === -->
+  <div class="manage-panel" id="trackPanel">
+    <div class="card panel-header">
+      <button class="back-btn" onclick="backFromTrackPanel()">← 返回</button>
+      <span class="panel-title">📊 库存追踪</span>
+    </div>
+    <div class="card">
+      <div class="track-row">
+        <span style="font-size:13px;font-weight:600;flex:0 0 50px;">发出日</span>
+        <input type="date" class="form-input" id="trackDate" style="flex:1;padding:8px;font-size:13px;" onchange="renderTrack()">
+      </div>
+      <div class="track-row">
+        <span style="font-size:13px;font-weight:600;flex:0 0 50px;">店面</span>
+        <select class="form-select" id="trackStore" style="flex:1;padding:8px;font-size:13px;" onchange="renderTrack()"><option value="">所有店</option></select>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px;">追踪结果</div>
+      <div id="trackResult" style="font-size:13px;color:var(--text-light);">请选择发出日期后查看</div>
+    </div>
+  </div>
+
+  <!-- === 数据备份面板 === -->
+  <div class="manage-panel" id="backupPanel">
+    <div class="card panel-header">
+      <button class="back-btn" onclick="backFromBackupPanel()">← 返回</button>
+      <span class="panel-title">💾 数据备份</span>
+    </div>
+    <div class="card">
+      <div class="backup-step">
+        <div class="step-title"><span class="step-num">1</span>📤 导出备份</div>
+        <div class="step-detail">点击下方「导出备份」按钮 → 手机弹出"保存到文件"→ 选择「存储到内部存储」或「保存到下载」→ 存好后发送到微信「文件传输助手」</div>
+      </div>
+      <div class="backup-step">
+        <div class="step-title"><span class="step-num">2</span>📥 恢复/换手机</div>
+        <div class="step-detail">从微信下载之前备份的 .json 文件 → 点击下方「选择文件导入」→ 选中下载的文件 → 自动恢复</div>
+      </div>
+      <button class="btn btn-primary" style="margin-bottom:6px;" onclick="exportData()">📤 导出备份</button>
+      <button class="btn btn-outline" onclick="document.getElementById('backupImportFile').click()">📥 选择文件导入</button>
+      <input type="file" id="backupImportFile" accept=".json" style="display:none" onchange="importData(event)">
+      <div style="margin-top:10px;text-align:center;">
+        <button class="btn btn-outline" style="padding:8px 16px;font-size:12px;display:inline-block;width:auto;" onclick="showBackupTutorial()">📖 使用教程（再次查看）</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ========== 历史记录页 ========== -->
+<div class="page" id="page-history">
+  <div class="card" style="padding:10px 10px 6px;">
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input type="date" class="form-input" id="filterDate" style="flex:1;padding:8px;font-size:13px;" onchange="renderHistory()">
+      <select class="form-select" id="filterStore" style="width:90px;padding:8px;font-size:13px;" onchange="renderHistory()"><option value="">全部店</option></select>
+      <select class="form-select" id="filterGoods" style="width:100px;padding:8px;font-size:13px;" onchange="renderHistory()"><option value="">全部筐</option><option value="0">鲜食筐</option><option value="1">面包筐</option><option value="2">低温筐</option><option value="3">冷冻筐</option><option value="4">常温筐</option></select>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:6px;">
+      <button class="btn btn-outline" style="flex:1;padding:8px;font-size:12px;" onclick="clearFilter()">全部</button>
+      <button class="btn btn-outline" style="flex:1;padding:8px;font-size:12px;" onclick="setFilterToday()">仅今天</button>
+    </div>
+  </div>
+  <div id="historyList"></div>
+</div>
+
+<!-- ========== 汇总页 ========== -->
+<div class="page" id="page-summary">
+  <div class="card">
+    <div class="form-group">
+      <label class="form-label">汇总日期范围</label>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="date" class="form-input" id="summaryStart" style="flex:1;padding:8px;font-size:13px;" onchange="renderSummary()">
+        <span style="color:var(--text-light);">~</span>
+        <input type="date" class="form-input" id="summaryEnd" style="flex:1;padding:8px;font-size:13px;" onchange="renderSummary()">
+      </div>
+      <div style="margin-top:10px;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text);">🏪 单店汇总（选店后只统计该店，选「全部店」看总数）</div>
+        <select class="form-select" id="summaryStore" style="width:100%;padding:8px;font-size:13px;" onchange="renderSummary()"><option value="">全部店</option></select>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+      <button class="btn btn-outline" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(7)">近7天</button>
+      <button class="btn btn-outline" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(30)">近30天</button>
+      <button class="btn btn-outline" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(0)">全部</button>
+    </div>
+  </div>
+  <div class="card" id="summaryCard" style="overflow-x:auto;">
+    <table class="summary-table" id="summaryTable"></table>
+  </div>
+</div>
+
+<!-- ========== 对账页 ========== -->
+<div class="page" id="page-reconcile">
+  <div class="card">
+    <div class="form-label" style="margin-bottom:10px;">📤 导出我的数据</div>
+    <div class="form-group">
+      <label class="form-label" style="font-size:13px;">导出日期范围</label>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input type="date" class="form-input" id="exportStart" style="flex:1;padding:8px;font-size:13px;">
+        <span style="color:var(--text-light);">~</span>
+        <input type="date" class="form-input" id="exportEnd" style="flex:1;padding:8px;font-size:13px;">
+      </div>
+      <div style="margin-top:8px;">
+        <select class="form-select" id="exportStore" style="width:100%;padding:8px;font-size:13px;"><option value="">全部店</option></select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="exportMyExcel()">导出Excel</button>
+    <div style="font-size:12px;color:var(--text-light);margin-top:6px;">
+      导出格式与仓库管理员表格一致，方便逐日逐筐对比（选单一店面时不含"店面"列）
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="form-label" style="margin-bottom:10px;">📥 导入管理员表格对比</div>
+    <button class="btn btn-outline" onclick="document.getElementById(&#39;reconcileFile&#39;).click()">选择管理员的Excel文件</button>
+    <input type="file" id="reconcileFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="importReconcile(event)">
+    <div class="compare-result" id="compareResult"></div>
+  </div>
+</div>
+
+<!-- ========== 设置页 ========== -->
+<div class="page" id="page-settings">
+  <div class="card" style="background:linear-gradient(135deg,#eaf3fc,#f0f7ff);border-left:4px solid var(--primary);">
+    <div style="font-size:15px;font-weight:700;color:var(--primary-dark);">📋 使用说明·快速上手</div>
+    <div style="font-size:12px;margin-top:4px;color:var(--text-light);">一共 3 步就能用起来，看一遍就会</div>
+  </div>
+
+  <div class="card" style="border-left:4px solid #4a90d9;">
+    <div style="font-size:14px;font-weight:700;color:#357abd;display:flex;align-items:center;gap:6px;">🔧 第1步：设置基础信息（只用做一次）</div>
+    <div style="margin-top:8px;font-size:13px;line-height:2;">
+      <b>📌 店面管理</b><br>
+      首页 → 点「店面管理」→ 点「新增店面」录入你负责的店面名 → 给每个店面加别名（如"北区店"别名"北区"），拍照识别时别名也能自动匹配。<br>
+      <span style="color:var(--text-light);font-size:12px;">💡 有配送路单表格的话，直接点「拍照」或「相册选」批量识别导入店面，不用一个个手动加。</span>
+      <br><br>
+      <b>📦 框名设置</b><br>
+      首页 → 点「框名设置」→ 可改框名称（如"低温筐"改"冷藏筐"）、加别名（说"冷藏"也能识别到低温筐）。<br>
+      <span style="color:var(--text-light);font-size:12px;">💡 鲜食筐/面包筐/低温筐/冷冻筐/常温筐 5 种默认已有，直接可用。</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid #2ecc71;">
+    <div style="font-size:14px;font-weight:700;color:#27ae60;display:flex;align-items:center;gap:6px;">📝 第2步：每天录入数据（选一种方式就行）</div>
+    <div style="margin-top:8px;font-size:13px;line-height:2;">
+      <b>方式A ✍️ 手动录入</b><br>
+      选店面 → 选日期（默认当天）→ 填 5 种框的发出/回收数量 → 点「保存当日记录」<br>
+      <span style="color:var(--text-light);font-size:12px;">💡 当天同一店面再次保存会覆盖该店面的记录，不会重复</span>
+      <br><br>
+      <b>方式B 🎤 语音录入</b><br>
+      选店面 → 点「语音录入库」或「语音录出库」→ 对着手机说：<br>
+      <span style="background:#f0f7ff;padding:3px 8px;border-radius:6px;font-size:13px;">"鲜食1 面包2 低温3 冷冻5 常温6"</span><br>
+      <span style="color:var(--text-light);font-size:12px;">💡 说简称也行：鲜1 面2 低3 冻5 常6；说完自动填入对应框，检查后再保存</span>
+      <br><br>
+      <b>方式C 📸 拍照识别出库（低温/冷冻/常温路单）</b><br>
+      选店面 → 点「拍照」→ 拍顶实配送路单 → 自动识别每行店面的物流箱数字 → 核对/修改后点「确认录入」<br>
+      <span style="color:var(--text-light);font-size:12px;">💡 识别弹窗里每行的编号/店名/物流箱都能直接改；识别漏了的店可点「新增一行」手动补上；合计行自动算</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--warning);">
+    <div style="font-size:14px;font-weight:700;color:#b35900;display:flex;align-items:center;gap:6px;">📊 第3步：查看数据 & 对账</div>
+    <div style="margin-top:8px;font-size:13px;line-height:2;">
+      <b>📋 记录页</b><br>
+      按日期/店面/框筛选历史记录，可删除单条。每条记录会标注来源（✍️手动 / 🎤语音 / 📸拍照）<br><br>
+      <b>📈 汇总页</b><br>
+      选日期范围 + 选店面（或选全部店看总数）→ 自动统计各框的发出/回收/差异<br><br>
+      <b>🔄 对账页</b><br>
+      ① 导出：选日期范围 → 点「导出Excel」→ 文件格式与管理员表格一致，可直接比对<br>
+      ② 导入：点「选择管理员的Excel文件」→ 自动逐日逐筐对比 → 一致项绿色 ✅，差异项黄色 ⚠️ 标出差额<br>
+      <span style="color:var(--text-light);font-size:12px;">💡 管理员表格需包含日期列 + 各框的发出/回收列，框名能对上就行</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid var(--success);">
+    <div style="font-size:14px;font-weight:700;color:var(--success);display:flex;align-items:center;gap:6px;">🔐 数据安全 & 常见问题</div>
+    <div style="margin-top:8px;font-size:13px;line-height:2;">
+      <b>⚠️ 数据存在手机浏览器本地，</b>换手机或清浏览器缓存会丢失！请定期：<br>
+      首页 →「数据备份」→「导出备份」→ 手机弹出"保存到文件"→ 存好后发到微信「文件传输助手」<br>
+      换手机时：新手机打开网页 →「数据备份」→「导入备份」→ 选择之前存的文件<br><br>
+      <b>❓ 拍照识别不准怎么办？</b><br>
+      弹窗底部的「列偏移 +/-」按钮可调整物流箱列位置；每行数字直接点进去改。<br><br>
+      <b>❓ 识别漏了店面怎么办？</b><br>
+      弹窗下方点「新增一行」手动填编号和店名，一样能录入。<br><br>
+      <b>❓ 每天要录很多店怎么办？</b><br>
+      先拍照识别出库（最快）→ 再手动补入库 → 或者语音说。
+    </div>
+  </div>
+</div>
+
+<!-- 浮层 -->
+<div class="toast" id="toast"></div>
+<div class="voice-overlay" id="voiceOverlay">
+  <div class="voice-icon">🎤</div>
+  <div class="voice-text" id="voiceText">请说话…</div>
+  <div class="voice-transcript" id="voiceTranscript"></div>
+  <button class="voice-stop" onclick="stopVoice()">结束</button>
+</div>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="bar-track"><div class="bar-fill"></div></div>
+  <div class="loading-text" id="loadingText">正在识别…</div>
+</div>
+
+<!-- 店面拍照识别弹窗 -->
+<div class="store-ocr-modal" id="storeOcrModal">
+  <div class="store-ocr-content">
+    <div class="form-label" style="margin-bottom:8px;">📸 识别结果（可直接修改）</div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">识别到 <span id="storeOcrCount">0</span> 条，可编辑/删除/新增</div>
+    <div id="storeOcrTable"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="closeStoreOcrModal()">取消</button>
+      <button class="btn btn-success" style="flex:1;" onclick="saveStoreOcrResult()">保存（新增所有）</button>
+    </div>
+  </div>
+</div>
+
+<!-- 筐删除弹窗 -->
+<div class="gd-modal" id="goodsDeleteModal" onclick="closeGoodsDeleteModal()">
+  <div class="gd-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">⚠️ 删除提醒</span>
+      <button onclick="closeGoodsDeleteModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <p id="goodsDeleteMsg" style="font-size:14px;line-height:1.6;margin-bottom:14px;"></p>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-danger" style="flex:1;" id="goodsDeleteConfirmBtn" onclick="confirmDeleteGoods()">确认删除</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="goViewGoodsData()">查看数据</button>
+    </div>
+  </div>
+</div>
+
+<!-- 备份教程弹窗 -->
+<div class="gd-modal" id="backupTutorialModal" onclick="closeBackupTutorialModal()">
+  <div class="gd-content" onclick="event.stopPropagation()" style="max-width:360px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">📖 备份与恢复教程</span>
+      <button onclick="closeBackupTutorialModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:13px;line-height:1.7;">
+      <p style="font-weight:600;margin-bottom:6px;">📤 导出备份：</p>
+      <p style="color:var(--text-light);margin-bottom:10px;">① 点击「导出备份」按钮<br>② 手机弹出"保存到文件"，选「存储到内部存储」或「下载」<br>③ 存好后发到微信「文件传输助手」</p>
+      <p style="font-weight:600;margin-bottom:6px;">📥 恢复/换手机：</p>
+      <p style="color:var(--text-light);margin-bottom:10px;">① 从微信下载之前备份的 .json 文件<br>② 点击「选择文件导入」<br>③ 选中下载的文件 → 自动恢复</p>
+      <p style="font-size:12px;color:var(--text-light);">💡 建议每次新增重要数据后导出一份，微信收藏里存着最保险。</p>
+    </div>
+  </div>
+</div>
+
+<!-- OCR 识别结果弹窗 -->
+<div class="store-ocr-modal" id="ocrResultModal" onclick="closeOcrResultModal()">
+  <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:520px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="font-weight:600;font-size:15px;">📸 识别结果（可直接修改）</span>
+      <button onclick="closeOcrResultModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">
+      当前模式：<span id="ocrModeLabel" style="color:var(--primary);font-weight:600;">发出</span>
+      · 筐类型：<span id="ocrGoodsLabel" style="color:var(--primary);font-weight:700;font-size:18px;background:#eaf3fc;padding:2px 10px;border-radius:8px;margin-left:4px;">常温筐</span>
+      · <span style="color:var(--warning);">黄色列=物流箱（自动录入该列）</span>
+    </div>
+    <div id="ocrEditFields"></div>
+  </div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="closeOcrResultModal()">取消</button>
+      <button class="btn btn-success" style="flex:1;" onclick="confirmOcrResult()">✅ 确认录入</button>
+    </div>
+  </div>
+</div>
+
+<!-- 语音录入弹窗 -->
+<div class="store-ocr-modal" id="voiceInputModal" onclick="closeVoiceInputModal()">
+  <div class="store-ocr-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="font-weight:600;font-size:15px;">🎤 语音录入</span>
+      <button onclick="closeVoiceInputModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">
+      当前模式：<span id="voiceModeLabel" style="color:var(--primary);font-weight:600;">发出</span>
+    </div>
+    <div class="btn-row" id="voiceButtonsRow" style="margin-bottom:8px;">
+      <button class="voice-btn voice-in" id="voiceInBtn" onclick="startVoice('in')" style="flex:1;">🔊 语音录发出</button>
+      <button class="voice-btn voice-out" id="voiceOutBtn" onclick="startVoice('out')" style="flex:1;">🔊 语音录回收</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;text-align:center;">
+      说"鲜食1面包2常温3低温5冷冻6"自动填入
+    </div>
+    <input type="text" id="manualVoiceInput" placeholder="或手动输入，如：鲜食1面包2" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;box-sizing:border-box;">
+    <button class="btn btn-primary" style="margin-top:8px;padding:10px;font-size:14px;" onclick="parseManualVoiceInput()">识别并填入</button>
+  </div>
+</div>
+
+<!-- 拍照识别弹窗 -->
+<div class="store-ocr-modal" id="photoInputModal" onclick="closePhotoInputModal()">
+  <div class="store-ocr-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="font-weight:600;font-size:15px;">📸 拍照识别</span>
+      <button onclick="closePhotoInputModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">
+      当前模式：<span id="photoModeLabel" style="color:var(--primary);font-weight:600;">发出</span>
+      <span style="margin-left:8px;">识别后自动填到对应输入框</span>
+    </div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:12px;text-align:center;">拍摄配送路单，自动识别物流箱合计</div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="document.getElementById('photoInput').click()">📷 拍照</button>
+      <button class="btn btn-outline" onclick="document.getElementById('photoAlbumInput').click()">🖼️ 相册选</button>
+    </div>
+    <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(event)">
+    <input type="file" id="photoAlbumInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+  </div>
+</div>
+
+<script>
+// ======== 配置 ========
+const STORAGE_KEY = 'kuanwei_inventory_data';
+const GOODS_KEY = 'kuanwei_goods_names';
+const STORE_KEY = 'kuanwei_stores';
+const OCR_KEY = 'kuanwei_ocr_keys';
+
+// 筐：名称 + 多别名（全局统一一套，所有店面共用）
+const DEFAULT_GOODS = [
+  { name: '鲜食筐', aliases: ['鲜食', '鲜'] },
+  { name: '面包筐', aliases: ['面包', '面'] },
+  { name: '低温筐', aliases: ['低温', '冷藏', '冷藏筐'] },
+  { name: '冷冻筐', aliases: ['冷冻'] },
+  { name: '常温筐', aliases: ['常温', '常'] },
+];
+// 店面：名称 + 多别名，可自定义增减
+const DEFAULT_STORES = [
+  { name: '默认店', aliases: [] },
+];
+
+let currentStoreIdx = 0; // 当前选中的店面下标
+let currentActionType = null; // 'in'=发出 'out'=回收
+let currentActionLabel = '发出';
+
+// ======== 数据层 ========
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    const stores = loadStoreConfig();
+    const defName = (stores[0] && stores[0].name) || '默认店';
+    // 旧数据无店面字段 → 归默认店(0)
+    return arr.map(r => {
+      if (r.storeIdx === undefined || r.storeIdx === null) {
+        r.storeIdx = 0;
+        r.storeName = defName;
+      }
+      return r;
+    });
+  } catch(e) { return []; }
+}
+function saveDataArr(arr) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+}
+// ---- 筐配置 ----
+function loadGoodsConfig() {
+  try {
+    const raw = localStorage.getItem(GOODS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        if (typeof parsed[0] === 'string') return parsed.map(n => ({ name: n, aliases: [] }));
+        return parsed;
+      }
+    }
+  } catch(e) {}
+  return DEFAULT_GOODS.map(g => ({ name: g.name, aliases: [...g.aliases] }));
+}
+function loadGoodsNames() {
+  return loadGoodsConfig().map(g => g.name);
+}
+function saveGoodsConfig(cfg) {
+  localStorage.setItem(GOODS_KEY, JSON.stringify(cfg));
+}
+function saveGoodsNamesStorage(names) {
+  localStorage.setItem(GOODS_KEY, JSON.stringify(names));
+}
+// ---- 店面配置 ----
+function loadStoreConfig() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        if (typeof parsed[0] === 'string') return parsed.map(n => ({ name: n, aliases: [] }));
+        return parsed;
+      }
+    }
+  } catch(e) {}
+  return DEFAULT_STORES.map(s => ({ name: s.name, aliases: [...s.aliases] }));
+}
+function loadStoreNames() {
+  return loadStoreConfig().map(s => s.name);
+}
+function saveStoreConfig(cfg) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(cfg));
+}
+// 默认百度OCR密钥（应用：库存管理 / AppID 134982254 / 通用文字识别高精度版）— 已预置，本机开箱即用
+const DEFAULT_OCR_KEYS = { apiKey: 'iswwim5FqTQx8jVSjtJaFaIa', secretKey: 'sh3ji9lbaBNunDyHJTRfkbdUrh4xCZuZ' };
+
+// 本机 CORS 代理（同源，绕开浏览器跨域拦截；python proxy_server.py 提供）
+const CORS_PROXY = (location.protocol === 'http:' || location.protocol === 'https:')
+  ? '/proxy?url='
+  : 'http://localhost:8080/proxy?url=';
+
+function loadOcrKeys() {
+  try {
+    const raw = localStorage.getItem(OCR_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { apiKey: DEFAULT_OCR_KEYS.apiKey, secretKey: DEFAULT_OCR_KEYS.secretKey };
+}
+function saveOcrKeysStorage(keys) {
+  localStorage.setItem(OCR_KEY, JSON.stringify(keys));
+}
+
+// ======== 别名模糊匹配 ========
+function escapeReg(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+// 从文本中按别名匹配各筐的数量，返回 {goodsIdx: qty}
+function matchGoodsFromText(text) {
+  const cfg = loadGoodsConfig();
+  const result = {};
+  cfg.forEach((g, idx) => {
+    const keys = [g.name, ...g.aliases].filter(Boolean);
+    if (keys.length === 0) return;
+    keys.sort((a, b) => b.length - a.length); // 优先长词
+    const re = new RegExp('(' + keys.map(escapeReg).join('|') + ')[^0-9]*(\\d+)', 'g');
+    let m, last = null;
+    while ((m = re.exec(text)) !== null) { last = parseInt(m[2]); }
+    if (last !== null) result[idx] = last;
+  });
+  return result;
+}
+// 从抬头文本判断筐类型，返回 goodsIdx 或 -1
+function detectGoodsIdxByHeader(text) {
+  const cfg = loadGoodsConfig();
+  for (let i = 0; i < cfg.length; i++) {
+    const keys = [cfg[i].name, ...cfg[i].aliases].filter(Boolean);
+    if (keys.some(k => text.includes(k))) return i;
+  }
+  return -1;
+}
+
+// ======== 工具 ========
+function todayStr() {
+  const d = new Date();
+  // 直接用本地时间方法（在中国手机浏览器自动取东八区）
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+function showLoading(text) {
+  document.getElementById('loadingText').textContent = text || '处理中…';
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
+
+// ======== 店面 chip 切换（手动录入页） ========
+function renderStoreChips() {
+  const cfg = loadStoreConfig();
+  const container = document.getElementById('recordStoreChips');
+  if (!container) return;
+  let html = '';
+  cfg.forEach((s, i) => {
+    const alias = (s.aliases && s.aliases[0]) || '';
+    const cls = i === currentStoreIdx ? 'store-chip active' : 'store-chip';
+    const aliasHtml = alias ? `<span class="chip-alias">· ${escapeHtml(alias)}</span>` : '';
+    html += `<button class="${cls}" onclick="selectStoreChip(${i})">${escapeHtml(s.name)}${aliasHtml}</button>`;
+  });
+  container.innerHTML = html;
+  // 同步隐藏 select
+  const sel = document.getElementById('recordStore');
+  if (sel) sel.value = String(currentStoreIdx);
+}
+function selectStoreChip(idx) {
+  currentStoreIdx = idx;
+  renderStoreChips();
+  reloadRecordInputs();
+  const cfg = loadStoreConfig();
+  const s = cfg[idx];
+  if (s) {
+    const alias = (s.aliases && s.aliases[0]) || '';
+    const label = alias ? `${s.name} · ${alias}` : s.name;
+    showTransparentToast('已选择 · ' + label);
+  }
+}
+
+// ======== 透明 toast（中部、2 秒自动消失、点击屏幕任意位置也消失） ========
+let transparentToastTimer = null;
+let lastTransparentToastTime = 0;
+function showTransparentToast(text) {
+  lastTransparentToastTime = Date.now();
+  let el = document.getElementById('transparentToast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'transparentToast';
+    el.className = 'transparent-toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = text;
+  el.classList.add('show');
+  if (transparentToastTimer) clearTimeout(transparentToastTimer);
+  transparentToastTimer = setTimeout(hideTransparentToast, 2000);
+}
+function hideTransparentToast() {
+  const el = document.getElementById('transparentToast');
+  if (el) el.classList.remove('show');
+  if (transparentToastTimer) { clearTimeout(transparentToastTimer); transparentToastTimer = null; }
+}
+// 点击屏幕任意位置关闭（自己刚触发的事件忽略，避免和自身竞争）
+document.addEventListener('click', () => {
+  if (transparentToastTimer && Date.now() - lastTransparentToastTime > 250) hideTransparentToast();
+});
+
+// ======== 首页向导（录入 Tab 内的向导首页） ========
+function manualEntry(type) {
+  if (!type) { showToast('请选择操作类型'); return; }
+  currentActionType = type;
+  const label = type === 'in' ? '发出' : '回收';
+  document.getElementById('manualHeaderLabel').textContent = label + ' - 手动录入';
+  document.getElementById('entryModeLabel').textContent = label;
+  document.getElementById('homeWizard').style.display = 'none';
+  document.getElementById('manualForm').style.display = 'block';
+  initStoreSelect('recordStore');
+  document.getElementById('recordDate').value = todayStr();
+  renderGoodsInputList();
+}
+
+function openVoiceInputModal() {
+  const label = currentActionType === 'out' ? '回收' : '发出';
+  document.getElementById('voiceModeLabel').textContent = label;
+  document.getElementById('voiceInBtn').style.display = currentActionType === 'in' ? '' : 'none';
+  document.getElementById('voiceOutBtn').style.display = currentActionType === 'out' ? '' : 'none';
+  document.getElementById('voiceInputModal').classList.add('show');
+}
+function closeVoiceInputModal() {
+  document.getElementById('voiceInputModal').classList.remove('show');
+}
+function openPhotoInputModal() {
+  const label = currentActionType === 'out' ? '回收' : '发出';
+  document.getElementById('photoModeLabel').textContent = label;
+  document.getElementById('photoInputModal').classList.add('show');
+}
+function closePhotoInputModal() {
+  document.getElementById('photoInputModal').classList.remove('show');
+}
+function backToHomeWizard() {
+  document.getElementById('manualForm').style.display = 'none';
+  document.getElementById('homeWizard').style.display = 'block';
+}
+
+// ======== 面板切换（首页 6 大按钮控制） ========
+function openStorePanel() {
+  document.getElementById('homeWizard').style.display = 'none';
+  document.getElementById('storeManagePanel').style.display = 'block';
+  renderStorePanelUI();
+}
+function backFromStorePanel() {
+  document.getElementById('storeManagePanel').style.display = 'none';
+  document.getElementById('homeWizard').style.display = 'block';
+}
+function openGoodsPanel() {
+  document.getElementById('homeWizard').style.display = 'none';
+  document.getElementById('goodsManagePanel').style.display = 'block';
+  renderGoodsPanelUI();
+}
+function backFromGoodsPanel() {
+  document.getElementById('goodsManagePanel').style.display = 'none';
+  document.getElementById('homeWizard').style.display = 'block';
+}
+function openTrackPanel() {
+  document.getElementById('homeWizard').style.display = 'none';
+  document.getElementById('trackPanel').style.display = 'block';
+  document.getElementById('trackDate').value = todayStr();
+  const sel = document.getElementById('trackStore');
+  populateStoreFilter('trackStore');
+  sel.value = '';
+  renderTrack();
+}
+function backFromTrackPanel() {
+  document.getElementById('trackPanel').style.display = 'none';
+  document.getElementById('homeWizard').style.display = 'block';
+}
+function openBackupPanel() {
+  document.getElementById('homeWizard').style.display = 'none';
+  document.getElementById('backupPanel').style.display = 'block';
+  // 首次进入自动弹出教程
+  try {
+    if (!localStorage.getItem('kuanwei_seen_backup_tutorial')) {
+      showBackupTutorial();
+      localStorage.setItem('kuanwei_seen_backup_tutorial', '1');
+    }
+  } catch(e) {}
+}
+function backFromBackupPanel() {
+  document.getElementById('backupPanel').style.display = 'none';
+  document.getElementById('homeWizard').style.display = 'block';
+}
+
+// ======== 店面管理面板 ========
+function renderStorePanelUI() {
+  const cfg = loadStoreConfig();
+  const container = document.getElementById('storeListPanel');
+  let html = '';
+  cfg.forEach((s, i) => {
+    html += `<div class="store-card">
+      <div class="sc-head">
+        <div class="sc-idx">${i+1}</div>
+        <input type="text" class="sc-name" id="sName${i}" value="${escapeHtml(s.name)}" maxlength="20">
+        ${cfg.length > 1 ? `<button class="sc-del" onclick="removeStoreFromPanel(${i})">删除</button>` : ''}
+      </div>
+      <div class="sc-alias-label">🏷️ 别名（识别时可替代店名）</div>
+      <div class="sc-aliases" id="sAliases${i}">
+        ${s.aliases.length > 0
+          ? s.aliases.map((a, ai) => `<span class="sc-alias">${escapeHtml(a)}<span class="sc-x" onclick="removeStoreAlias(${i},${ai})">×</span></span>`).join('')
+          : `<span class="sc-empty">暂无别名</span>`}
+      </div>
+      <div class="sc-add">
+        <input type="text" id="sAliasInput${i}" placeholder="输入别名后点添加" maxlength="20">
+        <button onclick="addStoreAlias(${i})">添加</button>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+  const sc = document.getElementById('storeCount');
+  if (sc) sc.textContent = cfg.length;
+}
+function addStoreAlias(idx) {
+  const cfg = loadStoreConfig();
+  const input = document.getElementById('sAliasInput' + idx);
+  const val = input.value.trim();
+  if (!val) return;
+  const nm = document.getElementById('sName' + idx)?.value?.trim();
+  if (nm) cfg[idx].name = nm;
+  if (!cfg[idx].aliases.includes(val)) cfg[idx].aliases.push(val);
+  saveStoreConfig(cfg);
+  renderStorePanelUI();
+}
+function removeStoreAlias(idx, ai) {
+  const cfg = loadStoreConfig();
+  cfg[idx].aliases.splice(ai, 1);
+  saveStoreConfig(cfg);
+  renderStorePanelUI();
+}
+function addStoreFromPanel() {
+  const cfg = loadStoreConfig();
+  cfg.push({ name: '新店面', aliases: [] });
+  saveStoreConfig(cfg);
+  renderStorePanelUI();
+  initAllStores();
+}
+function removeStoreFromPanel(idx) {
+  const cfg = loadStoreConfig();
+  if (cfg.length <= 1) { showToast('至少保留一个店面'); return; }
+  cfg.splice(idx, 1);
+  saveStoreConfig(cfg);
+  renderStorePanelUI();
+  initAllStores();
+}
+// 店面改完后刷新所有店面选择器
+function initAllStores() {
+  initStoreSelect('recordStore');
+  populateStoreFilter('filterStore');
+  populateStoreFilter('summaryStore');
+  populateStoreFilter('exportStore');
+  const ts = document.getElementById('trackStore');
+  if (ts) populateStoreFilter('trackStore');
+}
+
+// ======== 框名管理面板 ========
+function renderGoodsPanelUI() {
+  const cfg = loadGoodsConfig();
+  const container = document.getElementById('goodsListPanel');
+  let html = '';
+  cfg.forEach((g, i) => {
+    html += `<div class="config-item" style="border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="idx">${i+1}</div>
+        <input type="text" id="gName${i}" value="${escapeHtml(g.name)}" maxlength="20" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;">
+      </div>
+      <div class="alias-box" id="gAliases${i}" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
+        ${g.aliases.map((a, ai) => `<span class="alias-chip" style="background:#eef;color:#357abd;font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${escapeHtml(a)}<span style="cursor:pointer;color:#e74c3c;font-weight:700;" onclick="removeGoodsAlias(${i},${ai})">×</span></span>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <input type="text" id="gAliasInput${i}" placeholder="加别名，如 冷藏" style="flex:1;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        <button class="btn btn-outline" style="flex:0 0 auto;padding:7px 12px;font-size:12px;" onclick="addGoodsAlias(${i})">添加</button>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+function addGoodsAlias(idx) {
+  const cfg = loadGoodsConfig();
+  const input = document.getElementById('gAliasInput' + idx);
+  const val = input.value.trim();
+  if (!val) return;
+  const nm = document.getElementById('gName' + idx)?.value?.trim();
+  if (nm) cfg[idx].name = nm;
+  if (!cfg[idx].aliases.includes(val)) cfg[idx].aliases.push(val);
+  saveGoodsConfig(cfg);
+  renderGoodsPanelUI();
+}
+function removeGoodsAlias(idx, ai) {
+  const cfg = loadGoodsConfig();
+  cfg[idx].aliases.splice(ai, 1);
+  saveGoodsConfig(cfg);
+  renderGoodsPanelUI();
+}
+// 新增框类型
+function showAddGoodsModal() {
+  const name = prompt('请输入新框类型名称（如：甜品筐）：');
+  if (!name || !name.trim()) return;
+  const cfg = loadGoodsConfig();
+  cfg.push({ name: name.trim(), aliases: [] });
+  saveGoodsConfig(cfg);
+  renderGoodsPanelUI();
+  renderGoodsInputList();
+  initGoodsFilter();
+  showToast('✅ 已新增「' + name.trim() + '」');
+}
+// 删除框类型
+let goodsDeleteIdx = -1;
+function showDeleteGoodsModal() {
+  const cfg = loadGoodsConfig();
+  if (cfg.length <= 1) { showToast('至少保留一个筐类型'); return; }
+  const names = cfg.map(g => g.name).map((n,i) => (i+1)+'. '+n).join('\n');
+  const idxStr = prompt('选择要删除的框类型编号（输入数字）：\n\n' + names);
+  if (!idxStr) return;
+  const idx = parseInt(idxStr) - 1;
+  if (isNaN(idx) || idx < 0 || idx >= cfg.length) { showToast('编号无效'); return; }
+  goodsDeleteIdx = idx;
+  const name = cfg[idx].name;
+  // 检查有无数据
+  const data = loadData();
+  const count = data.filter(r => r.goodsIdx === idx).length;
+  const msg = document.getElementById('goodsDeleteMsg');
+  if (count > 0) {
+    msg.innerHTML = '<strong>' + escapeHtml(name) + '</strong> 有 <strong>' + count + '</strong> 条数据记录。<br><br>删除后这些数据将不可见（数据本身仍保留，如恢复此框名可再次查看）。';
+    document.getElementById('goodsDeleteConfirmBtn').style.display = '';
+  } else {
+    msg.innerHTML = '<strong>' + escapeHtml(name) + '</strong> 没有数据记录，可直接删除。';
+    document.getElementById('goodsDeleteConfirmBtn').textContent = '确认删除';
+    document.getElementById('goodsDeleteConfirmBtn').style.display = '';
+  }
+  document.getElementById('goodsDeleteModal').classList.add('show');
+}
+function closeGoodsDeleteModal() {
+  document.getElementById('goodsDeleteModal').classList.remove('show');
+  goodsDeleteIdx = -1;
+}
+function confirmDeleteGoods() {
+  if (goodsDeleteIdx < 0) return;
+  const cfg = loadGoodsConfig();
+  const name = cfg[goodsDeleteIdx].name;
+  cfg.splice(goodsDeleteIdx, 1);
+  saveGoodsConfig(cfg);
+  renderGoodsPanelUI();
+  renderGoodsInputList();
+  initGoodsFilter();
+  closeGoodsDeleteModal();
+  showToast('✅ 已删除「' + name + '」');
+}
+function goViewGoodsData() {
+  if (goodsDeleteIdx < 0) return;
+  closeGoodsDeleteModal();
+  // 切换到历史页，筛选该筐，日期 2026-07-31 ~ 当天
+  switchPage('history');
+  const filterGoods = document.getElementById('filterGoods');
+  if (filterGoods) filterGoods.value = String(goodsDeleteIdx);
+  document.getElementById('filterDate').value = '';
+  setFilterDateRange('filterDate', todayStr(), todayStr());
+  renderHistory();
+  goodsDeleteIdx = -1;
+}
+function setFilterDateRange(idFrom, fromDate, toDate) {
+  const inp = document.getElementById(idFrom);
+  if (inp) inp.value = fromDate;
+}
+
+// ======== 库存追踪 ========
+function renderTrack() {
+  const date = document.getElementById('trackDate').value;
+  if (!date) { document.getElementById('trackResult').innerHTML = '<span style="color:var(--text-light);">请选择发出日期后查看</span>'; return; }
+  const storeSel = document.getElementById('trackStore');
+  const storeVal = storeSel ? storeSel.value : '';
+  let data = loadData();
+  // 筛选：只取该发出日期 + 符合条件的店面
+  const outRecords = data.filter(r => r.date === date && r.qtyIn > 0 && (storeVal === '' || r.storeIdx === parseInt(storeVal)));
+  // 对于每个店面+筐，统计发出量 vs 截止今日的回收量
+  const today = todayStr();
+  const names = loadGoodsConfig();
+  const track = {}; // key: "storeIdx-goodsIdx"
+  outRecords.forEach(r => {
+    const key = r.storeIdx + '-' + r.goodsIdx;
+    if (!track[key]) track[key] = { storeIdx: r.storeIdx, goodsIdx: r.goodsIdx, name: names[r.goodsIdx]?.name || '?' , sent: 0, returned: 0 };
+    track[key].sent += r.qtyIn;
+  });
+  // 对每个店面+筐，查该店在发出日期之后的所有回收记录
+  Object.keys(track).forEach(key => {
+    const t = track[key];
+    const rets = data.filter(r =>
+      r.date > date && r.date <= today &&
+      r.storeIdx === t.storeIdx &&
+      r.goodsIdx === t.goodsIdx &&
+      r.qtyOut > 0
+    );
+    rets.forEach(r => t.returned += r.qtyOut);
+  });
+  const entries = Object.values(track);
+  if (entries.length === 0) {
+    document.getElementById('trackResult').innerHTML = '<span style="color:var(--text-light);">该日期无发出记录</span>';
+    return;
+  }
+  let html = '<table class="track-tbl"><thead><tr><th>店面</th><th>筐类型</th><th>发出</th><th>已回收</th><th>待回收</th></tr></thead><tbody>';
+  let totalSent = 0, totalRet = 0;
+  entries.forEach(t => {
+    const pending = t.sent - t.returned;
+    html += `<tr><td>${escapeHtml(loadStoreNames()[t.storeIdx] || '?')}</td><td>${escapeHtml(t.name)}</td><td>${t.sent}</td><td>${t.returned}</td><td style="color:${pending>0?'var(--danger)':'var(--success)'};font-weight:600;">${pending}</td></tr>`;
+    totalSent += t.sent; totalRet += t.returned;
+  });
+  const totalPending = totalSent - totalRet;
+  html += `<tr class="total-row"><td>合计</td><td></td><td>${totalSent}</td><td>${totalRet}</td><td style="color:${totalPending>0?'var(--danger)':'var(--success)'};font-weight:600;">${totalPending}</td></tr>`;
+  html += '</tbody></table>';
+  document.getElementById('trackResult').innerHTML = html;
+}
+
+// ======== 备份教程弹窗 ========
+function showBackupTutorial() {
+  document.getElementById('backupTutorialModal').classList.add('show');
+}
+function closeBackupTutorialModal() {
+  document.getElementById('backupTutorialModal').classList.remove('show');
+}
+
+// ======== 页面切换 ========
+function switchPage(pageName) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + pageName).classList.add('active');
+  document.querySelector(`.tab[data-page="${pageName}"]`).classList.add('active');
+  if (pageName === 'record') { initStoreSelect('recordStore'); renderTodayOverview(); }
+  if (pageName === 'history') renderHistory();
+  if (pageName === 'summary') renderSummary();
+  if (pageName === 'settings') renderSettings();
+  if (pageName === 'reconcile') populateStoreFilter('exportStore');
+}
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => switchPage(tab.dataset.page));
+});
+
+// ======== 录入页初始化 ========
+function initRecordPage() {
+  document.getElementById('recordDate').value = todayStr();
+  document.getElementById('todayLabel').textContent = todayStr();
+  initStoreSelect('recordStore');
+  renderGoodsInputList();
+}
+function renderGoodsInputList() {
+  const names = loadGoodsNames();
+  const container = document.getElementById('goodsInputList');
+  const isIn = currentActionType === 'in';
+  const isOut = currentActionType === 'out';
+  let html = '';
+  // 表头
+  html += '<div class="goods-input-item" style="font-size:11px;color:var(--text-light);border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:6px;">';
+  html += '<div class="gi-name">筐名</div>';
+  if (!isOut) html += '<div style="flex:1;text-align:center;">发出</div>';
+  if (!isIn)  html += '<div style="flex:1;text-align:center;">回收</div>';
+  html += '</div>';
+  names.forEach((name, i) => {
+    html += '<div class="goods-input-item">';
+    html += '<div class="gi-name">' + name + '</div>';
+    if (!isOut) html += '<div class="gi-in"><input type="number" id="giIn' + i + '" placeholder="0" min="0" inputmode="numeric" data-idx="' + i + '"></div>';
+    if (!isIn)  html += '<div class="gi-out"><input type="number" id="giOut' + i + '" placeholder="0" min="0" inputmode="numeric" data-idx="' + i + '"></div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+  reloadRecordInputs();
+}
+
+// 把当前(店面,日期)已有记录载入输入框
+function reloadRecordInputs() {
+  const date = document.getElementById('recordDate').value;
+  const data = loadData();
+  const n = loadGoodsNames().length;
+  for (let i = 0; i < n; i++) {
+    const ei = document.getElementById('giIn' + i);
+    const eo = document.getElementById('giOut' + i);
+    const rec = data.find(r => r.date === date && r.storeIdx === currentStoreIdx && r.goodsIdx === i);
+    if (ei) ei.value = rec ? rec.qtyIn : '';
+    if (eo) eo.value = rec ? rec.qtyOut : '';
+  }
+}
+
+// 店面切换
+function onRecordStoreChange() {
+  const sel = document.getElementById('recordStore');
+  currentStoreIdx = parseInt(sel.value) || 0;
+  renderStoreChips();
+  reloadRecordInputs();
+}
+
+// 初始化店面下拉（录入页用，默认选中当前店）；同时刷新 chip 列表
+function initStoreSelect(selId) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  const names = loadStoreNames();
+  sel.innerHTML = '';
+  names.forEach((name, i) => {
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = name;
+    sel.appendChild(opt);
+  });
+  sel.value = currentStoreIdx;
+  renderStoreChips();
+}
+
+// 初始化店面筛选下拉（历史/汇总/导出用，含"全部店"）
+function populateStoreFilter(selId) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  const names = loadStoreNames();
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">全部店</option>';
+  names.forEach((name, i) => {
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = name;
+    sel.appendChild(opt);
+  });
+  if (cur !== '' && names[parseInt(cur)] !== undefined) sel.value = cur;
+  else sel.value = '';
+}
+
+// ======== 手动保存 ========
+function saveManualRecord() {
+  const date = document.getElementById('recordDate').value;
+  if (!date) { showToast('请选择日期'); return; }
+  const names = loadGoodsNames();
+  const storeNames = loadStoreNames();
+  const storeName = storeNames[currentStoreIdx] || '默认店';
+  const data = loadData();
+  // 只移除「当天 + 当前店面」的旧记录（其它店面的同日记录保留）
+  const filtered = data.filter(r => !(r.date === date && r.storeIdx === currentStoreIdx));
+  let hasAny = false;
+  const records = [];
+  const n = names.length;
+  for (let i = 0; i < n; i++) {
+    const qIn = parseInt(document.getElementById('giIn'+i)?.value) || 0;
+    const qOut = parseInt(document.getElementById('giOut'+i)?.value) || 0;
+    if (qIn > 0 || qOut > 0) {
+      hasAny = true;
+      records.push({
+        id: Date.now() + '-' + currentStoreIdx + '-' + i,
+        date: date,
+        storeIdx: currentStoreIdx,
+        storeName: storeName,
+        goodsIdx: i,
+        goodsName: names[i],
+        qtyIn: qIn,
+        qtyOut: qOut,
+        source: 'manual',
+        createdAt: new Date().toISOString()
+      });
+    }
+  }
+  if (!hasAny) { showToast('请至少填一项数量'); return; }
+  saveDataArr([...filtered, ...records]);
+  reloadRecordInputs();
+  showToast('✅ 保存成功');
+  renderTodayOverview();
+}
+
+// ======== 今日概览 ========
+function renderTodayOverview() {
+  const today = todayStr();
+  const data = loadData();
+  const names = loadGoodsNames();
+  const todayRecords = data.filter(r => r.date === today && r.storeIdx === currentStoreIdx);
+  const container = document.getElementById('todayOverview');
+  if (todayRecords.length === 0) {
+    container.innerHTML = '<div class="empty">今日暂无记录</div>';
+    return;
+  }
+  const totals = {};
+  names.forEach((name, i) => { totals[i] = { in: 0, out: 0 }; });
+  todayRecords.forEach(r => {
+    if (totals[r.goodsIdx]) {
+      totals[r.goodsIdx].in += r.qtyIn;
+      totals[r.goodsIdx].out += r.qtyOut;
+    }
+  });
+  let html = '<div class="stat-grid">';
+  let anyShow = false;
+  names.forEach((name, i) => {
+    if (totals[i].in === 0 && totals[i].out === 0) return;
+    anyShow = true;
+    html += `
+      <div class="stat-card">
+        <div class="stat-name">${name}</div>
+        <div class="stat-vals">
+          <div><div class="stat-lbl">发</div><div class="stat-val in">${totals[i].in}</div></div>
+          <div><div class="stat-lbl">回</div><div class="stat-val out">${totals[i].out}</div></div>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  container.innerHTML = anyShow ? html : '<div class="empty">今日暂无记录</div>';
+}
+
+// ======== 语音识别 ========
+let voiceRecognition = null;
+let voiceMode = 'in'; // 'in' or 'out'
+
+function startVoice(mode) {
+  voiceMode = mode;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    showToast('浏览器不支持语音识别，请用Chrome');
+    return;
+  }
+  voiceRecognition = new SR();
+  voiceRecognition.lang = 'zh-CN';
+  voiceRecognition.continuous = false;
+  voiceRecognition.interimResults = true;
+
+  const overlay = document.getElementById('voiceOverlay');
+  const transcript = document.getElementById('voiceTranscript');
+  const voiceText = document.getElementById('voiceText');
+  transcript.textContent = '';
+  voiceText.textContent = '请说出筐名和数量…';
+  overlay.classList.add('show');
+  document.getElementById(mode === 'in' ? 'voiceInBtn' : 'voiceOutBtn').classList.add('recording');
+
+  voiceRecognition.onresult = function(event) {
+    let finalText = '';
+    let interimText = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        finalText += event.results[i][0].transcript;
+      } else {
+        interimText += event.results[i][0].transcript;
+      }
+    }
+    transcript.textContent = finalText || interimText;
+    if (finalText) {
+      parseVoiceText(finalText, mode);
+    }
+  };
+
+  voiceRecognition.onerror = function(event) {
+    voiceText.textContent = '识别出错: ' + event.error;
+    setTimeout(() => stopVoice(), 1500);
+  };
+
+  voiceRecognition.onend = function() {
+    document.getElementById(mode === 'in' ? 'voiceInBtn' : 'voiceOutBtn').classList.remove('recording');
+    setTimeout(() => overlay.classList.remove('show'), 500);
+  };
+
+  voiceRecognition.start();
+}
+
+function stopVoice() {
+  if (voiceRecognition) {
+    voiceRecognition.stop();
+  }
+  document.getElementById('voiceOverlay').classList.remove('show');
+}
+
+function parseManualVoiceInput() {
+  const text = document.getElementById('manualVoiceInput').value.trim();
+  if (!text) { showToast('请输入内容'); return; }
+  parseVoiceText(text, currentActionType);
+  document.getElementById('manualVoiceInput').value = '';
+  showToast('✅ 已填入');
+}
+
+function parseVoiceText(text, mode) {
+  const names = loadGoodsNames();
+  const results = matchGoodsFromText(text); // {idx: qty}，基于筐名+别名模糊匹配
+  const count = Object.keys(results).length;
+  if (count === 0) {
+    document.getElementById('voiceTranscript').textContent = '未识别到筐名+数量，请重试';
+    showToast('未识别到数据');
+    return;
+  }
+  // 填入对应输入框（当前店面）
+  let filled = [];
+  for (let idx in results) {
+    const inputId = mode === 'in' ? 'giIn' + idx : 'giOut' + idx;
+    const el = document.getElementById(inputId);
+    if (el) {
+      el.value = results[idx];
+      filled.push(names[idx] + ':' + results[idx]);
+    }
+  }
+  showToast(`✅ 已填入 ${filled.join('、')}`);
+}
+
+// ======== 拍照OCR ========
+let ocrCurrentResult = null; // { goodsIdx, qtyOut, rawText, trayType }
+let ocrColumnOffset = 0; // 列偏移：数字与列错位时调整
+let ocrCurrentImage = null;  // dataURL 用于弹窗预览
+
+function handlePhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    ocrCurrentImage = e.target.result;
+    doOCR(e.target.result, file);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function doOCR(imageDataUrl, file) {
+  const keys = loadOcrKeys();
+  if (!keys.apiKey || !keys.secretKey) {
+    showToast('请先在设置页配置百度OCR密钥');
+    return;
+  }
+
+  showLoading('正在识别…');
+  try {
+    // 1. 获取 access token
+    const tokenResp = await fetch(CORS_PROXY + encodeURIComponent('https://aip.baidubce.com/oauth/2.0/token'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `grant_type=client_credentials&client_id=${keys.apiKey}&client_secret=${keys.secretKey}`
+    });
+    const tokenData = await tokenResp.json();
+    if (!tokenData.access_token) throw new Error('获取token失败');
+    const accessToken = tokenData.access_token;
+
+    // 2. 压缩图片
+    const compressedBase64 = await compressImage(imageDataUrl, 1200);
+    const imgBase64 = compressedBase64.replace(/^data:image\/\w+;base64,/, '');
+
+    // 3. 调用通用文字识别（高精度版）
+    const ocrResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=${accessToken}`), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `image=${encodeURIComponent(imgBase64)}&language_type=CHN_ENG&detect_direction=true&paragraph=false&probability=false`
+    });
+    const ocrData = await ocrResp.json();
+
+    hideLoading();
+
+    if (!ocrData.words_result) {
+      throw new Error(ocrData.error_msg || '识别失败');
+    }
+
+    // 4. 解析识别结果
+    parseOcrResult(ocrData);
+
+    // 5. 识别完成，关闭拍照弹窗，只保留结果弹窗
+    closePhotoInputModal();
+
+  } catch(error) {
+    hideLoading();
+    console.error('OCR error:', error);
+    showToast('识别失败: ' + error.message);
+    closePhotoInputModal();
+  }
+}
+
+function compressImage(dataUrl, maxSize) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = function() {
+      let w = img.width, h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = h * maxSize / w; w = maxSize; }
+        else { w = w * maxSize / h; h = maxSize; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.src = dataUrl;
+  });
+}
+
+function parseOcrResult(ocrData) {
+  const names = loadGoodsNames();
+  const cfg = loadGoodsConfig();
+  const words = ocrData.words_result.map(item => item.words);
+
+  // 1. 识别抬头判断筐类型
+  let goodsIdx = -1;
+  const headerKeywords = cfg.map((g, idx) => {
+    const base = [g.name, ...g.aliases].filter(Boolean);
+    const ws = [];
+    base.forEach(b => { ws.push(b); ws.push(b + '配送'); ws.push(b + '路单'); });
+    return { idx, words: ws };
+  });
+  const allText = words.join(' ');
+  for (let p of headerKeywords) {
+    for (let kw of p.words) {
+      if (allText.includes(kw)) { goodsIdx = p.idx; break; }
+    }
+    if (goodsIdx >= 0) break;
+  }
+
+  // 2. 找表头中"整箱数量"和"物流箱"的列索引
+  let wholeColIdx = -1;
+  let logisticsColIdx = -1;
+  let colKeywords = ['整箱', '物流箱', '物流筐', '低温', '常温', '保温', '冷冻', '鲜食', '面包', '数量', '筐', '箱'];
+  let colCnt = 0;
+  for (const w of words) {
+    const tokens = w.split(/\s+/);
+    for (const t of tokens) {
+      if (colKeywords.some(k => t.includes(k))) {
+        // 精确查找"整箱数量"和"物流箱"
+        if ((t.includes('整箱') || t.includes('整箱数量')) && wholeColIdx < 0) {
+          wholeColIdx = colCnt;
+          // 复合词如"整箱数量物流箱"中：整箱是当前列，物流箱是下一列
+          const lIdx = t.indexOf('物流箱');
+          if (lIdx >= 0 && logisticsColIdx < 0) {
+            logisticsColIdx = colCnt + 1;
+          }
+        } else if ((t.includes('物流箱') || t.includes('物流筐')) && logisticsColIdx < 0) {
+          logisticsColIdx = colCnt;
+        }
+        colCnt++;
+      }
+    }
+    if (wholeColIdx >= 0 && logisticsColIdx >= 0) break;
+  }
+  // 兜底：logisticsColIdx 默认 1（整箱之后的列）
+  if (wholeColIdx < 0) wholeColIdx = 0;
+  if (logisticsColIdx < 0) logisticsColIdx = 1;
+
+  // 3. 用 parseStoreOcr 提取所有门店（处理分行、错字等情况）
+  const stores = parseStoreOcr(words);
+  if (stores.length === 0) {
+    // 兜底：直接按行解析（OCR 把整行作为一个 word）
+    for (const w of words) {
+      const m = w.match(/^(HN)?0*(\d{1,2})[\-–]0*(\d{1,2})/i);
+      if (!m) continue;
+      if (/合计/.test(w)) continue;
+      const code = parseInt(m[2], 10) + '-' + parseInt(m[3], 10);
+      let rest = w.slice(m.index + m[0].length).trim();
+      rest = rest.replace(/^\s*\d{1,2}[:：]\d{2}(?:[:：]\d{2})?\s*/, '').trim(); // 去行首时间
+      const tokens = rest.split(/\s+/).filter(Boolean);
+      const nums = [];
+      const nameParts = [];
+      tokens.forEach(t => { if (/^\d+$/.test(t)) nums.push(parseInt(t, 10)); else nameParts.push(t); });
+      const name = nameParts.join('').trim();
+      if (name) stores.push({ code, name });
+    }
+  }
+
+  // 4. 对每个门店，从原始 word 中提取编号/时间之后的数字
+  const rows = [];
+  stores.forEach(s => {
+    let nums = [];
+    // 策略A：找到包含 s.code 的原始 word，从编号后提取数字
+    const codeStr = s.code.replace('-', '\\-');
+    for (const w of words) {
+      if (w.match(new RegExp(codeStr))) {
+        const m = w.match(/^(HN)?0*(\d{1,2})[\-–]0*(\d{1,2})/i);
+        if (m) {
+          let rest = w.slice(m.index + m[0].length).trim();
+          rest = rest.replace(/^\s*\d{1,2}[:：]\d{2}(?:[:：]\d{2})?\s*/, '').trim(); // 去时间
+          const ms = rest.match(/\d+/g) || [];
+          nums = ms.map(x => parseInt(x, 10));
+          break;
+        }
+      }
+    }
+    // 策略A续：当前 word 无数字 → 从后续 words 收集（分行布局）
+    if (nums.length === 0) {
+      let pos = -1;
+      for (let i = 0; i < words.length; i++) {
+        if (words[i].includes(s.code) || words[i].includes(s.name.slice(0,4))) { pos = i; break; }
+      }
+      if (pos >= 0) {
+for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
+            // 下一行编号(43-05 或 HN43-05)直接停止，且不把编号里的数字收进去
+            if (/^(HN)?\d{1,3}[\-–]\d{1,2}\b/i.test(words[j])) break;
+            const m2 = words[j].match(/\d+/g);
+            if (m2) {
+              if (/^\d{1,2}[:：]\d{2}/.test(words[j])) continue;
+              m2.forEach(x => { nums.push(parseInt(x, 10)); });
+            }
+            // 合计行 / 表头标志 停止
+            if (/合计/.test(words[j]) || /^(发出|回收|整箱|物流)/.test(words[j].trim())) break;
+          }
+      }
+    }
+    // 只取物流箱列
+    const li = (nums[logisticsColIdx] !== undefined ? nums[logisticsColIdx] : (nums[0] || 0));
+    rows.push({ code: s.code, name: s.name, nums: [li], _rawNums: nums.slice() });
+  });
+
+  // 5. 找合计行（精确：包含"合计"且含数字，排除抬头里的"总数"等）
+  let totalNums = [];
+  for (const w of words) {
+    if (w.includes('合计') || w.includes('共计') || /^总\s/.test(w)) {
+      const matches = w.match(/\d+/g);
+      if (matches && matches.length >= 2) {
+        totalNums = matches.map(s => parseInt(s, 10));
+        break;
+      }
+    }
+  }
+  // 合计行只保留物流箱一列
+  let totalFiltered = [0];
+  if (totalNums.length >= 1) {
+    totalFiltered[0] = (totalNums[logisticsColIdx] !== undefined ? totalNums[logisticsColIdx] : (totalNums[0] || 0));
+  }
+
+  ocrCurrentResult = {
+    goodsIdx,
+    rows: rows.map(r => ({ ...r, nums: r.nums.slice() })),
+    _rawTotalNums: totalNums,
+    totalNums: totalFiltered.slice(),
+    wholeColIdx,
+    logisticsColIdx,
+    rawText: words.join('\n'),
+    words: words.slice(0, 30), // 供 debug
+    trayType: goodsIdx >= 0 ? names[goodsIdx] : '未识别'
+  };
+
+  // 渲染
+  document.getElementById('ocrModeLabel').textContent = currentActionType === 'out' ? '回收' : '发出';
+  document.getElementById('ocrGoodsLabel').textContent = ocrCurrentResult.trayType;
+  document.getElementById('ocrRawText').textContent = ocrCurrentResult.rawText;
+  refreshOcrQtyCol();
+  document.getElementById('ocrResultModal').classList.add('show');
+}
+
+// 渲染 OCR 表格（只显示物流箱一列；编号/门店/数字均可编辑）
+function refreshOcrQtyCol() {
+  if (!ocrCurrentResult) return;
+  const rows = ocrCurrentResult.rows;
+  const maxNumCols = 1;
+
+  let html = '<div style="overflow-x:auto;"><table class="summary-table" style="margin-top:6px;min-width:100%;">';
+  html += '<thead><tr><th style="min-width:58px;">编号</th><th style="min-width:120px;text-align:left;padding-left:6px;">门店</th><th style="min-width:66px;background:var(--warning);color:#fff;">物流箱</th><th style="min-width:28px;"></th></tr></thead><tbody>';
+  rows.forEach((r, i) => {
+    html += '<tr>';
+    html += '<td><input type="text" id="ocrCode_' + i + '" value="' + escapeHtml(r.code || '') + '" maxlength="10" style="width:60px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;text-align:center;"></td>';
+    html += '<td style="text-align:left;padding-left:6px;"><input type="text" id="ocrName_' + i + '" value="' + escapeHtml(r.name || '') + '" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;"></td>';
+    const v = r.nums[0] !== undefined ? r.nums[0] : 0;
+    html += '<td style="background:#fffde7;"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="width:64px;padding:5px;border:1.5px solid var(--warning);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#b35900;"></td>';
+    html += '<td><button onclick="removeOcrRow(' + i + ')" style="background:none;border:none;color:var(--danger);font-size:20px;cursor:pointer;padding:0 6px;line-height:1;">×</button></td>';
+    html += '</tr>';
+  });
+  if (rows.length > 0) {
+    let sum = 0;
+    rows.forEach((r, i) => {
+      const inp = document.getElementById('ocrQty_' + i);
+      if (inp) sum += parseInt(inp.value) || 0;
+    });
+    html += '<tr class="total-row"><td>合计</td><td></td><td style="background:#fff3cd;font-weight:700;color:#b35900;" id="ocrTotalCell_0">' + sum + '</td><td></td></tr>';
+  }
+  html += '</tbody></table></div>';
+  html += '<button onclick="addOcrRow()" style="margin-top:10px;padding:9px 14px;border:1.5px dashed var(--primary);border-radius:8px;background:#f0f7ff;color:var(--primary);font-size:13px;font-weight:600;cursor:pointer;width:100%;">➕ 新增一行（识别漏了时手动添加）</button>';
+  document.getElementById('ocrEditFields').innerHTML = html;
+  // 绑定 input 事件：编号/门店 改 r.code/r.name；物流箱 改 r.nums[0] 并重算合计
+  rows.forEach((r, i) => {
+    const codeInp = document.getElementById('ocrCode_' + i);
+    const nameInp = document.getElementById('ocrName_' + i);
+    const qtyInp = document.getElementById('ocrQty_' + i);
+    if (codeInp) codeInp.addEventListener('input', e => { r.code = e.target.value; });
+    if (nameInp) nameInp.addEventListener('input', e => { r.name = e.target.value; });
+    if (qtyInp) {
+      qtyInp.addEventListener('input', e => {
+        r.nums[0] = parseInt(e.target.value) || 0;
+        updateOcrTotal();
+      });
+    }
+  });
+  updateOcrTotal();
+}
+
+// 手动新增一行（识别漏了时）
+function addOcrRow() {
+  if (!ocrCurrentResult) return;
+  // 自动推断下一个编号（基于现有编号数字部分最大值+1）
+  let maxN = 0;
+  ocrCurrentResult.rows.forEach(r => {
+    const m = String(r.code || '').match(/(\d+)/);
+    if (m) maxN = Math.max(maxN, parseInt(m[1]));
+  });
+  const nextCode = maxN > 0 ? (maxN + 1) + '' : '';
+  ocrCurrentResult.rows.push({ code: nextCode, name: '', nums: [0], _rawNums: [] });
+  refreshOcrQtyCol();
+}
+
+function setLogisticsCol(c) {
+  // 已固定两列，无需切换
+}
+
+function updateOcrTotal() {
+  if (!ocrCurrentResult) return;
+  const rows = ocrCurrentResult.rows;
+  // 重算两列的合计
+  for (let c = 0; c < 1; c++) {
+    let sum = 0;
+    rows.forEach((r, i) => {
+      const inp = document.getElementById('ocrQty_' + i);
+      if (inp) sum += parseInt(inp.value) || 0;
+    });
+    const cell = document.getElementById('ocrTotalCell_' + c);
+    if (cell) cell.textContent = sum;
+  }
+}
+
+// 列偏移调整：当 OCR 漏识别或列错位时，按 +/- 偏移重算物流箱列
+function changeOcrOffset(delta) {
+  if (!ocrCurrentResult) return;
+  ocrColumnOffset = Math.max(-2, Math.min(2, ocrColumnOffset + delta));
+  const off = ocrColumnOffset;
+  const l = ocrCurrentResult.logisticsColIdx + off;
+  ocrCurrentResult.rows.forEach(r => {
+    const raw = r._rawNums || [];
+    r.nums[0] = (raw[l] !== undefined ? raw[l] : (raw[0] || 0));
+  });
+  const rt = ocrCurrentResult._rawTotalNums || [];
+  ocrCurrentResult.totalNums = [
+    (rt[l] !== undefined ? rt[l] : (rt[0] || 0)),
+  ];
+  refreshOcrQtyCol();
+}
+
+function removeOcrRow(i) {
+  if (!ocrCurrentResult) return;
+  ocrCurrentResult.rows.splice(i, 1);
+  refreshOcrQtyCol();
+}
+
+function closeOcrResultModal() {
+  document.getElementById('ocrResultModal').classList.remove('show');
+  ocrCurrentResult = null;
+  ocrCurrentImage = null;
+  document.getElementById('photoInput').value = '';
+  document.getElementById('photoAlbumInput').value = '';
+}
+
+function confirmOcrResult() {
+  if (!ocrCurrentResult || !ocrCurrentResult.rows) { showToast('无识别结果'); return; }
+  const goodsIdx = ocrCurrentResult.goodsIdx;
+  if (goodsIdx < 0) { showToast('未识别到筐类型，请检查抬头'); return; }
+  const date = document.getElementById('recordDate').value || todayStr();
+  const names = loadGoodsNames();
+  const storeNames = loadStoreNames();
+  const data = loadData();
+  let saved = 0, unmatched = 0;
+  // 只录入物流箱列（index=0）
+  ocrCurrentResult.rows.forEach((r, i) => {
+    const inp = document.getElementById('ocrQty_' + i);
+    const qty = parseInt(inp?.value || '0');
+    if (!qty || qty <= 0) return;
+    let storeIdx = -1;
+    const cfg = loadStoreConfig();
+    for (let si = 0; si < cfg.length; si++) {
+      const s = cfg[si];
+      if (s.name === r.name || (s.aliases && s.aliases.includes(r.code)) || (s.aliases && s.aliases.includes(r.name))) {
+        storeIdx = si; break;
+      }
+    }
+    if (storeIdx < 0) { unmatched++; return; }
+    const existing = data.find(x => x.date === date && x.storeIdx === storeIdx && x.goodsIdx === goodsIdx);
+    if (existing) {
+      if (currentActionType === 'out') existing.qtyOut = qty;
+      else existing.qtyIn = qty;
+      existing.source = 'ocr';
+      existing.updatedAt = new Date().toISOString();
+    } else {
+      data.push({
+        id: Date.now() + '-ocr-' + storeIdx + '-' + goodsIdx,
+        date, storeIdx, storeName: storeNames[storeIdx] || '',
+        goodsIdx, goodsName: names[goodsIdx],
+        qtyIn: currentActionType === 'out' ? 0 : qty,
+        qtyOut: currentActionType === 'out' ? qty : 0,
+        source: 'ocr', createdAt: new Date().toISOString()
+      });
+    }
+    saved++;
+  });
+  saveDataArr(data);
+  closeOcrResultModal();
+  reloadRecordInputs();
+  renderTodayOverview();
+  if (saved > 0) {
+    showToast('✅ 已录入 ' + saved + ' 条' + (unmatched > 0 ? '，' + unmatched + ' 条未匹配到店面被跳过' : ''));
+  } else {
+    showToast('⚠️ 未匹配到任何店面，请在店面管理里检查别名设置');
+  }
+}
+
+// ======== 历史记录页 ========
+function initGoodsFilter() {
+  const names = loadGoodsNames();
+  const filterSel = document.getElementById('filterGoods');
+  filterSel.innerHTML = '<option value="">全部筐</option>';
+  names.forEach((name, i) => {
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = name;
+    filterSel.appendChild(opt);
+  });
+}
+
+function renderHistory() {
+  // 刷新店面筛选项
+  const fs = document.getElementById('filterStore');
+  if (fs) {
+    const cur = fs.value;
+    const storeNames = loadStoreNames();
+    fs.innerHTML = '<option value="">全部店</option>';
+    storeNames.forEach((n, i) => { const o = document.createElement('option'); o.value = i; o.textContent = n; fs.appendChild(o); });
+    if (cur !== '' && storeNames[parseInt(cur)] !== undefined) fs.value = cur; else fs.value = '';
+  }
+  const filterDate = document.getElementById('filterDate').value;
+  const filterGoods = document.getElementById('filterGoods').value;
+  const filterStore = document.getElementById('filterStore').value;
+  let data = loadData();
+  if (filterDate) data = data.filter(r => r.date >= filterDate);
+  if (filterStore !== '') data = data.filter(r => r.storeIdx === parseInt(filterStore));
+  if (filterGoods !== '') data = data.filter(r => r.goodsIdx === parseInt(filterGoods));
+  data.sort((a, b) => {
+    if (b.date !== a.date) return b.date.localeCompare(a.date);
+    return (b.createdAt || '').localeCompare(a.createdAt || '');
+  });
+  const container = document.getElementById('historyList');
+  if (data.length === 0) {
+    container.innerHTML = '<div class="empty">暂无记录</div>';
+    return;
+  }
+  // 按日期分组
+  const grouped = {};
+  data.forEach(r => {
+    if (!grouped[r.date]) grouped[r.date] = [];
+    grouped[r.date].push(r);
+  });
+  const dates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+  let html = '';
+  dates.forEach(date => {
+    html += `<div class="card" style="padding:10px;">`;
+    html += `<div style="font-size:14px;font-weight:700;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px;">${date}</div>`;
+    grouped[date].forEach(r => {
+      const sourceIcon = r.source === 'ocr' ? '📸' : (r.source === 'voice' ? '🎤' : '✍️');
+      const storeTag = r.storeName ? `<span style="font-size:11px;color:var(--primary);margin-left:6px;">🏪${r.storeName}</span>` : '';
+      html += `
+        <div class="record-item" style="box-shadow:none;border:1px solid #f0f0f0;margin-bottom:6px;">
+          <div class="record-top">
+            <span class="record-goods">${sourceIcon} ${r.goodsName}${storeTag}</span>
+            <button class="del-btn" onclick="deleteRecord('${r.id}')">删除</button>
+          </div>
+          <div class="record-qty">
+            <span class="qty-tag"><span class="qname">发出</span><span class="qin">+${r.qtyIn}</span></span>
+            <span class="qty-tag"><span class="qname">回收</span><span class="qout">-${r.qtyOut}</span></span>
+          </div>
+        </div>`;
+    });
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+function deleteRecord(id) {
+  let data = loadData();
+  data = data.filter(r => String(r.id) !== String(id));
+  saveDataArr(data);
+  renderHistory();
+  showToast('已删除');
+}
+
+function clearFilter() {
+  document.getElementById('filterDate').value = '';
+  document.getElementById('filterGoods').value = '';
+  renderHistory();
+}
+
+function setFilterToday() {
+  document.getElementById('filterDate').value = todayStr();
+  renderHistory();
+}
+
+// ======== 汇总页 ========
+function renderSummary() {
+  // 刷新店面筛选项
+  populateStoreFilter('summaryStore');
+  const start = document.getElementById('summaryStart').value;
+  const end = document.getElementById('summaryEnd').value;
+  const summaryStore = document.getElementById('summaryStore').value;
+  let data = loadData();
+  if (start) data = data.filter(r => r.date >= start);
+  if (end) data = data.filter(r => r.date <= end);
+  if (summaryStore !== '') data = data.filter(r => r.storeIdx === parseInt(summaryStore));
+  const names = loadGoodsNames();
+  const storeCfg = loadStoreConfig();
+  const storeName = summaryStore !== '' && storeCfg[parseInt(summaryStore)] ? storeCfg[parseInt(summaryStore)].name : '';
+  const totals = {};
+  names.forEach((name, i) => { totals[i] = { in: 0, out: 0 }; });
+  let grandIn = 0, grandOut = 0;
+  data.forEach(r => {
+    if (totals[r.goodsIdx]) {
+      totals[r.goodsIdx].in += r.qtyIn;
+      totals[r.goodsIdx].out += r.qtyOut;
+      grandIn += r.qtyIn;
+      grandOut += r.qtyOut;
+    }
+  });
+  let html = '';
+  if (storeName) html += '<div style="font-size:16px;font-weight:700;color:var(--primary);padding-bottom:8px;border-bottom:2px solid var(--primary);margin-bottom:10px;">🏪 ' + escapeHtml(storeName) + ' 汇总</div>';
+  html += `    <thead><tr>
+      <th>筐类型</th><th>发出</th><th>回收</th><th>差异</th>
+    </tr></thead><tbody>`;
+  names.forEach((name, i) => {
+    const net = totals[i].in - totals[i].out;
+    const netStr = net >= 0 ? `+${net}` : `${net}`;
+    html += `<tr>
+      <td>${name}</td>
+      <td class="in">${totals[i].in}</td>
+      <td class="out">${totals[i].out}</td>
+      <td style="color:${net>=0?'var(--success)':'var(--danger)'};font-weight:600;">${netStr}</td>
+    </tr>`;
+  });
+  const grandNet = grandIn - grandOut;
+  const grandNetStr = grandNet >= 0 ? `+${grandNet}` : `${grandNet}`;
+  html += `<tr class="total-row">
+    <td>合计</td>
+    <td class="in">${grandIn}</td>
+    <td class="out">${grandOut}</td>
+    <td style="color:${grandNet>=0?'var(--success)':'var(--danger)'};">${grandNetStr}</td>
+  </tr></tbody>`;
+  document.getElementById('summaryTable').innerHTML = html;
+}
+
+function setSummaryRange(days) {
+  const end = todayStr();
+  if (days === 0) {
+    document.getElementById('summaryStart').value = '';
+    document.getElementById('summaryEnd').value = end;
+  } else {
+    const d = new Date();
+    d.setDate(d.getDate() - days + 1);
+    document.getElementById('summaryStart').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    document.getElementById('summaryEnd').value = end;
+  }
+  renderSummary();
+}
+
+function initSummaryPage() {
+  const d = new Date();
+  d.setDate(d.getDate() - 6);
+  document.getElementById('summaryStart').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  document.getElementById('summaryEnd').value = todayStr();
+}
+
+// ======== 对账页 ========
+function exportMyExcel() {
+  const start = document.getElementById('exportStart')?.value;
+  const end = document.getElementById('exportEnd')?.value;
+  const exportStore = document.getElementById('exportStore')?.value || '';
+  let data = loadData();
+  if (start) data = data.filter(r => r.date >= start);
+  if (end) data = data.filter(r => r.date <= end);
+  if (exportStore !== '') data = data.filter(r => r.storeIdx === parseInt(exportStore));
+  const names = loadGoodsNames();
+  // 按 (日期+店面) 分组
+  const byKey = {};
+  data.forEach(r => {
+    const key = r.date + '|' + (r.storeName || '默认店');
+    if (!byKey[key]) {
+      byKey[key] = { date: r.date, store: r.storeName || '默认店', in: {}, out: {} };
+      names.forEach((n, i) => { byKey[key].in[i] = 0; byKey[key].out[i] = 0; });
+    }
+    if (byKey[key].in[r.goodsIdx] !== undefined) {
+      byKey[key].in[r.goodsIdx] += r.qtyIn;
+      byKey[key].out[r.goodsIdx] += r.qtyOut;
+    }
+  });
+  const rowsArr = Object.values(byKey).sort((a, b) => a.date === b.date ? (a.store||'').localeCompare(b.store||'') : a.date.localeCompare(b.date));
+  const allStores = (exportStore === '');
+
+  // 表头：日期 [+店面] + 各筐发出 + 各筐回收
+  const headers = ['日期'];
+  if (allStores) headers.push('店面');
+  names.forEach(n => headers.push(n + '-发出'));
+  names.forEach(n => headers.push(n + '-回收'));
+
+  const rows = [headers];
+  rowsArr.forEach(d => {
+    const row = [d.date];
+    if (allStores) row.push(d.store);
+    names.forEach((n, i) => row.push(d.in[i]));
+    names.forEach((n, i) => row.push(d.out[i]));
+    rows.push(row);
+  });
+  // 合计行
+  const totalRow = ['合计'];
+  if (allStores) totalRow.push('');
+  names.forEach((n, i) => { totalRow.push(rowsArr.reduce((s, d) => s + d.in[i], 0)); });
+  names.forEach((n, i) => { totalRow.push(rowsArr.reduce((s, d) => s + d.out[i], 0)); });
+  rows.push(totalRow);
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '库存数据');
+  XLSX.writeFile(wb, `库存数据_${start||'全部'}_${end||todayStr()}.xlsx`);
+  showToast('✅ Excel已导出');
+}
+
+function importReconcile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  showLoading('正在读取对比…');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const sheetData = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      hideLoading();
+      compareReconcile(sheetData);
+    } catch(err) {
+      hideLoading();
+      showToast('读取失败: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function compareReconcile(sheetData) {
+  if (sheetData.length < 2) {
+    showToast('表格数据为空');
+    return;
+  }
+  const names = loadGoodsNames();
+  const headerRow = sheetData[0].map(h => String(h || '').trim());
+  // 找日期列
+  let dateCol = headerRow.findIndex(h => h.includes('日期') || h.includes('时间') || h.includes('Date'));
+  if (dateCol < 0) dateCol = 0;
+
+  // 找筐名列（支持各种格式）
+  const colMap = {}; // goodsIdx -> {inCol, outCol}
+  names.forEach((name, i) => {
+    let inCol = -1, outCol = -1;
+    headerRow.forEach((h, col) => {
+      if (h.includes(name) || h.includes(name.replace('筐',''))) {
+        if (h.includes('发出') || h.includes('发')) inCol = col;
+        if (h.includes('回收') || h.includes('回')) outCol = col;
+      }
+    });
+    if (inCol >= 0 || outCol >= 0) colMap[i] = { inCol, outCol };
+  });
+
+  // 如果没匹配到带"发出/回收"的列，尝试只按筐名匹配（数字列）
+  if (Object.keys(colMap).length === 0) {
+    names.forEach((name, i) => {
+      headerRow.forEach((h, col) => {
+        if (h.includes(name) || h.includes(name.replace('筐',''))) {
+          colMap[i] = { inCol: -1, outCol: col };
+        }
+      });
+    });
+  }
+
+  // 获取我的数据
+  const myData = loadData();
+  const myByDate = {};
+  myData.forEach(r => {
+    if (!myByDate[r.date]) myByDate[r.date] = {};
+    myByDate[r.date][r.goodsIdx] = { in: r.qtyIn, out: r.qtyOut, store: r.storeName };
+  });
+
+  // 逐行对比
+  let html = '';
+  let diffCount = 0;
+  let matchCount = 0;
+
+  for (let row = 1; row < sheetData.length; row++) {
+    const rowData = sheetData[row];
+    if (!rowData[dateCol]) continue;
+    const dateStr = String(rowData[dateCol]).trim();
+    // 标准化日期格式
+    const normalizedDate = normalizeDate(dateStr);
+    if (!normalizedDate) continue;
+
+    for (let idx in colMap) {
+      const cm = colMap[idx];
+      const hisOut = cm.outCol >= 0 ? (parseInt(rowData[cm.outCol]) || 0) : 0;
+      const hisIn = cm.inCol >= 0 ? (parseInt(rowData[cm.inCol]) || 0) : 0;
+      const mine = myByDate[normalizedDate] && myByDate[normalizedDate][idx];
+      const myOut = mine ? mine.out : 0;
+      const myIn = mine ? mine.in : 0;
+      const gapOut = hisOut - myOut;
+      const gapIn = hisIn - myIn;
+
+      if (hisOut !== myOut || hisIn !== myIn) {
+        diffCount++;
+        html += `<div class="diff-row">
+          <div class="diff-date">${normalizedDate}</div>
+          <div class="diff-goods">${mine.store ? '🏪'+mine.store+' ' : ''}${names[idx]}</div>
+          <div class="diff-vals">
+            <div>我:<span class="dv-mine">发${myIn}回${myOut}</span> 他:<span class="dv-his">发${hisIn}回${hisOut}</span> 差:<span class="dv-gap">发${gapIn>0?'+':''}${gapIn} 回${gapOut>0?'+':''}${gapOut}</span></div>
+          </div>
+        </div>`;
+      } else if (hisOut > 0 || hisIn > 0) {
+        matchCount++;
+        html += `<div class="diff-row match">
+          <div class="diff-date">${normalizedDate}</div>
+          <div class="diff-goods">${mine.store ? '🏪'+mine.store+' ' : ''}${names[idx]}</div>
+          <div class="diff-vals">
+            <div>✅ 发${myIn} 回${myOut}</div>
+          </div>
+        </div>`;
+      }
+    }
+  }
+
+  let summaryHtml = `<div style="font-size:14px;margin-bottom:8px;">`;
+  summaryHtml += `共对比 ${matchCount + diffCount} 项，`;
+  summaryHtml += `<span style="color:var(--success);font-weight:600;">一致 ${matchCount}</span>，`;
+  summaryHtml += `<span style="color:var(--danger);font-weight:600;">差异 ${diffCount}</span>`;
+  summaryHtml += `</div>`;
+
+  if (diffCount === 0 && matchCount > 0) {
+    summaryHtml += '<div style="color:var(--success);font-weight:600;padding:8px;background:#d4edda;border-radius:6px;">🎉 全部一致，数据吻合！</div>';
+  }
+
+  const container = document.getElementById('compareResult');
+  container.innerHTML = summaryHtml + (html || '<div class="empty">无对比数据</div>');
+}
+
+function normalizeDate(str) {
+  str = String(str).trim();
+  // 已是 yyyy-mm-dd
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+  // yyyy/mm/dd 或 yyyy.mm.dd
+  let m = str.match(/(\d{4})[\/.](\d{1,2})[\/.](\d{1,2})/);
+  if (m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  // Excel数字日期
+  m = str.match(/^(\d{5})$/);
+  if (m) {
+    const excelDate = new Date(Date.UTC(1899, 11, 30) + parseInt(m[1]) * 86400000);
+    return `${excelDate.getUTCFullYear()}-${String(excelDate.getUTCMonth()+1).padStart(2,'0')}-${String(excelDate.getUTCDate()).padStart(2,'0')}`;
+  }
+  // mm/dd 或 m月d日
+  m = str.match(/(\d{1,2})\/(\d{1,2})/);
+  if (m) {
+    const year = new Date().getFullYear();
+    return `${year}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
+  }
+  m = str.match(/(\d{1,2})月(\d{1,2})日/);
+  if (m) {
+    const year = new Date().getFullYear();
+    return `${year}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
+  }
+  return null;
+}
+
+// ======== 设置页 ========
+function renderSettings() {
+  // 设置页现为使用说明，无动态内容需渲染
+}
+
+function renderGoodsConfigUI() {
+  const cfg = loadGoodsConfig();
+  const container = document.getElementById('goodsList');
+  let html = '';
+  cfg.forEach((g, i) => {
+    html += `<div class="config-item" style="border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="idx">${i+1}</div>
+        <input type="text" id="goodsName${i}" value="${g.name}" maxlength="20" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;">
+      </div>
+      <div class="alias-box" id="aliases${i}" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
+        ${g.aliases.map((a, ai) => `<span class="alias-chip" style="background:#eef;color:#357abd;font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${a}<span style="cursor:pointer;color:#e74c3c;font-weight:700;" onclick="removeAlias(${i},${ai},'goods')">×</span></span>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <input type="text" id="aliasInput${i}" placeholder="加别名，如 冷藏" style="flex:1;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        <button class="btn btn-outline" style="flex:0 0 auto;padding:7px 12px;font-size:12px;" onclick="addAlias(${i},'goods')">添加</button>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function renderStoreConfigUI() {
+  const cfg = loadStoreConfig();
+  const container = document.getElementById('storeList');
+  if (!container) return;
+  let html = '';
+  cfg.forEach((s, i) => {
+    html += `<div class="config-item" style="border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div class="idx">${i+1}</div>
+        <input type="text" id="storeName${i}" value="${s.name}" maxlength="20" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;">
+        ${cfg.length > 1 ? `<button class="btn btn-outline" style="flex:0 0 auto;padding:6px 10px;font-size:12px;color:var(--danger);" onclick="removeStore(${i})">删除</button>` : ''}
+      </div>
+      <div class="alias-box" id="storeAliases${i}" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
+        ${s.aliases.map((a, ai) => `<span class="alias-chip" style="background:#eef;color:#357abd;font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${a}<span style="cursor:pointer;color:#e74c3c;font-weight:700;" onclick="removeAlias(${i},${ai},'store')">×</span></span>`).join('')}
+      </div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <input type="text" id="storeAliasInput${i}" placeholder="加别名" style="flex:1;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
+        <button class="btn btn-outline" style="flex:0 0 auto;padding:7px 12px;font-size:12px;" onclick="addAlias(${i},'store')">添加</button>
+      </div>
+    </div>`;
+  });
+  html += `<button class="btn btn-outline" style="margin-top:4px;" onclick="addStore()">➕ 新增店面</button>`;
+  container.innerHTML = html;
+}
+
+function renderAliasChips(idx, type) {
+  const cfg = type === 'goods' ? loadGoodsConfig() : loadStoreConfig();
+  const box = document.getElementById((type === 'goods' ? 'aliases' : 'storeAliases') + idx);
+  if (!box) return;
+  box.innerHTML = cfg[idx].aliases.map((a, ai) => `<span class="alias-chip" style="background:#eef;color:#357abd;font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${a}<span style="cursor:pointer;color:#e74c3c;font-weight:700;" onclick="removeAlias(${idx},${ai},'${type}')">×</span></span>`).join('');
+}
+
+function addAlias(idx, type) {
+  const input = document.getElementById((type === 'goods' ? 'aliasInput' : 'storeAliasInput') + idx);
+  const val = input.value.trim();
+  if (!val) return;
+  if (type === 'goods') {
+    const cfg = loadGoodsConfig();
+    const nm = document.getElementById('goodsName' + idx)?.value?.trim();
+    if (nm) cfg[idx].name = nm;
+    if (!cfg[idx].aliases.includes(val)) cfg[idx].aliases.push(val);
+    saveGoodsConfig(cfg);
+    renderAliasChips(idx, 'goods');
+  } else {
+    const cfg = loadStoreConfig();
+    const nm = document.getElementById('storeName' + idx)?.value?.trim();
+    if (nm) cfg[idx].name = nm;
+    if (!cfg[idx].aliases.includes(val)) cfg[idx].aliases.push(val);
+    saveStoreConfig(cfg);
+    renderAliasChips(idx, 'store');
+  }
+  input.value = '';
+}
+
+function removeAlias(idx, ai, type) {
+  if (type === 'goods') {
+    const cfg = loadGoodsConfig();
+    cfg[idx].aliases.splice(ai, 1);
+    saveGoodsConfig(cfg);
+    renderAliasChips(idx, 'goods');
+  } else {
+    const cfg = loadStoreConfig();
+    cfg[idx].aliases.splice(ai, 1);
+    saveStoreConfig(cfg);
+    renderAliasChips(idx, 'store');
+  }
+}
+
+function addStore() {
+  const cfg = loadStoreConfig();
+  cfg.push({ name: '新店面', aliases: [] });
+  saveStoreConfig(cfg);
+  renderStoreConfigUI();
+}
+
+function removeStore(idx) {
+  const cfg = loadStoreConfig();
+  if (cfg.length <= 1) { showToast('至少保留一个店面'); return; }
+  cfg.splice(idx, 1);
+  saveStoreConfig(cfg);
+  renderStoreConfigUI();
+}
+
+function saveGoodsConfigUI() {
+  const cfg = loadGoodsConfig();
+  const n = cfg.length;
+  const newCfg = [];
+  for (let i = 0; i < n; i++) {
+    const val = document.getElementById('goodsName' + i)?.value?.trim();
+    newCfg.push({ name: val || cfg[i].name, aliases: cfg[i].aliases });
+  }
+  saveGoodsConfig(newCfg);
+  initGoodsFilter();
+  initStoreSelect('recordStore');
+  renderGoodsInputList();
+  showToast('✅ 筐设置已保存');
+}
+
+function saveStoreConfigUI() {
+  const cfg = loadStoreConfig();
+  const n = cfg.length;
+  const newCfg = [];
+  for (let i = 0; i < n; i++) {
+    const val = document.getElementById('storeName' + i)?.value?.trim();
+    newCfg.push({ name: val || cfg[i].name, aliases: cfg[i].aliases });
+  }
+  saveStoreConfig(newCfg);
+  initStoreSelect('recordStore');
+  populateStoreFilter('filterStore');
+  populateStoreFilter('summaryStore');
+  populateStoreFilter('exportStore');
+  showToast('✅ 店面已保存');
+}
+
+function saveOcrKeys() {
+  const apiKey = document.getElementById('ocrApiKey').value.trim();
+  const secretKey = document.getElementById('ocrSecretKey').value.trim();
+  saveOcrKeysStorage({ apiKey, secretKey });
+  showToast('✅ 密钥已保存');
+}
+
+// ======== 店面拍照识别（批量导入） ========
+let storeOcrParsed = [];
+
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// 从 OCR 词列表解析店面行：只取「路线编号 + 门店名称」，丢弃表头/数量/时间等其它信息
+// 路线编号统一转为 4-1 格式（去掉 HN 前缀与前导零）
+// 百度 OCR 通常按「行」返回（整行 = 编号+店名+数量/时间），此处兼容：行内提取 / 店名在下一行 两种情况
+const STORE_OCR_NOISE = ['配送编号', '门店名称', '编号', '名称', '合计', '小计', '路单', '总计', '单位', '备注', '签字', '配送', '门店', '序号'];
+function isEmptyStoreName(s) {
+  // 清理后只剩数字、时间符号、空白、标点，视为无店名
+  return !s || /^[\d\s:：,，.。\-_–—]+$/.test(s);
+}
+function cleanStoreName(s) {
+  let r = String(s).trim();
+  // 去掉常见噪音词
+  STORE_OCR_NOISE.forEach(n => { r = r.split(n).join(''); });
+  // 去掉粘连在文字末尾的时间，如 "全家20:" → "全家"
+  r = r.replace(/(\D)\d{1,2}[:：](?:\d{2}(?:[:：]\d{2})?)?$/, '$1');
+  // 按空白切分，逐 token 过滤时间/数量/纯数字，保留店名文字
+  const parts = r.split(/\s+/).filter(part => {
+    if (!part) return false;
+    if (/^\d{1,2}[:：]\d{2}(?:[:：]\d{2})?$/.test(part)) return false; // 时间
+    if (/^\d+$/.test(part)) return false;                              // 纯数字
+    if (/^\d+(筐|个|件|箱|只)$/.test(part)) return false;               // 数字+单位
+    return true;
+  });
+  r = parts.join('').trim(); // 表格各单元格之间不要空格，直接拼接
+  return isEmptyStoreName(r) ? '' : r;
+}
+function parseStoreOcr(words) {
+  const stores = [];
+  let pendingCode = null; // 已匹配到编号、但本行未带店名，等待下一行补店名
+  for (const w of words) {
+    const t = String(w).trim();
+    if (!t) continue;
+    // 行内提取编号（必须从行首开始匹配；HN 前缀可选：HN04-01 / 04-01 / 4-1 均可；避免店名中的「7-11」被误判）
+    const m = t.match(/^(HN)?0*(\d{1,2})[\-–]0*(\d{1,2})/i);
+    if (m) {
+      const code = parseInt(m[2], 10) + '-' + parseInt(m[3], 10);
+      // 编号之后的内容 = 店名候选：去行首/末尾时间、数量、噪音词
+      let rest = cleanStoreName(t.slice(m.index + m[0].length));
+      if (rest) {
+        stores.push({ code, name: rest });
+        pendingCode = null;
+      } else {
+        pendingCode = code; // 店名在后续行
+      }
+    } else if (pendingCode !== null) {
+      // 上一行仅有编号，本行可能是时间/数量/店名
+      if (/^\d+$/.test(t) || /^\d{1,2}[:：]\d{2}/.test(t)) {
+        // 纯数字或时间：跳过，但保留 pendingCode（店名可能在更下一行）
+        continue;
+      }
+      if (STORE_OCR_NOISE.some(n => t.indexOf(n) >= 0)) { pendingCode = null; continue; }
+      const nm = cleanStoreName(t);
+      if (nm) {
+        stores.push({ code: pendingCode, name: nm });
+        pendingCode = null;
+      }
+      // 清理后仍为空则保留 pendingCode，继续等待有效店名
+    }
+    // 其它无编号且无 pending 的词（表头/合计/孤立文字等）直接丢弃，不保留无关信息
+  }
+  return stores;
+}
+
+function handleStorePhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    doStoreOCR(e.target.result);
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+async function doStoreOCR(imageDataUrl) {
+  const keys = loadOcrKeys();
+  if (!keys.apiKey || !keys.secretKey) {
+    showToast('请先在设置页配置百度OCR密钥');
+    return;
+  }
+  showLoading('正在识别店面…');
+  try {
+    const tokenResp = await fetch(CORS_PROXY + encodeURIComponent('https://aip.baidubce.com/oauth/2.0/token'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `grant_type=client_credentials&client_id=${keys.apiKey}&client_secret=${keys.secretKey}`
+    });
+    const tokenData = await tokenResp.json();
+    if (!tokenData.access_token) throw new Error('获取token失败');
+    const accessToken = tokenData.access_token;
+    const compressedBase64 = await compressImage(imageDataUrl, 1200);
+    const imgBase64 = compressedBase64.replace(/^data:image\/\w+;base64,/, '');
+    const ocrResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=${accessToken}`), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `image=${encodeURIComponent(imgBase64)}&language_type=CHN_ENG&detect_direction=true&paragraph=false&probability=false`
+    });
+    const ocrData = await ocrResp.json();
+    hideLoading();
+    if (!ocrData.words_result) throw new Error(ocrData.error_msg || '识别失败');
+    showStoreOcrResult(ocrData);
+  } catch (error) {
+    hideLoading();
+    showToast('识别失败: ' + error.message);
+  }
+}
+
+function showStoreOcrResult(ocrData) {
+  const words = ocrData.words_result.map(it => it.words);
+  storeOcrParsed = parseStoreOcr(words);
+  if (storeOcrParsed.length === 0) {
+    showToast('未识别到有效店面（需要编号+店名），请检查图片');
+    return;
+  }
+  document.getElementById('storeOcrCount').textContent = storeOcrParsed.length;
+  renderStoreOcrTable();
+  document.getElementById('storeOcrModal').classList.add('show');
+}
+
+function renderStoreOcrTable() {
+  const container = document.getElementById('storeOcrTable');
+  let html = '';
+  storeOcrParsed.forEach((s, i) => {
+    html += `<div class="store-ocr-row">
+      <input type="text" value="${escapeHtml(s.code)}" data-i="${i}" data-k="code" style="width:80px;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:13px;" placeholder="编号">
+      <input type="text" value="${escapeHtml(s.name)}" data-i="${i}" data-k="name" style="flex:1;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:13px;" placeholder="门店名称">
+      <button class="del-btn" onclick="removeStoreOcrRow(${i})" style="font-size:18px;color:var(--danger);">×</button>
+    </div>`;
+  });
+  html += `<button class="btn btn-outline" style="margin-top:4px;font-size:12px;padding:7px;" onclick="addStoreOcrRow()">➕ 新增一行</button>`;
+  container.innerHTML = html;
+  container.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const i = +e.target.dataset.i;
+      const k = e.target.dataset.k;
+      if (storeOcrParsed[i]) storeOcrParsed[i][k] = e.target.value;
+    });
+  });
+}
+
+function removeStoreOcrRow(i) {
+  storeOcrParsed.splice(i, 1);
+  document.getElementById('storeOcrCount').textContent = storeOcrParsed.length;
+  renderStoreOcrTable();
+}
+
+function addStoreOcrRow() {
+  storeOcrParsed.push({ code: '', name: '' });
+  document.getElementById('storeOcrCount').textContent = storeOcrParsed.length;
+  renderStoreOcrTable();
+}
+
+function closeStoreOcrModal() {
+  document.getElementById('storeOcrModal').classList.remove('show');
+  storeOcrParsed = [];
+}
+
+function saveStoreOcrResult() {
+  const valid = storeOcrParsed.filter(s => s.name && s.name.trim());
+  if (valid.length === 0) { showToast('没有有效店面'); return; }
+  const cfg = loadStoreConfig();
+  const existing = new Set(cfg.map(c => c.name));
+  let added = 0, skipped = 0;
+  valid.forEach(s => {
+    const name = s.name.trim();
+    if (existing.has(name)) { skipped++; return; }
+    const aliases = (s.code && s.code.trim()) ? [s.code.trim()] : [];
+    cfg.push({ name, aliases });
+    existing.add(name);
+    added++;
+  });
+  saveStoreConfig(cfg);
+  initStoreSelect('recordStore');
+  populateStoreFilter('filterStore');
+  populateStoreFilter('summaryStore');
+  populateStoreFilter('exportStore');
+  renderStorePanelUI();
+  if (document.getElementById('storeList')) renderStoreConfigUI();
+  closeStoreOcrModal();
+  showToast(`✅ 新增 ${added} 个${skipped ? '，跳过重复 ' + skipped + ' 个' : ''}`);
+}
+
+// ======== 数据导入导出 ========
+function exportData() {
+  const data = loadData();
+  const goods = loadGoodsNames();
+  const exportObj = {
+    exportDate: new Date().toISOString(),
+    goodsNames: goods,
+    records: data
+  };
+  const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `库存数据_${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ 已导出');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const obj = JSON.parse(e.target.result);
+      if (!obj.records || !Array.isArray(obj.records)) {
+        showToast('❌ 文件格式错误');
+        return;
+      }
+      if (confirm(`即将导入 ${obj.records.length} 条记录，将覆盖当前数据，确认？`)) {
+        saveDataArr(obj.records);
+        if (obj.goodsNames) saveGoodsNamesStorage(obj.goodsNames);
+        initGoodsFilter();
+        renderGoodsInputList();
+        renderTodayOverview();
+        showToast('✅ 导入成功');
+      }
+    } catch(err) {
+      showToast('❌ 导入失败: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearAllData() {
+  if (confirm('确认清空全部数据？此操作不可恢复！')) {
+    if (confirm('再次确认：所有记录将被删除！')) {
+      saveDataArr([]);
+      showToast('已清空');
+      renderTodayOverview();
+    }
+  }
+}
+
+// ======== 初始化 ========
+initRecordPage();
+initGoodsFilter();
+initSummaryPage();
+// 默认对账日期范围
+const dEnd = todayStr();
+const dStart = new Date();
+dStart.setDate(dStart.getDate() - 29);
+document.getElementById('exportStart')?.setAttribute('value', `${dStart.getFullYear()}-${String(dStart.getMonth()+1).padStart(2,'0')}-${String(dStart.getDate()).padStart(2,'0')}`);
+document.getElementById('exportEnd')?.setAttribute('value', dEnd);
+</script>
+
+
+</body></html>
