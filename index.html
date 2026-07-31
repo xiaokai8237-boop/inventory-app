@@ -1222,6 +1222,30 @@ body {
   </div>
 </div>
 
+<!-- 记录删除确认弹窗 -->
+<div class="gd-modal" id="recordDeleteModal" onclick="closeRecordDeleteModal()">
+  <div class="gd-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">🗑️ 删除确认</span>
+      <button onclick="closeRecordDeleteModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <p style="font-size:14px;line-height:1.6;margin-bottom:14px;">确定要删除这条记录吗？删除后不可恢复。</p>
+    <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:14px;">
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:6px;">不再提醒：</div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:14px;padding:6px 0;cursor:pointer;">
+        <input type="checkbox" id="delNoRemindToday" style="width:18px;height:18px;"> 今日不再提醒
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-size:14px;padding:6px 0;cursor:pointer;">
+        <input type="checkbox" id="delNoRemind7d" style="width:18px;height:18px;"> 7 天不再提醒
+      </label>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-danger" style="flex:1;" onclick="confirmDeleteRecord()">🗑️ 确认删除</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="closeRecordDeleteModal()">取消</button>
+    </div>
+  </div>
+</div>
+
 <!-- 备份教程弹窗 -->
 <div class="gd-modal" id="backupTutorialModal" onclick="closeBackupTutorialModal()">
   <div class="gd-content" onclick="event.stopPropagation()" style="max-width:400px;max-height:85vh;overflow-y:auto;">
@@ -3196,7 +3220,44 @@ function renderHistory() {
   container.innerHTML = html;
 }
 
+let pendingDeleteRecordId = null; // 待删除的记录 id
+
+// 删除记录：免提醒期内直接删，否则弹确认框
 function deleteRecord(id) {
+  // 检查免提醒期
+  try {
+    const until = parseInt(localStorage.getItem('kuanwei_del_confirm_until') || '0');
+    if (until && Date.now() < until) {
+      doDeleteRecord(id);
+      return;
+    }
+  } catch(e) {}
+  pendingDeleteRecordId = id;
+  document.getElementById('recordDeleteModal').classList.add('show');
+}
+
+function closeRecordDeleteModal() {
+  document.getElementById('recordDeleteModal').classList.remove('show');
+  pendingDeleteRecordId = null;
+}
+
+function confirmDeleteRecord() {
+  const noToday = document.getElementById('delNoRemindToday').checked;
+  const no7d = document.getElementById('delNoRemind7d').checked;
+  // 设置免提醒时间
+  if (no7d) {
+    localStorage.setItem('kuanwei_del_confirm_until', String(Date.now() + 7 * 24 * 3600 * 1000));
+  } else if (noToday) {
+    localStorage.setItem('kuanwei_del_confirm_until', String(Date.now() + 24 * 3600 * 1000));
+  }
+  closeRecordDeleteModal();
+  if (pendingDeleteRecordId !== null) {
+    doDeleteRecord(pendingDeleteRecordId);
+    pendingDeleteRecordId = null;
+  }
+}
+
+function doDeleteRecord(id) {
   let data = loadData();
   data = data.filter(r => String(r.id) !== String(id));
   saveDataArr(data);
