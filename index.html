@@ -2007,7 +2007,8 @@ let ocrCurrentImage = null;  // dataURL 用于弹窗预览
 function handlePhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
-  // 选完照片立刻显示加载，不等文件读完
+  // 立刻关闭拍照弹窗，显示加载动画
+  closePhotoInputModal();
   showLoading('正在加载图片…');
   const reader = new FileReader();
   reader.onload = function(e) {
