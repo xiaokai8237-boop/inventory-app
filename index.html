@@ -2767,6 +2767,7 @@ async function doOCR(imageDataUrl, file) {
 
     // 3. 优先用「表格识别」专用 API（路单是表格结构，识别率更高）
     let ocrData = null;
+    let usedTable = false;
     try {
       const tblResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/table?access_token=${accessToken}`), {
         method: 'POST',
@@ -2778,12 +2779,18 @@ async function doOCR(imageDataUrl, file) {
         // 表格识别成功：转换为 words 列表供现有解析器使用
         const converted = convertTableResult(tblData);
         if (converted && converted.length > 0) {
-          ocrData = { words_result: converted.map(w => ({ words: w })) };
+          // 检查表格识别是否包含筐类型关键词（否则回退通用 OCR）
+          const blob = converted.join(' ');
+          const hasTrayKeyword = /(冷藏|冷冻|常温|面包|鲜食)/.test(blob);
+          if (hasTrayKeyword) {
+            ocrData = { words_result: converted.map(w => ({ words: w })) };
+            usedTable = true;
+          }
         }
       }
     } catch(e) { /* 表格识别失败则走通用 */ }
 
-    // 4. 表格识别不可用时回退到通用高精度版
+    // 4. 表格识别不可用/未识别到关键字时回退到通用高精度版
     if (!ocrData) {
       const ocrResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=${accessToken}`), {
         method: 'POST',
