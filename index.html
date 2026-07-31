@@ -954,6 +954,15 @@ body {
     <div class="card">
       <div id="cloudBackupStatus"></div>
       <button class="btn btn-primary" style="margin-bottom:6px;" onclick="backupToCloud(true)">☁️ 立即备份到云端</button>
+      <div style="background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:12px;margin:12px 0;">
+        <div style="font-weight:600;font-size:14px;margin-bottom:8px;">🔗 云账号绑定（换手机自动恢复用）</div>
+        <input type="email" class="form-input" id="cloudAccountInput" placeholder="输入你的邮箱，如 abc@qq.com" style="font-size:14px;margin-bottom:8px;">
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" style="flex:1;" onclick="bindCloudAccount()">🔒 绑定账号</button>
+          <button class="btn btn-success" style="flex:1;" onclick="restoreFromAccount()">📥 从云账号恢复</button>
+        </div>
+        <div style="font-size:11px;color:var(--text-light);margin-top:6px;">绑定后：数据自动备份到该账号下；新手机输入同一邮箱 → 点「从云账号恢复」即可</div>
+      </div>
       <div class="backup-step">
         <div class="step-title"><span class="step-num">1</span>📤 导出备份</div>
         <div class="step-detail">点击下方「导出备份」按钮 → 手机弹出"保存到文件"→ 选择「存储到内部存储」或「保存到下载」→ 存好后发送到微信「文件传输助手」</div>
@@ -1364,6 +1373,7 @@ function scheduleCloudBackup() {
 async function backupToCloud(manual) {
   try {
     const deviceId = getDeviceId();
+    const account = localStorage.getItem('kuanwei_cloud_account') || '';
     const payload = {
       deviceId: deviceId,
       data: {
@@ -1374,6 +1384,7 @@ async function backupToCloud(manual) {
         storeConfig: loadStoreConfig()
       }
     };
+    if (account) payload.account = account;
     const resp = await fetch('/backup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1394,6 +1405,58 @@ async function backupToCloud(manual) {
   }
 }
 
+// 绑定云账号
+function bindCloudAccount() {
+  const input = document.getElementById('cloudAccountInput');
+  const email = (input?.value || '').trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('请输入正确的邮箱');
+    return;
+  }
+  localStorage.setItem('kuanwei_cloud_account', email);
+  renderCloudBackupStatus();
+  showToast('🔒 账号已绑定，正在备份…');
+  backupToCloud(true);
+}
+
+// 从云账号恢复（换手机时用）
+async function restoreFromAccount() {
+  const input = document.getElementById('cloudAccountInput');
+  const email = (input?.value || '').trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('请输入正确的邮箱');
+    return;
+  }
+  showLoading('正在从云端恢复…');
+  try {
+    const resp = await fetch('/backup?account=' + encodeURIComponent(email));
+    const result = await resp.json();
+    hideLoading();
+    if (result && result.data && result.data.records) {
+      const cloud = result.data;
+      saveDataArr(cloud.records || []);
+      if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
+      if (cloud.storeConfig && Array.isArray(cloud.storeConfig)) saveStoreConfig(cloud.storeConfig);
+      localStorage.setItem('kuanwei_cloud_account', email);
+      // 刷新界面
+      try {
+        initStoreSelect('recordStore');
+        renderStoreChips();
+        renderGoodsInputList();
+        initGoodsFilter();
+        renderTodayOverview();
+      } catch(e) {}
+      renderCloudBackupStatus();
+      showToast('✅ 已从云账号恢复 ' + cloud.records.length + ' 条记录');
+    } else {
+      showToast('⚠️ 该邮箱在云端没有备份数据');
+    }
+  } catch(e) {
+    hideLoading();
+    showToast('❌ 恢复失败，请检查网络');
+  }
+}
+
 // 渲染云备份状态
 function renderCloudBackupStatus() {
   const el = document.getElementById('cloudBackupStatus');
@@ -1407,11 +1470,13 @@ function renderCloudBackupStatus() {
       timeText = `${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     } catch(e) {}
   }
+  const account = localStorage.getItem('kuanwei_cloud_account') || '';
   el.innerHTML = `
     <div style="background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:12px;">
       <div style="font-weight:600;font-size:14px;color:var(--primary-dark);margin-bottom:6px;">☁️ 云备份状态</div>
       <div style="font-size:13px;line-height:1.8;color:var(--text);">
         <div>🕐 上次备份：<b>${timeText}</b></div>
+        ${account ? `<div>🔗 云账号：<b>${account}</b></div>` : ''}
         <div style="font-size:11px;color:var(--text-light);margin-top:2px;">设备ID：${deviceId.slice(0,14)}…</div>
       </div>
       <div style="font-size:11px;color:var(--success);margin-top:6px;">✓ 保存数据后自动备份到云端，清缓存/换手机可恢复</div>
