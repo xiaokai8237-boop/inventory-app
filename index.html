@@ -1276,6 +1276,7 @@ function loadData() {
 }
 function saveDataArr(arr) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  scheduleCloudBackup();
 }
 // ---- 筐配置 ----
 function loadGoodsConfig() {
@@ -1296,9 +1297,11 @@ function loadGoodsNames() {
 }
 function saveGoodsConfig(cfg) {
   localStorage.setItem(GOODS_KEY, JSON.stringify(cfg));
+  scheduleCloudBackup();
 }
 function saveGoodsNamesStorage(names) {
   localStorage.setItem(GOODS_KEY, JSON.stringify(names));
+  scheduleCloudBackup();
 }
 // ---- 店面配置 ----
 function loadStoreConfig() {
@@ -1319,6 +1322,7 @@ function loadStoreNames() {
 }
 function saveStoreConfig(cfg) {
   localStorage.setItem(STORE_KEY, JSON.stringify(cfg));
+  scheduleCloudBackup();
 }
 // 默认百度OCR密钥（应用：库存管理 / AppID 134982254 / 通用文字识别高精度版）— 已预置，本机开箱即用
 const DEFAULT_OCR_KEYS = { apiKey: 'iswwim5FqTQx8jVSjtJaFaIa', secretKey: 'sh3ji9lbaBNunDyHJTRfkbdUrh4xCZuZ' };
@@ -1337,6 +1341,80 @@ function loadOcrKeys() {
 }
 function saveOcrKeysStorage(keys) {
   localStorage.setItem(OCR_KEY, JSON.stringify(keys));
+}
+
+// ======== 云备份（Cloudflare KV） ========
+function getDeviceId() {
+  let id = localStorage.getItem('kuanwei_device_id');
+  if (!id) {
+    id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('kuanwei_device_id', id);
+  }
+  return id;
+}
+
+let backupTimer = null;
+function scheduleCloudBackup() {
+  if (backupTimer) clearTimeout(backupTimer);
+  backupTimer = setTimeout(backupToCloud, 3000); // 保存后3秒自动备份（防抖）
+}
+
+async function backupToCloud() {
+  try {
+    const deviceId = getDeviceId();
+    const payload = {
+      deviceId: deviceId,
+      data: {
+        version: 1,
+        backupTime: new Date().toISOString(),
+        records: loadData(),
+        goodsConfig: loadGoodsConfig(),
+        storeConfig: loadStoreConfig()
+      }
+    };
+    const resp = await fetch('/backup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await resp.json();
+    if (result && result.ok) {
+      localStorage.setItem('kuanwei_last_backup', new Date().toISOString());
+    }
+  } catch (e) {
+    // 备份失败静默处理（可能是离线），下次保存会自动重试
+  }
+}
+
+async function restoreFromCloud() {
+  try {
+    const deviceId = getDeviceId();
+    const resp = await fetch('/backup?deviceId=' + deviceId);
+    const result = await resp.json();
+    if (result && result.data && result.data.records) {
+      const cloud = result.data;
+      const localRecords = loadData();
+      const localEmpty = localRecords.length === 0;
+      const cloudNewer = !localStorage.getItem('kuanwei_last_save') ||
+        (cloud.backupTime && cloud.backupTime > localStorage.getItem('kuanwei_last_save'));
+      // 本地为空 或 云端比本地新 → 从云端恢复
+      if (localEmpty || cloudNewer) {
+        saveDataArr(cloud.records || []);
+        if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
+        if (cloud.storeConfig && Array.isArray(cloud.storeConfig)) saveStoreConfig(cloud.storeConfig);
+        // 刷新界面
+        try {
+          initStoreSelect('recordStore');
+          renderStoreChips();
+          renderGoodsInputList();
+          initGoodsFilter();
+          renderTodayOverview();
+        } catch(e) {}
+      }
+    }
+  } catch (e) {
+    // 恢复失败静默（可能是离线/首次使用）
+  }
 }
 
 // ======== 别名模糊匹配 ========
@@ -3211,6 +3289,8 @@ function clearAllData() {
 initRecordPage();
 initGoodsFilter();
 initSummaryPage();
+// 云备份恢复（清缓存/换手机后自动从云端拉取数据）
+restoreFromCloud();
 // 默认对账日期范围
 const dEnd = todayStr();
 const dStart = new Date();
