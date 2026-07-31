@@ -861,7 +861,10 @@ body {
     <div class="card">
       <div style="font-size:15px;font-weight:700;margin-bottom:10px;color:var(--text);">🏪 我的店面 <span style="font-size:13px;color:var(--primary);font-weight:600;">(<span id="storeCount">0</span>)</span></div>
       <div id="storeListPanel"></div>
-      <button class="btn btn-primary" style="margin-top:6px;" onclick="addStoreFromPanel()">➕ 新增店面</button>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="saveStorePanelChanges()">💾 保存修改</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="addStoreFromPanel()">➕ 新增店面</button>
+      </div>
       <div class="import-zone" style="margin-top:16px;">
         <div class="iz-title">📸 批量导入店面</div>
         <div style="display:flex;gap:8px;">
@@ -1525,6 +1528,28 @@ function renderStorePanelUI() {
   container.innerHTML = html;
   const sc = document.getElementById('storeCount');
   if (sc) sc.textContent = cfg.length;
+}
+// 保存店面管理面板的所有修改（店名/别名）
+function saveStorePanelChanges() {
+  const cfg = loadStoreConfig();
+  let changed = 0;
+  cfg.forEach((s, i) => {
+    const nm = document.getElementById('sName' + i);
+    if (nm) {
+      const val = nm.value.trim();
+      if (val && val !== s.name) { s.name = val; changed++; }
+    }
+    // 收集当前输入框里未添加的别名
+    const ai = document.getElementById('sAliasInput' + i);
+    if (ai) {
+      const av = ai.value.trim();
+      if (av && !s.aliases.includes(av)) { s.aliases.push(av); changed++; ai.value = ''; }
+    }
+  });
+  saveStoreConfig(cfg);
+  renderStorePanelUI();
+  initAllStores();
+  showToast(changed > 0 ? `✅ 已保存 ${changed} 处修改` : '已保存');
 }
 function addStoreAlias(idx) {
   const cfg = loadStoreConfig();
