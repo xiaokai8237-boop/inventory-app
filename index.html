@@ -2890,6 +2890,68 @@ function compressImage(dataUrl, maxSize) {
   });
 }
 
+// 编辑距离（OCR 店名错 1-2 个字也能匹配）
+function levenshtein(a, b) {
+  a = String(a); b = String(b);
+  if (a.length < b.length) return levenshtein(b, a);
+  if (!b.length) return a.length;
+  const row = Array.from({length: b.length + 1}, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = row[0];
+    row[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = row[j];
+      row[j] = Math.min(row[j] + 1, row[j-1] + 1, prev + (a[i-1] === b[j-1] ? 0 : 1));
+      prev = tmp;
+    }
+  }
+  return row[b.length];
+}
+
+// 智能补行：识别出的编号有缺口时，从已配置门店自动补全（利用门店固定的先验）
+function fillMissingStores(rows, storeCfg) {
+  if (!rows || rows.length < 2) return rows;
+  const nums = rows.map(r => {
+    const p = String(r.code || '').split('-');
+    return p.length === 2 ? parseInt(p[1], 10) : -1;
+  }).filter(n => n >= 0);
+  if (nums.length < 2) return rows;
+  const min = Math.min(...nums), max = Math.max(...nums);
+  const present = new Set(nums);
+  const missing = [];
+  for (let i = min; i <= max; i++) {
+    if (!present.has(i)) missing.push(i);
+  }
+  if (!missing.length) return rows;
+  // 从配置门店里找这些缺失编号对应的店（通过编号别名或店名模糊匹配）
+  const routeNum = String(rows[0].code || '').split('-')[0];
+  const routePrefix = String(rows[0].code || '').replace(/-.*$/, '');
+  const addedRows = [];
+  missing.forEach(n => {
+    const targetCode = routePrefix + '-' + n;
+    let found = null;
+    for (const s of storeCfg || []) {
+      const aliases = s.aliases || [];
+      // 别名精确匹配编号
+      if (aliases.some(a => String(a).trim() === targetCode || String(a).trim().endsWith('-' + n) && /^\d+$/.test(String(a).trim().split('-').pop()))) {
+        found = s; break;
+      }
+    }
+    if (found) {
+      addedRows.push({ code: targetCode, name: found.name, nums: [0], _rawNums: [], _missing: true });
+    }
+  });
+  if (!addedRows.length) return rows;
+  // 按编号插入原 rows（保持顺序）
+  const all = rows.concat(addedRows);
+  all.sort((a, b) => {
+    const na = parseInt(String(a.code).split('-')[1] || '0', 10);
+    const nb = parseInt(String(b.code).split('-')[1] || '0', 10);
+    return na - nb;
+  });
+  return all;
+}
+
 function parseOcrResult(ocrData) {
   const names = loadGoodsNames();
   const cfg = loadGoodsConfig();
@@ -3034,6 +3096,9 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
     totalFiltered[0] = (totalNums[logisticsColIdx] !== undefined ? totalNums[logisticsColIdx] : (totalNums[0] || 0));
   }
 
+  // ===== 智能补行：利用「门店固定」先验，编号缺口自动补全 =====
+  rows = fillMissingStores(rows, loadStoreConfig());
+
   ocrCurrentResult = {
     goodsIdx,
     rows: rows.map(r => ({ ...r, nums: r.nums.slice() })),
@@ -3063,9 +3128,13 @@ function refreshOcrQtyCol() {
   let html = '<div style="overflow-x:auto;"><table class="summary-table" style="margin-top:6px;min-width:100%;">';
   html += '<thead><tr><th style="min-width:58px;">编号</th><th style="min-width:120px;text-align:left;padding-left:6px;">门店</th><th style="min-width:66px;background:var(--warning);color:#fff;">物流箱</th><th style="min-width:28px;"></th></tr></thead><tbody>';
   rows.forEach((r, i) => {
-    html += '<tr>';
+    // 自动补的行：黄色警示背景提示用户核对
+    const isMissing = r._missing;
+    const rowBg = isMissing ? ' style="background:#fff3cd;"' : '';
+    const hint = isMissing ? ' <span style="color:var(--warning);font-size:11px;">⚠️可能漏识别</span>' : '';
+    html += '<tr' + rowBg + '>';
     html += '<td><input type="text" id="ocrCode_' + i + '" value="' + escapeHtml(r.code || '') + '" maxlength="10" style="width:60px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;text-align:center;"></td>';
-    html += '<td style="text-align:left;padding-left:6px;"><input type="text" id="ocrName_' + i + '" value="' + escapeHtml(r.name || '') + '" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;"></td>';
+    html += '<td style="text-align:left;padding-left:6px;"><input type="text" id="ocrName_' + i + '" value="' + escapeHtml(r.name || '') + '" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;">' + hint + '</td>';
     const v = r.nums[0] !== undefined ? r.nums[0] : 0;
     html += '<td style="background:#fffde7;"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="width:64px;padding:5px;border:1.5px solid var(--warning);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#b35900;"></td>';
     html += '<td><button onclick="removeOcrRow(' + i + ')" style="background:none;border:none;color:var(--danger);font-size:20px;cursor:pointer;padding:0 6px;line-height:1;">×</button></td>';
@@ -3205,6 +3274,11 @@ function confirmOcrResult() {
       if (s.aliases && rCodeNorm) {
         const codeMatch = s.aliases.some(a => String(a).replace(/^[A-Za-z]+/, '').toLowerCase() === rCodeNorm);
         if (codeMatch) { storeIdx = si; break; }
+      }
+      // 7) 编辑距离匹配（OCR 错 1-2 个字也能命中配置门店）
+      if (rNameNorm && rNameNorm.length >= 4) {
+        const ed = levenshtein(normName(s.name), rNameNorm);
+        if (ed <= 2) { storeIdx = si; break; }
       }
     }
     if (storeIdx < 0) { unmatched++; return; }
