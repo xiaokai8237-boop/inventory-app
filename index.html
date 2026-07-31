@@ -2004,6 +2004,8 @@ let ocrCurrentImage = null;  // dataURL 用于弹窗预览
 function handlePhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
+  // 选完照片立刻显示加载，不等文件读完
+  showLoading('正在加载图片…');
   const reader = new FileReader();
   reader.onload = function(e) {
     ocrCurrentImage = e.target.result;
@@ -2974,6 +2976,7 @@ function parseStoreOcr(words) {
 function handleStorePhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
+  showLoading('正在加载图片…');
   const reader = new FileReader();
   reader.onload = function(e) {
     doStoreOCR(e.target.result);
