@@ -2437,8 +2437,10 @@ function closeBackupTutorialModal() {
 function switchPage(pageName) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-' + pageName).classList.add('active');
-  document.querySelector(`.tab[data-page="${pageName}"]`).classList.add('active');
+  const pageEl = document.getElementById('page-' + pageName);
+  if (pageEl) pageEl.classList.add('active');
+  const tabEl = document.querySelector(`.tab[data-page="${pageName}"]`);
+  if (tabEl) tabEl.classList.add('active');
   if (pageName === 'record') { initStoreSelect('recordStore'); renderTodayOverview(); }
   if (pageName === 'history') renderHistory();
   if (pageName === 'summary') renderSummary();
