@@ -792,7 +792,7 @@ body {
       </div>
       <!-- 第二行：数据备份/店面管理/框名设置 -->
       <div class="home-grid-row" style="margin-bottom:10px;">
-        <button class="home-btn" onclick="openBackupPanel()"><div class="hb-icon">💾</div>数据备份</button>
+        <button class="home-btn" onclick="openBackupPanel()"><div class="hb-icon">💾</div>数据备份与恢复</button>
         <button class="home-btn" onclick="openStorePanel()"><div class="hb-icon">🏪</div>店面管理</button>
         <button class="home-btn" onclick="openGoodsPanel()"><div class="hb-icon">📦</div>框名设置</button>
       </div>
@@ -949,9 +949,11 @@ body {
   <div class="manage-panel" id="backupPanel">
     <div class="card panel-header">
       <button class="back-btn" onclick="backFromBackupPanel()">← 返回</button>
-      <span class="panel-title">💾 数据备份</span>
+      <span class="panel-title">💾 数据备份与恢复</span>
     </div>
     <div class="card">
+      <div id="cloudBackupStatus"></div>
+      <button class="btn btn-primary" style="margin-bottom:6px;" onclick="backupToCloud(true)">☁️ 立即备份到云端</button>
       <div class="backup-step">
         <div class="step-title"><span class="step-num">1</span>📤 导出备份</div>
         <div class="step-detail">点击下方「导出备份」按钮 → 手机弹出"保存到文件"→ 选择「存储到内部存储」或「保存到下载」→ 存好后发送到微信「文件传输助手」</div>
@@ -1359,7 +1361,7 @@ function scheduleCloudBackup() {
   backupTimer = setTimeout(backupToCloud, 3000); // 保存后3秒自动备份（防抖）
 }
 
-async function backupToCloud() {
+async function backupToCloud(manual) {
   try {
     const deviceId = getDeviceId();
     const payload = {
@@ -1380,10 +1382,40 @@ async function backupToCloud() {
     const result = await resp.json();
     if (result && result.ok) {
       localStorage.setItem('kuanwei_last_backup', new Date().toISOString());
+      if (manual) {
+        showToast('✅ 已备份到云端');
+        renderCloudBackupStatus();
+      }
+    } else if (manual) {
+      showToast('❌ 备份失败，请检查网络');
     }
   } catch (e) {
-    // 备份失败静默处理（可能是离线），下次保存会自动重试
+    if (manual) showToast('❌ 备份失败，请检查网络');
   }
+}
+
+// 渲染云备份状态
+function renderCloudBackupStatus() {
+  const el = document.getElementById('cloudBackupStatus');
+  if (!el) return;
+  const last = localStorage.getItem('kuanwei_last_backup');
+  const deviceId = localStorage.getItem('kuanwei_device_id') || '未生成';
+  let timeText = '从未备份';
+  if (last) {
+    try {
+      const d = new Date(last);
+      timeText = `${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    } catch(e) {}
+  }
+  el.innerHTML = `
+    <div style="background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:12px;">
+      <div style="font-weight:600;font-size:14px;color:var(--primary-dark);margin-bottom:6px;">☁️ 云备份状态</div>
+      <div style="font-size:13px;line-height:1.8;color:var(--text);">
+        <div>🕐 上次备份：<b>${timeText}</b></div>
+        <div style="font-size:11px;color:var(--text-light);margin-top:2px;">设备ID：${deviceId.slice(0,14)}…</div>
+      </div>
+      <div style="font-size:11px;color:var(--success);margin-top:6px;">✓ 保存数据后自动备份到云端，清缓存/换手机可恢复</div>
+    </div>`;
 }
 
 async function restoreFromCloud() {
@@ -1596,6 +1628,7 @@ function backFromTrackPanel() {
 function openBackupPanel() {
   document.getElementById('homeWizard').style.display = 'none';
   document.getElementById('backupPanel').style.display = 'block';
+  renderCloudBackupStatus();
   // 首次进入自动弹出教程
   try {
     if (!localStorage.getItem('kuanwei_seen_backup_tutorial')) {
