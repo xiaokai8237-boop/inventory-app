@@ -808,17 +808,6 @@ body {
         <button class="home-btn" onclick="switchPage('settings')"><div class="hb-icon">❓</div>使用说明</button>
       </div>
     </div>
-
-    <div class="card" style="text-align:center;padding:16px 14px;">
-      <div class="form-label" style="margin-bottom:12px;">📲 快捷录入</div>
-      <div class="home-grid-row">
-        <button class="home-btn" onclick="openVoiceInputModal()"><div class="hb-icon">🎤</div>语音录入</button>
-        <button class="home-btn" onclick="openPhotoInputModal()"><div class="hb-icon">📸</div>拍照识别</button>
-      </div>
-      <div style="font-size:11px;color:var(--text-light);margin-top:10px;">
-        语音或拍照识别后，自动填到当前「<span id="entryModeLabel">发出</span>」输入列
-      </div>
-    </div>
   </div>
 
   <!-- === 手动录入表单（点击手动录入后显示） === -->
@@ -875,6 +864,14 @@ body {
           <div class="gi-out"><input type="number" id="giOut4" placeholder="0" min="0" inputmode="numeric" data-idx="4"></div>
         </div></div>
       <button class="btn btn-primary" style="margin-top:8px;" onclick="saveManualRecord()">保存当日记录</button>
+    </div>
+
+    <div class="card" style="text-align:center;padding:16px 14px;">
+      <div class="form-label" style="margin-bottom:12px;">📲 快捷录入（自动填到当前「<span id="entryModeLabel">发出</span>」列）</div>
+      <div class="home-grid-row">
+        <button class="home-btn" onclick="openVoiceInputModal()"><div class="hb-icon">🎤</div>语音录入</button>
+        <button class="home-btn" onclick="openPhotoInputModal()"><div class="hb-icon">📸</div>拍照识别</button>
+      </div>
     </div>
 
     <div class="card">
