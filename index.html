@@ -3022,21 +3022,33 @@ function confirmOcrResult() {
   const names = loadGoodsNames();
   const storeNames = loadStoreNames();
   const data = loadData();
-  let saved = 0, unmatched = 0;
+  const cfgAll = loadStoreConfig();
+  let saved = 0, unmatched = 0, aliasAdded = 0;
   // 只录入物流箱列（index=0）
   ocrCurrentResult.rows.forEach((r, i) => {
     const inp = document.getElementById('ocrQty_' + i);
     const qty = parseInt(inp?.value || '0');
     if (!qty || qty <= 0) return;
     let storeIdx = -1;
-    const cfg = loadStoreConfig();
-    for (let si = 0; si < cfg.length; si++) {
-      const s = cfg[si];
+    for (let si = 0; si < cfgAll.length; si++) {
+      const s = cfgAll[si];
       if (s.name === r.name || (s.aliases && s.aliases.includes(r.code)) || (s.aliases && s.aliases.includes(r.name))) {
         storeIdx = si; break;
       }
     }
     if (storeIdx < 0) { unmatched++; return; }
+    // 编号变化自动加别名：识别出的编号不在该门店别名里 → 自动新增，下次识别到新编号也能匹配
+    if (r.code) {
+      const codeStr = String(r.code).trim();
+      if (codeStr && cfgAll[storeIdx]) {
+        const s = cfgAll[storeIdx];
+        if (!s.aliases) s.aliases = [];
+        if (!s.aliases.includes(codeStr)) {
+          s.aliases.push(codeStr);
+          aliasAdded++;
+        }
+      }
+    }
     const existing = data.find(x => x.date === date && x.storeIdx === storeIdx && x.goodsIdx === goodsIdx);
     if (existing) {
       if (currentActionType === 'out') existing.qtyOut = qty;
@@ -3056,11 +3068,15 @@ function confirmOcrResult() {
     saved++;
   });
   saveDataArr(data);
+  if (aliasAdded > 0) {
+    saveStoreConfig(cfgAll);
+    try { initStoreSelect('recordStore'); renderStoreChips(); } catch(e) {}
+  }
   closeOcrResultModal();
   reloadRecordInputs();
   renderTodayOverview();
   if (saved > 0) {
-    showToast('✅ 已录入 ' + saved + ' 条' + (unmatched > 0 ? '，' + unmatched + ' 条未匹配到店面被跳过' : ''));
+    showToast('✅ 已录入 ' + saved + ' 条' + (unmatched > 0 ? '，' + unmatched + ' 条未匹配被跳过' : '') + (aliasAdded > 0 ? '，自动新增 ' + aliasAdded + ' 个别名' : ''));
   } else {
     showToast('⚠️ 未匹配到任何店面，请在店面管理里检查别名设置');
   }
