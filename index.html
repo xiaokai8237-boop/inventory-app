@@ -2232,7 +2232,8 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
   // 渲染
   document.getElementById('ocrModeLabel').textContent = currentActionType === 'out' ? '回收' : '发出';
   document.getElementById('ocrGoodsLabel').textContent = ocrCurrentResult.trayType;
-  document.getElementById('ocrRawText').textContent = ocrCurrentResult.rawText;
+  const rawEl = document.getElementById('ocrRawText');
+  if (rawEl) rawEl.textContent = ocrCurrentResult.rawText;
   refreshOcrQtyCol();
   document.getElementById('ocrResultModal').classList.add('show');
 }
