@@ -754,7 +754,6 @@ body {
   <div class="tab" data-page="history">记录</div>
   <div class="tab" data-page="summary">汇总</div>
   <div class="tab" data-page="reconcile">对账</div>
-  <div class="tab" data-page="settings">使用说明</div>
 </div>
 
 <!-- ========== 录入页（首页向导 + 手动录入） ========== -->
@@ -840,6 +839,7 @@ body {
       <div class="home-grid-row">
         <button class="home-btn" onclick="openVoiceInputModal()"><div class="hb-icon">🎤</div>语音录入</button>
         <button class="home-btn" onclick="openPhotoInputModal()"><div class="hb-icon">📸</div>拍照识别</button>
+        <button class="home-btn" onclick="switchPage('settings')"><div class="hb-icon">❓</div>使用说明</button>
       </div>
       <div style="font-size:11px;color:var(--text-light);margin-top:10px;">
         语音或拍照识别后，自动填到当前「<span id="entryModeLabel">发出</span>」输入列
