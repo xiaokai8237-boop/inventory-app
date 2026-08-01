@@ -1649,9 +1649,7 @@ const DEFAULT_GOODS = [
   { name: '常温筐', aliases: ['常温', '常'] },
 ];
 // 店面：名称 + 多别名，可自定义增减
-const DEFAULT_STORES = [
-  { name: '默认店', aliases: [] },
-];
+const DEFAULT_STORES = [];
 
 let currentStoreIdx = 0; // 当前选中的店面下标
 let currentActionType = null; // 'in'=发出 'out'=回收
@@ -2285,6 +2283,19 @@ function renderStoreChips() {
   const cfg = loadStoreConfig();
   const container = document.getElementById('recordStoreChips');
   if (!container) return;
+  // 无店面时提示去新增
+  if (!cfg || cfg.length === 0) {
+    container.innerHTML = `
+      <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:8px;padding:10px 12px;font-size:13px;color:#7c5a00;">
+        🏪 还没有店面，先去添加吧：<br>
+        回首页 → 点「🏪 店面管理」→「➕ 新增店面」<br>
+        <span style="font-size:12px;">（或拍照路单批量导入，会自动带上编号别名）</span>
+      </div>`;
+    // 同步隐藏 select
+    const sel = document.getElementById('recordStore');
+    if (sel) sel.value = '';
+    return;
+  }
   let html = '';
   cfg.forEach((s, i) => {
     const alias = (s.aliases && s.aliases[0]) || '';
@@ -2866,6 +2877,11 @@ function saveManualRecord() {
   if (!date) { showToast('请选择日期'); return; }
   const names = loadGoodsNames();
   const storeNames = loadStoreNames();
+  // 无店面时提示去新增
+  if (!storeNames || storeNames.length === 0) {
+    showToast('请先到「店面管理」添加店面');
+    return;
+  }
   const storeName = storeNames[currentStoreIdx] || '默认店';
   const data = loadData();
   // 只移除「当天 + 当前店面」的旧记录（其它店面的同日记录保留）
