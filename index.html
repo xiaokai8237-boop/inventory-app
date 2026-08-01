@@ -1038,9 +1038,9 @@ body {
         <select class="form-select" id="exportStore" style="width:100%;padding:8px;font-size:13px;"><option value="">全部店</option></select>
       </div>
     </div>
-    <button class="btn btn-primary" onclick="exportMyExcel()">导出Excel</button>
-    <div style="font-size:12px;color:var(--text-light);margin-top:6px;">
-      导出格式与仓库管理员表格一致，方便逐日逐筐对比（选单一店面时不含"店面"列）
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="exportMyExcel()">📋 导出明细</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="exportSummaryExcel()">📊 导出汇总</button>
     </div>
   </div>
 
@@ -3723,6 +3723,52 @@ function exportMyExcel() {
   XLSX.utils.book_append_sheet(wb, ws, '库存数据');
   XLSX.writeFile(wb, `库存数据_${start||'全部'}_${end||todayStr()}.xlsx`);
   showToast('✅ Excel已导出（按日分组）');
+}
+
+function exportSummaryExcel() {
+  const start = document.getElementById('exportStart')?.value;
+  const end = document.getElementById('exportEnd')?.value;
+  let data = loadData();
+  if (start) data = data.filter(r => r.date >= start);
+  if (end) data = data.filter(r => r.date <= end);
+  const names = loadGoodsNames();
+
+  // 表头日期：2026-07-01 → 7月1
+  const fmt = (d) => {
+    if (!d) return '';
+    const p = d.split('-');
+    return (p.length === 3) ? (parseInt(p[1], 10) + '月' + parseInt(p[2], 10)) : d;
+  };
+  const rangeText = (fmt(start) || '开始') + ' 至 ' + (fmt(end) || '今天');
+
+  // 每种筐的合计
+  const totals = names.map((n, i) => ({ in: 0, out: 0 }));
+  data.forEach(r => {
+    if (totals[r.goodsIdx]) {
+      totals[r.goodsIdx].in += r.qtyIn || 0;
+      totals[r.goodsIdx].out += r.qtyOut || 0;
+    }
+  });
+
+  const rows = [
+    ['物流筐收发管理系统 · 汇总报表', '', '', ''],
+    ['日期范围：' + rangeText, '', '', ''],
+    [],
+    ['筐类型', '发出', '回收', '差额'],
+  ];
+  let tIn = 0, tOut = 0;
+  names.forEach((n, i) => {
+    const diff = totals[i].out - totals[i].in; // 差额 = 回收 - 发出
+    rows.push([n, totals[i].in, totals[i].out, diff]);
+    tIn += totals[i].in; tOut += totals[i].out;
+  });
+  rows.push(['合计', tIn, tOut, tOut - tIn]);
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '汇总报表');
+  XLSX.writeFile(wb, `汇总_${rangeText}.xlsx`);
+  showToast('✅ 汇总已导出');
 }
 
 function importReconcile(event) {
