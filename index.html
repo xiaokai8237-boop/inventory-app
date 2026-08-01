@@ -1542,6 +1542,26 @@ body {
   </div>
 </div>
 
+<!-- 管理员密码验证弹窗 -->
+<div class="store-ocr-modal" id="adminAuthModal" onclick="closeAdminAuthModal()">
+  <div class="store-ocr-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">🔐 管理员验证</span>
+      <button onclick="closeAdminAuthModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">请输入管理员密码以进入面板</div>
+    <div class="form-group">
+      <label class="form-label">管理员密码</label>
+      <div class="pwd-wrap"><input type="password" class="form-input" id="adminAuthPwd" placeholder="输入管理员密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="adminAuthPwd_eye" onclick="togglePwd('adminAuthPwd')" tabindex="-1">👁</button></div>
+    </div>
+    <div style="font-size:11px;color:#dc2626;margin-bottom:8px;display:none;" id="adminAuthErr">密码错误，请重试</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="closeAdminAuthModal()">取消</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="doAdminAuth()">🔓 验证</button>
+    </div>
+  </div>
+</div>
+
 <!-- 管理员重置弹窗 -->
 <div class="store-ocr-modal" id="adminModal" onclick="closeAdminModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
@@ -1555,10 +1575,6 @@ body {
         <div style="font-size:28px;font-weight:700;color:#15803d;" id="adminUserCount">-</div>
       </div>
       <button class="btn btn-outline" style="width:auto;padding:8px 14px;font-size:12px;display:inline-block;" onclick="loadAdminStats()">📊 刷新统计</button>
-    </div>
-    <div class="form-group">
-      <label class="form-label">管理员密钥</label>
-      <input type="password" class="form-input" id="adminKeyInput" placeholder="输入管理员密钥" onchange="loadAdminStats()">
     </div>
     <div class="form-group">
       <label class="form-label">用户手机号</label>
@@ -2247,11 +2263,24 @@ async function doForgotReset() {
 
 // 管理员
 let adminUsers = [];
+let adminKey = ''; // 验证通过后保存的管理员密码，供面板内操作使用（无需二次输入）
+function openAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('show'); document.getElementById('adminAuthErr').style.display = 'none'; }
+function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.remove('show'); }
+function doAdminAuth() {
+  const pwd = document.getElementById('adminAuthPwd').value;
+  if (pwd === '8023.520') {
+    adminKey = pwd;
+    document.getElementById('adminAuthPwd').value = '';
+    closeAdminAuthModal();
+    openAdminModal();
+  } else {
+    document.getElementById('adminAuthErr').style.display = 'block';
+  }
+}
 function openAdminModal() { document.getElementById('adminModal').classList.add('show'); loadAdminStats(); }
 function closeAdminModal() { document.getElementById('adminModal').classList.remove('show'); }
 // 管理员统计：注册人数 + 用户列表
 async function loadAdminStats() {
-  const adminKey = document.getElementById('adminKeyInput').value;
   if (!adminKey) return;
   try {
     const resp = await fetch('/admin/stats', {
@@ -2290,9 +2319,8 @@ function renderAdminUsers() {
     </div>`).join('');
 }
 async function doAdminReset() {
-  const adminKey = document.getElementById('adminKeyInput').value;
   const phone = document.getElementById('adminPhone').value.trim();
-  if (!adminKey) { showToast('请输入管理员密钥'); return; }
+  if (!adminKey) { showToast('请先验证管理员密码'); return; }
   if (!validatePhone(phone)) { showToast('请输入正确的11位手机号'); return; }
   showLoading('正在重置…');
   try {
@@ -2313,16 +2341,16 @@ async function doAdminReset() {
 }
 
 // 从云账号恢复（换手机时用）
-// 管理员隐藏入口：使用说明页 ❓ 连点10次
+// 管理员隐藏入口：使用说明页 ❓ 连点5次 → 弹密码验证框
 let adminTapCount = 0;
 let adminTapTimer = null;
 function adminTap() {
   adminTapCount++;
   if (adminTapTimer) clearTimeout(adminTapTimer);
   adminTapTimer = setTimeout(() => { adminTapCount = 0; }, 3000);
-  if (adminTapCount >= 10) {
+  if (adminTapCount >= 5) {
     adminTapCount = 0;
-    openAdminModal();
+    openAdminAuthModal();
   }
 }
 
