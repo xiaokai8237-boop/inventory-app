@@ -28,6 +28,31 @@
   --text: #1e293b;
   --text-light: #94a3b8;
   --border: #e2e8f0;
+  --header-bg: #ffffff;
+  --tabs-bg: #ffffff;
+  --card-border: rgba(226,232,240,.6);
+  --shadow: 0 1px 4px rgba(15,23,42,.05);
+  --input-bg: #ffffff;
+  --soft-bg: #f8fafc;
+}
+/* 深色模式 */
+html[data-theme="dark"] {
+  --bg: #0f172a;
+  --card-bg: #1e293b;
+  --primary: #60a5fa;
+  --primary-dark: #93c5fd;
+  --danger: #f87171;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --text: #e2e8f0;
+  --text-light: #94a3b8;
+  --border: #334155;
+  --header-bg: #1e293b;
+  --tabs-bg: #1e293b;
+  --card-border: rgba(51,65,85,.6);
+  --shadow: 0 1px 4px rgba(0,0,0,.4);
+  --input-bg: #0f172a;
+  --soft-bg: #16213a;
 }
 * {
   margin: 0; padding: 0; box-sizing: border-box;
@@ -48,7 +73,7 @@ body {
 
 /* 顶部 */
 .header {
-  background: #fff;
+  background: var(--header-bg);
   color: var(--text);
   padding: 18px 16px 12px;
   text-align: center;
@@ -56,13 +81,29 @@ body {
   top: 0; z-index: 100;
   box-shadow: 0 1px 3px rgba(0,0,0,.08);
 }
+/* 离线提示条 */
+.offline-banner {
+  display: none; text-align: center; padding: 8px; font-size: 13px; font-weight: 600;
+  background: #fef3c7; color: #b45309; border-bottom: 1px solid #fde68a;
+}
+html[data-theme="dark"] .offline-banner { background: #2a2406; color: #fbbf24; border-color: #7c6a16; }
+
+/* 顶部深色模式切换按钮 */
+.theme-toggle {
+  position: absolute; right: 12px; top: 14px;
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--card-bg);
+  color: var(--text); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+}
 .header h1 { font-size: 18px; font-weight: 700; color: var(--primary); }
 .header .date-today { font-size: 12px; color: var(--text-light); margin-top: 2px; }
 
 /* Tab */
 .tabs {
   display: flex;
-  background: #fff;
+  background: var(--tabs-bg);
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 56px; z-index: 99;
@@ -89,8 +130,8 @@ body {
   border-radius: 14px;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 1px 4px rgba(15,23,42,.05);
-  border: 1px solid rgba(226,232,240,.6);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--card-border);
 }
 
 /* 表单 */
@@ -108,15 +149,19 @@ body {
   border: 1.5px solid var(--border);
   border-radius: 12px;
   font-size: 16px;
-  background: #f8fafc;
+  background: var(--input-bg);
+  color: var(--text);
   outline: none;
   transition: all .2s;
 }
 .form-input:focus, .form-select:focus {
   border-color: var(--primary);
-  background: #fff;
+  background: var(--input-bg);
   box-shadow: 0 0 0 3px rgba(59,130,246,.12);
 }
+/* 深色下 date/select 下拉箭头可见 */
+html[data-theme="dark"] .form-input,
+html[data-theme="dark"] .form-select { color-scheme: dark; }
 /* 文件选择按钮：input 铺满 label，透明可点击，解决安卓 PWA 隐藏 input 拦截问题 */
 .store-file-btn { display: inline-flex; align-items: center; justify-content: center; }
 .store-file-input {
@@ -345,6 +390,32 @@ body {
 .stat-card .stat-val.in { color: var(--success); }
 .stat-card .stat-val.out { color: var(--danger); }
 .stat-card .stat-lbl { font-size: 11px; color: var(--text-light); }
+
+/* 今日状态卡片 */
+.today-status-head {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+}
+.today-status-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.today-status-date { font-size: 11px; color: var(--text-light); }
+.today-status-sum { display: flex; gap: 10px; margin-bottom: 10px; }
+.today-status-box {
+  flex: 1; text-align: center; padding: 10px 8px; border-radius: 10px;
+  background: var(--soft-bg); border: 1px solid var(--border);
+}
+.today-status-box .tsb-num { font-size: 22px; font-weight: 800; }
+.today-status-box .tsb-num.in { color: var(--success); }
+.today-status-box .tsb-num.out { color: var(--danger); }
+.today-status-box .tsb-lbl { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+.today-status-progress { margin-top: 4px; }
+.today-status-progress .tsp-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-light); margin-bottom: 4px; }
+.today-status-bar { height: 8px; background: var(--soft-bg); border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+.today-status-bar > div { height: 100%; background: var(--primary); border-radius: 6px; transition: width .4s; }
+.today-store-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.today-store-chip {
+  font-size: 11px; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--border); color: var(--text);
+}
+.today-store-chip.done { background: var(--soft-bg); color: var(--success); border-color: var(--success); }
+.today-store-chip.pending { background: var(--soft-bg); color: var(--text-light); }
 
 /* 历史记录 */
 .record-item {
@@ -847,6 +918,35 @@ body {
 .gd-modal { display: none; position: fixed; top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:9998;align-items:center;justify-content:center; }
 .gd-modal.show { display:flex; }
 .gd-content { background:var(--card-bg); border-radius:12px; padding:14px; max-width:320px; width:90%; box-shadow:0 4px 20px rgba(0,0,0,.3); }
+
+/* ===== 深色模式兼容（覆盖 JS 内联硬编码浅色底） ===== */
+html[data-theme="dark"] .native-file-btn { background: var(--card-bg); color: var(--primary); }
+html[data-theme="dark"] .store-chip { background: var(--soft-bg); }
+html[data-theme="dark"] .stat-card { background: var(--soft-bg); }
+html[data-theme="dark"] .summary-table th { background: var(--soft-bg); color: var(--text); }
+html[data-theme="dark"] .summary-table td { color: var(--text); }
+html[data-theme="dark"] .summary-table { color: var(--text); }
+html[data-theme="dark"] .goods-input-item { color: var(--text); }
+html[data-theme="dark"] .goods-input-list input { background: var(--input-bg); color: var(--text); }
+html[data-theme="dark"] .home-btn { background: var(--card-bg); border-color: var(--border); color: var(--text); }
+html[data-theme="dark"] .btn-outline { background: var(--card-bg); color: var(--primary); border-color: var(--primary); }
+html[data-theme="dark"] .modal-content { background: var(--card-bg); color: var(--text); }
+html[data-theme="dark"] .modal-header { color: var(--text); }
+html[data-theme="dark"] .modal-body { color: var(--text); }
+html[data-theme="dark"] .empty { color: var(--text-light); }
+html[data-theme="dark"] input[type="number"], html[data-theme="dark"] textarea { background: var(--input-bg); color: var(--text); }
+html[data-theme="dark"] .alias-chip { background: var(--soft-bg) !important; }
+/* 账号状态/云备份等内联浅色块在深色下统一变深 */
+html[data-theme="dark"] div[style*="#f0f7ff"] { background: var(--soft-bg) !important; border-color: var(--border) !important; }
+html[data-theme="dark"] div[style*="#f0fdf4"] { background: #16301f !important; border-color: #166534 !important; }
+html[data-theme="dark"] div[style*="#fff8e1"] { background: #2a2406 !important; border-color: #7c6a16 !important; }
+html[data-theme="dark"] div[style*="#fff7ed"], html[data-theme="dark"] button[style*="#fff7ed"] { background: #2d1b0a !important; border-color: #9a4d0e !important; color: #fdba74 !important; }
+html[data-theme="dark"] div[style*="#f8fafc"], html[data-theme="dark"] div[style*="#f8f9fa"], html[data-theme="dark"] div[style*="#fafafa"], html[data-theme="dark"] div[style*="#f7fbff"] { background: var(--soft-bg) !important; }
+html[data-theme="dark"] div[style*="color:#15803d"] { color: #4ade80 !important; }
+html[data-theme="dark"] div[style*="color:#b45309"] { color: #fbbf24 !important; }
+html[data-theme="dark"] div[style*="#f0fdf4"], html[data-theme="dark"] span[style*="#f0fdf4"] { background: #16301f !important; }
+html[data-theme="dark"] div[style*="background:#eaf3fc"] { background: var(--soft-bg) !important; }
+html[data-theme="dark"] div[style*="background:#f0f7ff"] { background: var(--soft-bg) !important; }
 </style>
 </head>
 <body>
@@ -854,7 +954,10 @@ body {
 <div class="header">
   <h1>📦 物流筐收发管理系统</h1>
   <div class="date-today" id="todayLabel"></div>
+  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="切换深浅色">🌙</button>
 </div>
+
+<div class="offline-banner" id="offlineBanner">📡 当前离线，已切换为离线模式，数据保存在本机，联网后自动同步</div>
 
 <div class="tabs">
   <div class="tab active" data-page="record">首页</div>
@@ -867,6 +970,9 @@ body {
   <!-- === 首页向导（默认显示） === -->
   <div id="homeWizard">
     <div style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v2.0.0</div>
+    <div id="accountBadge" style="display:none;background:var(--soft-bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--text);margin-bottom:8px;"></div>
+    <!-- 今日状态卡片 -->
+    <div class="card" id="todayStatusCard" style="padding:14px;margin-bottom:12px;"></div>
     <div class="card" style="text-align:center;padding:16px 14px;">
       <div style="font-size:16px;font-weight:600;margin-bottom:16px;">选择操作</div>
       <!-- 第一行：发出/回收（主操作，突出） -->
@@ -1906,10 +2012,35 @@ let currentStoreIdx = 0; // 当前选中的店面下标
 let currentActionType = null; // 'in'=发出 'out'=回收
 let currentActionLabel = '发出';
 
-// ======== 数据层 ========
+// ======== 数据层（支持多账号本地隔离） ========
+// 多账号数据隔离复核加强：
+// - 登录账号后，记录/筐配置/店面配置写入「账号作用域」key（kuanwei_xxx__<手机号>），实现本地按账号彻底隔离
+// - 不同账号数据互不串号；切换账号自动加载对应账号的数据
+// - 未登录时使用全局 key（与旧版本兼容）
+const DATA_KEYS = [STORAGE_KEY, GOODS_KEY, STORE_KEY];
+function getDataScope() { return getCloudPhone() || ''; }
+function scopeKey(base) {
+  const scope = getDataScope();
+  return scope ? (base + '__' + scope) : base;
+}
+// 账号首次登录时，把旧版全局数据迁移到该账号作用域，避免数据丢失
+// 迁移后清空全局 key，防止旧数据串到其他账号（多账号隔离复核）
+function migrateDataToScope() {
+  const scope = getDataScope();
+  if (!scope) return;
+  for (const base of DATA_KEYS) {
+    const scoped = scopeKey(base);
+    if (localStorage.getItem(scoped) === null) {
+      const globalVal = localStorage.getItem(base);
+      if (globalVal !== null) localStorage.setItem(scoped, globalVal);
+    }
+    // 已迁入账号作用域，清除全局残留，杜绝账号间串数据
+    if (localStorage.getItem(base) !== null) localStorage.removeItem(base);
+  }
+}
 function loadData() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(scopeKey(STORAGE_KEY));
     if (!raw) return [];
     const arr = JSON.parse(raw);
     const stores = loadStoreConfig();
@@ -1925,13 +2056,13 @@ function loadData() {
   } catch(e) { return []; }
 }
 function saveDataArr(arr) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  localStorage.setItem(scopeKey(STORAGE_KEY), JSON.stringify(arr));
   scheduleCloudBackup();
 }
 // ---- 筐配置 ----
 function loadGoodsConfig() {
   try {
-    const raw = localStorage.getItem(GOODS_KEY);
+    const raw = localStorage.getItem(scopeKey(GOODS_KEY));
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
@@ -1946,17 +2077,17 @@ function loadGoodsNames() {
   return loadGoodsConfig().map(g => g.name);
 }
 function saveGoodsConfig(cfg) {
-  localStorage.setItem(GOODS_KEY, JSON.stringify(cfg));
+  localStorage.setItem(scopeKey(GOODS_KEY), JSON.stringify(cfg));
   scheduleCloudBackup();
 }
 function saveGoodsNamesStorage(names) {
-  localStorage.setItem(GOODS_KEY, JSON.stringify(names));
+  localStorage.setItem(scopeKey(GOODS_KEY), JSON.stringify(names));
   scheduleCloudBackup();
 }
 // ---- 店面配置 ----
 function loadStoreConfig() {
   try {
-    const raw = localStorage.getItem(STORE_KEY);
+    const raw = localStorage.getItem(scopeKey(STORE_KEY));
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
@@ -1980,7 +2111,7 @@ function loadStoreNames() {
   return loadStoreConfig().map(s => s.name);
 }
 function saveStoreConfig(cfg) {
-  localStorage.setItem(STORE_KEY, JSON.stringify(cfg));
+  localStorage.setItem(scopeKey(STORE_KEY), JSON.stringify(cfg));
   scheduleCloudBackup();
 }
 // 默认百度OCR密钥（应用：物流筐收发管理系统 / AppID 134982254 / 通用文字识别高精度版）— 已预置，本机开箱即用
@@ -2094,7 +2225,61 @@ const UI_KEYS = [
   'kuanwei_seen_backup_tutorial', // 备份教程已看
   'kuanwei_del_confirm_until', // 删除确认免提示
   'kuanwei_ocr_keys',          // OCR 自定义密钥
+  'kuanwei_theme',             // 深色模式偏好
 ];
+
+// ======== 深色模式 ========
+function applyTheme(theme) {
+  const html = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  if (theme === 'dark') {
+    html.setAttribute('data-theme', 'dark');
+    if (btn) btn.textContent = '☀️';
+  } else {
+    html.removeAttribute('data-theme');
+    if (btn) btn.textContent = '🌙';
+  }
+}
+function loadTheme() {
+  const saved = localStorage.getItem('kuanwei_theme');
+  if (saved === 'dark') return 'dark';
+  // 未设置时跟随系统
+  if (saved === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+  return 'light';
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('kuanwei_theme', cur);
+  applyTheme(cur);
+  showToast(cur === 'dark' ? '🌙 已切换为深色模式' : '☀️ 已切换为浅色模式');
+}
+function initTheme() { applyTheme(loadTheme()); }
+
+// ======== 离线检测 ========
+// 离线时显示提示条，联网后自动隐藏；离线不阻断本地录入（数据自动存本机，联网后台备份）
+function updateOfflineBanner() {
+  const el = document.getElementById('offlineBanner');
+  if (!el) return;
+  if (navigator.onLine) {
+    el.style.display = 'none';
+  } else {
+    el.style.display = '';
+  }
+}
+function initOffline() {
+  updateOfflineBanner();
+  window.addEventListener('online', () => {
+    updateOfflineBanner();
+    showToast('📡 已恢复网络，正在同步…');
+    // 联网后尝试后台备份当前数据
+    if (getCloudPhone()) backupToCloud(false);
+    renderTodayStatus();
+  });
+  window.addEventListener('offline', () => {
+    updateOfflineBanner();
+    showToast('📡 当前离线，数据已存本机，联网后自动同步');
+  });
+}
 function collectUiState() {
   const ui = {};
   for (const k of UI_KEYS) {
@@ -2179,6 +2364,20 @@ function clearLock(phone) {
   localStorage.setItem('kuanwei_lock', JSON.stringify(rec));
 }
 
+// 账号标识徽标（首页顶部，显示当前数据归属账号，明确多账号隔离）
+function renderAccountBadge() {
+  const el = document.getElementById('accountBadge');
+  if (!el) return;
+  const phone = getCloudPhone();
+  const logged = isLoggedIn();
+  if (phone && logged) {
+    el.style.display = '';
+    el.innerHTML = `🔗 数据账号：<b>${phone}</b>（多账号数据已隔离）`;
+  } else {
+    el.style.display = 'none';
+  }
+}
+
 // 账号状态渲染
 function renderAccountStatus() {
   const el = document.getElementById('accountStatus');
@@ -2250,10 +2449,12 @@ async function doLogin() {
     if (result.ok && result.data) {
       clearLock(phone);
       setCloudPhone(phone);
+      migrateDataToScope(); // 首次登录：旧全局数据迁入该账号作用域
       setLoggedIn(true);
       closeLoginModal();
       renderAccountStatus();
       renderCloudBackupStatus();
+      renderAccountBadge();
       showToast('✅ 登录成功，正在同步数据…');
       // 自动同步云端数据
       autoSyncFromCloud(phone).then(hasCloud => {
@@ -2270,9 +2471,13 @@ async function doLogin() {
   } catch (e) { hideLoading(); showToast('❌ 网络错误'); }
 }
 function logout() {
+  // 退出前先备份当前账号数据到云端，避免丢失
+  const phone = getCloudPhone();
+  if (phone) backupToCloud(false);
   setLoggedIn(false);
   renderAccountStatus();
-  showToast('已退出登录');
+  renderAccountBadge();
+  showToast('已退出登录，数据已隔离');
 }
 
 // 设置密码
@@ -2300,9 +2505,11 @@ async function doSetupAccount() {
     hideLoading();
     if (result.ok) {
       setCloudPhone(phone);
+      migrateDataToScope(); // 旧全局数据迁入该账号作用域
       closeSetupModal();
       renderAccountStatus();
       renderCloudBackupStatus();
+      renderAccountBadge();
       setLoggedIn(true);
       showToast('✅ 密码设置成功');
       // 登录成功 → 自动同步云端该账号数据（换手机场景：把旧手机的数据拉回来）
@@ -2375,14 +2582,16 @@ async function doVerifyAccount() {
     if (result.ok && result.data) {
       clearLock(phone);
       const cloud = result.data;
+      setCloudPhone(phone);      // 先切换账号作用域，再写入该账号数据
+      migrateDataToScope();
+      setLoggedIn(true);
       saveDataArr(cloud.records || []);
       if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
       if (cloud.storeConfig && Array.isArray(cloud.storeConfig)) saveStoreConfig(cloud.storeConfig);
-      setCloudPhone(phone);
-      setLoggedIn(true);
       closeVerifyModal();
       renderAccountStatus();
       renderCloudBackupStatus();
+      renderAccountBadge();
       try {
         initStoreSelect('recordStore'); renderStoreChips(); renderGoodsInputList(); initGoodsFilter(); renderTodayOverview();
       } catch(e) {}
@@ -2905,6 +3114,7 @@ function closeInstallModal() {
 function backToHomeWizard() {
   document.getElementById('manualForm').style.display = 'none';
   document.getElementById('homeWizard').style.display = 'block';
+  renderTodayStatus();
 }
 
 // ======== 面板切换（首页 6 大按钮控制） ========
@@ -3571,6 +3781,70 @@ function renderTodayOverview() {
   }
 
   container.innerHTML = anyShow ? html : '<div class="empty">今日暂无记录</div>';
+  renderTodayStatus(); // 同步刷新今日状态卡片
+}
+
+// ======== 今日状态卡片 ========
+// 展示：今日发出/回收总数、已录入店面进度、待录入店面提醒
+function renderTodayStatus() {
+  const el = document.getElementById('todayStatusCard');
+  if (!el) return;
+  const today = todayStr();
+  const data = loadData();
+  const stores = getSortedStores();
+  // 今日各店是否已录入（含额外发收记录，storeIdx=-1 单列）
+  const todayRecords = data.filter(r => r.date === today);
+  let totalIn = 0, totalOut = 0;
+  todayRecords.forEach(r => { totalIn += r.qtyIn || 0; totalOut += r.qtyOut || 0; });
+  const doneSet = new Set();
+  let hasExtra = false;
+  todayRecords.forEach(r => {
+    if (r.storeIdx === -1) { hasExtra = true; return; }
+    if (r.storeIdx !== undefined) doneSet.add(r.storeIdx);
+  });
+  const totalStores = stores.length;
+  const doneCount = doneSet.size;
+  const pct = totalStores > 0 ? Math.round(doneCount / totalStores * 100) : (todayRecords.length > 0 ? 100 : 0);
+
+  // 待录入店面
+  const pendingStores = stores.filter(s => !doneSet.has(s._idx));
+
+  let html = '';
+  html += `<div class="today-status-head">
+    <div class="today-status-title">📊 今日状态</div>
+    <div class="today-status-date">${today}</div>
+  </div>`;
+  html += `<div class="today-status-sum">
+    <div class="today-status-box"><div class="tsb-num in">${totalIn}</div><div class="tsb-lbl">今日发出</div></div>
+    <div class="today-status-box"><div class="tsb-num out">${totalOut}</div><div class="tsb-lbl">今日回收</div></div>
+    <div class="today-status-box"><div class="tsb-num">${doneCount}/${totalStores}</div><div class="tsb-lbl">已录店面</div></div>
+  </div>`;
+  // 录入进度条
+  html += `<div class="today-status-progress">
+    <div class="tsp-top"><span>录入进度</span><span>${pct}%${hasExtra ? ' · 含额外发收' : ''}</span></div>
+    <div class="today-status-bar"><div style="width:${pct}%;"></div></div>
+  </div>`;
+
+  // 各店状态 chips：已录（绿）/ 待录（灰）
+  if (totalStores > 0) {
+    html += `<div class="today-store-chips">`;
+    stores.forEach(s => {
+      const done = doneSet.has(s._idx);
+      html += `<span class="today-store-chip ${done ? 'done' : 'pending'}">${done ? '✓ ' : '○ '}${escapeHtml(s.s.name)}</span>`;
+    });
+    html += `</div>`;
+  }
+
+  // 待录入提醒
+  if (pendingStores.length > 0) {
+    html += `<div style="font-size:11px;color:var(--warning);margin-top:8px;">⏳ 还有 ${pendingStores.length} 家店未录入：${pendingStores.map(s=>escapeHtml(s.s.name)).join('、')}</div>`;
+  } else if (todayRecords.length > 0) {
+    html += `<div style="font-size:11px;color:var(--success);margin-top:8px;">🎉 今日所有店面均已录入！</div>`;
+  } else {
+    html += `<div style="font-size:11px;color:var(--text-light);margin-top:8px;">今日还没有记录，点击上方「发出/回收」开始录入</div>`;
+  }
+
+  el.innerHTML = html;
 }
 
 // ======== 语音识别 ========
@@ -5558,6 +5832,10 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
+initTheme();
+initOffline();
+renderAccountBadge();
+renderTodayStatus();
 initRecordPage();
 initGoodsFilter();
 initSummaryPage();

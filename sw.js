@@ -1,6 +1,10 @@
-// 物流筐收发管理系统 - Service Worker（离线可用）
-const CACHE = 'kuanwei-v24';
-const ASSETS = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
+// 物流筐收发管理系统 - Service Worker（离线完整可用）
+const CACHE = 'kuanwei-v25';
+const ASSETS = [
+  '/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png',
+  // 预缓存 xlsx 库，保证离线时对账/导出可用
+  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -29,7 +33,6 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return; // 不缓存 POST（OCR/备份等）
   const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return; // 外部请求不缓存
 
   // 页面导航：网络优先（保证最新），离线时用缓存
   if (req.mode === 'navigate') {
