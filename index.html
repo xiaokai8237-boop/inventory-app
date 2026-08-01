@@ -500,6 +500,18 @@ body {
   cursor: pointer;
   transition: background .2s;
 }
+.store-card .sc-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.store-card .sc-foot .sc-del {
+  padding: 6px 14px;
+  font-size: 12.5px;
+  opacity: .85;
+}
 .store-card .sc-del:active { background: #ffebee; }
 .store-card .sc-alias-label {
   font-size: 12px;
@@ -2819,7 +2831,6 @@ function renderStorePanelUI() {
           <button class="sc-move" onclick="moveStore(${idx},1)" ${i===view.length-1?'disabled':''}>▼</button>
         </div>
         <input type="text" class="sc-name" id="sName${idx}" value="${escapeHtml(s.name)}" maxlength="20">
-        <button class="sc-del" onclick="removeStoreFromPanel(${idx})">删除</button>
       </div>
       <div class="sc-alias-label">🏷️ 别名（识别时可替代店名）</div>
       <div class="sc-aliases" id="sAliases${idx}">
@@ -2830,6 +2841,9 @@ function renderStorePanelUI() {
       <div class="sc-add">
         <input type="text" id="sAliasInput${idx}" placeholder="输入别名后点添加" maxlength="20">
         <button onclick="addStoreAlias(${idx})">添加</button>
+      </div>
+      <div class="sc-foot">
+        <button class="sc-del" onclick="removeStoreFromPanel(${idx})">🗑️ 删除此店面</button>
       </div>
     </div>`;
   });
