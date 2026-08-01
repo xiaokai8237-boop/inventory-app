@@ -874,6 +874,10 @@ body {
         <button class="home-btn-main home-btn-issue" onclick="manualEntry('in')"><span class="hb-icon">📤</span>发出</button>
         <button class="home-btn-main home-btn-recover" onclick="manualEntry('out')"><span class="hb-icon">📥</span>回收</button>
       </div>
+      <!-- 额外发收登记（针对所有门店） -->
+      <div class="home-grid-row" style="margin-bottom:10px;">
+        <button class="home-btn" style="background:#fff7ed;border-color:#fdba74;color:#c2410c;" onclick="openExtraModal()"><div class="hb-icon">➕</div>额外发收登记</button>
+      </div>
       <!-- 第二行：数据备份/店面管理/框名设置 -->
       <div class="home-grid-row" style="margin-bottom:10px;">
         <button class="home-btn" onclick="openBackupPanel()"><div class="hb-icon">💾</div>数据备份与恢复</button>
@@ -961,6 +965,20 @@ body {
     <div class="card">
       <div class="form-label" style="margin-bottom:8px;">📊 今日各筐统计（全部门店）</div>
       <div id="todayOverview"></div>
+    </div>
+
+    <!-- 额外发收登记弹窗（针对所有门店） -->
+    <div class="store-ocr-modal" id="extraModal" onclick="closeExtraModal()">
+      <div class="store-ocr-content" onclick="event.stopPropagation()">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <span style="font-weight:600;font-size:15px;">➕ 额外发收登记</span>
+          <button onclick="closeExtraModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+        </div>
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">针对所有门店的额外发出/回收，填对应筐的数量后点保存</div>
+        <div class="goods-input-list" id="extraGoodsList" style="margin-bottom:10px;"></div>
+        <button class="btn btn-primary" style="width:100%;" onclick="saveExtraRecord()">💾 保存登记</button>
+        <button class="btn btn-outline" style="width:100%;margin-top:8px;" onclick="closeExtraModal()">取消</button>
+      </div>
     </div>
   </div>
 
@@ -3197,8 +3215,8 @@ function renderTrack() {
   const storeSel = document.getElementById('trackStore');
   const storeVal = storeSel ? storeSel.value : '';
   let data = loadData();
-  // 筛选：只取该发出日期 + 符合条件的店面
-  const outRecords = data.filter(r => r.date === date && r.qtyIn > 0 && (storeVal === '' || r.storeIdx === parseInt(storeVal)));
+  // 筛选：只取该发出日期 + 符合条件的店面（排除额外发收，无店面归属不追踪）
+  const outRecords = data.filter(r => r.date === date && r.qtyIn > 0 && !r.extra && r.storeIdx !== -1 && (storeVal === '' || r.storeIdx === parseInt(storeVal)));
   // 对于每个店面+筐，统计发出量 vs 截止今日的回收量
   const today = todayStr();
   const names = loadGoodsConfig();
@@ -3396,6 +3414,80 @@ function saveManualRecord() {
   renderTodayOverview();
   // 保存后自动跳到下一个店面（连续录入）
   autoNextStore();
+}
+
+// ======== 额外发收登记（针对所有门店，storeIdx=-1） ========
+function openExtraModal() {
+  const names = loadGoodsNames();
+  const container = document.getElementById('extraGoodsList');
+  let html = '';
+  // 表头
+  html += '<div class="goods-input-item" style="font-size:11px;color:var(--text-light);border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:6px;">';
+  html += '<div class="gi-name">筐名</div>';
+  html += '<div style="flex:1;text-align:center;">额外发出</div>';
+  html += '<div style="flex:1;text-align:center;">额外回收</div>';
+  html += '</div>';
+  names.forEach((n, i) => {
+    html += `<div class="goods-input-item">
+      <div class="gi-name" data-idx="${i}">${escapeHtml(n)}</div>
+      <div class="gi-in"><input type="number" id="exIn${i}" placeholder="0" min="0" inputmode="numeric" data-idx="${i}"></div>
+      <div class="gi-out"><input type="number" id="exOut${i}" placeholder="0" min="0" inputmode="numeric" data-idx="${i}"></div>
+    </div>`;
+  });
+  container.innerHTML = html;
+  document.getElementById('extraModal').classList.add('show');
+}
+function closeExtraModal() {
+  document.getElementById('extraModal').classList.remove('show');
+}
+// 保存额外发收登记：发出列记为 qtyIn，回收列记为 qtyOut，storeIdx=-1（所有门店）
+function saveExtraRecord() {
+  const date = todayStr();
+  const names = loadGoodsNames();
+  const data = loadData();
+  let hasAny = false;
+  const records = [];
+  for (let i = 0; i < names.length; i++) {
+    const qIn = parseInt(document.getElementById('exIn'+i)?.value) || 0;
+    const qOut = parseInt(document.getElementById('exOut'+i)?.value) || 0;
+    if (qIn > 0) {
+      hasAny = true;
+      records.push({
+        id: 'extra-' + Date.now() + '-in-' + i,
+        date: date,
+        storeIdx: -1,
+        storeName: '额外发收',
+        goodsIdx: i,
+        goodsName: names[i],
+        qtyIn: qIn,
+        qtyOut: 0,
+        extra: true,
+        source: 'extra',
+        createdAt: new Date().toISOString()
+      });
+    }
+    if (qOut > 0) {
+      hasAny = true;
+      records.push({
+        id: 'extra-' + Date.now() + '-out-' + i,
+        date: date,
+        storeIdx: -1,
+        storeName: '额外发收',
+        goodsIdx: i,
+        goodsName: names[i],
+        qtyIn: 0,
+        qtyOut: qOut,
+        extra: true,
+        source: 'extra',
+        createdAt: new Date().toISOString()
+      });
+    }
+  }
+  if (!hasAny) { showToast('请至少填一项数量'); return; }
+  saveDataArr([...data, ...records]);
+  closeExtraModal();
+  showToast('✅ 已保存额外发收登记');
+  renderTodayOverview();
 }
 
 // 保存后自动跳下一个店面（循环到最后一个时停在本店）
@@ -4419,10 +4511,11 @@ function generateDailyReport() {
   const selNames = new Set(dailyReportState.stores.length ? dailyReportState.stores : cfg.map(s => s.name));
   const data = loadData();
 
-  // 今天 + 选中的门店记录
-  const todayData = data.filter(r => r.date === today && selNames.has(r.storeName || ''));
-  // 本月 + 选中门店
-  const monthData = data.filter(r => r.date.startsWith(month) && selNames.has(r.storeName || ''));
+  // 今天 + 选中的门店记录（额外发收=所有门店，始终纳入）
+  const isExtra = (r) => r.extra || r.storeIdx === -1 || r.storeName === '额外发收';
+  const todayData = data.filter(r => r.date === today && (isExtra(r) || selNames.has(r.storeName || '')));
+  // 本月 + 选中门店（额外发收始终纳入）
+  const monthData = data.filter(r => r.date.startsWith(month) && (isExtra(r) || selNames.has(r.storeName || '')));
   // 累计欠框（本月 发出-回收）
   const owe = {};
   names.forEach((n, i) => { owe[i] = { emit: 0, recv: 0 }; });
@@ -4645,7 +4738,7 @@ function renderHistory() {
   const filterStore = document.getElementById('filterStore').value;
   let data = loadData();
   if (filterDate) data = data.filter(r => r.date >= filterDate);
-  if (filterStore !== '') data = data.filter(r => r.storeIdx === parseInt(filterStore));
+  if (filterStore !== '') data = data.filter(r => r.storeIdx === parseInt(filterStore) || r.extra || r.storeIdx === -1);
   if (filterGoods !== '') data = data.filter(r => r.goodsIdx === parseInt(filterGoods));
   data.sort((a, b) => {
     if (b.date !== a.date) return b.date.localeCompare(a.date);
@@ -4798,7 +4891,7 @@ function renderSummary() {
   let data = loadData();
   if (start) data = data.filter(r => r.date >= start);
   if (end) data = data.filter(r => r.date <= end);
-  if (summaryStore !== '') data = data.filter(r => r.storeIdx === parseInt(summaryStore));
+  if (summaryStore !== '') data = data.filter(r => r.storeIdx === parseInt(summaryStore) || r.extra || r.storeIdx === -1);
   const names = loadGoodsNames();
   const storeCfg = loadStoreConfig();
   const storeName = summaryStore !== '' && storeCfg[parseInt(summaryStore)] ? storeCfg[parseInt(summaryStore)].name : '';
@@ -4868,7 +4961,7 @@ function exportMyExcel() {
   let data = loadData();
   if (start) data = data.filter(r => r.date >= start);
   if (end) data = data.filter(r => r.date <= end);
-  if (exportStore !== '') data = data.filter(r => r.storeIdx === parseInt(exportStore));
+  if (exportStore !== '') data = data.filter(r => r.storeIdx === parseInt(exportStore) || r.extra || r.storeIdx === -1);
   const names = loadGoodsNames();
   // 按 (日期+店面) 分组
   const byKey = {};
