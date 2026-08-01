@@ -1784,18 +1784,22 @@ body {
     </div>
     <div class="form-group">
       <label class="form-label">月份</label>
-      <input type="month" class="form-input" id="dailyReportMonth" style="padding:8px;font-size:14px;">
+      <input type="month" class="form-input" id="dailyReportMonth" onchange="updateDailyLivePreview()" style="padding:8px;font-size:14px;">
     </div>
     <div class="form-group">
       <label class="form-label">报表信息（默认全选）</label>
       <div id="dailyReportFields" style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:13px;">
-        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_emit" checked> 各店发出</label>
-        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_recv" checked> 各店回收</label>
-        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_today" checked> 今日回框</label>
-        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_mon_recv" checked> 本月累计回框</label>
-        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_mon_emit" checked> 本月累计发出</label>
-        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_owe" checked> 累计欠框</label>
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_emit" checked onchange="updateDailyLivePreview()"> 各店发出</label>
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_recv" checked onchange="updateDailyLivePreview()"> 各店回收</label>
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_today" checked onchange="updateDailyLivePreview()"> 今日回框</label>
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_mon_recv" checked onchange="updateDailyLivePreview()"> 本月累计回框</label>
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_mon_emit" checked onchange="updateDailyLivePreview()"> 本月累计发出</label>
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_owe" checked onchange="updateDailyLivePreview()"> 累计欠框</label>
       </div>
+    </div>
+    <div style="margin-bottom:8px;">
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">👁 实时预览（勾选变化自动更新）</div>
+      <div id="dailyLivePreview" style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;white-space:pre-wrap;max-height:180px;overflow-y:auto;"></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:8px;">
       <button class="btn btn-primary" style="flex:1;" onclick="generateDailyReport()">📋 生成日报</button>
@@ -4241,6 +4245,7 @@ function openDailyReport() {
   const lineBox = document.getElementById('dailyReportLines');
   lineBox.innerHTML = lineArr.map(l =>
     `<button class="btn ${(dailyReportState.line === l) ? 'btn-primary' : 'btn-outline'}" style="padding:5px 12px;font-size:12px;width:auto;display:inline-block;" onclick="dailySelLine('${l}')">${l}</button>`).join('');
+  setTimeout(updateDailyLivePreview, 0);
   // 门店（按线路过滤）
   renderDailyStores();
   // 信息项勾选
@@ -4263,6 +4268,7 @@ function dailySelLine(line) {
     b.className = 'btn ' + (b.textContent === line ? 'btn-primary' : 'btn-outline');
   });
   renderDailyStores();
+  setTimeout(updateDailyLivePreview, 0);
 }
 function renderDailyStores() {
   const cfg = loadStoreConfig();
@@ -4272,13 +4278,14 @@ function renderDailyStores() {
   const box = document.getElementById('dailyReportStores');
   box.innerHTML = list.map((s, i) => {
     const checked = sel.length === 0 || sel.includes(s.name) ? 'checked' : '';
-    return `<label style="display:flex;align-items:center;gap:6px;font-size:13px;"><input type="checkbox" class="dr-store" data-name="${escapeHtml(s.name)}" ${checked}> ${escapeHtml(s.name)}</label>`;
+    return `<label style="display:flex;align-items:center;gap:6px;font-size:13px;"><input type="checkbox" class="dr-store" data-name="${escapeHtml(s.name)}" ${checked} onchange="updateDailyLivePreview()"> ${escapeHtml(s.name)}</label>`;
   }).join('');
   dailyReportState._lineStores = list.map(s => s.name);
 }
 function dailySelAllStores(all) {
   const box = document.getElementById('dailyReportStores');
   box.querySelectorAll('input.dr-store').forEach(cb => { cb.checked = all; });
+  setTimeout(updateDailyLivePreview, 0);
 }
 function collectDailySelection() {
   const sel = [];
@@ -4367,10 +4374,24 @@ function generateDailyReport() {
   if (f.owe && oweLines.length) lines.push(`累计欠框：${oweLines.join('、')}`);
 
   const text = lines.join('\n');
+  if (arguments[0] === true) return text; // 仅计算预览（实时预览用）
   // 打开"日报预览确认"弹窗，内容可编辑
   showDailyPreview(text);
   // 记住选择
   try { localStorage.setItem('kuanwei_daily_pref', JSON.stringify({ line: dailyReportState.line, month, stores: dailyReportState.stores, fields: dailyReportState.fields })); } catch(e) {}
+}
+
+// 实时预览：勾选变化时自动更新界面预览窗口
+function updateDailyLivePreview() {
+  try {
+    collectDailySelection();
+    const text = generateDailyReport(true);
+    const box = document.getElementById('dailyLivePreview');
+    if (box) {
+      box.style.display = 'block';
+      box.textContent = text;
+    }
+  } catch (e) { /* 预览出错静默 */ }
 }
 
 // 打开日报预览确认弹窗（内容可编辑）
