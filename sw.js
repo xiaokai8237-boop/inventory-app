@@ -1,5 +1,5 @@
 // 物流筐收发管理系统 - Service Worker（离线可用）
-const CACHE = 'kuanwei-v11';
+const CACHE = 'kuanwei-v12';
 const ASSETS = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', (e) => {
