@@ -1916,7 +1916,16 @@ async function doSetupAccount() {
       renderAccountStatus();
       renderCloudBackupStatus();
       showToast('✅ 密码设置成功');
-      backupToCloud(true);
+      // 登录成功 → 自动同步云端该账号数据（换手机场景：把旧手机的数据拉回来）
+      autoSyncFromCloud(phone).then(hasCloud => {
+        if (hasCloud) {
+          showToast('✅ 已同步云端数据');
+          renderAccountStatus();
+          renderCloudBackupStatus();
+          renderTodayOverview();
+        }
+        backupToCloud(true);
+      }).catch(() => backupToCloud(true));
     } else {
       showToast(result.error || '设置失败');
     }
@@ -2039,7 +2048,16 @@ async function doForgotReset() {
       setCloudPhone(phone);
       closeForgotModal();
       renderAccountStatus();
-      showToast('✅ 密码已重置，请用新密码恢复数据');
+      showToast('✅ 密码已重置，正在同步数据…');
+      // 登录成功 → 自动同步云端该账号数据
+      autoSyncFromCloud(phone).then(hasCloud => {
+        if (hasCloud) {
+          showToast('✅ 已同步云端数据');
+          renderTodayOverview();
+        } else {
+          showToast('✅ 密码已重置，请用新密码登录');
+        }
+      });
     } else {
       recordFail(phone);
       showToast(result.error || '重置失败');
@@ -2110,6 +2128,28 @@ function adminTap() {
 }
 
 // 渲染云备份状态
+// 登录成功后自动从云端拉取该账号最新数据（合并到本地，不丢本地记录）
+async function autoSyncFromCloud(phone) {
+  try {
+    const resp = await fetch('/backup?account=' + encodeURIComponent(phone));
+    const result = await resp.json();
+    if (!(result && result.data && result.data.records)) return false;
+    const cloud = result.data;
+    // 合并：按 日期+店面+筐 去重（云端优先，因为登录时云端是最新的）
+    const local = loadData();
+    const byKey = new Map();
+    local.forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
+    (cloud.records || []).forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
+    saveDataArr([...byKey.values()]);
+    if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
+    if (cloud.storeConfig && Array.isArray(cloud.storeConfig)) saveStoreConfig(cloud.storeConfig);
+    try {
+      initStoreSelect('recordStore'); renderStoreChips(); renderGoodsInputList(); initGoodsFilter(); renderTodayOverview();
+    } catch(e) {}
+    return true;
+  } catch(e) { return false; }
+}
+
 function renderCloudBackupStatus() {
   const el = document.getElementById('cloudBackupStatus');
   if (!el) return;
