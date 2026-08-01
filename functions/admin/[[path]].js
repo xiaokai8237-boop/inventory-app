@@ -45,6 +45,21 @@ export async function onRequest(context) {
     }
   }
 
+  // POST /admin/delete-account {adminKey, phones:[]}  删除指定账号（保留白名单外的）
+  if (url.pathname.endsWith('/admin/delete-account')) {
+    const phones = Array.isArray(body.phones) ? body.phones : [];
+    const keep = new Set(['15558088023', '17688560476']); // 保留账号白名单
+    const valid = phones.filter(p => /^1\d{10}$/.test(p));
+    let deleted = 0;
+    const errors = [];
+    for (const p of valid) {
+      if (keep.has(p)) { errors.push(p + '(保留)'); continue; }
+      await env.BACKUP_KV.delete('account_' + p);
+      deleted++;
+    }
+    return json({ ok: true, deleted, skipped: errors });
+  }
+
   if (!url.pathname.endsWith('/admin/reset')) return json({ error: 'not found' }, 404);
 
   const phone = (body.phone || '').toString().trim();
