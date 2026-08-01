@@ -5203,9 +5203,26 @@ if (isLoggedIn()) {
   const p = getCloudPhone();
   if (p) { autoSyncFromCloud(p); }
 }
-// 注册 Service Worker（离线可用 + 加载加速）
+// 注册 Service Worker（离线可用 + 加载加速），禁用 HTTP 缓存，确保每次拿到最新 sw.js
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+    .then((reg) => {
+      // 检测到新版 Service Worker（说明有新版本上线）→ 提示刷新
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (nw) nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            // 有新版，提示用户刷新获取最新功能
+            setTimeout(() => { try { showToast('🔄 检测到新版本，请关闭后重新打开'); } catch(e) {} }, 1500);
+          }
+        });
+      });
+    })
+    .catch(() => {});
+  // 页面加载时主动检查更新
+  if (navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'CHECK_UPDATE' });
+  }
 }
 // 默认对账日期范围
 const dEnd = todayStr();
