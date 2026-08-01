@@ -1312,7 +1312,11 @@ body {
     <div style="font-size:13px;color:var(--text-light);margin-bottom:10px;">
       当前模式：<span id="ocrModeLabel" style="color:var(--primary);font-weight:600;font-size:14px;">发出</span>
       · 筐类型：<span id="ocrGoodsLabel" style="color:#fff;font-weight:700;font-size:24px;background:linear-gradient(135deg,#3b82f6,#2563eb);padding:4px 16px;border-radius:10px;margin-left:4px;box-shadow:0 2px 8px rgba(59,130,246,.3);display:inline-block;">常温筐</span>
-      · <span style="color:var(--warning);">黄色列=物流箱（自动录入该列）</span>
+    </div>
+    <div style="font-size:11.5px;color:var(--text-light);margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap;">
+      <span><span style="display:inline-block;width:10px;height:10px;background:#10b981;border-radius:2px;margin-right:3px;"></span>绿色=高置信</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:2px;margin-right:3px;"></span>黄色=建议核对</span>
+      <span style="color:var(--warning);">黄色列=物流箱（自动录入该列）</span>
     </div>
     <div id="ocrEditFields"></div>
     <div style="background:#fff3cd;border:1.5px solid #f59e0b;border-radius:8px;padding:8px 12px;margin-top:10px;font-size:13px;color:#b45309;font-weight:600;text-align:center;">
@@ -2712,6 +2716,23 @@ function saveManualRecord() {
   reloadRecordInputs();
   showToast('✅ 保存成功');
   renderTodayOverview();
+  // 保存后自动跳到下一个店面（连续录入）
+  autoNextStore();
+}
+
+// 保存后自动跳下一个店面（循环到最后一个时停在本店）
+function autoNextStore() {
+  const cfg = loadStoreConfig();
+  if (!cfg || cfg.length < 2) return;
+  const nextIdx = currentStoreIdx + 1;
+  if (nextIdx >= cfg.length) {
+    // 已到最后一个店面：清空输入，停在本店
+    reloadRecordInputs();
+    return;
+  }
+  currentStoreIdx = nextIdx;
+  renderStoreChips();
+  reloadRecordInputs();
 }
 
 // ======== 今日概览 ========
@@ -2919,6 +2940,9 @@ async function doOCR(imageDataUrl, file) {
     if (!ocrData.words_result) {
       throw new Error(ocrData.error_msg || '识别失败');
     }
+
+    // 记录识别来源（表格识别=高置信）
+    ocrData._highConf = !!usedTable;
 
     // 5. 解析识别结果
     parseOcrResult(ocrData);
@@ -3212,6 +3236,11 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
 
   // ===== 智能补行：利用「门店固定」先验，编号缺口自动补全 =====
   rows = fillMissingStores(rows, loadStoreConfig());
+  // 表格识别来源 → 高置信标记（数字可信，绿色）
+  const highConf = !!ocrData._highConf;
+  if (highConf) {
+    rows.forEach(r => { if (!r._missing) r._highConf = true; });
+  }
 
   ocrCurrentResult = {
     goodsIdx,
@@ -3244,13 +3273,18 @@ function refreshOcrQtyCol() {
   rows.forEach((r, i) => {
     // 自动补的行：黄色警示背景提示用户核对
     const isMissing = r._missing;
+    // 高置信（表格识别）：数量框绿色
+    const isHighConf = r._highConf;
     const rowBg = isMissing ? ' style="background:#fff3cd;"' : '';
     const hint = isMissing ? ' <span style="color:var(--warning);font-size:11px;">⚠️可能漏识别</span>' : '';
     html += '<tr' + rowBg + '>';
     html += '<td><input type="text" id="ocrCode_' + i + '" value="' + escapeHtml(r.code || '') + '" maxlength="10" style="width:60px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;text-align:center;"></td>';
     html += '<td style="text-align:left;padding-left:6px;"><input type="text" id="ocrName_' + i + '" value="' + escapeHtml(r.name || '') + '" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;">' + hint + '</td>';
     const v = r.nums[0] !== undefined ? r.nums[0] : 0;
-    html += '<td style="background:#fffde7;"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="width:64px;padding:5px;border:1.5px solid var(--warning);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#b35900;"></td>';
+    const qtyStyle = isHighConf
+      ? 'width:64px;padding:5px;border:1.5px solid #10b981;border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#15803d;background:#f0fdf4;'
+      : 'width:64px;padding:5px;border:1.5px solid var(--warning);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#b35900;';
+    html += '<td style="background:' + (isHighConf ? '#f0fdf4;' : '#fffde7;') + '"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="' + qtyStyle + '"></td>';
     html += '<td><button onclick="removeOcrRow(' + i + ')" style="background:none;border:none;color:var(--danger);font-size:20px;cursor:pointer;padding:0 6px;line-height:1;">×</button></td>';
     html += '</tr>';
   });
@@ -4121,14 +4155,23 @@ function importData(event) {
         showToast('❌ 文件格式错误');
         return;
       }
-      if (confirm(`即将导入 ${obj.records.length} 条记录，将覆盖当前数据，确认？`)) {
+      // 导入方式：点确定=覆盖，点取消=合并追加（推荐）
+      const overwrite = confirm(`导入 ${obj.records.length} 条记录：\n\n点「确定」= 覆盖当前所有数据\n点「取消」= 合并到现有数据（推荐，不会丢）`);
+      if (overwrite) {
         saveDataArr(obj.records);
-        if (obj.goodsNames) saveGoodsNamesStorage(obj.goodsNames);
-        initGoodsFilter();
-        renderGoodsInputList();
-        renderTodayOverview();
-        showToast('✅ 导入成功');
+      } else {
+        // 合并：按 日期+店面+筐 去重（同一天同一店同一筐保留新值）
+        const cur = loadData();
+        const byKey = new Map();
+        cur.forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
+        obj.records.forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
+        saveDataArr([...byKey.values()]);
       }
+      if (obj.goodsNames) saveGoodsNamesStorage(obj.goodsNames);
+      initGoodsFilter();
+      renderGoodsInputList();
+      renderTodayOverview();
+      showToast('✅ 导入成功' + (overwrite ? '' : '（合并）'));
     } catch(err) {
       showToast('❌ 导入失败: ' + err.message);
     }
@@ -4144,6 +4187,10 @@ initSummaryPage();
 initWelcome();
 // 云备份恢复（清缓存/换手机后自动从云端拉取数据）
 restoreFromCloud();
+// 注册 Service Worker（离线可用 + 加载加速）
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
 // 默认对账日期范围
 const dEnd = todayStr();
 const dStart = new Date();
