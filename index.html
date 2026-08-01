@@ -454,6 +454,18 @@ body {
   transition: border-color .2s;
 }
 .store-card .sc-name:focus { border-color: var(--primary); background: #fff; }
+.store-card .sc-move {
+  flex: 0 0 auto;
+  width: 32px; height: 40px;
+  font-size: 15px;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  color: var(--primary);
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.store-card .sc-move:active { background: #eff6ff; }
 .store-card .sc-del {
   flex: 0 0 auto;
   padding: 8px 12px;
@@ -1841,6 +1853,15 @@ function loadStoreConfig() {
   } catch(e) {}
   return DEFAULT_STORES.map(s => ({ name: s.name, aliases: [...s.aliases] }));
 }
+// 店面排序视图：按 sort 字段升序（无 sort 视为 sort=下标），不改变数组物理顺序（storeIdx 保持稳定）
+function getSortedStores() {
+  const cfg = loadStoreConfig();
+  return cfg.map((s, i) => ({ _idx: i, sort: (s.sort === undefined ? i : s.sort), s }))
+           .sort((a, b) => a.sort - b.sort);
+}
+function getSortedStoreNames() {
+  return getSortedStores().map(x => x.s.name);
+}
 function loadStoreNames() {
   return loadStoreConfig().map(s => s.name);
 }
@@ -2509,11 +2530,11 @@ function checkOcrCancel() {
 
 // ======== 店面 chip 切换（手动录入页） ========
 function renderStoreChips() {
-  const cfg = loadStoreConfig();
+  const view = getSortedStores();
   const container = document.getElementById('recordStoreChips');
   if (!container) return;
   // 无店面时提示去新增
-  if (!cfg || cfg.length === 0) {
+  if (!view || view.length === 0) {
     container.innerHTML = `
       <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:8px;padding:10px 12px;font-size:13px;color:#7c5a00;">
         🏪 还没有店面，先去添加吧：<br>
@@ -2526,11 +2547,13 @@ function renderStoreChips() {
     return;
   }
   let html = '';
-  cfg.forEach((s, i) => {
+  view.forEach((x) => {
+    const s = x.s;
+    const idx = x._idx;
     const alias = (s.aliases && s.aliases[0]) || '';
-    const cls = i === currentStoreIdx ? 'store-chip active' : 'store-chip';
+    const cls = idx === currentStoreIdx ? 'store-chip active' : 'store-chip';
     const aliasHtml = alias ? `<span class="chip-alias">· ${escapeHtml(alias)}</span>` : '';
-    html += `<button class="${cls}" onclick="selectStoreChip(${i})">${escapeHtml(s.name)}${aliasHtml}</button>`;
+    html += `<button class="${cls}" onclick="selectStoreChip(${idx})">${escapeHtml(s.name)}${aliasHtml}</button>`;
   });
   container.innerHTML = html;
   // 同步隐藏 select
@@ -2721,32 +2744,59 @@ function backFromBackupPanel() {
 
 // ======== 店面管理面板 ========
 function renderStorePanelUI() {
-  const cfg = loadStoreConfig();
+  const view = getSortedStores(); // 排序视图（含原始下标 _idx）
   const container = document.getElementById('storeListPanel');
   let html = '';
-  cfg.forEach((s, i) => {
+  view.forEach((x, i) => {
+    const s = x.s;
+    const idx = x._idx; // 原始数组下标
+    const upDisabled = i === 0 ? 'disabled style="opacity:.35;"' : '';
+    const downDisabled = i === view.length - 1 ? 'disabled style="opacity:.35;"' : '';
     html += `<div class="store-card">
       <div class="sc-head">
         <div class="sc-idx">${i+1}</div>
-        <input type="text" class="sc-name" id="sName${i}" value="${escapeHtml(s.name)}" maxlength="20">
-        <button class="sc-del" onclick="removeStoreFromPanel(${i})">删除</button>
+        <input type="text" class="sc-name" id="sName${idx}" value="${escapeHtml(s.name)}" maxlength="20">
+        <div style="display:flex;gap:4px;flex-shrink:0;">
+          <button class="sc-move" onclick="moveStore(${idx},-1)" ${upDisabled}>↑</button>
+          <button class="sc-move" onclick="moveStore(${idx},1)" ${downDisabled}>↓</button>
+        </div>
+        <button class="sc-del" onclick="removeStoreFromPanel(${idx})">删除</button>
       </div>
       <div class="sc-alias-label">🏷️ 别名（识别时可替代店名）</div>
-      <div class="sc-aliases" id="sAliases${i}">
+      <div class="sc-aliases" id="sAliases${idx}">
         ${s.aliases.length > 0
-          ? s.aliases.map((a, ai) => `<span class="sc-alias">${escapeHtml(a)}<span class="sc-x" onclick="removeStoreAlias(${i},${ai})">×</span></span>`).join('')
+          ? s.aliases.map((a, ai) => `<span class="sc-alias">${escapeHtml(a)}<span class="sc-x" onclick="removeStoreAlias(${idx},${ai})">×</span></span>`).join('')
           : `<span class="sc-empty">暂无别名</span>`}
       </div>
       <div class="sc-add">
-        <input type="text" id="sAliasInput${i}" placeholder="输入别名后点添加" maxlength="20">
-        <button onclick="addStoreAlias(${i})">添加</button>
+        <input type="text" id="sAliasInput${idx}" placeholder="输入别名后点添加" maxlength="20">
+        <button onclick="addStoreAlias(${idx})">添加</button>
       </div>
     </div>`;
   });
   container.innerHTML = html;
   const sc = document.getElementById('storeCount');
-  if (sc) sc.textContent = cfg.length;
+  if (sc) sc.textContent = view.length;
 }
+// 上移/下移店面排序（交换两店的 sort 值）
+function moveStore(idx, dir) {
+  const cfg = loadStoreConfig();
+  const view = getSortedStores();
+  const pos = view.findIndex(x => x._idx === idx);
+  const j = pos + dir;
+  if (pos < 0 || j < 0 || j >= view.length) return;
+  const otherIdx = view[j]._idx;
+  const tmp = cfg[idx].sort;
+  cfg[idx].sort = cfg[otherIdx].sort;
+  cfg[otherIdx].sort = tmp;
+  // 归一化 sort（0..n-1）
+  cfg = cfg.map((s, i) => ({ ...s, sort: i }));
+  saveStoreConfig(cfg);
+  renderStorePanelUI();
+  initAllStores();
+  showToast('已调整排序');
+}
+
 // 保存店面管理面板的所有修改（店名/别名）
 function saveStorePanelChanges() {
   const cfg = loadStoreConfig();
@@ -2781,6 +2831,8 @@ function saveStorePanelChanges() {
       if (av && !s.aliases.includes(av)) { s.aliases.push(av); changed++; ai.value = ''; }
     }
   });
+  // 按 sort 归一化（保证删除/调整后 sort 连续，数组顺序即显示顺序）
+  cfg = cfg.map((s, idx) => ({ ...s, sort: idx }));
   saveStoreConfig(cfg);
   renderStorePanelUI();
   initAllStores();
@@ -2805,7 +2857,7 @@ function removeStoreAlias(idx, ai) {
 }
 function addStoreFromPanel() {
   const cfg = loadStoreConfig();
-  cfg.push({ name: '新店面', aliases: [] });
+  cfg.push({ name: '新店面', aliases: [], sort: cfg.length });
   saveStoreConfig(cfg);
   renderStorePanelUI();
   initAllStores();
@@ -2813,6 +2865,7 @@ function addStoreFromPanel() {
 function removeStoreFromPanel(idx) {
   const cfg = loadStoreConfig();
   cfg.splice(idx, 1);
+  cfg = cfg.map((s, i) => ({ ...s, sort: i }));
   saveStoreConfig(cfg);
   renderStorePanelUI();
   initAllStores();
@@ -3072,11 +3125,11 @@ function onRecordStoreChange() {
 function initStoreSelect(selId) {
   const sel = document.getElementById(selId);
   if (!sel) return;
-  const names = loadStoreNames();
+  const view = getSortedStores(); // 排序视图，value 用原始 storeIdx
   sel.innerHTML = '';
-  names.forEach((name, i) => {
+  view.forEach(x => {
     const opt = document.createElement('option');
-    opt.value = i; opt.textContent = name;
+    opt.value = x._idx; opt.textContent = x.s.name;
     sel.appendChild(opt);
   });
   sel.value = currentStoreIdx;
@@ -3087,15 +3140,15 @@ function initStoreSelect(selId) {
 function populateStoreFilter(selId) {
   const sel = document.getElementById(selId);
   if (!sel) return;
-  const names = loadStoreNames();
+  const view = getSortedStores();
   const cur = sel.value;
   sel.innerHTML = '<option value="">全部店</option>';
-  names.forEach((name, i) => {
+  view.forEach(x => {
     const opt = document.createElement('option');
-    opt.value = i; opt.textContent = name;
+    opt.value = x._idx; opt.textContent = x.s.name;
     sel.appendChild(opt);
   });
-  if (cur !== '' && names[parseInt(cur)] !== undefined) sel.value = cur;
+  if (cur !== '' && view.some(x => String(x._idx) === String(cur))) sel.value = cur;
   else sel.value = '';
 }
 
