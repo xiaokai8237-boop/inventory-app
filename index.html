@@ -798,6 +798,11 @@ body {
 
   <!-- === 首页向导（默认显示） === -->
   <div id="homeWizard">
+    <div id="homeGuide" style="display:none;background:#fff8e1;border:2px solid #f59e0b;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:14px;color:#7c5a00;position:relative;">
+      👇 <b>先点这里「📤 发出」</b>，开始记录今天给每家店发了几个筐<br>
+      <span style="font-size:12px;">（回收时点「📥 回收」）</span>
+      <span style="position:absolute;top:-8px;right:8px;font-size:18px;" onclick="this.parentElement.style.display='none';localStorage.setItem('kuanwei_guide_seen','1')">✕</span>
+    </div>
     <div class="card" style="text-align:center;padding:16px 14px;">
       <div style="font-size:16px;font-weight:600;margin-bottom:16px;">选择操作</div>
       <!-- 第一行：发出/回收（主操作，突出） -->
@@ -1164,7 +1169,10 @@ body {
     <div style="font-size:14px;font-weight:700;color:var(--primary-dark);">📊 第5步：查看和核对数据</div>
     <div style="margin-top:8px;font-size:13px;line-height:2;">
       <b>📋 想看以前记过什么？</b><br>
-      点顶部 <b>「记录」</b> → 能看到所有历史记录，可按日期/店面/筐筛选 → 记错了可以点「删除」<br><br>
+      点顶部 <b>「记录」</b> → 能看到所有历史记录，可按日期/店面/筐筛选<br>
+      记错了点 <b>「编辑」</b> 直接改数量，不用删了重录；想删才点「删除」<br><br>
+      <b>📊 想一眼看今天每家店发了/收了多少？</b><br>
+      进「📤 发出」或「📥 回收」页，底部有「今日各筐统计（全部门店）」和「📋 今日各店明细」，每家店每个筐都列出来了<br><br>
       <b>📈 想看统计总数？</b><br>
       ① 点 <b>「首页」</b> → 点 <b>「📈 汇总」</b> 按钮<br>
       ② 选日期范围（或点"近7天"）<br>
@@ -1201,15 +1209,23 @@ body {
     <div style="font-size:14px;font-weight:700;color:#b45309;">❓ 常见问题</div>
     <div style="margin-top:8px;font-size:13px;line-height:2;">
       <b>❓ 拍照识别出来的数字不准怎么办？</b><br>
-      弹窗里每个数字都可以<b>直接点进去改</b>，改成对的再点「确认录入」。拍照时尽量拍正、光线亮一点，识别更准。<br><br>
+      弹窗里每个数字都可以<b>直接点进去改</b>，改成对的再点「确认录入」。绿色=可信，黄色=建议核对。拍照时尽量拍正、光线亮一点，识别更准。<br><br>
       <b>❓ 识别漏了一家店怎么办？</b><br>
       点表格下面 <b>「➕ 新增一行」</b>，自己把编号、店名、数量填进去。<br><br>
       <b>❓ 填错了已经保存了，怎么改？</b><br>
-      点顶部 <b>「记录」</b> → 找到那条 → 点<b>「删除」</b> → 回到首页重新录一遍。<br><br>
+      点顶部 <b>「记录」</b> → 找到那条 → 点<b>「编辑」</b> → 直接改发出/回收数量 → 保存。<br><br>
       <b>❓ 语音识别不准怎么办？</b><br>
-      说的时候稍微慢一点、清楚一点；识别完记得检查数字再保存。<br><br>
+      说的时候稍微慢一点、清楚一点；识别后<b>会先弹确认框</b>，看到数字对了再点「填入」，说错了点「取消」重说。<br><br>
+      <b>❓ 手写单据能识别吗？</b><br>
+      手写单会走「手写增强识别」，尽量拍清晰；如果个别数字识别不到，在弹窗里手动改或补填。<br><br>
+      <b>❓ 识别要等好几秒，是卡住了吗？</b><br>
+      不是，识别过程有进度条和步骤提示（定位表格→识别文字→汇总），一般 3-5 秒出结果；急的话可以点「取消识别」重拍。<br><br>
+      <b>❓ 两台手机的数据能合并吗？</b><br>
+      能。数据备份与恢复 → 「选择文件导入」时，点「取消」就是<b>合并</b>（不会覆盖），两台手机数据合到一起。<br><br>
+      <b>❓ 没网络能用吗？</b><br>
+      打开过一次后，页面会缓存，<b>没网也能打开看数据</b>；但录入/拍照识别需要联网。<br><br>
       <b><span id="adminTapZone" onclick="adminTap()" style="cursor:default;user-select:none;">❓</span> 每天要录很多店怎么办？</b><br>
-      先拍照识别出库（最快）→ 再手动补入库 → 或者语音说。
+      保存后<b>自动跳到下一家店</b>，一路填完不用选店；配合语音或拍照更快。
     </div>
   </div>
 </div>
@@ -1278,6 +1294,31 @@ body {
     <div style="display:flex;gap:8px;">
       <button class="btn btn-danger" style="flex:1;" onclick="confirmDeleteRecord()">🗑️ 确认删除</button>
       <button class="btn btn-outline" style="flex:1;" onclick="closeRecordDeleteModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 记录编辑弹窗 -->
+<div class="gd-modal" id="editRecordModal" onclick="closeEditRecordModal()">
+  <div class="gd-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">✏️ 编辑记录</span>
+      <button onclick="closeEditRecordModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:13px;color:var(--text);margin-bottom:12px;" id="editRecordInfo"></div>
+    <div style="display:flex;gap:10px;margin-bottom:14px;">
+      <div style="flex:1;background:#f0f7ff;border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">发出</div>
+        <input type="number" id="editQtyIn" min="0" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:6px;font-size:16px;text-align:center;">
+      </div>
+      <div style="flex:1;background:#f0fdf4;border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">回收</div>
+        <input type="number" id="editQtyOut" min="0" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:6px;font-size:16px;text-align:center;">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="confirmEditRecord()">✅ 保存修改</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="closeEditRecordModal()">取消</button>
     </div>
   </div>
 </div>
@@ -1548,6 +1589,23 @@ body {
     </div>
     <input type="text" id="manualVoiceInput" placeholder="或手动输入，如：鲜食1面包2" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;box-sizing:border-box;">
     <button class="btn btn-primary" style="margin-top:8px;padding:10px;font-size:14px;" onclick="parseManualVoiceInput()">识别并填入</button>
+  </div>
+</div>
+
+<!-- 语音识别确认弹窗 -->
+<div class="store-ocr-modal" id="voiceConfirmModal">
+  <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:340px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">🎤 确认识别结果</span>
+      <button onclick="cancelVoiceFill()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:14px;color:var(--text);margin-bottom:6px;">识别到：</div>
+    <div id="voiceConfirmInfo" style="font-size:15px;font-weight:600;color:var(--primary);background:#f0f7ff;border-radius:8px;padding:12px;margin-bottom:6px;"></div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:14px;">确认无误后点「填入」；说错了点「取消」重说</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="confirmVoiceFill()">✅ 填入</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="cancelVoiceFill()">取消</button>
+    </div>
   </div>
 </div>
 
@@ -2280,7 +2338,24 @@ function closeWelcome(goTutorial) {
   try { localStorage.setItem('kuanwei_welcome_seen', '1'); } catch(e) {}
   const m = document.getElementById('welcomeModal');
   if (m) m.classList.remove('show');
-  if (goTutorial) switchPage('settings');
+  if (goTutorial) {
+    switchPage('settings');
+  } else {
+    // 首次开始使用 → 显示首页引导箭头（一次性）
+    showHomeGuide();
+  }
+}
+
+// 首页引导箭头（新用户首次进入显示，引导点「发出」）
+function showHomeGuide() {
+  try {
+    if (localStorage.getItem('kuanwei_guide_seen')) return;
+    const guide = document.getElementById('homeGuide');
+    if (guide) {
+      guide.style.display = 'block';
+      setTimeout(() => { guide.style.display = 'none'; localStorage.setItem('kuanwei_guide_seen', '1'); }, 8000);
+    }
+  } catch(e) {}
 }
 
 // ======== 添加到主屏幕（PWA） ========
@@ -2810,6 +2885,36 @@ function renderTodayOverview() {
       </div>`;
   });
   html += '</div>';
+
+  // 今日各店明细表（每店一行，各筐发出/回收）
+  const storeMap = {};
+  todayRecords.forEach(r => {
+    if (!storeMap[r.storeIdx]) storeMap[r.storeIdx] = { name: r.storeName || '未知店', rows: {} };
+    names.forEach((n, i) => {
+      if (!storeMap[r.storeIdx].rows[i]) storeMap[r.storeIdx].rows[i] = { in: 0, out: 0 };
+    });
+    if (storeMap[r.storeIdx].rows[r.goodsIdx]) {
+      storeMap[r.storeIdx].rows[r.goodsIdx].in += r.qtyIn;
+      storeMap[r.storeIdx].rows[r.goodsIdx].out += r.qtyOut;
+    }
+  });
+  const storeKeys = Object.keys(storeMap);
+  if (storeKeys.length > 0) {
+    html += '<div style="margin-top:10px;"><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">📋 今日各店明细</div><div style="overflow-x:auto;"><table class="summary-table" style="min-width:100%;"><thead><tr><th style="text-align:left;">店面</th>';
+    names.forEach((n, i) => { html += `<th>${n}<br><span style="font-weight:400;font-size:10px;">发/回</span></th>`; });
+    html += '</tr></thead><tbody>';
+    storeKeys.forEach(sk => {
+      const s = storeMap[sk];
+      html += `<tr><td style="text-align:left;font-size:12px;">${escapeHtml(s.name)}</td>`;
+      names.forEach((n, i) => {
+        const d = s.rows[i] || { in: 0, out: 0 };
+        html += `<td style="font-size:12px;"><span style="color:var(--primary);font-weight:600;">${d.in}</span>/<span style="color:var(--success);font-weight:600;">${d.out}</span></td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div></div>';
+  }
+
   container.innerHTML = anyShow ? html : '<div class="empty">今日暂无记录</div>';
 }
 
@@ -2890,7 +2995,17 @@ function parseVoiceText(text, mode) {
     showToast('未识别到数据');
     return;
   }
-  // 填入对应输入框（当前店面）
+  // 先展示识别结果，用户确认后才填入（防止听错/说错直接污染输入框）
+  pendingVoiceResults = { results, mode };
+  const rows = Object.keys(results).map(idx => `${names[idx]}：${results[idx]}`).join('，');
+  document.getElementById('voiceConfirmInfo').textContent = rows;
+  document.getElementById('voiceConfirmModal').classList.add('show');
+}
+let pendingVoiceResults = null;
+function confirmVoiceFill() {
+  if (!pendingVoiceResults) return;
+  const { results, mode } = pendingVoiceResults;
+  const names = loadGoodsNames();
   let filled = [];
   for (let idx in results) {
     const inputId = mode === 'in' ? 'giIn' + idx : 'giOut' + idx;
@@ -2900,7 +3015,14 @@ function parseVoiceText(text, mode) {
       filled.push(names[idx] + ':' + results[idx]);
     }
   }
+  pendingVoiceResults = null;
+  document.getElementById('voiceConfirmModal').classList.remove('show');
   showToast(`✅ 已填入 ${filled.join('、')}`);
+}
+function cancelVoiceFill() {
+  pendingVoiceResults = null;
+  document.getElementById('voiceConfirmModal').classList.remove('show');
+  showToast('已取消');
 }
 
 // ======== 拍照OCR ========
@@ -3581,7 +3703,10 @@ function renderHistory() {
         <div class="record-item" style="box-shadow:none;border:1px solid #f0f0f0;margin-bottom:6px;">
           <div class="record-top">
             <span class="record-goods">${sourceIcon} ${r.goodsName}${storeTag}</span>
-            <button class="del-btn" onclick="deleteRecord('${r.id}')">删除</button>
+            <div style="display:flex;gap:6px;">
+              <button class="del-btn" style="background:#f0f7ff;color:var(--primary);" onclick="openEditRecord('${r.id}')">编辑</button>
+              <button class="del-btn" onclick="deleteRecord('${r.id}')">删除</button>
+            </div>
           </div>
           <div class="record-qty">
             <span class="qty-tag"><span class="qname">发出</span><span class="qin">+${r.qtyIn}</span></span>
@@ -3595,6 +3720,48 @@ function renderHistory() {
 }
 
 let pendingDeleteRecordId = null; // 待删除的记录 id
+let pendingEditRecordId = null; // 待编辑的记录 id
+
+// 编辑记录
+function openEditRecord(id) {
+  const data = loadData();
+  const r = data.find(x => String(x.id) === String(id));
+  if (!r) { showToast('记录不存在'); return; }
+  pendingEditRecordId = id;
+  const storeName = r.storeName || '未知店';
+  document.getElementById('editRecordInfo').innerHTML =
+    `📅 ${r.date} · 🏪 ${storeName} · ${r.goodsName || ''}`;
+  document.getElementById('editQtyIn').value = r.qtyIn || 0;
+  document.getElementById('editQtyOut').value = r.qtyOut || 0;
+  document.getElementById('editRecordModal').classList.add('show');
+}
+function closeEditRecordModal() {
+  document.getElementById('editRecordModal').classList.remove('show');
+  pendingEditRecordId = null;
+}
+function confirmEditRecord() {
+  if (pendingEditRecordId === null) return;
+  const qIn = parseInt(document.getElementById('editQtyIn').value) || 0;
+  const qOut = parseInt(document.getElementById('editQtyOut').value) || 0;
+  if (qIn === 0 && qOut === 0) {
+    showToast('发出和回收不能都是 0，请填一个');
+    return;
+  }
+  let data = loadData();
+  const r = data.find(x => String(x.id) === String(pendingEditRecordId));
+  if (r) {
+    r.qtyIn = qIn;
+    r.qtyOut = qOut;
+    r.updatedAt = new Date().toISOString();
+    saveDataArr(data);
+    closeEditRecordModal();
+    renderHistory();
+    renderTodayOverview();
+    showToast('✅ 已修改');
+  } else {
+    showToast('记录不存在');
+  }
+}
 
 // 删除记录：免提醒期内直接删，否则弹确认框
 function deleteRecord(id) {
