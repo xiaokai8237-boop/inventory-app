@@ -968,9 +968,9 @@ body {
             📷 拍照
             <input type="file" class="store-file-input" accept="image/*" capture="environment" onchange="handleStorePhoto(event)">
           </label>
-          <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;">
+          <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;" onclick="openAlbumPicker('store', event)">
             🖼️ 相册选
-            <input type="file" class="store-file-input" accept="image/*" onchange="handleStorePhoto(event)">
+            <input type="file" id="storeOcrAlbumInput" class="store-file-input" accept="image/*" onchange="handleStorePhoto(event)" style="display:none;">
           </label>
         </div>
         <div class="iz-tip">拍「配送路单店面表」类表格（含 HN40-01 编号），识别后可在弹窗里逐条修正再保存</div>
@@ -1754,9 +1754,9 @@ body {
         📷 拍照
         <input type="file" id="photoInput" class="store-file-input" accept="image/*" capture="environment" onchange="handlePhoto(event)">
       </label>
-      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;">
+      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;" onclick="openAlbumPicker('photo', event)">
         🖼️ 相册选
-        <input type="file" id="photoAlbumInput" class="store-file-input" accept="image/*" onchange="handlePhoto(event)">
+        <input type="file" id="photoAlbumInput" class="store-file-input" accept="image/*" onchange="handlePhoto(event)" style="display:none;">
       </label>
     </div>
   </div>
@@ -3469,6 +3469,31 @@ function cancelVoiceFill() {
 let ocrCurrentResult = null; // { goodsIdx, qtyOut, rawText, trayType }
 let ocrColumnOffset = 0; // 列偏移：数字与列错位时调整
 let ocrCurrentImage = null;  // dataURL 用于弹窗预览
+
+// 相册选：优先用 showOpenFilePicker（安卓 PWA 可用），fallback 原生 input
+function openAlbumPicker(type, ev) {
+  if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+  if (window.showOpenFilePicker) {
+    try {
+      showOpenFilePicker({ types: [{ description: '图片', accept: { 'image/*': ['.jpg','.jpeg','.png','.webp','.bmp'] } }], multiple: false })
+        .then(async (handles) => {
+          if (!handles || !handles[0]) return;
+          const file = await handles[0].getFile();
+          if (!file) return;
+          const fake = { target: { files: [file] } };
+          if (type === 'store') handleStorePhoto(fake);
+          else handlePhoto(fake);
+        })
+        .catch(() => { /* 用户取消或不可用，fallback */ triggerAlbumInput(type); });
+    } catch (e) { triggerAlbumInput(type); }
+  } else {
+    triggerAlbumInput(type);
+  }
+}
+function triggerAlbumInput(type) {
+  const el = document.getElementById(type === 'store' ? 'storeOcrAlbumInput' : 'photoAlbumInput');
+  if (el) el.click();
+}
 
 function handlePhoto(event) {
   const file = event.target.files[0];
