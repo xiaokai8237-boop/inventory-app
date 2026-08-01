@@ -3679,23 +3679,41 @@ function exportMyExcel() {
   const rowsArr = Object.values(byKey).sort((a, b) => a.date === b.date ? (a.store||'').localeCompare(b.store||'') : a.date.localeCompare(b.date));
   const allStores = (exportStore === '');
 
-  // 表头：日期 [+店面] + 各筐发出 + 各筐回收
-  const headers = ['日期'];
-  if (allStores) headers.push('店面');
+  // 生成「按日分组」明细：每个日期一组，组内每家店一行，末尾本日小计
+  const headers = ['店面'];
   names.forEach(n => headers.push(n + '-发出'));
   names.forEach(n => headers.push(n + '-回收'));
+  const rows = [['物流筐收发管理系统 · 按日明细', '', '', '', '', '', '']];
+  rows.push(['导出范围：', start || '全部', '至', end || todayStr(), '', '', '']);
+  rows.push([]);
 
-  const rows = [headers];
+  let curDate = null;
   rowsArr.forEach(d => {
-    const row = [d.date];
-    if (allStores) row.push(d.store);
-    names.forEach((n, i) => row.push(d.in[i]));
-    names.forEach((n, i) => row.push(d.out[i]));
+    // 新日期 → 日期标题行
+    if (d.date !== curDate) {
+      curDate = d.date;
+      rows.push([curDate, '', '', '', '', '', '']);
+      rows.push(headers.slice());
+    }
+    const row = [d.store];
+    names.forEach((n, i) => row.push(d.in[i] || 0));
+    names.forEach((n, i) => row.push(d.out[i] || 0));
     rows.push(row);
+    // 本日期小计：在下一组日期前补
+    const isLast = rowsArr.indexOf(d) === rowsArr.length - 1;
+    const next = rowsArr[rowsArr.indexOf(d) + 1];
+    if (isLast || next.date !== curDate) {
+      const dayItems = rowsArr.filter(x => x.date === curDate);
+      const subRow = ['本日合计'];
+      names.forEach((n, i) => { subRow.push(dayItems.reduce((s, x) => s + x.in[i], 0)); });
+      names.forEach((n, i) => { subRow.push(dayItems.reduce((s, x) => s + x.out[i], 0)); });
+      rows.push(subRow);
+      rows.push([]);
+    }
   });
-  // 合计行
-  const totalRow = ['合计'];
-  if (allStores) totalRow.push('');
+
+  // 顶部总合计
+  const totalRow = ['总合计'];
   names.forEach((n, i) => { totalRow.push(rowsArr.reduce((s, d) => s + d.in[i], 0)); });
   names.forEach((n, i) => { totalRow.push(rowsArr.reduce((s, d) => s + d.out[i], 0)); });
   rows.push(totalRow);
@@ -3704,7 +3722,7 @@ function exportMyExcel() {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, '库存数据');
   XLSX.writeFile(wb, `库存数据_${start||'全部'}_${end||todayStr()}.xlsx`);
-  showToast('✅ Excel已导出');
+  showToast('✅ Excel已导出（按日分组）');
 }
 
 function importReconcile(event) {
