@@ -928,11 +928,11 @@ body {
       <div class="import-zone" style="margin-top:16px;">
         <div class="iz-title">📸 批量导入店面</div>
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('storeOcrFile').click()">📷 拍照</button>
-          <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('storeOcrAlbum').click()">🖼️ 相册选</button>
+          <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;" for="storeOcrFile">📷 拍照</label>
+          <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;" for="storeOcrAlbum">🖼️ 相册选</label>
         </div>
-        <input type="file" id="storeOcrFile" accept="image/*" capture="environment" style="display:none" onchange="handleStorePhoto(event)">
-        <input type="file" id="storeOcrAlbum" accept="image/*" style="display:none" onchange="handleStorePhoto(event)">
+        <input type="file" id="storeOcrFile" accept="image/*" capture="environment" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;" onchange="handleStorePhoto(event)">
+        <input type="file" id="storeOcrAlbum" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;" onchange="handleStorePhoto(event)">
         <div class="iz-tip">拍「配送路单店面表」类表格（含 HN40-01 编号），识别后可在弹窗里逐条修正再保存</div>
       </div>
     </div>
@@ -1701,11 +1701,11 @@ body {
     </div>
     <div style="font-size:12px;color:var(--text-light);margin-bottom:12px;text-align:center;">拍摄配送路单，自动识别物流箱合计</div>
     <div class="btn-row">
-      <button class="btn btn-outline" onclick="document.getElementById('photoInput').click()">📷 拍照</button>
-      <button class="btn btn-outline" onclick="document.getElementById('photoAlbumInput').click()">🖼️ 相册选</button>
+      <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" for="photoInput">📷 拍照</label>
+      <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" for="photoAlbumInput">🖼️ 相册选</label>
     </div>
-    <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(event)">
-    <input type="file" id="photoAlbumInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+    <input type="file" id="photoInput" accept="image/*" capture="environment" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;" onchange="handlePhoto(event)">
+    <input type="file" id="photoAlbumInput" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;" onchange="handlePhoto(event)">
   </div>
 </div>
 
