@@ -798,11 +798,6 @@ body {
 
   <!-- === 首页向导（默认显示） === -->
   <div id="homeWizard">
-    <div id="homeGuide" style="display:none;background:#fff8e1;border:2px solid #f59e0b;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:14px;color:#7c5a00;position:relative;">
-      👇 <b>先点这里「📤 发出」</b>，开始记录今天给每家店发了几个筐<br>
-      <span style="font-size:12px;">（回收时点「📥 回收」）</span>
-      <span style="position:absolute;top:-8px;right:8px;font-size:18px;" onclick="this.parentElement.style.display='none';localStorage.setItem('kuanwei_guide_seen','1')">✕</span>
-    </div>
     <div class="card" style="text-align:center;padding:16px 14px;">
       <div style="font-size:16px;font-weight:600;margin-bottom:16px;">选择操作</div>
       <!-- 第一行：发出/回收（主操作，突出） -->
@@ -1539,12 +1534,20 @@ body {
       <button onclick="closeInstallModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
     </div>
     <div style="font-size:13px;line-height:1.9;color:var(--text);">
-      <div style="margin-bottom:8px;">按下面的步骤操作（苹果手机）：</div>
-      <div><b>①</b> 点底部 <b>「分享」</b> 按钮 <span style="background:#f0f7ff;padding:2px 8px;border-radius:6px;font-size:12px;">□↑</span></div>
-      <div><b>②</b> 向下滑动，找到 <b>「添加到主屏幕」</b></div>
-      <div><b>③</b> 点 <b>「添加」</b> → 桌面出现图标，像 App 一样用</div>
-      <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px;margin-top:12px;font-size:12.5px;color:#7c5a00;">
-        💡 安卓手机：浏览器菜单里点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b> 即可。
+      <div id="installWechatTip" style="display:none;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12.5px;color:#7c5a00;">
+        ⚠️ <b>微信里不能添加到主屏幕</b>，需要先用浏览器打开：<br>
+        ① 点右上角 <b>「⋯」</b><br>
+        ② 点 <b>「在浏览器打开」</b>（选 Safari / Chrome）<br>
+        ③ 打开后再点「📱 添加到主屏幕」
+      </div>
+      <div id="installNormalTip">
+        <div style="margin-bottom:8px;">按下面的步骤操作（苹果手机）：</div>
+        <div><b>①</b> 点底部 <b>「分享」</b> 按钮 <span style="background:#f0f7ff;padding:2px 8px;border-radius:6px;font-size:12px;">□↑</span></div>
+        <div><b>②</b> 向下滑动，找到 <b>「添加到主屏幕」</b></div>
+        <div><b>③</b> 点 <b>「添加」</b> → 桌面出现图标，像 App 一样用</div>
+        <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px;margin-top:12px;font-size:12.5px;color:#7c5a00;">
+          💡 安卓手机：浏览器菜单里点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b> 即可。
+        </div>
       </div>
     </div>
   </div>
@@ -2340,22 +2343,7 @@ function closeWelcome(goTutorial) {
   if (m) m.classList.remove('show');
   if (goTutorial) {
     switchPage('settings');
-  } else {
-    // 首次开始使用 → 显示首页引导箭头（一次性）
-    showHomeGuide();
   }
-}
-
-// 首页引导箭头（新用户首次进入显示，引导点「发出」）
-function showHomeGuide() {
-  try {
-    if (localStorage.getItem('kuanwei_guide_seen')) return;
-    const guide = document.getElementById('homeGuide');
-    if (guide) {
-      guide.style.display = 'block';
-      setTimeout(() => { guide.style.display = 'none'; localStorage.setItem('kuanwei_guide_seen', '1'); }, 8000);
-    }
-  } catch(e) {}
 }
 
 // ======== 添加到主屏幕（PWA） ========
@@ -2366,6 +2354,17 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 function installApp() {
+  // 微信内置浏览器：无法添加主屏幕，引导到浏览器打开
+  const isWechat = /MicroMessenger/i.test(navigator.userAgent);
+  if (isWechat) {
+    const modal = document.getElementById('installModal');
+    if (modal) modal.classList.add('show');
+    const wx = document.getElementById('installWechatTip');
+    const normal = document.getElementById('installNormalTip');
+    if (wx) wx.style.display = 'block';
+    if (normal) normal.style.display = 'none';
+    return;
+  }
   // Android/Chrome：触发原生安装提示
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -2375,6 +2374,10 @@ function installApp() {
   // iOS Safari 等：显示引导教程
   const modal = document.getElementById('installModal');
   if (modal) modal.classList.add('show');
+  const wx = document.getElementById('installWechatTip');
+  const normal = document.getElementById('installNormalTip');
+  if (wx) wx.style.display = 'none';
+  if (normal) normal.style.display = 'block';
 }
 function closeInstallModal() {
   const modal = document.getElementById('installModal');
