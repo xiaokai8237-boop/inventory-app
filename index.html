@@ -466,17 +466,27 @@ body {
   transition: border-color .2s;
 }
 .store-card .sc-name:focus { border-color: var(--primary); background: #fff; }
+.store-card .sc-move-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex-shrink: 0;
+}
 .store-card .sc-move {
   flex: 0 0 auto;
-  width: 32px; height: 40px;
-  font-size: 15px;
-  border: 1.5px solid var(--border);
-  background: #fff;
+  width: 30px; height: 22px;
+  font-size: 11px;
+  line-height: 1;
+  padding: 0;
+  border: 1px solid var(--border);
+  background: #f8fafc;
   color: var(--primary);
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
 }
+.store-card .sc-move:active { background: #eff6ff; }
+.store-card .sc-move:disabled { opacity: .3; cursor: default; background: #f1f5f9; }
 .store-card .sc-move:active { background: #eff6ff; }
 .store-card .sc-del {
   flex: 0 0 auto;
@@ -2800,15 +2810,13 @@ function renderStorePanelUI() {
   view.forEach((x, i) => {
     const s = x.s;
     const idx = x._idx; // 原始数组下标
-    html += `<div class="store-card" draggable="true"
-        data-idx="${idx}"
-        ondragstart="dragStoreStart(event, ${idx})"
-        ondragover="dragStoreOver(event)"
-        ondragend="dragStoreEnd()"
-        ondragenter="dragStoreEnter(event)"
-        ondrop="dragStoreDrop(${idx})">
+    html += `<div class="store-card">
       <div class="sc-head">
         <div class="sc-idx">${i+1}</div>
+        <div class="sc-move-col">
+          <button class="sc-move" onclick="moveStore(${idx},-1)" ${i===0?'disabled':''}>▲</button>
+          <button class="sc-move" onclick="moveStore(${idx},1)" ${i===view.length-1?'disabled':''}>▼</button>
+        </div>
         <input type="text" class="sc-name" id="sName${idx}" value="${escapeHtml(s.name)}" maxlength="20">
         <button class="sc-del" onclick="removeStoreFromPanel(${idx})">删除</button>
       </div>
@@ -2827,108 +2835,6 @@ function renderStorePanelUI() {
   container.innerHTML = html;
   const sc = document.getElementById('storeCount');
   if (sc) sc.textContent = view.length;
-  // 容器级拖拽兜底，避免拖到空白处被浏览器默认处理
-  container.ondragover = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
-  container.ondrop = (e) => { e.preventDefault(); };
-  // 触屏长按拖动
-  if (window.matchMedia('(pointer: coarse)').matches) {
-    container.querySelectorAll('.store-card').forEach(bindTouchDrag);
-  }
-}
-// 触屏长按拖动：长按约400ms进入拖动，滑动到目标卡片松手完成排序
-let touchDragTimer = null;
-let touchDragFrom = null;
-let touchDragActive = false;
-function bindTouchDrag(card) {
-  const idx = parseInt(card.getAttribute('data-idx'), 10);
-  card.addEventListener('touchstart', (e) => {
-    // 忽略对 input/button 的长按，避免与输入冲突
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
-    touchDragFrom = idx;
-    touchDragActive = false;
-    clearTimeout(touchDragTimer);
-    const t = e.touches[0];
-    const startY = t.clientY;
-    touchDragTimer = setTimeout(() => {
-      touchDragActive = true;
-      card.classList.add('dragging');
-      if (navigator.vibrate) { try { navigator.vibrate(15); } catch (err) {} }
-    }, 400);
-  }, { passive: true });
-  card.addEventListener('touchmove', (e) => {
-    if (!touchDragActive) return;
-    e.preventDefault();
-    const y = e.touches[0].clientY;
-    const cards = card.parentElement.querySelectorAll('.store-card');
-    cards.forEach(c => c.classList.remove('drag-over'));
-    cards.forEach(c => {
-      const r = c.getBoundingClientRect();
-      if (y >= r.top && y <= r.bottom) c.classList.add('drag-over');
-    });
-  }, { passive: false });
-  card.addEventListener('touchend', (e) => {
-    clearTimeout(touchDragTimer);
-    if (!touchDragActive) { touchDragActive = false; return; }
-    const y = (e.changedTouches[0] || {}).clientY || 0;
-    let targetIdx = touchDragFrom;
-    card.parentElement.querySelectorAll('.store-card').forEach(c => {
-      c.classList.remove('drag-over');
-      const r = c.getBoundingClientRect();
-      if (y >= r.top && y <= r.bottom) targetIdx = parseInt(c.getAttribute('data-idx'), 10);
-    });
-    card.classList.remove('dragging');
-    touchDragActive = false;
-    if (targetIdx !== touchDragFrom) dragStoreDrop(targetIdx);
-    else touchDragFrom = null;
-  }, { passive: true });
-  card.addEventListener('touchcancel', () => {
-    clearTimeout(touchDragTimer);
-    card.classList.remove('dragging');
-    card.parentElement.querySelectorAll('.store-card').forEach(c => c.classList.remove('drag-over'));
-    touchDragActive = false;
-    touchDragFrom = null;
-  }, { passive: true });
-}
-// 长按拖动排序
-let dragStoreFrom = null; // 被拖拽店的原始下标
-function dragStoreStart(e, idx) {
-  dragStoreFrom = idx;
-  e.dataTransfer.effectAllowed = 'move';
-  try { e.dataTransfer.setData('text/plain', String(idx)); } catch (err) {}
-  const card = e.currentTarget;
-  if (card) { card.style.opacity = '0.5'; }
-}
-function dragStoreOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-}
-function dragStoreEnter(e) {
-  e.preventDefault();
-}
-function dragStoreEnd() {
-  const view = getSortedStores();
-  view.forEach((x, i) => {
-    const el = document.querySelector(`.store-card[data-idx="${x._idx}"]`);
-    if (el) el.style.opacity = '';
-  });
-  dragStoreFrom = null;
-}
-function dragStoreDrop(targetIdx) {
-  if (dragStoreFrom === null || dragStoreFrom === targetIdx) return;
-  const cfg = loadStoreConfig();
-  const fromPos = getSortedStores().findIndex(x => x._idx === dragStoreFrom);
-  const toPos = getSortedStores().findIndex(x => x._idx === targetIdx);
-  if (fromPos < 0 || toPos < 0) return;
-  // 按显示顺序构造新数组（仅更新 sort）
-  const view = getSortedStores();
-  const reordered = view.slice();
-  const [moved] = reordered.splice(fromPos, 1);
-  reordered.splice(toPos, 0, moved);
-  reordered.forEach((x, k) => { cfg[x._idx].sort = k; });
-  saveStoreConfig(cfg);
-  renderStorePanelUI();
-  initAllStores();
-  showToast('✅ 已更新排序');
 }
 // 上移/下移店面排序（交换两店的 sort 值）
 function moveStore(idx, dir) {
