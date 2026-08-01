@@ -38,13 +38,13 @@ export async function onRequest(context) {
   const imageBase64 = body.imageBase64 || '';
   if (!imageBase64) return json({ error: 'missing imageBase64' }, 400);
   try {
-    return await callTencentOCR(imageBase64, json);
+    return await callTencentOCR(imageBase64, json, TENCENT_SECRET_ID, TENCENT_SECRET_KEY);
   } catch(e) {
     return json({ error: 'tcloud error: ' + e.message }, 500);
   }
 }
 
-async function callTencentOCR(imageBase64, json) {
+async function callTencentOCR(imageBase64, json, TENCENT_SECRET_ID, TENCENT_SECRET_KEY) {
   const service = 'ocr';
   const host = 'ocr.tencentcloudapi.com';
   const region = 'ap-guangzhou';
