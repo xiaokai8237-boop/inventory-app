@@ -931,8 +931,8 @@ body {
           <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;" for="storeOcrFile">📷 拍照</label>
           <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;" for="storeOcrAlbum">🖼️ 相册选</label>
         </div>
-        <input type="file" id="storeOcrFile" accept="image/*" capture="environment" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;" onchange="handleStorePhoto(event)">
-        <input type="file" id="storeOcrAlbum" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;" onchange="handleStorePhoto(event)">
+    <input type="file" id="storeOcrFile" accept="image/*" capture="environment" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;overflow:hidden;" onchange="handleStorePhoto(event)">
+    <input type="file" id="storeOcrAlbum" accept="image/*" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;overflow:hidden;" onchange="handleStorePhoto(event)">
         <div class="iz-tip">拍「配送路单店面表」类表格（含 HN40-01 编号），识别后可在弹窗里逐条修正再保存</div>
       </div>
     </div>
@@ -1704,8 +1704,8 @@ body {
       <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" for="photoInput">📷 拍照</label>
       <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" for="photoAlbumInput">🖼️ 相册选</label>
     </div>
-    <input type="file" id="photoInput" accept="image/*" capture="environment" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;" onchange="handlePhoto(event)">
-    <input type="file" id="photoAlbumInput" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none;" onchange="handlePhoto(event)">
+    <input type="file" id="photoInput" accept="image/*" capture="environment" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;overflow:hidden;" onchange="handlePhoto(event)">
+    <input type="file" id="photoAlbumInput" accept="image/*" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;overflow:hidden;" onchange="handlePhoto(event)">
   </div>
 </div>
 
