@@ -53,6 +53,8 @@ async function callTencentOCR(imageBase64, json, TENCENT_SECRET_ID, TENCENT_SECR
   const algorithm = 'TC3-HMAC-SHA256';
   const date = new Date().toISOString().slice(0, 10); // YYYY-MM-DD（腾讯云签名要求带连字符）
 
+  const ts = Math.floor(Date.now() / 1000);
+  const isoTime = new Date(ts * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z'); // 无毫秒
   const payload = JSON.stringify({ ImageBase64: imageBase64, LanguageType: 'zh', IsPdf: false });
 
   const canonicalHeaders = 'content-type:application/json; charset=utf-8\nhost:' + host + '\n';
@@ -60,7 +62,7 @@ async function callTencentOCR(imageBase64, json, TENCENT_SECRET_ID, TENCENT_SECR
   const canonicalRequest = ['POST', '/', '', canonicalHeaders, signedHeaders, await sha256Hex(payload)].join('\n');
 
   const credentialScope = date + '/ocr/tc3_request';
-  const stringToSign = [algorithm, new Date().toISOString(), credentialScope, await sha256Hex(canonicalRequest)].join('\n');
+  const stringToSign = [algorithm, isoTime, credentialScope, await sha256Hex(canonicalRequest)].join('\n');
 
   const secretDate = await hmacSha256(new TextEncoder().encode('TC3' + TENCENT_SECRET_KEY), date);
   const secretService = await hmacSha256(secretDate, service);
@@ -77,7 +79,7 @@ async function callTencentOCR(imageBase64, json, TENCENT_SECRET_ID, TENCENT_SECR
       'Host': host,
       'X-TC-Action': action,
       'X-TC-Version': version,
-      'X-TC-Timestamp': String(Math.floor(Date.now() / 1000)),
+      'X-TC-Timestamp': String(ts),
       'X-TC-Region': region,
     },
     body: payload
