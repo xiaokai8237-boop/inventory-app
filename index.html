@@ -125,6 +125,22 @@ body {
   opacity: 0; cursor: pointer;
   font-size: 0; z-index: 1;
 }
+/* 原生 file input 直接作为按钮（安卓 WebView 最可靠） */
+.native-file-btn {
+  flex: 1;
+  padding: 11px 12px;
+  font-size: 14px;
+  text-align: center;
+  color: var(--primary);
+  background: #fff;
+  border: 1.5px solid var(--primary);
+  border-radius: 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+  min-height: 42px;
+  -webkit-appearance: none;
+}
+.native-file-btn::before { content: '🖼️ 相册选'; }
 /* 密码框眼睛按钮 */
 .pwd-wrap { position: relative; }
 .pwd-wrap input { padding-right: 46px; }
@@ -968,10 +984,7 @@ body {
             📷 拍照
             <input type="file" class="store-file-input" accept="image/*" capture="environment" onchange="handleStorePhoto(event)">
           </label>
-          <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;" onclick="openAlbumPicker('store', event)">
-            🖼️ 相册选
-            <input type="file" id="storeOcrAlbumInput" class="store-file-input" accept="image/*" onchange="handleStorePhoto(event)" style="display:none;">
-          </label>
+          <input type="file" id="storeOcrAlbumInput" class="btn btn-outline native-file-btn" accept="image/*" title="🖼️ 相册选" onchange="handleStorePhoto(event)">
         </div>
         <div class="iz-tip">拍「配送路单店面表」类表格（含 HN40-01 编号），识别后可在弹窗里逐条修正再保存</div>
       </div>
@@ -1754,10 +1767,7 @@ body {
         📷 拍照
         <input type="file" id="photoInput" class="store-file-input" accept="image/*" capture="environment" onchange="handlePhoto(event)">
       </label>
-      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;" onclick="openAlbumPicker('photo', event)">
-        🖼️ 相册选
-        <input type="file" id="photoAlbumInput" class="store-file-input" accept="image/*" onchange="handlePhoto(event)" style="display:none;">
-      </label>
+      <input type="file" id="photoAlbumInput" class="btn btn-outline native-file-btn" accept="image/*" title="🖼️ 相册选" onchange="handlePhoto(event)">
     </div>
   </div>
 </div>
