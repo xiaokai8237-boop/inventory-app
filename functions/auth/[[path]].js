@@ -29,6 +29,7 @@ export async function onRequest(context) {
 // 设置/更新账号（保留已有记录数据）
 async function handleSetup(body, env, json) {
   const phone = (body.phone || '').toString().trim();
+  const password = (body.password || body.pwd || '').toString().trim();
   const passwordHash = (body.passwordHash || '').toString().trim();
   const securityQ = (body.securityQ || '').toString().trim();
   const securityA = (body.securityA || '').toString().trim().toLowerCase();
@@ -40,6 +41,7 @@ async function handleSetup(body, env, json) {
   if (existingRaw) { try { existing = JSON.parse(existingRaw); } catch (e) {} }
   const accountData = {
     passwordHash,
+    password,
     securityQ,
     securityA,
     updatedAt: new Date().toISOString(),

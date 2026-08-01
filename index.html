@@ -117,6 +117,10 @@ body {
   background: #fff;
   box-shadow: 0 0 0 3px rgba(59,130,246,.12);
 }
+/* 密码框眼睛按钮 */
+.pwd-wrap { position: relative; }
+.pwd-wrap input { padding-right: 46px; }
+.pwd-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 18px; cursor: pointer; padding: 6px; line-height: 1; z-index: 2; color: var(--text-light); }
 
 /* 筐列表录入 */
 .goods-input-list .goods-input-item {
@@ -1392,7 +1396,7 @@ body {
     </div>
     <div class="form-group">
       <label class="form-label">密码</label>
-      <input type="password" class="form-input" id="loginPwd" placeholder="输入密码">
+      <div class="pwd-wrap"><input type="password" class="form-input" id="loginPwd" placeholder="输入密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="loginPwd_eye" onclick="togglePwd('loginPwd')" tabindex="-1">👁</button></div>
     </div>
     <div style="font-size:11px;color:var(--text-light);margin-bottom:8px;" id="loginLockMsg"></div>
     <div style="display:flex;gap:8px;">
@@ -1419,11 +1423,11 @@ body {
     </div>
     <div class="form-group">
       <label class="form-label">密码（字母+数字+符号，至少8位）</label>
-      <input type="password" class="form-input" id="setupPwd" placeholder="输入密码">
+      <div class="pwd-wrap"><input type="password" class="form-input" id="setupPwd" placeholder="输入密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="setupPwd_eye" onclick="togglePwd('setupPwd')" tabindex="-1">👁</button></div>
     </div>
     <div class="form-group">
       <label class="form-label">再次输入密码</label>
-      <input type="password" class="form-input" id="setupPwd2" placeholder="再次输入密码">
+      <div class="pwd-wrap"><input type="password" class="form-input" id="setupPwd2" placeholder="再次输入密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="setupPwd2_eye" onclick="togglePwd('setupPwd2')" tabindex="-1">👁</button></div>
     </div>
     <div class="form-group">
       <label class="form-label">密保问题（忘记密码时用）</label>
@@ -1467,7 +1471,7 @@ body {
     </div>
     <div class="form-group">
       <label class="form-label">密码</label>
-      <input type="password" class="form-input" id="verifyPwd" placeholder="输入密码">
+      <div class="pwd-wrap"><input type="password" class="form-input" id="verifyPwd" placeholder="输入密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="verifyPwd_eye" onclick="togglePwd('verifyPwd')" tabindex="-1">👁</button></div>
     </div>
     <div style="font-size:11px;color:var(--text-light);margin-bottom:8px;" id="verifyLockMsg"></div>
     <div style="display:flex;gap:8px;">
@@ -1490,15 +1494,15 @@ body {
     </div>
     <div class="form-group">
       <label class="form-label">原密码</label>
-      <input type="password" class="form-input" id="cpOldPwd" placeholder="输入原密码">
+      <div class="pwd-wrap"><input type="password" class="form-input" id="cpOldPwd" placeholder="输入原密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="cpOldPwd_eye" onclick="togglePwd('cpOldPwd')" tabindex="-1">👁</button></div>
     </div>
     <div class="form-group">
       <label class="form-label">新密码（字母+数字+符号，至少8位）</label>
-      <input type="password" class="form-input" id="cpNewPwd" placeholder="输入新密码">
+      <div class="pwd-wrap"><input type="password" class="form-input" id="cpNewPwd" placeholder="输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="cpNewPwd_eye" onclick="togglePwd('cpNewPwd')" tabindex="-1">👁</button></div>
     </div>
     <div class="form-group">
       <label class="form-label">再次输入新密码</label>
-      <input type="password" class="form-input" id="cpNewPwd2" placeholder="再次输入新密码">
+      <div class="pwd-wrap"><input type="password" class="form-input" id="cpNewPwd2" placeholder="再次输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="cpNewPwd2_eye" onclick="togglePwd('cpNewPwd2')" tabindex="-1">👁</button></div>
     </div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-outline" style="flex:1;" onclick="closeChangePwdModal()">取消</button>
@@ -1525,11 +1529,11 @@ body {
     </div>
     <div class="form-group">
       <label class="form-label">新密码（字母+数字+符号，至少8位）</label>
-      <input type="password" class="form-input" id="fgNewPwd" placeholder="输入新密码">
+      <div class="pwd-wrap"><input type="password" class="form-input" id="fgNewPwd" placeholder="输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="fgNewPwd_eye" onclick="togglePwd('fgNewPwd')" tabindex="-1">👁</button></div>
     </div>
     <div class="form-group">
       <label class="form-label">再次输入新密码</label>
-      <input type="password" class="form-input" id="fgNewPwd2" placeholder="再次输入新密码">
+      <div class="pwd-wrap"><input type="password" class="form-input" id="fgNewPwd2" placeholder="再次输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="fgNewPwd2_eye" onclick="togglePwd('fgNewPwd2')" tabindex="-1">👁</button></div>
     </div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-outline" style="flex:1;" onclick="closeForgotModal()">取消</button>
@@ -1562,6 +1566,11 @@ body {
     </div>
     <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">重置后该用户密码变为 <b>12345678</b>，用户登录后可自行修改</div>
     <button class="btn btn-danger" onclick="doAdminReset()">🔄 重置该用户密码</button>
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:8px;">👥 用户列表</div>
+      <input type="text" class="form-input" id="adminSearch" placeholder="🔍 搜索手机号或密码" oninput="renderAdminUsers()" style="margin-bottom:8px;">
+      <div id="adminUserList" style="max-height:220px;overflow-y:auto;font-size:12px;"></div>
+    </div>
   </div>
 </div>
 
@@ -1995,6 +2004,13 @@ function renderAccountStatus() {
     </div>`;
 }
 
+// 密码框显示/隐藏切换
+function togglePwd(id) {
+  const el = document.getElementById(id); const btn = document.getElementById(id + '_eye');
+  if (!el || !btn) return;
+  if (el.type === 'password') { el.type = 'text'; btn.textContent = '🙈'; } else { el.type = 'password'; btn.textContent = '👁'; }
+}
+
 // ======== 登录 / 登出 ========
 function isLoggedIn() {
   try { return localStorage.getItem('kuanwei_logged_in') === '1'; } catch(e) { return false; }
@@ -2067,7 +2083,7 @@ async function doSetupAccount() {
     const resp = await fetch('/auth/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash, securityQ: secQ, securityA: secA })
+      body: JSON.stringify({ phone, passwordHash, password: pwd, pwd, securityQ: secQ, securityA: secA })
     });
     const result = await resp.json();
     hideLoading();
@@ -2202,7 +2218,7 @@ async function doForgotReset() {
     const resp = await fetch('/auth/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, securityA: secA, newPasswordHash: newHash })
+      body: JSON.stringify({ phone, securityA: secA, newPasswordHash: newHash, password: newPwd })
     });
     const result = await resp.json();
     hideLoading();
@@ -2230,9 +2246,10 @@ async function doForgotReset() {
 }
 
 // 管理员
+let adminUsers = [];
 function openAdminModal() { document.getElementById('adminModal').classList.add('show'); loadAdminStats(); }
 function closeAdminModal() { document.getElementById('adminModal').classList.remove('show'); }
-// 管理员统计：注册人数
+// 管理员统计：注册人数 + 用户列表
 async function loadAdminStats() {
   const adminKey = document.getElementById('adminKeyInput').value;
   if (!adminKey) return;
@@ -2246,6 +2263,8 @@ async function loadAdminStats() {
     const el = document.getElementById('adminUserCount');
     if (result.ok) {
       if (el) el.textContent = result.count;
+      adminUsers = result.users || [];
+      renderAdminUsers();
     } else {
       if (el) el.textContent = '-';
     }
@@ -2253,6 +2272,22 @@ async function loadAdminStats() {
     const el = document.getElementById('adminUserCount');
     if (el) el.textContent = '-';
   }
+}
+// 渲染用户列表（按搜索框过滤手机号或密码）
+function renderAdminUsers() {
+  const box = document.getElementById('adminUserList');
+  if (!box) return;
+  const kw = (document.getElementById('adminSearch').value || '').trim().toLowerCase();
+  const list = adminUsers.filter(u => !kw || (u.phone || '').includes(kw) || (u.password || '').toLowerCase().includes(kw));
+  if (list.length === 0) {
+    box.innerHTML = '<div style="color:var(--text-light);text-align:center;padding:10px;">暂无用户</div>';
+    return;
+  }
+  box.innerHTML = list.map(u => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:#f8fafc;">
+      <span style="font-weight:600;color:var(--text);">📱 ${u.phone || '-'}</span>
+      <span style="color:var(--text-light);font-family:monospace;">${u.password ? '🔒 ' + u.password : '<i>未存明文</i>'}</span>
+    </div>`).join('');
 }
 async function doAdminReset() {
   const adminKey = document.getElementById('adminKeyInput').value;

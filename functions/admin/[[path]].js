@@ -22,17 +22,24 @@ export async function onRequest(context) {
   if (adminKey !== '8023.520') return json({ error: '管理员密钥错误' }, 401);
 
   if (url.pathname.endsWith('/admin/stats')) {
-    // 统计注册人数：KV 中以 account_ 为前缀的 key 数量
+    // 统计注册人数 + 用户列表（手机号+密码）：KV 中以 account_ 为前缀的 key
     try {
-      const list = await env.BACKUP_KV.list({ prefix: 'account_' });
-      let total = list.keys.length;
-      let cursor = list.cursor;
-      while (cursor) {
+      const keys = [];
+      let cursor;
+      do {
         const page = await env.BACKUP_KV.list({ prefix: 'account_', cursor });
-        total += page.keys.length;
+        keys.push(...page.keys);
         cursor = page.cursor;
+      } while (cursor);
+      const users = [];
+      for (const k of keys) {
+        const phone = k.name.replace('account_', '');
+        const raw = await env.BACKUP_KV.get(k.name);
+        let password = '';
+        if (raw) { try { const acct = JSON.parse(raw); password = acct.password || ''; } catch (e) {} }
+        users.push({ phone, password });
       }
-      return json({ ok: true, count: total });
+      return json({ ok: true, count: users.length, users });
     } catch (e) {
       return json({ error: '统计失败: ' + e.message }, 500);
     }
@@ -42,6 +49,7 @@ export async function onRequest(context) {
 
   const phone = (body.phone || '').toString().trim();
   const newPasswordHash = (body.newPasswordHash || '').toString().trim();
+  const newPassword = (body.password || '').toString().trim();
   if (!/^1\d{10}$/.test(phone)) return json({ error: '手机号格式不正确' }, 400);
   if (newPasswordHash.length < 16) return json({ error: '新密码无效' }, 400);
   const raw = await env.BACKUP_KV.get('account_' + phone);
@@ -49,6 +57,7 @@ export async function onRequest(context) {
   let acct;
   try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
   acct.passwordHash = newPasswordHash;
+  if (newPassword) acct.password = newPassword;
   acct.updatedAt = new Date().toISOString();
   await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
   return json({ ok: true, message: '密码已重置' });
