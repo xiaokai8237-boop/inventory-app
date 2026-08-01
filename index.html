@@ -2165,7 +2165,7 @@ async function doLogin() {
     const resp = await fetch('/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash })
+      body: JSON.stringify({ phone, passwordHash, deviceId: getDeviceId() })
     });
     const result = await resp.json();
     hideLoading();
@@ -2216,7 +2216,7 @@ async function doSetupAccount() {
     const resp = await fetch('/auth/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash, password: pwd, pwd, securityQ: secQ, securityA: secA })
+      body: JSON.stringify({ phone, passwordHash, password: pwd, pwd, securityQ: secQ, securityA: secA, deviceId: getDeviceId() })
     });
     const result = await resp.json();
     hideLoading();
@@ -2244,8 +2244,44 @@ async function doSetupAccount() {
 }
 
 // 恢复数据
-function openVerifyModal() { document.getElementById('verifyModal').classList.add('show'); }
+function openVerifyModal() {
+  // 已登录：免密直接恢复，不弹密码框
+  if (isLoggedIn()) {
+    const p = getCloudPhone();
+    if (p) { restoreLoggedIn(p); return; }
+  }
+  document.getElementById('verifyModal').classList.add('show');
+}
 function closeVerifyModal() { document.getElementById('verifyModal').classList.remove('show'); }
+// 已登录用户免密恢复：直接拉取该账号云端数据（后端 verify 支持已登录 deviceId 免密）
+async function restoreLoggedIn(phone) {
+  showLoading('正在恢复…');
+  try {
+    const deviceId = getDeviceId();
+    const resp = await fetch('/auth/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, deviceId, skipPwd: true })
+    });
+    const result = await resp.json();
+    hideLoading();
+    if (result.ok && result.data) {
+      const cloud = result.data;
+      saveDataArr(cloud.records || []);
+      if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
+      if (cloud.storeConfig && Array.isArray(cloud.storeConfig)) saveStoreConfig(cloud.storeConfig);
+      renderAccountStatus();
+      renderCloudBackupStatus();
+      try { initStoreSelect('recordStore'); renderStoreChips(); renderGoodsInputList(); initGoodsFilter(); renderTodayOverview(); } catch(e) {}
+      showToast('✅ 已恢复云端数据');
+    } else {
+      showToast('云端暂无数据或恢复失败');
+    }
+  } catch (e) {
+    hideLoading();
+    showToast('❌ 恢复失败，请检查网络');
+  }
+}
 async function doVerifyAccount() {
   const phone = document.getElementById('verifyPhone').value.trim();
   const pwd = document.getElementById('verifyPwd').value;
@@ -2258,7 +2294,7 @@ async function doVerifyAccount() {
     const resp = await fetch('/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash })
+      body: JSON.stringify({ phone, passwordHash, deviceId: getDeviceId() })
     });
     const result = await resp.json();
     hideLoading();
