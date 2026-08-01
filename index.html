@@ -2583,7 +2583,6 @@ function addStoreFromPanel() {
 }
 function removeStoreFromPanel(idx) {
   const cfg = loadStoreConfig();
-  if (cfg.length <= 1) { showToast('至少保留一个店面'); return; }
   cfg.splice(idx, 1);
   saveStoreConfig(cfg);
   renderStorePanelUI();
@@ -4329,7 +4328,6 @@ function addStore() {
 
 function removeStore(idx) {
   const cfg = loadStoreConfig();
-  if (cfg.length <= 1) { showToast('至少保留一个店面'); return; }
   cfg.splice(idx, 1);
   saveStoreConfig(cfg);
   renderStoreConfigUI();
