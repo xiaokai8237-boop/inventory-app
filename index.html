@@ -4261,7 +4261,7 @@ function renderStoreConfigUI() {
       <div style="display:flex;gap:8px;align-items:center;">
         <div class="idx">${i+1}</div>
         <input type="text" id="storeName${i}" value="${s.name}" maxlength="20" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;">
-        ${cfg.length > 1 ? `<button class="btn btn-outline" style="flex:0 0 auto;padding:6px 10px;font-size:12px;color:var(--danger);" onclick="removeStore(${i})">删除</button>` : ''}
+        <button class="btn btn-outline" style="flex:0 0 auto;padding:6px 10px;font-size:12px;color:var(--danger);" onclick="removeStore(${i})">删除</button>
       </div>
       <div class="alias-box" id="storeAliases${i}" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
         ${s.aliases.map((a, ai) => `<span class="alias-chip" style="background:#eef;color:#357abd;font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${a}<span style="cursor:pointer;color:#e74c3c;font-weight:700;" onclick="removeAlias(${i},${ai},'store')">×</span></span>`).join('')}
