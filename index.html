@@ -1637,6 +1637,15 @@ body {
           💡 安卓手机：浏览器菜单里点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b> 即可。
         </div>
       </div>
+      <div id="installAndroidTip" style="display:none;">
+        <div style="margin-bottom:8px;">安卓手机这样重新添加：</div>
+        <div><b>①</b> 打开浏览器右上角菜单 <b>「⋮」</b></div>
+        <div><b>②</b> 点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b></div>
+        <div><b>③</b> 点 <b>「添加 / 安装」</b> → 桌面重新出现图标</div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px;margin-top:12px;font-size:12.5px;color:#15803d;">
+          ✅ 如果找不到菜单按钮，可在浏览器地址栏刷新页面后再试。
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2690,13 +2699,21 @@ function installApp() {
     deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
     return;
   }
-  // iOS Safari 等：显示引导教程
+  // 无自动安装提示（已安装过再卸载 / iOS / 其他）：显示引导
   const modal = document.getElementById('installModal');
   if (modal) modal.classList.add('show');
   const wx = document.getElementById('installWechatTip');
   const normal = document.getElementById('installNormalTip');
+  const android = document.getElementById('installAndroidTip');
   if (wx) wx.style.display = 'none';
-  if (normal) normal.style.display = 'block';
+  if (android) android.style.display = 'none';
+  if (normal) normal.style.display = 'none';
+  // 安卓（且非微信）：已卸载重装，引导用浏览器菜单安装
+  if (/Android/i.test(navigator.userAgent) && !isWechat) {
+    if (android) android.style.display = 'block';
+  } else if (normal) {
+    normal.style.display = 'block';
+  }
 }
 function closeInstallModal() {
   const modal = document.getElementById('installModal');
