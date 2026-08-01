@@ -4484,7 +4484,22 @@ function saveStoreOcrResult() {
   valid.forEach(s => {
     const name = s.name.trim();
     if (existing.has(name)) { skipped++; return; }
-    const aliases = (s.code && s.code.trim()) ? [s.code.trim()] : [];
+    // 自动生成别名：完整编号(35-12) + 店号简称(12店)，带查重
+    const aliases = [];
+    if (s.code && s.code.trim()) {
+      const code = s.code.trim();
+      aliases.push(code);
+      const parts = String(code).split('-');
+      if (parts.length === 2) {
+        const tail = parts[1].replace(/^0+/, '');
+        if (tail) {
+          const shortAlias = tail + '店';
+          const used = new Set();
+          cfg.forEach(c => (c.aliases || []).forEach(a => used.add(String(a))));
+          if (!used.has(shortAlias)) aliases.push(shortAlias);
+        }
+      }
+    }
     cfg.push({ name, aliases });
     existing.add(name);
     added++;
