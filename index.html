@@ -432,13 +432,12 @@ body {
   border-radius: 12px;
   padding: 12px;
   margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
   touch-action: pan-y;
   transition: opacity .15s;
 }
 .store-card.dragging { opacity: .45; border-style: dashed; border-color: var(--primary); }
 .store-card.drag-over { border-left-color: #22c55e; background: #f0fdf4; }
-  box-shadow: 0 1px 4px rgba(0,0,0,.05);
-}
 .store-card .sc-head {
   display: flex;
   align-items: center;
@@ -2796,9 +2795,8 @@ function renderStorePanelUI() {
         ondragenter="dragStoreEnter(event)"
         ondrop="dragStoreDrop(${idx})">
       <div class="sc-head">
-        <div class="sc-idx" style="cursor:grab;">≡</div>
+        <div class="sc-idx">${i+1}</div>
         <input type="text" class="sc-name" id="sName${idx}" value="${escapeHtml(s.name)}" maxlength="20">
-        <div style="font-size:11px;color:var(--text-light);flex-shrink:0;padding:0 6px;">长按拖动排序</div>
         <button class="sc-del" onclick="removeStoreFromPanel(${idx})">删除</button>
       </div>
       <div class="sc-alias-label">🏷️ 别名（识别时可替代店名）</div>
