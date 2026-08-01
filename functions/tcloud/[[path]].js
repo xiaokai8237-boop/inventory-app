@@ -51,7 +51,7 @@ async function callTencentOCR(imageBase64, json, TENCENT_SECRET_ID, TENCENT_SECR
   const action = 'GeneralBasicOCR';
   const version = '2018-11-19';
   const algorithm = 'TC3-HMAC-SHA256';
-  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const date = new Date().toISOString().slice(0, 10); // YYYY-MM-DD（腾讯云签名要求带连字符）
 
   const payload = JSON.stringify({ ImageBase64: imageBase64, LanguageType: 'zh', IsPdf: false });
 
