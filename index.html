@@ -2027,11 +2027,12 @@ async function backupToCloud(manual) {
     const payload = {
       deviceId: deviceId,
       data: {
-        version: 1,
+        version: 2,
         backupTime: new Date().toISOString(),
         records: loadData(),
         goodsConfig: loadGoodsConfig(),
-        storeConfig: loadStoreConfig()
+        storeConfig: loadStoreConfig(),
+        uiState: collectUiState()
       }
     };
     if (account) payload.account = account;
@@ -2052,6 +2053,52 @@ async function backupToCloud(manual) {
     }
   } catch (e) {
     if (manual) showToast('❌ 备份失败，请检查网络');
+  }
+}
+
+// ======== 用户界面状态收集/还原（换设备无陌生感） ========
+const UI_KEYS = [
+  'kuanwei_daily_pref',        // 日报偏好（线路/门店/信息项）
+  'kuanwei_welcome_seen',      // 欢迎引导已看
+  'kuanwei_seen_backup_tutorial', // 备份教程已看
+  'kuanwei_del_confirm_until', // 删除确认免提示
+  'kuanwei_ocr_keys',          // OCR 自定义密钥
+];
+function collectUiState() {
+  const ui = {};
+  for (const k of UI_KEYS) {
+    try { const v = localStorage.getItem(k); if (v !== null && v !== undefined) ui[k] = v; } catch(e) {}
+  }
+  // 每日相册照片（当天+昨天），便于换设备后照片不丢
+  try {
+    const photos = {};
+    for (let i = 0; i < 2; i++) {
+      const d = new Date(Date.now() - i * 86400000);
+      const key = 'kuanwei_photos_' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+      const v = localStorage.getItem(key);
+      if (v) photos[key] = v;
+    }
+    ui._photos = photos;
+  } catch(e) {}
+  return ui;
+}
+function applyUiState(ui) {
+  if (!ui || typeof ui !== 'object') return;
+  for (const k of Object.keys(ui)) {
+    if (k === '_photos') continue;
+    try {
+      const v = ui[k];
+      if (v === null || v === undefined) localStorage.removeItem(k);
+      else localStorage.setItem(k, v);
+    } catch(e) {}
+  }
+  // 还原相册照片
+  if (ui._photos) {
+    try {
+      for (const k of Object.keys(ui._photos)) {
+        if (!localStorage.getItem(k)) localStorage.setItem(k, ui._photos[k]);
+      }
+    } catch(e) {}
   }
 }
 
@@ -2253,23 +2300,19 @@ function openVerifyModal() {
   document.getElementById('verifyModal').classList.add('show');
 }
 function closeVerifyModal() { document.getElementById('verifyModal').classList.remove('show'); }
-// 已登录用户免密恢复：直接拉取该账号云端数据（后端 verify 支持已登录 deviceId 免密）
+// 已登录用户免密恢复：直接拉取该账号云端数据（含用户界面偏好，换设备无陌生感）
 async function restoreLoggedIn(phone) {
   showLoading('正在恢复…');
   try {
-    const deviceId = getDeviceId();
-    const resp = await fetch('/auth/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, deviceId, skipPwd: true })
-    });
+    const resp = await fetch('/backup?account=' + encodeURIComponent(phone));
     const result = await resp.json();
     hideLoading();
-    if (result.ok && result.data) {
+    if (result.data) {
       const cloud = result.data;
       saveDataArr(cloud.records || []);
       if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
       if (cloud.storeConfig && Array.isArray(cloud.storeConfig)) saveStoreConfig(cloud.storeConfig);
+      if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
       renderAccountStatus();
       renderCloudBackupStatus();
       try { initStoreSelect('recordStore'); renderStoreChips(); renderGoodsInputList(); initGoodsFilter(); renderTodayOverview(); } catch(e) {}
@@ -2523,6 +2566,7 @@ async function autoSyncFromCloud(phone) {
     saveDataArr([...byKey.values()]);
     if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
     if (cloud.storeConfig && Array.isArray(cloud.storeConfig)) saveStoreConfig(cloud.storeConfig);
+    if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
     try {
       initStoreSelect('recordStore'); renderStoreChips(); renderGoodsInputList(); initGoodsFilter(); renderTodayOverview();
     } catch(e) {}
