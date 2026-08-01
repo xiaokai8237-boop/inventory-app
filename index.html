@@ -1806,6 +1806,22 @@ body {
   </div>
 </div>
 
+<!-- 日报预览确认弹窗 -->
+<div class="store-ocr-modal" id="dailyPreviewModal">
+  <div class="store-ocr-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">📋 日报预览</span>
+      <button onclick="closeDailyPreview()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">确认内容无误后点"确认生成"，也可直接修改下方文字</div>
+    <textarea id="dailyPreviewText" rows="8" style="width:100%;box-sizing:border-box;font-size:13px;line-height:1.6;border:1.5px solid var(--border);border-radius:8px;padding:10px;resize:vertical;font-family:inherit;min-height:160px;"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="closeDailyPreview()">返回</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="confirmDailyPreview()">✅ 确认生成</button>
+    </div>
+  </div>
+</div>
+
 <!-- 上交筐照片弹窗 -->
 <div class="store-ocr-modal" id="photoPanelModal">
   <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:420px;">
@@ -4351,13 +4367,30 @@ function generateDailyReport() {
   if (f.owe && oweLines.length) lines.push(`累计欠框：${oweLines.join('、')}`);
 
   const text = lines.join('\n');
+  // 打开"日报预览确认"弹窗，内容可编辑
+  showDailyPreview(text);
+  // 记住选择
+  try { localStorage.setItem('kuanwei_daily_pref', JSON.stringify({ line: dailyReportState.line, month, stores: dailyReportState.stores, fields: dailyReportState.fields })); } catch(e) {}
+}
+
+// 打开日报预览确认弹窗（内容可编辑）
+function showDailyPreview(text) {
+  document.getElementById('dailyPreviewText').value = text;
+  document.getElementById('dailyPreviewModal').classList.add('show');
+}
+function closeDailyPreview() {
+  document.getElementById('dailyPreviewModal').classList.remove('show');
+}
+// 确认生成：把编辑后的文字作为最终日报
+function confirmDailyPreview() {
+  const text = document.getElementById('dailyPreviewText').value;
   dailyReportState._text = text;
+  closeDailyPreview();
   const prev = document.getElementById('dailyReportPreview');
   prev.style.display = 'block';
   prev.textContent = text;
   document.getElementById('dailyReportCopyBtn').style.display = 'block';
-  // 记住选择
-  try { localStorage.setItem('kuanwei_daily_pref', JSON.stringify({ line: dailyReportState.line, month, stores: dailyReportState.stores, fields: dailyReportState.fields })); } catch(e) {}
+  showToast('✅ 日报已生成，可复制');
 }
 
 function copyDailyReport() {
