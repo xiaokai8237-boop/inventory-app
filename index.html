@@ -1000,6 +1000,13 @@ body {
       <button class="btn btn-outline" style="flex:1;padding:8px;font-size:12px;" onclick="setFilterToday()">仅今天</button>
     </div>
   </div>
+  <div class="card" style="padding:10px;">
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary" style="flex:1;padding:10px;font-size:13px;" onclick="openDailyReport()">📋 日报（发仓库）</button>
+      <button class="btn btn-outline" style="flex:1;padding:10px;font-size:13px;" onclick="openPhotoPanel()">📷 上交筐照片</button>
+    </div>
+    <div id="dailyPhotoInfo" style="font-size:11px;color:var(--text-light);margin-top:6px;"></div>
+  </div>
   <div id="historyList"></div>
 </div>
 
@@ -1630,6 +1637,67 @@ body {
     </div>
     <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(event)">
     <input type="file" id="photoAlbumInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+  </div>
+</div>
+
+
+<!-- 日报生成弹窗 -->
+<div class="store-ocr-modal" id="dailyReportModal">
+  <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">📋 生成日报（发给仓库）</span>
+      <button onclick="closeDailyReportModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">线路</label>
+      <div id="dailyReportLines" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">门店（默认全选，点取消勾选可去掉）</label>
+      <div style="margin-bottom:4px;">
+        <button class="btn btn-outline" style="padding:4px 12px;font-size:12px;width:auto;display:inline-block;" onclick="dailySelAllStores(true)">☑ 全选</button>
+        <button class="btn btn-outline" style="padding:4px 12px;font-size:12px;width:auto;display:inline-block;" onclick="dailySelAllStores(false)">清空</button>
+      </div>
+      <div id="dailyReportStores" style="display:flex;flex-direction:column;gap:4px;max-height:160px;overflow-y:auto;"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">月份</label>
+      <input type="month" class="form-input" id="dailyReportMonth" style="padding:8px;font-size:14px;">
+    </div>
+    <div class="form-group">
+      <label class="form-label">报表信息（默认全选）</label>
+      <div id="dailyReportFields" style="display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:13px;">
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_emit" checked> 各店发出</label>
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_recv" checked> 各店回收</label>
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_today" checked> 今日回框</label>
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_mon_recv" checked> 本月累计回框</label>
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_mon_emit" checked> 本月累计发出</label>
+        <label style="display:flex;align-items:center;gap:5px;"><input type="checkbox" id="drf_owe" checked> 累计欠框</label>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="generateDailyReport()">📋 生成日报</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="closeDailyReportModal()">取消</button>
+    </div>
+    <div id="dailyReportPreview" style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;white-space:pre-wrap;max-height:200px;overflow-y:auto;display:none;"></div>
+    <button class="btn btn-success" id="dailyReportCopyBtn" style="margin-top:8px;width:100%;display:none;" onclick="copyDailyReport()">📋 一键复制（粘贴到微信发仓库）</button>
+  </div>
+</div>
+
+<!-- 上交筐照片弹窗 -->
+<div class="store-ocr-modal" id="photoPanelModal">
+  <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:420px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">📷 上交筐照片</span>
+      <button onclick="closePhotoPanel()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:13px;color:var(--text);margin-bottom:10px;" id="photoPanelDate"></div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <button class="btn btn-primary" style="flex:1;" onclick="document.getElementById('photoUploadInput').click()">📷 拍/选照片</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="saveDailyPhotos()">💾 保存</button>
+    </div>
+    <input type="file" id="photoUploadInput" accept="image/*" capture="environment" style="display:none" onchange="handleDailyPhoto(event)">
+    <div id="photoPanelList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
   </div>
 </div>
 
@@ -2778,7 +2846,7 @@ function switchPage(pageName) {
   const tabEl = document.querySelector(`.tab[data-page="${pageName}"]`);
   if (tabEl) tabEl.classList.add('active');
   if (pageName === 'record') { initStoreSelect('recordStore'); renderTodayOverview(); }
-  if (pageName === 'history') renderHistory();
+  if (pageName === 'history') { renderHistory(); updateDailyPhotoInfo(); }
   if (pageName === 'summary') renderSummary();
   if (pageName === 'settings') renderSettings();
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
@@ -3747,6 +3815,289 @@ function initGoodsFilter() {
     opt.value = i; opt.textContent = name;
     filterSel.appendChild(opt);
   });
+}
+
+// ======== 日报生成（发仓库用） ========
+let dailyReportState = { line: '全部', month: '', stores: [], fields: {} };
+
+// 识别门店线路（从编号别名 42-1 → 42线）
+function detectStoreLine(store) {
+  const aliases = store.aliases || [];
+  for (const a of aliases) {
+    const m = String(a).match(/^(\d{1,3})\s*[-–−_]\s*\d{1,3}$/);
+    if (m) return m[1] + '线';
+  }
+  return '';
+}
+
+function openDailyReport() {
+  const modal = document.getElementById('dailyReportModal');
+  if (!modal) return;
+  // 加载上次选择
+  try {
+    const saved = JSON.parse(localStorage.getItem('kuanwei_daily_pref') || 'null');
+    if (saved) dailyReportState = { ...dailyReportState, ...saved };
+  } catch(e) {}
+  // 默认月份 = 本月
+  const now = new Date();
+  const defMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  const monthEl = document.getElementById('dailyReportMonth');
+  if (monthEl) monthEl.value = dailyReportState.month || defMonth;
+  dailyReportState.month = dailyReportState.month || defMonth;
+  // 线路
+  const cfg = loadStoreConfig();
+  const lines = new Set();
+  cfg.forEach(s => { const l = detectStoreLine(s); if (l) lines.add(l); });
+  const lineArr = ['全部', ...[...lines].sort()];
+  const lineBox = document.getElementById('dailyReportLines');
+  lineBox.innerHTML = lineArr.map(l =>
+    `<button class="btn ${(dailyReportState.line === l) ? 'btn-primary' : 'btn-outline'}" style="padding:5px 12px;font-size:12px;width:auto;display:inline-block;" onclick="dailySelLine('${l}')">${l}</button>`).join('');
+  // 门店（按线路过滤）
+  renderDailyStores();
+  // 信息项勾选
+  const fields = dailyReportState.fields || {};
+  ['emit','recv','today','mon_recv','mon_emit','owe'].forEach(k => {
+    const el = document.getElementById('drf_' + k);
+    if (el) el.checked = (fields[k] === undefined) ? true : fields[k];
+  });
+  modal.classList.add('show');
+}
+function closeDailyReportModal() {
+  document.getElementById('dailyReportModal').classList.remove('show');
+}
+function dailySelLine(line) {
+  dailyReportState.line = line;
+  // 刷新线路按钮样式 + 门店
+  const lineBox = document.getElementById('dailyReportLines');
+  const btns = lineBox.querySelectorAll('button');
+  btns.forEach(b => {
+    b.className = 'btn ' + (b.textContent === line ? 'btn-primary' : 'btn-outline');
+  });
+  renderDailyStores();
+}
+function renderDailyStores() {
+  const cfg = loadStoreConfig();
+  const line = dailyReportState.line;
+  const list = cfg.filter(s => line === '全部' || detectStoreLine(s) === line);
+  const sel = dailyReportState.stores || [];
+  const box = document.getElementById('dailyReportStores');
+  box.innerHTML = list.map((s, i) => {
+    const checked = sel.length === 0 || sel.includes(s.name) ? 'checked' : '';
+    return `<label style="display:flex;align-items:center;gap:6px;font-size:13px;"><input type="checkbox" class="dr-store" data-name="${escapeHtml(s.name)}" ${checked}> ${escapeHtml(s.name)}</label>`;
+  }).join('');
+  dailyReportState._lineStores = list.map(s => s.name);
+}
+function dailySelAllStores(all) {
+  const box = document.getElementById('dailyReportStores');
+  box.querySelectorAll('input.dr-store').forEach(cb => { cb.checked = all; });
+}
+function collectDailySelection() {
+  const sel = [];
+  const box = document.getElementById('dailyReportStores');
+  box.querySelectorAll('input.dr-store:checked').forEach(cb => sel.push(cb.dataset.name));
+  dailyReportState.stores = sel;
+  const fields = {};
+  ['emit','recv','today','mon_recv','mon_emit','owe'].forEach(k => {
+    const el = document.getElementById('drf_' + k);
+    fields[k] = el ? el.checked : true;
+  });
+  dailyReportState.fields = fields;
+  dailyReportState.month = document.getElementById('dailyReportMonth').value;
+}
+
+function generateDailyReport() {
+  collectDailySelection();
+  const names = loadGoodsNames();
+  const cfg = loadStoreConfig();
+  const month = dailyReportState.month;
+  const [y, m] = month.split('-');
+  const monthLabel = parseInt(m, 10) + '月';
+  const today = todayStr();
+  const todayLabel = parseInt(today.split('-')[2], 10) + '日';
+  const lineLabel = dailyReportState.line === '全部' ? '全部线路' : dailyReportState.line;
+
+  // 选中门店集合（按名称）
+  const selNames = new Set(dailyReportState.stores.length ? dailyReportState.stores : cfg.map(s => s.name));
+  const data = loadData();
+
+  // 今天 + 选中的门店记录
+  const todayData = data.filter(r => r.date === today && selNames.has(r.storeName || ''));
+  // 本月 + 选中门店
+  const monthData = data.filter(r => r.date.startsWith(month) && selNames.has(r.storeName || ''));
+  // 累计欠框（本月 发出-回收）
+  const owe = {};
+  names.forEach((n, i) => { owe[i] = { emit: 0, recv: 0 }; });
+  monthData.forEach(r => { if (owe[r.goodsIdx]) { owe[r.goodsIdx].emit += r.qtyIn; owe[r.goodsIdx].recv += r.qtyOut; } });
+
+  const f = dailyReportState.fields;
+  let lines = [];
+  lines.push(`${lineLabel} ${todayLabel}`);
+  lines.push('');
+
+  // 各店：今日发出/回收（有数据的筐）
+  if (f.emit || f.recv) {
+    const selStores = [...selNames];
+    // 按 cfg 顺序
+    cfg.filter(s => selNames.has(s.name)).forEach(s => {
+      const rows = todayData.filter(r => (r.storeName || '') === s.name);
+      if (!rows.length) return;
+      const parts = [];
+      names.forEach((n, i) => {
+        const emit = rows.reduce((sum, r) => sum + (r.goodsIdx === i ? r.qtyIn : 0), 0);
+        const recv = rows.reduce((sum, r) => sum + (r.goodsIdx === i ? r.qtyOut : 0), 0);
+        if (emit > 0 && f.emit && f.recv) parts.push(`发出 ${emit} 筐${n}、回收 ${recv} 筐${n}`);
+        else if (emit > 0 && f.emit) parts.push(`发出 ${emit} 筐${n}`);
+        else if (recv > 0 && f.recv) parts.push(`回收 ${recv} 筐${n}`);
+      });
+      if (parts.length) lines.push(`${s.name}：${parts.join('、')}`);
+    });
+    if (lines.length <= 2) lines.push('（今日无记录）');
+    lines.push('');
+  }
+
+  // 今日回框合计（有数据的筐）
+  if (f.today) {
+    const todayOwe = {};
+    names.forEach((n, i) => { todayOwe[i] = { recv: 0 }; });
+    todayData.forEach(r => { if (todayOwe[r.goodsIdx]) todayOwe[r.goodsIdx].recv += r.qtyOut; });
+    const recvLines = [];
+    names.forEach((n, i) => { if (todayOwe[i].recv > 0) recvLines.push(`${n}回框 ${todayOwe[i].recv} 筐`); });
+    if (recvLines.length) { lines.push(`${todayLabel}回框：${recvLines.join('、')}`); lines.push(''); }
+  }
+
+  // 本月累计
+  const monRecvLines = [], monEmitLines = [], oweLines = [];
+  names.forEach((n, i) => {
+    if (owe[i].recv > 0) monRecvLines.push(`${n} ${owe[i].recv} 筐`);
+    if (owe[i].emit > 0) monEmitLines.push(`${n} ${owe[i].emit} 筐`);
+    const diff = owe[i].emit - owe[i].recv;
+    if (diff !== 0) oweLines.push(`${n} ${diff} 筐`);
+  });
+  if (f.mon_recv && monRecvLines.length) lines.push(`${monthLabel}累计回框：${monRecvLines.join('、')}`);
+  if (f.mon_emit && monEmitLines.length) lines.push(`${monthLabel}累计发出：${monEmitLines.join('、')}`);
+  if (f.owe && oweLines.length) lines.push(`累计欠框：${oweLines.join('、')}`);
+
+  const text = lines.join('\n');
+  dailyReportState._text = text;
+  const prev = document.getElementById('dailyReportPreview');
+  prev.style.display = 'block';
+  prev.textContent = text;
+  document.getElementById('dailyReportCopyBtn').style.display = 'block';
+  // 记住选择
+  try { localStorage.setItem('kuanwei_daily_pref', JSON.stringify({ line: dailyReportState.line, month, stores: dailyReportState.stores, fields: dailyReportState.fields })); } catch(e) {}
+}
+
+function copyDailyReport() {
+  if (!dailyReportState._text) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(dailyReportState._text).then(() => {
+      showToast('✅ 已复制，去微信粘贴发仓库');
+    }).catch(() => fallbackCopy());
+  } else fallbackCopy();
+}
+function fallbackCopy() {
+  const ta = document.createElement('textarea');
+  ta.value = dailyReportState._text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  showToast('✅ 已复制，去微信粘贴发仓库');
+}
+
+// ======== 上交筐照片记录 ========
+let pendingDailyPhotos = []; // 待保存的当天照片 base64
+function openPhotoPanel() {
+  const modal = document.getElementById('photoPanelModal');
+  if (!modal) return;
+  pendingDailyPhotos = [];
+  const today = todayStr();
+  document.getElementById('photoPanelDate').textContent = '日期：' + today;
+  renderDailyPhotoList();
+  modal.classList.add('show');
+}
+function closePhotoPanel() {
+  document.getElementById('photoPanelModal').classList.remove('show');
+}
+function getPhotosKey(date) { return 'kuanwei_photos_' + date; }
+function loadDailyPhotos(date) {
+  try { return JSON.parse(localStorage.getItem(getPhotosKey(date)) || '[]'); }
+  catch(e) { return []; }
+}
+function handleDailyPhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    try {
+      const compressed = await compressImage(e.target.result, 900);
+      pendingDailyPhotos.push(compressed);
+      renderDailyPhotoList();
+    } catch(err) { showToast('❌ 照片处理失败'); }
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+function saveDailyPhotos() {
+  if (pendingDailyPhotos.length === 0) { showToast('还没有新照片'); return; }
+  const today = todayStr();
+  const existing = loadDailyPhotos(today);
+  const all = existing.concat(pendingDailyPhotos);
+  try {
+    localStorage.setItem(getPhotosKey(today), JSON.stringify(all));
+    pendingDailyPhotos = [];
+    renderDailyPhotoList();
+    updateDailyPhotoInfo();
+    showToast('✅ 已保存 ' + all.length + ' 张照片');
+  } catch(e) {
+    showToast('❌ 照片太多存不下，请删除一些');
+  }
+}
+function renderDailyPhotoList() {
+  const today = todayStr();
+  const existing = loadDailyPhotos(today);
+  const all = existing.concat(pendingDailyPhotos);
+  const box = document.getElementById('photoPanelList');
+  if (all.length === 0) {
+    box.innerHTML = '<div style="font-size:12px;color:var(--text-light);">还没有照片，点「📷 拍/选照片」添加</div>';
+    return;
+  }
+  box.innerHTML = all.map((p, i) => {
+    const isNew = i >= existing.length;
+    return `<div style="position:relative;width:90px;height:90px;">
+      <img src="${p}" style="width:90px;height:90px;object-fit:cover;border-radius:6px;border:1px solid var(--border);" onclick="viewDailyPhoto(${i})">
+      ${isNew ? '<span style="position:absolute;top:2px;left:2px;background:#f59e0b;color:#fff;font-size:10px;padding:1px 4px;border-radius:4px;">新</span>' : ''}
+      <span style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;width:16px;height:16px;border-radius:50%;text-align:center;line-height:16px;cursor:pointer;" onclick="removeDailyPhoto(${i})">×</span>
+    </div>`;
+  }).join('');
+}
+function removeDailyPhoto(idx) {
+  const today = todayStr();
+  const existing = loadDailyPhotos(today);
+  if (idx < existing.length) {
+    const all = existing.slice();
+    all.splice(idx, 1);
+    localStorage.setItem(getPhotosKey(today), JSON.stringify(all));
+    updateDailyPhotoInfo();
+  } else {
+    pendingDailyPhotos.splice(idx - existing.length, 1);
+  }
+  renderDailyPhotoList();
+}
+function viewDailyPhoto(idx) {
+  const today = todayStr();
+  const existing = loadDailyPhotos(today);
+  const all = existing.concat(pendingDailyPhotos);
+  if (all[idx]) {
+    const w = window.open('', '_blank');
+    if (w) { w.document.write('<img src="' + all[idx] + '" style="max-width:100%">'); }
+  }
+}
+function updateDailyPhotoInfo() {
+  const today = todayStr();
+  const n = loadDailyPhotos(today).length;
+  const el = document.getElementById('dailyPhotoInfo');
+  if (el) el.textContent = n > 0 ? `📷 今天已存 ${n} 张上交筐照片` : '';
 }
 
 function renderHistory() {
