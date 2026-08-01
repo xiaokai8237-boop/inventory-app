@@ -117,6 +117,14 @@ body {
   background: #fff;
   box-shadow: 0 0 0 3px rgba(59,130,246,.12);
 }
+/* 文件选择按钮：input 铺满 label，透明可点击，解决安卓 PWA 隐藏 input 拦截问题 */
+.store-file-btn { display: inline-flex; align-items: center; justify-content: center; }
+.store-file-input {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  opacity: 0; cursor: pointer;
+  font-size: 0; z-index: 1;
+}
 /* 密码框眼睛按钮 */
 .pwd-wrap { position: relative; }
 .pwd-wrap input { padding-right: 46px; }
@@ -928,11 +936,15 @@ body {
       <div class="import-zone" style="margin-top:16px;">
         <div class="iz-title">📸 批量导入店面</div>
         <div style="display:flex;gap:8px;">
-          <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;" for="storeOcrFile">📷 拍照</label>
-          <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;" for="storeOcrAlbum">🖼️ 相册选</label>
+          <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;">
+            📷 拍照
+            <input type="file" class="store-file-input" accept="image/*" capture="environment" onchange="handleStorePhoto(event)">
+          </label>
+          <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;">
+            🖼️ 相册选
+            <input type="file" class="store-file-input" accept="image/*" onchange="handleStorePhoto(event)">
+          </label>
         </div>
-    <input type="file" id="storeOcrFile" accept="image/*" capture="environment" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;overflow:hidden;" onchange="handleStorePhoto(event)">
-    <input type="file" id="storeOcrAlbum" accept="image/*" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;overflow:hidden;" onchange="handleStorePhoto(event)">
         <div class="iz-tip">拍「配送路单店面表」类表格（含 HN40-01 编号），识别后可在弹窗里逐条修正再保存</div>
       </div>
     </div>
@@ -1701,11 +1713,15 @@ body {
     </div>
     <div style="font-size:12px;color:var(--text-light);margin-bottom:12px;text-align:center;">拍摄配送路单，自动识别物流箱合计</div>
     <div class="btn-row">
-      <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" for="photoInput">📷 拍照</label>
-      <label class="btn btn-outline" style="flex:1;text-align:center;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;" for="photoAlbumInput">🖼️ 相册选</label>
+      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;">
+        📷 拍照
+        <input type="file" id="photoInput" class="store-file-input" accept="image/*" capture="environment" onchange="handlePhoto(event)">
+      </label>
+      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;">
+        🖼️ 相册选
+        <input type="file" id="photoAlbumInput" class="store-file-input" accept="image/*" onchange="handlePhoto(event)">
+      </label>
     </div>
-    <input type="file" id="photoInput" accept="image/*" capture="environment" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;overflow:hidden;" onchange="handlePhoto(event)">
-    <input type="file" id="photoAlbumInput" accept="image/*" style="position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;overflow:hidden;" onchange="handlePhoto(event)">
   </div>
 </div>
 
