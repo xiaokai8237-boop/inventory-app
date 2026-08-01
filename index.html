@@ -2020,6 +2020,19 @@ function scheduleCloudBackup() {
   backupTimer = setTimeout(backupToCloud, 3000); // 保存后3秒自动备份（防抖）
 }
 
+// 定时兜底备份：无操作时每30分钟自动备份一次（后台静默，零干扰）
+let periodicBackupTimer = null;
+function startPeriodicBackup() {
+  if (periodicBackupTimer) return;
+  // 启动后先不立即备份，等第一个30分钟周期
+  periodicBackupTimer = setInterval(() => {
+    // 仅已登录或有数据时备份，避免打扰
+    if (localStorage.getItem('kuanwei_phone')) {
+      backupToCloud(false);
+    }
+  }, 30 * 60 * 1000); // 30分钟
+}
+
 async function backupToCloud(manual) {
   try {
     const deviceId = getDeviceId();
@@ -5459,6 +5472,8 @@ initSummaryPage();
 initWelcome();
 // 云备份恢复（清缓存/换手机后自动从云端拉取数据）
 restoreFromCloud();
+// 定时兜底备份：无操作时每30分钟自动备份一次（后台静默）
+startPeriodicBackup();
 // 已登录用户：打开时自动同步该账号云端数据
 if (isLoggedIn()) {
   const p = getCloudPhone();
