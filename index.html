@@ -1906,7 +1906,7 @@ async function doSetupAccount() {
     const resp = await fetch('/auth/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash, securityQ: secQ, securityA })
+      body: JSON.stringify({ phone, passwordHash, securityQ: secQ, securityA: secA })
     });
     const result = await resp.json();
     hideLoading();
@@ -1929,7 +1929,7 @@ async function doSetupAccount() {
     } else {
       showToast(result.error || '设置失败');
     }
-  } catch (e) { hideLoading(); console.error('SETUP_ERROR:', e && (e.stack || e.message)); showToast('❌ 网络错误: ' + (e && e.message || e)); }
+  } catch (e) { hideLoading(); console.error('SETUP_ERROR:', e && (e.stack || e.message)); showToast('❌ 网络错误'); }
 }
 
 // 恢复数据
