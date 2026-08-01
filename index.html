@@ -1671,6 +1671,26 @@ function saveOcrKeysStorage(keys) {
   localStorage.setItem(OCR_KEY, JSON.stringify(keys));
 }
 
+// 获取百度 OCR access_token（带缓存：token 有效期30天，缓存24小时，避免每次都请求）
+async function getOcrAccessToken(apiKey, secretKey) {
+  const cacheKey = 'kuanwei_ocr_token_' + String(apiKey).slice(-6);
+  try {
+    const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+    if (cached && cached.token && cached.expire > Date.now()) return cached.token;
+  } catch(e) {}
+  const tokenResp = await fetch(CORS_PROXY + encodeURIComponent('https://aip.baidubce.com/oauth/2.0/token'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`
+  });
+  const tokenData = await tokenResp.json();
+  if (!tokenData.access_token) throw new Error('获取token失败');
+  try {
+    localStorage.setItem(cacheKey, JSON.stringify({ token: tokenData.access_token, expire: Date.now() + 24 * 3600 * 1000 }));
+  } catch(e) {}
+  return tokenData.access_token;
+}
+
 // ======== 云备份（Cloudflare KV） ========
 function getDeviceId() {
   let id = localStorage.getItem('kuanwei_device_id');
@@ -2858,15 +2878,9 @@ async function doOCR(imageDataUrl, file) {
 
   showLoading('正在识别…');
   try {
-    // 1. 获取 access token
-    const tokenResp = await fetch(CORS_PROXY + encodeURIComponent('https://aip.baidubce.com/oauth/2.0/token'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `grant_type=client_credentials&client_id=${keys.apiKey}&client_secret=${keys.secretKey}`
-    });
-    const tokenData = await tokenResp.json();
-    if (!tokenData.access_token) throw new Error('获取token失败');
-    const accessToken = tokenData.access_token;
+    // 1. 获取 access token（带缓存，24小时内不重复请求）
+    const accessToken = await getOcrAccessToken(keys.apiKey, keys.secretKey);    const tokenData = await tokenResp.json();
+    if (!accessToken) throw new Error('获取token失败');
 
     // 2. 压缩图片
     const compressedBase64 = await compressImage(imageDataUrl, 1600);
@@ -4070,14 +4084,8 @@ async function doStoreOCR(imageDataUrl) {
   }
   showLoading('正在识别店面…');
   try {
-    const tokenResp = await fetch(CORS_PROXY + encodeURIComponent('https://aip.baidubce.com/oauth/2.0/token'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `grant_type=client_credentials&client_id=${keys.apiKey}&client_secret=${keys.secretKey}`
-    });
-    const tokenData = await tokenResp.json();
-    if (!tokenData.access_token) throw new Error('获取token失败');
-    const accessToken = tokenData.access_token;
+    // 获取 access token（带缓存）
+    const accessToken = await getOcrAccessToken(keys.apiKey, keys.secretKey);
     const compressedBase64 = await compressImage(imageDataUrl, 1600);
     const imgBase64 = compressedBase64.replace(/^data:image\/\w+;base64,/, '');
     const ocrResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=${accessToken}`), {
