@@ -62,7 +62,7 @@ async function callTencentOCR(imageBase64, json, TENCENT_SECRET_ID, TENCENT_SECR
   const canonicalRequest = ['POST', '/', '', canonicalHeaders, signedHeaders, await sha256Hex(payload)].join('\n');
 
   const credentialScope = date + '/ocr/tc3_request';
-  const stringToSign = [algorithm, isoTime, credentialScope, await sha256Hex(canonicalRequest)].join('\n');
+  const stringToSign = [algorithm, String(ts), credentialScope, await sha256Hex(canonicalRequest)].join('\n');
 
   const secretDate = await hmacSha256(new TextEncoder().encode('TC3' + TENCENT_SECRET_KEY), date);
   const secretService = await hmacSha256(secretDate, service);
