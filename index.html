@@ -86,10 +86,11 @@ body {
 .page.active { display: block; }
 .card {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px;
   margin-bottom: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  box-shadow: 0 1px 4px rgba(15,23,42,.05);
+  border: 1px solid rgba(226,232,240,.6);
 }
 
 /* 表单 */
@@ -105,7 +106,7 @@ body {
   width: 100%;
   padding: 12px 14px;
   border: 1.5px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 16px;
   background: #f8fafc;
   outline: none;
@@ -210,7 +211,7 @@ body {
   width: 100%;
   padding: 14px;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -690,7 +691,7 @@ body {
 /* 店面拍照识别弹窗 */
 .store-ocr-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); z-index: 9998; align-items: center; justify-content: center; }
 .store-ocr-modal.show { display: flex; }
-.store-ocr-content { background: var(--card-bg); border-radius: 12px; padding: 14px; max-width: 95%; width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+.store-ocr-content { background: var(--card-bg); border-radius: 16px; padding: 14px; max-width: 95%; width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,.3); }
 .store-ocr-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
 
 /* 首页按钮网格 */
@@ -1377,6 +1378,33 @@ body {
   </div>
 </div>
 
+<!-- 登录弹窗 -->
+<div class="store-ocr-modal" id="loginModal" onclick="closeLoginModal()">
+  <div class="store-ocr-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">🔐 登录账号</span>
+      <button onclick="closeLoginModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">输入设置过的手机号+密码登录，登录后自动同步云端数据</div>
+    <div class="form-group">
+      <label class="form-label">手机号</label>
+      <input type="tel" class="form-input" id="loginPhone" maxlength="11" placeholder="11位手机号" inputmode="numeric">
+    </div>
+    <div class="form-group">
+      <label class="form-label">密码</label>
+      <input type="password" class="form-input" id="loginPwd" placeholder="输入密码">
+    </div>
+    <div style="font-size:11px;color:var(--text-light);margin-bottom:8px;" id="loginLockMsg"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="closeLoginModal()">取消</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="doLogin()">🔐 登录</button>
+    </div>
+    <div style="font-size:12px;color:var(--text-light);text-align:center;margin-top:10px;">
+      没有账号？<span style="color:var(--primary);font-weight:600;cursor:pointer;" onclick="closeLoginModal();openSetupModal()">去设置密码</span>
+    </div>
+  </div>
+</div>
+
 <!-- 设置密码弹窗 -->
 <div class="store-ocr-modal" id="setupModal" onclick="closeSetupModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
@@ -1402,9 +1430,16 @@ body {
       <select class="form-select" id="setupSecQ">
         <option value="我的家乡是哪里？">我的家乡是哪里？</option>
         <option value="我母亲的名字是？">我母亲的名字是？</option>
+        <option value="我父亲的名字是？">我父亲的名字是？</option>
         <option value="我小学的名字是？">我小学的名字是？</option>
+        <option value="我初中/高中的学校名字是？">我初中/高中的学校名字是？</option>
         <option value="我最喜欢的食物是？">我最喜欢的食物是？</option>
-        <option value="我的宠物名字是？">我的宠物名字是？</option>
+        <option value="我第一只宠物的名字是？">我第一只宠物的名字是？</option>
+        <option value="我最好的朋友的名字是？">我最好的朋友的名字是？</option>
+        <option value="我出生在哪个城市？">我出生在哪个城市？</option>
+        <option value="我小时候的昵称是？">我小时候的昵称是？</option>
+        <option value="我最喜欢的歌手/明星是？">我最喜欢的歌手/明星是？</option>
+        <option value="我第一份工作的公司/地方是？">我第一份工作的公司/地方是？</option>
       </select>
     </div>
     <div class="form-group">
@@ -1929,25 +1964,88 @@ function renderAccountStatus() {
   const el = document.getElementById('accountStatus');
   if (!el) return;
   const phone = getCloudPhone();
+  const logged = isLoggedIn();
   if (!phone) {
+    // 从未设置过：显示注册 + 登录入口
     el.innerHTML = `
       <div style="background:#fff8e1;border:1.5px solid #ffe082;border-radius:10px;padding:12px;">
-        <div style="font-weight:600;font-size:14px;color:#b45309;margin-bottom:4px;">🔑 账号密码（未设置）</div>
+        <div style="font-weight:600;font-size:14px;color:#b45309;margin-bottom:4px;">🔑 账号（未设置）</div>
         <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">设置密码后，换手机/清缓存输入手机号+密码即可恢复数据（当前使用设备自动备份）</div>
-        <button class="btn btn-primary" style="padding:10px;" onclick="openSetupModal()">🔑 设置账号密码</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" style="flex:1;padding:10px;" onclick="openSetupModal()">🔑 设置账号密码</button>
+          <button class="btn btn-outline" style="flex:1;padding:10px;" onclick="openLoginModal()">🔐 登录</button>
+        </div>
       </div>`;
     return;
   }
+  // 有手机号（设置过密码）
   el.innerHTML = `
-    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;">
-      <div style="font-weight:600;font-size:14px;color:#15803d;margin-bottom:4px;">🔑 账号已设置</div>
+    <div style="background:${logged ? '#f0fdf4' : '#fff8e1'};border:1.5px solid ${logged ? '#bbf7d0' : '#ffe082'};border-radius:10px;padding:12px;">
+      <div style="font-weight:600;font-size:14px;color:${logged ? '#15803d' : '#b45309'};margin-bottom:4px;">🔑 账号${logged ? '（已登录）' : '（未登录）'}</div>
       <div style="font-size:13px;margin-bottom:8px;">📱 ${phone}</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;">
-        <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openVerifyModal()">📥 恢复数据</button>
-        <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openChangePwdModal()">✏️ 更改密码</button>
-        <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openForgotModal()">❓ 忘记密码</button>
+        ${logged
+          ? `<button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openVerifyModal()">📥 恢复数据</button>
+             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openChangePwdModal()">✏️ 更改密码</button>
+             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="logout()">🚪 退出登录</button>`
+          : `<button class="btn btn-primary" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openLoginModal()">🔐 登录</button>
+             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openChangePwdModal()">✏️ 更改密码</button>
+             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openForgotModal()">❓ 忘记密码</button>`}
       </div>
     </div>`;
+}
+
+// ======== 登录 / 登出 ========
+function isLoggedIn() {
+  try { return localStorage.getItem('kuanwei_logged_in') === '1'; } catch(e) { return false; }
+}
+function setLoggedIn(v) {
+  try { localStorage.setItem('kuanwei_logged_in', v ? '1' : '0'); } catch(e) {}
+}
+function openLoginModal() { document.getElementById('loginModal').classList.add('show'); }
+function closeLoginModal() { document.getElementById('loginModal').classList.remove('show'); }
+async function doLogin() {
+  const phone = document.getElementById('loginPhone').value.trim();
+  const pwd = document.getElementById('loginPwd').value;
+  if (!validatePhone(phone)) { showToast('请输入正确的11位手机号'); return; }
+  const locked = checkLock(phone);
+  if (locked > 0) { showToast('尝试次数过多，请 ' + locked + ' 分钟后再试'); return; }
+  showLoading('正在登录…');
+  try {
+    const passwordHash = await hashPassword(phone, pwd);
+    const resp = await fetch('/auth/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, passwordHash })
+    });
+    const result = await resp.json();
+    hideLoading();
+    if (result.ok && result.data) {
+      clearLock(phone);
+      setCloudPhone(phone);
+      setLoggedIn(true);
+      closeLoginModal();
+      renderAccountStatus();
+      renderCloudBackupStatus();
+      showToast('✅ 登录成功，正在同步数据…');
+      // 自动同步云端数据
+      autoSyncFromCloud(phone).then(hasCloud => {
+        if (hasCloud) {
+          showToast('✅ 已同步云端数据');
+          renderTodayOverview();
+          try { initStoreSelect('recordStore'); renderStoreChips(); renderGoodsInputList(); } catch(e) {}
+        }
+      });
+    } else {
+      recordFail(phone);
+      showToast(result.error || '登录失败');
+    }
+  } catch (e) { hideLoading(); showToast('❌ 网络错误'); }
+}
+function logout() {
+  setLoggedIn(false);
+  renderAccountStatus();
+  showToast('已退出登录');
 }
 
 // 设置密码
@@ -1978,6 +2076,7 @@ async function doSetupAccount() {
       closeSetupModal();
       renderAccountStatus();
       renderCloudBackupStatus();
+      setLoggedIn(true);
       showToast('✅ 密码设置成功');
       // 登录成功 → 自动同步云端该账号数据（换手机场景：把旧手机的数据拉回来）
       autoSyncFromCloud(phone).then(hasCloud => {
@@ -2021,6 +2120,7 @@ async function doVerifyAccount() {
       if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
       if (cloud.storeConfig && Array.isArray(cloud.storeConfig)) saveStoreConfig(cloud.storeConfig);
       setCloudPhone(phone);
+      setLoggedIn(true);
       closeVerifyModal();
       renderAccountStatus();
       renderCloudBackupStatus();
@@ -2111,6 +2211,7 @@ async function doForgotReset() {
       setCloudPhone(phone);
       closeForgotModal();
       renderAccountStatus();
+      setLoggedIn(true);
       showToast('✅ 密码已重置，正在同步数据…');
       // 登录成功 → 自动同步云端该账号数据
       autoSyncFromCloud(phone).then(hasCloud => {
@@ -4981,6 +5082,11 @@ initSummaryPage();
 initWelcome();
 // 云备份恢复（清缓存/换手机后自动从云端拉取数据）
 restoreFromCloud();
+// 已登录用户：打开时自动同步该账号云端数据
+if (isLoggedIn()) {
+  const p = getCloudPhone();
+  if (p) { autoSyncFromCloud(p); }
+}
 // 注册 Service Worker（离线可用 + 加载加速）
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(() => {});
