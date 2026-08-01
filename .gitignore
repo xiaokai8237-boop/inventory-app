@@ -1,2 +1,5 @@
 # 本地工作记忆/IDE 数据（含敏感信息，勿上传公开仓库）
 .codebuddy/
+
+# wrangler 本地缓存
+.wrangler/
