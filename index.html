@@ -3134,7 +3134,7 @@ function parseOcrResult(ocrData) {
   }
 
   // 4. 对每个门店，从原始 word 中提取编号/时间之后的数字
-  const rows = [];
+  let rows = [];
   stores.forEach(s => {
     let nums = [];
     // 策略A：找到包含 s.code 的原始 word，从编号后提取数字
