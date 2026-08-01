@@ -1,5 +1,5 @@
 // 物流筐收发管理系统 - Service Worker（离线可用）
-const CACHE = 'kuanwei-v9';
+const CACHE = 'kuanwei-v10';
 const ASSETS = ['/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -8,6 +8,13 @@ self.addEventListener('install', (e) => {
       .then((c) => c.addAll(ASSETS))
       .then(() => self.skipWaiting())
   );
+});
+
+// 收到 SKIP_WAITING 消息：立即接管新版本（配合前端"立即更新"）
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', (e) => {

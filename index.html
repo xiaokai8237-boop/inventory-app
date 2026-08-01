@@ -1799,6 +1799,19 @@ body {
   </div>
 </div>
 
+<!-- 新版本确认弹窗 -->
+<div class="store-ocr-modal" id="versionConfirmModal">
+  <div class="store-ocr-content" style="max-width:300px;text-align:center;">
+    <div style="font-size:34px;margin-bottom:8px;">🔄</div>
+    <div style="font-weight:600;font-size:16px;color:var(--text);margin-bottom:6px;">发现新版本</div>
+    <div style="font-size:13px;color:var(--text-light);margin-bottom:18px;">需要重启应用才能更新到最新版本，是否立即更新？</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="closeVersionConfirm()">稍后</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="applyNewVersion()">立即更新</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ======== 配置 ========
 const STORAGE_KEY = 'kuanwei_inventory_data';
@@ -5354,8 +5367,8 @@ if ('serviceWorker' in navigator) {
         const nw = reg.installing;
         if (nw) nw.addEventListener('statechange', () => {
           if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-            // 有新版，提示用户刷新获取最新功能
-            setTimeout(() => { try { showToast('🔄 检测到新版本，请关闭后重新打开'); } catch(e) {} }, 1500);
+            // 有新版：弹确认框，用户确认后强制重启加载新版本
+            setTimeout(showVersionConfirm, 800);
           }
         });
       });
@@ -5365,6 +5378,31 @@ if ('serviceWorker' in navigator) {
   if (navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({ type: 'CHECK_UPDATE' });
   }
+}
+
+// 检测到新版本确认弹窗
+function showVersionConfirm() {
+  const m = document.getElementById('versionConfirmModal');
+  if (m) m.classList.add('show');
+}
+function closeVersionConfirm() {
+  const m = document.getElementById('versionConfirmModal');
+  if (m) m.classList.remove('show');
+}
+// 用户确认：强制重启，加载新版本
+function applyNewVersion() {
+  closeVersionConfirm();
+  // 让等待中的新 Service Worker 立即接管
+  if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (reg && reg.waiting) {
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+    }).catch(() => {});
+  }
+  try { showToast('🔄 正在重启更新…'); } catch (e) {}
+  // 短暂延迟后强制重新加载（重新加载即拿到新版本）
+  setTimeout(() => { window.location.reload(); }, 600);
 }
 // 默认对账日期范围
 const dEnd = todayStr();
