@@ -3270,6 +3270,20 @@ async function doOCR(imageDataUrl, file) {
       ocrData = { words_result: handwritingWords.map(w => ({ words: w })) };
     }
 
+    // 5.5 并行调用腾讯云 OCR（交叉验证：两引擎结果对比）
+    let tcloudWords = null;
+    try {
+      updateLoadingStep('🔄 双引擎交叉验证…', 80);
+      const tcResp = await fetch('/tcloud', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: imgBase64 })
+      });
+      const tcData = await tcResp.json();
+      if (tcData.ok && tcData.words && tcData.words.length > 0) tcloudWords = tcData.words;
+    } catch(e) {}
+    checkOcrCancel();
+
     hideLoading();
     checkOcrCancel();
 
@@ -3282,6 +3296,9 @@ async function doOCR(imageDataUrl, file) {
 
     // 6. 解析识别结果
     parseOcrResult(ocrData);
+    // 7. 交叉验证：腾讯云结果与百度结果对比，不一致标黄
+    crossValidateOcr(ocrCurrentResult, tcloudWords);
+    refreshOcrQtyCol();
 
     // 7. 识别完成，关闭拍照弹窗，只保留结果弹窗
     closePhotoInputModal();
@@ -3425,6 +3442,27 @@ function fillMissingStores(rows, storeCfg) {
     return na - nb;
   });
   return all;
+}
+
+// 交叉验证：腾讯云结果 vs 百度结果，数字不一致的行标黄（提示用户核对）
+function crossValidateOcr(result, tcloudWords) {
+  if (!result || !result.rows || !tcloudWords || !tcloudWords.length) return;
+  result.rows.forEach(r => {
+    if (!r.code) return;
+    const codeStr = String(r.code);
+    // 在腾讯结果里找包含该编号的行
+    const hit = tcloudWords.find(w => String(w).includes(codeStr));
+    if (!hit) return;
+    // 编号后提取数字（第一个数字近似该店数量）
+    const idx = String(hit).indexOf(codeStr);
+    const rest = String(hit).slice(idx + codeStr.length);
+    const nums = rest.match(/\d+/g);
+    if (!nums || !nums.length) return;
+    const tcVal = parseInt(nums[0], 10);
+    const myVal = r.nums && r.nums[0] !== undefined ? r.nums[0] : 0;
+    // 不一致 → 标记低置信（黄色待核对）
+    if (tcVal !== myVal) r._conflict = true;
+  });
 }
 
 function parseOcrResult(ocrData) {
@@ -3612,16 +3650,20 @@ function refreshOcrQtyCol() {
     const isMissing = r._missing;
     // 高置信（表格识别）：数量框绿色
     const isHighConf = r._highConf;
-    const rowBg = isMissing ? ' style="background:#fff3cd;"' : '';
-    const hint = isMissing ? ' <span style="color:var(--warning);font-size:11px;">⚠️可能漏识别</span>' : '';
+    // 双引擎不一致：标黄待核对（优先于绿色）
+    const isConflict = r._conflict;
+    const rowBg = isMissing || isConflict ? ' style="background:#fff3cd;"' : '';
+    const hint = isMissing ? ' <span style="color:var(--warning);font-size:11px;">⚠️可能漏识别</span>' : (isConflict ? ' <span style="color:#e65100;font-size:11px;">⚠️两引擎结果不同</span>' : '');
     html += '<tr' + rowBg + '>';
     html += '<td><input type="text" id="ocrCode_' + i + '" value="' + escapeHtml(r.code || '') + '" maxlength="10" style="width:60px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;text-align:center;"></td>';
     html += '<td style="text-align:left;padding-left:6px;"><input type="text" id="ocrName_' + i + '" value="' + escapeHtml(r.name || '') + '" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;">' + hint + '</td>';
     const v = r.nums[0] !== undefined ? r.nums[0] : 0;
-    const qtyStyle = isHighConf
+    const qtyStyle = (isHighConf && !isConflict)
       ? 'width:64px;padding:5px;border:1.5px solid #10b981;border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#15803d;background:#f0fdf4;'
-      : 'width:64px;padding:5px;border:1.5px solid var(--warning);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#b35900;';
-    html += '<td style="background:' + (isHighConf ? '#f0fdf4;' : '#fffde7;') + '"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="' + qtyStyle + '"></td>';
+      : (isConflict
+        ? 'width:64px;padding:5px;border:2px solid #e65100;border-radius:6px;font-size:14px;text-align:center;font-weight:700;color:#e65100;background:#fff3cd;'
+        : 'width:64px;padding:5px;border:1.5px solid var(--warning);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#b35900;');
+    html += '<td style="background:' + (isHighConf && !isConflict ? '#f0fdf4;' : (isConflict ? '#fff3cd;' : '#fffde7;')) + '"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="' + qtyStyle + '"></td>';
     html += '<td><button onclick="removeOcrRow(' + i + ')" style="background:none;border:none;color:var(--danger);font-size:20px;cursor:pointer;padding:0 6px;line-height:1;">×</button></td>';
     html += '</tr>';
   });
