@@ -680,6 +680,12 @@ body {
   100% { transform: translateX(calc(330%)); }
 }
 .loading-overlay .loading-text { color: #fff; font-size: 15px; font-weight: 500; letter-spacing: .5px; }
+.loading-overlay .loading-step { color: rgba(255,255,255,.75); font-size: 13px; margin-top: 6px; min-height: 18px; }
+.loading-overlay .loading-cancel {
+  margin-top: 14px; padding: 7px 18px; border: 1px solid rgba(255,255,255,.5);
+  background: rgba(255,255,255,.1); color: #fff; font-size: 13px; border-radius: 18px; cursor: pointer;
+}
+.loading-overlay .loading-cancel:active { background: rgba(255,255,255,.25); }
 
 /* 店面拍照识别弹窗 */
 .store-ocr-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); z-index: 9998; align-items: center; justify-content: center; }
@@ -1218,8 +1224,10 @@ body {
 </div>
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
-  <div class="bar-track"><div class="bar-fill"></div></div>
+  <div class="bar-track"><div class="bar-fill" id="loadingBar"></div></div>
   <div class="loading-text" id="loadingText">正在识别…</div>
+  <div class="loading-step" id="loadingStep"></div>
+  <button class="loading-cancel" id="loadingCancelBtn" onclick="cancelOcr()">取消识别</button>
 </div>
 
 <!-- 店面拍照识别弹窗 -->
@@ -2128,15 +2136,47 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
 }
+// OCR 取消标志
+let ocrCancelled = false;
+// 安抚文案轮换
+const LOADING_TIPS = ['别急，正在努力认字…', '马上就好，稍等一下…', '数字越多越准…'];
+let loadingTipIdx = 0;
+
 function showLoading(text) {
   const txt = document.getElementById('loadingText');
   const ov = document.getElementById('loadingOverlay');
   if (txt) txt.textContent = text || '处理中…';
+  const step = document.getElementById('loadingStep');
+  if (step) step.textContent = '';
+  const bar = document.getElementById('loadingBar');
+  if (bar) bar.style.width = '30%';
+  const cancel = document.getElementById('loadingCancelBtn');
+  if (cancel) cancel.style.display = 'inline-block';
   if (ov) ov.classList.add('show');
 }
 function hideLoading() {
   const ov = document.getElementById('loadingOverlay');
   if (ov) ov.classList.remove('show');
+  ocrCancelled = false;
+}
+// 更新加载步骤：如 updateLoadingStep('🔍 定位表格…', 40)
+function updateLoadingStep(text, pct) {
+  const step = document.getElementById('loadingStep');
+  if (step) step.textContent = text || '';
+  const bar = document.getElementById('loadingBar');
+  if (bar && pct) bar.style.width = Math.min(95, pct) + '%';
+  // 轮换安抚语（每 2 步换一句）
+  loadingTipIdx = (loadingTipIdx + 1) % LOADING_TIPS.length;
+}
+// 取消识别
+function cancelOcr() {
+  ocrCancelled = true;
+  hideLoading();
+  showToast('已取消');
+}
+// 检查是否被取消（取消则抛错终止流程）
+function checkOcrCancel() {
+  if (ocrCancelled) throw new Error('已取消');
 }
 
 // ======== 店面 chip 切换（手动录入页） ========
@@ -2892,29 +2932,41 @@ async function doOCR(imageDataUrl, file) {
   showLoading('正在识别…');
   try {
     // 1. 获取 access token（带缓存，24小时内不重复请求）
+    updateLoadingStep('正在准备…', 5);
     const accessToken = await getOcrAccessToken(keys.apiKey, keys.secretKey);
     if (!accessToken) throw new Error('获取token失败');
+    checkOcrCancel();
 
-    // 2. 压缩图片
+    // 2. 压缩图片（本地预处理，毫秒级）
+    updateLoadingStep('正在处理图片…', 10);
     const compressedBase64 = await compressImage(imageDataUrl, 1600);
     const imgBase64 = compressedBase64.replace(/^data:image\/\w+;base64,/, '');
     const imgEnc = encodeURIComponent(imgBase64);
+    checkOcrCancel();
 
-    // 3. 优先用「表格识别」专用 API（路单是表格结构，识别率更高）
+    // 3. 并行调用：表格识别（结构化）+ 通用高精度（兜底/交叉验证）
+    updateLoadingStep('🔍 正在定位表格…', 25);
     let ocrData = null;
     let usedTable = false;
+    let generalWords = null;
     try {
-      const tblResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/table?access_token=${accessToken}`), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `image=${imgEnc}`
-      });
-      const tblData = await tblResp.json();
+      const [tblPromise, genPromise] = await Promise.all([
+        fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/table?access_token=${accessToken}`), {
+          method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: `image=${imgEnc}`
+        }),
+        fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=${accessToken}`), {
+          method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `image=${imgEnc}&language_type=CHN_ENG&detect_direction=true&paragraph=false&probability=false`
+        })
+      ]);
+      checkOcrCancel();
+      updateLoadingStep('🔍 正在识别文字…', 55);
+      const [tblData, genData] = await Promise.all([tblPromise.json(), genPromise.json()]);
+      if (genData.words_result) generalWords = genData.words_result.map(x => x.words);
+      // 表格识别成功 → 用表格结构化结果
       if (tblData.tables_result && tblData.tables_result.length > 0) {
-        // 表格识别成功：转换为 words 列表供现有解析器使用
         const converted = convertTableResult(tblData);
         if (converted && converted.length > 0) {
-          // 检查表格识别是否包含筐类型关键词（否则回退通用 OCR）
           const blob = converted.join(' ');
           const hasTrayKeyword = /(冷藏|冷冻|常温|面包|鲜食)/.test(blob);
           if (hasTrayKeyword) {
@@ -2923,35 +2975,52 @@ async function doOCR(imageDataUrl, file) {
           }
         }
       }
-    } catch(e) { /* 表格识别失败则走通用 */ }
+    } catch(e) { /* 并行识别失败则走兜底 */ }
 
-    // 4. 表格识别不可用/未识别到关键字时回退到通用高精度版
-    if (!ocrData) {
-      const ocrResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=${accessToken}`), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `image=${imgEnc}&language_type=CHN_ENG&detect_direction=true&paragraph=false&probability=false`
-      });
-      ocrData = await ocrResp.json();
+    // 4. 表格识别不可用 → 用通用 OCR 结果
+    if (!ocrData && generalWords && generalWords.length > 0) {
+      ocrData = { words_result: generalWords.map(w => ({ words: w })) };
+    }
+
+    // 5. 手写单增强：检测「鲜食/手写」→ 调用手写专用 API 补充（提高数字识别率）
+    let handwritingWords = null;
+    if (ocrData) {
+      const blob = (ocrData.words_result || []).map(x => x.words).join(' ');
+      if (/(鲜食|手写|顶汇|当日出框)/.test(blob)) {
+        try {
+          updateLoadingStep('✍️ 检测到手写单，增强识别…', 70);
+          const hwResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/handwriting?access_token=${accessToken}`), {
+            method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: `image=${imgEnc}&language_type=CHN_ENG`
+          });
+          const hwData = await hwResp.json();
+          if (hwData.words_result) handwritingWords = hwData.words_result.map(x => x.words);
+        } catch(e) {}
+      }
+    }
+    // 有手写补充结果且主结果缺失关键词 → 优先手写结果
+    if (handwritingWords && handwritingWords.length > 0) {
+      ocrData = { words_result: handwritingWords.map(w => ({ words: w })) };
     }
 
     hideLoading();
+    checkOcrCancel();
 
-    if (!ocrData.words_result) {
-      throw new Error(ocrData.error_msg || '识别失败');
+    if (!ocrData || !ocrData.words_result) {
+      throw new Error(ocrData?.error_msg || '识别失败');
     }
 
     // 记录识别来源（表格识别=高置信）
     ocrData._highConf = !!usedTable;
 
-    // 5. 解析识别结果
+    // 6. 解析识别结果
     parseOcrResult(ocrData);
 
-    // 6. 识别完成，关闭拍照弹窗，只保留结果弹窗
+    // 7. 识别完成，关闭拍照弹窗，只保留结果弹窗
     closePhotoInputModal();
 
   } catch(error) {
     hideLoading();
+    if (error.message === '已取消') return;
     console.error('OCR error:', error);
     showToast('识别失败: ' + error.message);
     closePhotoInputModal();
