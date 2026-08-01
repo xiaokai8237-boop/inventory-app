@@ -2500,7 +2500,7 @@ function renderStorePanelUI() {
       <div class="sc-head">
         <div class="sc-idx">${i+1}</div>
         <input type="text" class="sc-name" id="sName${i}" value="${escapeHtml(s.name)}" maxlength="20">
-        ${cfg.length > 1 ? `<button class="sc-del" onclick="removeStoreFromPanel(${i})">删除</button>` : ''}
+        <button class="sc-del" onclick="removeStoreFromPanel(${i})">删除</button>
       </div>
       <div class="sc-alias-label">🏷️ 别名（识别时可替代店名）</div>
       <div class="sc-aliases" id="sAliases${i}">
