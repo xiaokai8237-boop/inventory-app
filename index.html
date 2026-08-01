@@ -2017,7 +2017,7 @@ function getDeviceId() {
 let backupTimer = null;
 function scheduleCloudBackup() {
   if (backupTimer) clearTimeout(backupTimer);
-  backupTimer = setTimeout(backupToCloud, 3000); // 保存后3秒自动备份（防抖）
+  backupTimer = setTimeout(backupToCloud, 1000); // 保存后1秒自动备份（防抖）
 }
 
 // 定时兜底备份：无操作时每30分钟自动备份一次（后台静默，零干扰）
