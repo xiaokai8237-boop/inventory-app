@@ -3491,8 +3491,23 @@ function openAlbumPicker(type, ev) {
   }
 }
 function triggerAlbumInput(type) {
+  // 方案1：直接触发已有 input
   const el = document.getElementById(type === 'store' ? 'storeOcrAlbumInput' : 'photoAlbumInput');
-  if (el) el.click();
+  if (el) {
+    try { el.click(); } catch (e) {}
+  }
+  // 方案2：动态创建可见 file input 触发（小米 WebView 需可见 input 才响应）
+  try {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;opacity:0;z-index:99999;cursor:pointer;';
+    const cleanup = () => { try { document.body.removeChild(input); } catch (e) {} };
+    if (type === 'store') input.onchange = (e) => { try { handleStorePhoto(e); } catch (err) {} cleanup(); };
+    else input.onchange = (e) => { try { handlePhoto(e); } catch (err) {} cleanup(); };
+    document.body.appendChild(input);
+    input.click();
+  } catch (e) {}
 }
 
 function handlePhoto(event) {
