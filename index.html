@@ -2730,10 +2730,16 @@ function renderTrack() {
 
 // ======== 备份教程弹窗 ========
 function showBackupTutorial() {
-  document.getElementById('backupTutorialModal').classList.add('show');
+  const modal = document.getElementById('backupTutorialModal');
+  if (modal) modal.classList.add('show');
+  // 4 秒后自动关闭（避免一直遮挡其他操作）
+  if (window._backupTutorialTimer) clearTimeout(window._backupTutorialTimer);
+  window._backupTutorialTimer = setTimeout(() => closeBackupTutorialModal(), 4000);
 }
 function closeBackupTutorialModal() {
-  document.getElementById('backupTutorialModal').classList.remove('show');
+  if (window._backupTutorialTimer) { clearTimeout(window._backupTutorialTimer); window._backupTutorialTimer = null; }
+  const modal = document.getElementById('backupTutorialModal');
+  if (modal) modal.classList.remove('show');
 }
 
 // ======== 页面切换 ========
