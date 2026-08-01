@@ -1929,7 +1929,7 @@ async function doSetupAccount() {
     } else {
       showToast(result.error || '设置失败');
     }
-  } catch (e) { hideLoading(); showToast('❌ 网络错误'); }
+  } catch (e) { hideLoading(); console.error('SETUP_ERROR:', e && (e.stack || e.message)); showToast('❌ 网络错误: ' + (e && e.message || e)); }
 }
 
 // 恢复数据
