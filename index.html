@@ -3218,8 +3218,11 @@ async function autoSyncFromCloud(phone) {
       (cloud.records || []).forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
       saveDataArr([...byKey.values()]);
       if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
-      // 仅当云端店面非空时才覆盖本地，避免云端空 storeConfig 误清用户本地已配置的店面
-      if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0) saveStoreConfig(cloud.storeConfig);
+      // 店面配置：仅当本地为空时才从云端拉取；本地已有店面配置（用户主动设置的顺序/别称）时保留本地，
+      // 避免云端旧配置覆盖用户刚设的顺序/别称（用户没点备份时云端是旧数据，但 backupTime 可能因其他数据较新）
+      if (loadStoreConfig().length === 0 && cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0) {
+        saveStoreConfig(cloud.storeConfig);
+      }
       if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
       // 同步后校验：店面配置为空但日报偏好有店 → 自动导入
       if (loadStoreConfig().length === 0) importStoresFromDailyPref();
@@ -6482,7 +6485,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.31'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.32'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
