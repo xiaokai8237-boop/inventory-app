@@ -3355,7 +3355,12 @@ function triggerPhoto(type, mode) {
   if (type === 'camera' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
       .then(stream => { try { stream.getTracks().forEach(t => t.stop()); } catch (e) {} })
-      .catch(() => {}); // 权限被拒由系统选择器兜底，此处静默
+      .catch((err) => {
+        // 相机权限被拒：明确提示（PWA 下常见）
+        if (err && err.name === 'NotAllowedError') {
+          showToast('🔒 相机权限被拒绝，请在设置中允许相机权限');
+        }
+      }); // 权限被拒由系统选择器兜底，此处提示
   }
   const input = document.createElement('input');
   input.type = 'file';
