@@ -3605,8 +3605,9 @@ function saveStorePanelChanges() {
       if (av && !s.aliases.includes(av)) { s.aliases.push(av); changed++; ai.value = ''; }
     }
   });
-  // 按 sort 归一化（保证删除/调整后 sort 连续，数组顺序即显示顺序）
-  cfg = cfg.map((s, idx) => ({ ...s, sort: idx }));
+  // 保留用户排序：按现有 sort 值归一化（0..n-1），数组物理顺序不变（storeIdx 稳定）
+  const sortedView = cfg.slice().sort((a, b) => (a.sort == null ? 0 : a.sort) - (b.sort == null ? 0 : b.sort)).map(s => cfg.indexOf(s));
+  sortedView.forEach((ri, k) => { cfg[ri].sort = k; });
   saveStoreConfig(cfg);
   renderStorePanelUI();
   initAllStores();
@@ -6229,7 +6230,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.5'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.6'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
