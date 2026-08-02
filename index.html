@@ -825,7 +825,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,.65);
-  z-index: 9998;
+  z-index: 10000;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -872,6 +872,10 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 .store-ocr-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); z-index: 9998; align-items: center; justify-content: center; }
 .store-ocr-modal.show { display: flex; }
 .store-ocr-content { background: var(--card-bg); border-radius: 16px; padding: 14px; max-width: 95%; width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+/* 子弹窗置顶：从父弹窗内打开、或随时弹出的强制更新框，保证不被任何父弹窗/浮层盖住 */
+#voiceConfirmModal.store-ocr-modal.show,
+#dailyPreviewModal.store-ocr-modal.show,
+#versionConfirmModal.store-ocr-modal.show { z-index: 10001; }
 .store-ocr-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
 
 /* 首页按钮网格 */
@@ -4280,6 +4284,8 @@ function parseVoiceText(text, mode) {
   pendingVoiceResults = { results, mode };
   const rows = Object.keys(results).map(idx => `${names[idx]}：${results[idx]}`).join('，');
   document.getElementById('voiceConfirmInfo').textContent = rows;
+  // 立即收起语音识别浮层（不等 onend 的500ms延迟），让确认框完全置顶显示
+  document.getElementById('voiceOverlay').classList.remove('show');
   document.getElementById('voiceConfirmModal').classList.add('show');
 }
 let pendingVoiceResults = null;
@@ -6184,7 +6190,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.2'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
