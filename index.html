@@ -3375,6 +3375,8 @@ function closePhotoInputModal() {
 // 注意：input 必须位于可视区内（不能 display:none / 移出可视区），否则 PWA/WebView 会阻止唤起系统选择器。
 // 同时拍照前主动请求相机权限，避免 PWA 下因未授权导致唤起被拒。
 function triggerPhoto(type, mode) {
+  // 立即关闭拍照弹窗（点按钮弹窗就消失）
+  closePhotoInputModal();
   // 拍照前主动请求相机权限（部分 PWA/WebView 需此步才能授权相机），获取后立即释放（仅为触发权限框）
   if (type === 'camera' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
