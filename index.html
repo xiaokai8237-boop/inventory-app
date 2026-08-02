@@ -106,8 +106,8 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
 }
-.header h1 { font-size: 18px; font-weight: 700; color: var(--primary); padding: 0 52px; }
-.header .date-today { font-size: 12px; color: var(--text-light); margin-top: 2px; padding: 0 52px; }
+.header h1 { font-size: 18px; font-weight: 700; color: var(--primary); padding: 0 48px 0 12px; }
+.header .date-today { font-size: 12px; color: var(--text-light); margin-top: 2px; padding: 0 48px 0 12px; }
 
 /* 首页角落登录状态胶囊 */
 .login-pill {
@@ -1004,7 +1004,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 <body>
 
 <div class="header">
-  <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)">🔑 登录</button>
   <h1>📦 物流筐收发管理系统</h1>
   <div class="date-today" id="todayLabel"></div>
   <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="切换深浅色">🌙</button>
@@ -1028,6 +1027,8 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   <!-- === 首页向导（默认显示） === -->
   <div id="homeWizard">
     <div style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v2.0.0</div>
+    <!-- 账号登录状态（原"数据账号"徽标位置） -->
+    <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)" style="position:static;max-width:none;width:100%;justify-content:center;margin-bottom:8px;">🔑 登录</button>
     <div class="card" style="text-align:center;padding:16px 14px;">
       <div style="font-size:16px;font-weight:600;margin-bottom:16px;">选择操作</div>
       <!-- 第一行：发出/回收（主操作，突出） -->
