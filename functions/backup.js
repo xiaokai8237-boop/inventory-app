@@ -38,7 +38,28 @@ async function handleBackupPost(body, env, json) {
   const deviceId = body.deviceId;
   const data = body.data;
   if ((!account && !deviceId) || !data) return json({ error: 'missing account/deviceId or data' }, 400);
-  if (account) await env.BACKUP_KV.put('data_' + account, JSON.stringify(data));
+  // 服务器端防数据丢失（终极保护，客户端无论新旧版本都无法绕过）：
+  // 本地记录/店面为空数组但云端已有数据时，保留云端数据，避免"清缓存/换设备/旧版本"上传空值覆盖云端。
+  if (account) {
+    const key = 'data_' + account;
+    const raw = await env.BACKUP_KV.get(key);
+    if (raw) {
+      try {
+        const cloud = JSON.parse(raw);
+        // 记录保护：本地 records 空但云端有记录 → 保留云端记录
+        if (Array.isArray(cloud.records) && cloud.records.length > 0 &&
+            Array.isArray(data.records) && data.records.length === 0) {
+          data.records = cloud.records;
+        }
+        // 店面保护：本地 storeConfig 空但云端有店面 → 保留云端店面
+        if (Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0 &&
+            Array.isArray(data.storeConfig) && data.storeConfig.length === 0) {
+          data.storeConfig = cloud.storeConfig;
+        }
+      } catch (e) {}
+    }
+    await env.BACKUP_KV.put(key, JSON.stringify(data));
+  }
   if (deviceId) await env.BACKUP_KV.put('device_' + deviceId, JSON.stringify(data));
   return json({ ok: true });
 }
