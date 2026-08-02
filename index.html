@@ -1162,11 +1162,8 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div class="import-zone" style="margin-top:16px;">
         <div class="iz-title">📸 批量导入店面</div>
         <div style="display:flex;gap:8px;">
-          <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;">
-            📷 拍照
-            <input type="file" class="store-file-input" accept="image/*" capture="environment" onchange="handleStorePhoto(event)">
-          </label>
-          <input type="file" id="storeOcrAlbumInput" class="btn btn-outline native-file-btn" accept="image/*" title="🖼️ 相册选" onchange="handleStorePhoto(event)">
+          <button type="button" class="btn btn-outline" style="flex:1;text-align:center;" onclick="triggerPhoto('camera','store')">📷 拍照</button>
+          <button type="button" class="btn btn-outline" style="flex:1;text-align:center;" onclick="triggerPhoto('album','store')">🖼️ 相册选</button>
         </div>
         <div class="iz-tip">拍「配送路单店面表」类表格（含 HN40-01 编号），识别后可在弹窗里逐条修正再保存</div>
       </div>
@@ -2011,11 +2008,8 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <div style="font-size:12px;color:var(--text-light);margin-bottom:12px;text-align:center;">拍摄配送路单，自动识别物流箱合计</div>
     <div class="btn-row">
-      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;cursor:pointer;position:relative;overflow:hidden;">
-        📷 拍照
-        <input type="file" id="photoInput" class="store-file-input" accept="image/*" capture="environment" onchange="handlePhoto(event)">
-      </label>
-      <input type="file" id="photoAlbumInput" class="btn btn-outline native-file-btn" accept="image/*" title="🖼️ 相册选" onchange="handlePhoto(event)">
+      <button type="button" class="btn btn-outline store-file-btn" style="flex:1;text-align:center;" onclick="triggerPhoto('camera')">📷 拍照</button>
+      <button type="button" class="btn btn-outline store-file-btn" style="flex:1;text-align:center;" onclick="triggerPhoto('album')">🖼️ 相册选</button>
     </div>
   </div>
 </div>
@@ -3341,6 +3335,22 @@ function openPhotoInputModal() {
 }
 function closePhotoInputModal() {
   document.getElementById('photoInputModal').classList.remove('show');
+}
+// 拍照/相册选（针对 PWA 桌面模式最可靠方案）：
+// 每次点击动态创建一个「原生可见」的 file input 并立即触发，触发后移除。
+// 原生可见 file input 在小米 PWA（WebView）下点击是系统级行为，最稳。
+function triggerPhoto(type, mode) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  if (type === 'camera') input.setAttribute('capture', 'environment');
+  // 保持可见（不 display:none），确保系统文件选择器能正常唤起
+  input.style.position = 'fixed';
+  input.style.left = '-9999px'; // 移出可视区但保持可聚焦触发
+  input.onchange = (e) => (mode === 'store' ? handleStorePhoto(e) : handlePhoto(e));
+  document.body.appendChild(input);
+  input.click();
+  setTimeout(() => { if (input.parentNode) input.parentNode.removeChild(input); }, 10000);
 }
 // ======== 新用户欢迎引导（首次打开自动弹出） ========
 function initWelcome() {
@@ -4863,8 +4873,6 @@ function closeOcrResultModal() {
   document.getElementById('ocrResultModal').classList.remove('show');
   ocrCurrentResult = null;
   ocrCurrentImage = null;
-  document.getElementById('photoInput').value = '';
-  document.getElementById('photoAlbumInput').value = '';
 }
 
 function confirmOcrResult() {
