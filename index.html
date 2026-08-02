@@ -1222,18 +1222,15 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div id="accountStatus" style="margin:12px 0;"></div>
       <div class="backup-step">
         <div class="step-title"><span class="step-num">1</span>📤 导出备份</div>
-        <div class="step-detail">点击下方「导出备份」按钮 → 手机弹出"保存到文件"→ 选择「存储到内部存储」或「保存到下载」→ 存好后发送到微信「文件传输助手」</div>
+        <div class="step-detail">点击下方「导出备份」→ 保存到手机 → 可发送到微信「文件传输助手」留存</div>
       </div>
       <div class="backup-step">
         <div class="step-title"><span class="step-num">2</span>📥 恢复/换手机</div>
-        <div class="step-detail">从微信下载之前备份的 .json 文件 → 点击下方「选择文件导入」→ 选中下载的文件 → 自动恢复</div>
+        <div class="step-detail">点击下方「选择文件导入」→ 选中之前备份的 .json 文件 → 自动恢复</div>
       </div>
       <button class="btn btn-primary" style="margin-bottom:6px;" onclick="exportData()">📤 导出备份</button>
       <button class="btn btn-outline" onclick="document.getElementById('backupImportFile').click()">📥 选择文件导入</button>
       <input type="file" id="backupImportFile" accept=".json" style="display:none" onchange="importData(event)">
-      <div style="margin-top:10px;text-align:center;">
-        <button class="btn btn-outline" style="padding:8px 16px;font-size:12px;display:inline-block;width:auto;" onclick="showBackupTutorial()">📖 使用教程（再次查看）</button>
-      </div>
     </div>
   </div>
 
@@ -2542,6 +2539,7 @@ function toggleAccountMenu(e) {
     html += `<div class="am-item" onclick="openSetupModal();closeAccountMenu()">🔑 设置账号密码</div>`;
   } else {
     html += `<div class="am-item" onclick="openLoginModal();closeAccountMenu()">🔄 切换用户</div>`;
+    html += `<div class="am-item" onclick="openChangePwdModal();closeAccountMenu()">✏️ 更改密码</div>`;
     html += `<div class="am-item" onclick="logout();closeAccountMenu()">🚪 退出登录</div>`;
     html += `<div class="am-item danger" onclick="openDeleteAccountModal();closeAccountMenu()">🗑️ 注销账号</div>`;
   }
@@ -2577,19 +2575,19 @@ function renderAccountStatus() {
     return;
   }
   // 有手机号（设置过密码）
+  // 退出登录/更改密码已整合到首页登录胶囊菜单，此处只保留核心操作
   el.innerHTML = `
     <div style="background:${logged ? '#f0fdf4' : '#fff8e1'};border:1.5px solid ${logged ? '#bbf7d0' : '#ffe082'};border-radius:10px;padding:12px;">
       <div style="font-weight:600;font-size:14px;color:${logged ? '#15803d' : '#b45309'};margin-bottom:4px;">🔑 账号${logged ? '（已登录）' : '（未登录）'}</div>
-      <div style="font-size:13px;margin-bottom:8px;">📱 ${phone}</div>
+      <div style="font-size:13px;margin-bottom:8px;">📱 ${maskPhone(phone)}</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;">
         ${logged
           ? `<button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openVerifyModal()">📥 恢复数据</button>
-             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openChangePwdModal()">✏️ 更改密码</button>
-             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="logout()">🚪 退出登录</button>`
+             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openForgotModal()">🔐 切换/登录</button>`
           : `<button class="btn btn-primary" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openLoginModal()">🔐 登录</button>
-             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openChangePwdModal()">✏️ 更改密码</button>
              <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openForgotModal()">❓ 忘记密码</button>`}
       </div>
+      <div style="font-size:11px;color:var(--text-light);margin-top:8px;">更改密码 / 退出登录 / 注销账号，请到首页左上角账号菜单操作</div>
     </div>`;
 }
 
