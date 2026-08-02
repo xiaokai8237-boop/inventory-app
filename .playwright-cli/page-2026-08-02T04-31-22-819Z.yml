@@ -1,0 +1,73 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - heading "📦 物流筐收发管理系统" [level=1] [ref=f1e3]
+    - generic [ref=f1e4]: 2026-08-02
+    - button "🌙" [ref=f1e5] [cursor=pointer]
+  - generic [ref=f1e6]:
+    - generic [ref=f1e7] [cursor=pointer]: 首页
+    - generic [ref=f1e8] [cursor=pointer]: 记录
+  - generic [ref=f1e10]:
+    - generic [ref=f1e11]: v6.0.3
+    - button "🔑 登录" [ref=f1e12] [cursor=pointer]
+    - generic [ref=f1e13]:
+      - generic [ref=f1e14]: 选择操作
+      - generic [ref=f1e15]:
+        - button "📤 发出" [ref=f1e16] [cursor=pointer]:
+          - generic [ref=f1e17]: 📤
+          - text: 发出
+        - button "📥 回收" [ref=f1e18] [cursor=pointer]:
+          - generic [ref=f1e19]: 📥
+          - text: 回收
+      - generic [ref=f1e20]:
+        - button "💾 数据备份与恢复" [ref=f1e21] [cursor=pointer]:
+          - generic [ref=f1e22]: 💾
+          - text: 数据备份与恢复
+        - button "🏪 店面管理" [ref=f1e23] [cursor=pointer]:
+          - generic [ref=f1e24]: 🏪
+          - text: 店面管理
+        - button "📦 框名设置" [ref=f1e25] [cursor=pointer]:
+          - generic [ref=f1e26]: 📦
+          - text: 框名设置
+      - generic [ref=f1e27]:
+        - button "📊 库存追踪" [ref=f1e28] [cursor=pointer]:
+          - generic [ref=f1e29]: 📊
+          - text: 库存追踪
+        - button "📈 汇总" [ref=f1e30] [cursor=pointer]:
+          - generic [ref=f1e31]: 📈
+          - text: 汇总
+        - button "🔄 对账" [ref=f1e32] [cursor=pointer]:
+          - generic [ref=f1e33]: 🔄
+          - text: 对账
+      - generic [ref=f1e34]:
+        - button "❓ 使用说明" [ref=f1e35] [cursor=pointer]:
+          - generic [ref=f1e36]: ❓
+          - text: 使用说明
+        - button "📱 添加到主屏幕" [ref=f1e37] [cursor=pointer]:
+          - generic [ref=f1e38]: 📱
+          - text: 添加到主屏幕
+    - generic [ref=f1e39]:
+      - generic [ref=f1e40]:
+        - generic [ref=f1e41]: 📊 今日状态
+        - generic [ref=f1e42]: 2026-08-02
+      - generic [ref=f1e43]:
+        - generic [ref=f1e44]:
+          - generic [ref=f1e45]: "0"
+          - generic [ref=f1e46]: 今日发出
+        - generic [ref=f1e47]:
+          - generic [ref=f1e48]: "0"
+          - generic [ref=f1e49]: 今日回收
+        - generic [ref=f1e50]:
+          - generic [ref=f1e51]: 0/0
+          - generic [ref=f1e52]: 已录店面
+      - generic [ref=f1e54]:
+        - generic [ref=f1e55]: 录入进度
+        - generic [ref=f1e56]: 0%
+      - generic [ref=f1e58]: 今日还没有记录，点击上方「发出/回收」开始录入
+  - generic [ref=f1e60]:
+    - generic [ref=f1e61]: 👋
+    - generic [ref=f1e62]: 欢迎使用 物流筐收发管理系统
+    - generic [ref=f1e63]: 帮你把每个筐的去向记得清清楚楚
+    - generic [ref=f1e64]: 第一次用，建议先做 3 件事： ① 📱 把软件加到手机桌面（像App一样用） ② 🏪 设置你要记的店面 ③ 🔑 设置密码（防止数据丢失） 详细步骤看「使用说明」，每一步都写得清清楚楚
+    - generic [ref=f1e65]:
+      - button "📖 查看使用说明" [ref=f1e66] [cursor=pointer]
+      - button "🚀 开始使用" [ref=f1e67] [cursor=pointer]
