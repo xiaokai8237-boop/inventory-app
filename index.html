@@ -2708,14 +2708,10 @@ async function doLogin() {
       renderAccountStatus();
       renderCloudBackupStatus();
       renderAccountBadge();
-      showToast('✅ 登录成功，正在同步数据…');
+      showToast('✅ 登录成功');
       refreshRecordViews(); // 登录后无条件刷新，避免切换账号时界面残留上一账号数据
-      // 登录强制完整同步：登录是明确"从云端恢复数据"的时机，清除本地时间戳保证必然拉取云端全量（记录/店面/筐/设置）
-      localStorage.removeItem('kuanwei_last_save');
-      autoSyncFromCloud(phone).then(hasCloud => {
-        if (hasCloud) { showToast('✅ 已同步云端数据'); refreshRecordViews(); }
-        else { showToast('⚠️ 该账号云端暂无数据，请先在原设备确认已备份'); }
-      });
+      // 不再自动同步云端：恢复/同步数据需用户手动点击「恢复云端数据」
+      showToast('💡 如需要云端数据，请手动点「恢复云端数据」');
     } else {
       recordFail(phone);
       showToast(result.error || '登录失败');
@@ -2843,16 +2839,8 @@ async function doSetupAccount() {
       setLoggedIn(true);
       refreshRecordViews(); // 设置账号后刷新数据视图
       showToast('✅ 密码设置成功');
-      // 登录成功 → 自动同步云端该账号数据（换手机场景：把旧手机的数据拉回来）
-      autoSyncFromCloud(phone).then(hasCloud => {
-        if (hasCloud) {
-          showToast('✅ 已同步云端数据');
-          renderAccountStatus();
-          renderCloudBackupStatus();
-          renderTodayOverview();
-        }
-        backupToCloud(true);
-      }).catch(() => backupToCloud(true));
+      // 新账号首次备份本地数据到云端；不再自动同步（恢复需用户手动点「恢复云端数据」）
+      backupToCloud(true);
     } else {
       showToast(result.error || '设置失败');
     }
@@ -3030,16 +3018,9 @@ async function doForgotReset() {
       closeForgotModal();
       renderAccountStatus();
       setLoggedIn(true);
-      showToast('✅ 密码已重置，正在同步数据…');
-      // 登录成功 → 自动同步云端该账号数据
-      autoSyncFromCloud(phone).then(hasCloud => {
-        if (hasCloud) {
-          showToast('✅ 已同步云端数据');
-          renderTodayOverview();
-        } else {
-          showToast('✅ 密码已重置，请用新密码登录');
-        }
-      });
+      showToast('✅ 密码已重置');
+      // 不再自动同步云端：恢复/同步数据需用户手动点击「恢复云端数据」
+      showToast('💡 如需要云端数据，请手动点「恢复云端数据」');
     } else {
       recordFail(phone);
       showToast(result.error || '重置失败');
@@ -6485,7 +6466,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.32'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.33'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -6503,11 +6484,8 @@ initWelcome();
 restoreFromCloud();
 // 定时兜底备份：无操作时每30分钟自动备份一次（后台静默）
 startPeriodicBackup();
-// 已登录用户：打开时自动同步该账号云端数据
-if (isLoggedIn()) {
-  const p = getCloudPhone();
-  if (p) { autoSyncFromCloud(p); }
-}
+// 已登录用户：打开时不再自动同步云端（恢复/同步改为用户手动点击「恢复云端数据」，避免自动同步覆盖本地设置）
+// 原自动同步逻辑已移除：if (isLoggedIn()) { const p = getCloudPhone(); if (p) { autoSyncFromCloud(p); } }
 // 界面初始化完成：淡出移除启动加载遮罩，并通知原生隐藏启动页（自适应：网页加载完才消失）
 (function removeBootOverlay() {
   try {
