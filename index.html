@@ -6251,7 +6251,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.16'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.17'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -6274,7 +6274,7 @@ if (isLoggedIn()) {
   const p = getCloudPhone();
   if (p) { autoSyncFromCloud(p); }
 }
-// 界面初始化完成：淡出移除启动加载遮罩（与 APP 原生启动页无缝衔接）
+// 界面初始化完成：淡出移除启动加载遮罩，并通知原生隐藏启动页（自适应：网页加载完才消失）
 (function removeBootOverlay() {
   try {
     const ov = document.getElementById('bootOverlay');
@@ -6282,6 +6282,10 @@ if (isLoggedIn()) {
       ov.style.transition = 'opacity .3s';
       ov.style.opacity = '0';
       setTimeout(() => { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 350);
+    }
+    // Capacitor APP：通知原生隐藏启动页（此时网页已渲染完成）
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SplashScreen) {
+      try { window.Capacitor.Plugins.SplashScreen.hide(); } catch (e) {}
     }
   } catch (e) {}
 })();
