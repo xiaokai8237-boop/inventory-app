@@ -1996,8 +1996,12 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <div style="font-size:12px;color:var(--text-light);margin-bottom:12px;text-align:center;">拍摄配送路单，自动识别物流箱合计</div>
     <div class="btn-row">
-      <button class="btn btn-outline store-file-btn" style="flex:1;text-align:center;display:flex;align-items:center;justify-content:center;" onclick="triggerPhoto('camera')">📷 拍照</button>
-      <button class="btn btn-outline store-file-btn" style="flex:1;text-align:center;display:flex;align-items:center;justify-content:center;" onclick="triggerPhoto('album')">🖼️ 相册选</button>
+      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">📷 拍照
+        <input type="file" accept="image/*" capture="environment" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;" onchange="handlePhoto(event)" oncancel="this.value=''">
+      </label>
+      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">🖼️ 相册选
+        <input type="file" accept="image/*" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;" onchange="handlePhoto(event)" oncancel="this.value=''">
+      </label>
     </div>
   </div>
 </div>
@@ -2294,7 +2298,7 @@ async function backupToCloud(manual) {
       }
     };
     if (account) payload.account = account;
-    const resp = await fetch('/backup', {
+    const resp = await fetch(API_BASE + '/backup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -2594,7 +2598,7 @@ function pwdDebug(action, payload, resp, note) {
 // 登录失败时：查云端该账号明文密码，对比用户输入，定位是否不一致
 async function pwdCompareCloud(phone, sentPassword) {
   try {
-    const r = await fetch('/admin/stats', {
+    const r = await fetch(API_BASE + '/admin/stats', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ adminKey: '8023.520' })
@@ -2615,7 +2619,7 @@ async function doLogin() {
   const sentBody = { phone, password: pwd, deviceId: getDeviceId() };
   pwdDebug('登录', sentBody, null, '前端即将发送'); // 调试：打印实际发送的手机号/密码
   try {
-    const resp = await fetch('/auth/verify', {
+    const resp = await fetch(API_BASE + '/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(sentBody)
@@ -2693,7 +2697,7 @@ async function doDeleteAccount() {
   pwdDebug('注销-校验密码', delVerifyBody, null, '前端即将发送');
   try {
     // 1. 校验密码（绝对禁止无密码注销）
-    const verifyResp = await fetch('/auth/verify', {
+    const verifyResp = await fetch(API_BASE + '/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(delVerifyBody)
@@ -2702,7 +2706,7 @@ async function doDeleteAccount() {
     pwdDebug('注销-校验密码', delVerifyBody, verifyResult, '后端返回');
     if (!verifyResult.ok) { hideLoading(); pwdCompareCloud(phone, pwd); showToast('密码错误，无法注销'); return; }
     // 2. 调用后端软注销：释放手机号 + 数据冻结 + 生成临时代码（供管理员恢复）
-    const delResp = await fetch('/auth/delete', {
+    const delResp = await fetch(API_BASE + '/auth/delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(delBody)
@@ -2751,7 +2755,7 @@ async function doSetupAccount() {
   const setupBody = { phone, password: pwd, securityQ: secQ, securityA: secA, deviceId: getDeviceId() };
   pwdDebug('设置账号', setupBody, null, '前端即将发送');
   try {
-    const resp = await fetch('/auth/setup', {
+    const resp = await fetch(API_BASE + '/auth/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(setupBody)
@@ -2795,7 +2799,7 @@ function closeVerifyModal() { document.getElementById('verifyModal').classList.r
 async function restoreLoggedIn(phone) {
   showLoading('正在恢复…');
   try {
-    const resp = await fetch('/backup?account=' + encodeURIComponent(phone));
+    const resp = await fetch(API_BASE + '/backup?account=' + encodeURIComponent(phone));
     const result = await resp.json();
     hideLoading();
     if (result.data) {
@@ -2826,7 +2830,7 @@ async function doVerifyAccount() {
   const vfBody = { phone, password: pwd, deviceId: getDeviceId() };
   pwdDebug('恢复数据-验证', vfBody, null, '前端即将发送');
   try {
-    const resp = await fetch('/auth/verify', {
+    const resp = await fetch(API_BASE + '/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(vfBody)
@@ -2874,7 +2878,7 @@ async function doChangePwd() {
   pwdDebug('改密-校验原密码', chgVerifyBody, null, '前端即将发送');
   try {
     // 1. 校验原密码（明文）
-    const verifyResp = await fetch('/auth/verify', {
+    const verifyResp = await fetch(API_BASE + '/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(chgVerifyBody)
@@ -2890,7 +2894,7 @@ async function doChangePwd() {
     // 2. 更新为新密码（保留数据）
     const secQ = verifyResult.data && verifyResult.data.securityQ ? verifyResult.data.securityQ : '';
     const secA = verifyResult.data && verifyResult.data.securityA ? verifyResult.data.securityA : '';
-    const setupResp = await fetch('/auth/setup', {
+    const setupResp = await fetch(API_BASE + '/auth/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phone, password: newPwd, securityQ: secQ, securityA: secA })
@@ -2926,7 +2930,7 @@ async function doForgotReset() {
   const fgResetBody = { phone, securityA: secA, password: newPwd };
   pwdDebug('忘记密码-重置', fgResetBody, null, '前端即将发送');
   try {
-    const resp = await fetch('/auth/reset', {
+    const resp = await fetch(API_BASE + '/auth/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(fgResetBody)
@@ -2979,7 +2983,7 @@ function closeAdminModal() { document.getElementById('adminModal').classList.rem
 async function loadAdminStats() {
   if (!adminKey) return;
   try {
-    const resp = await fetch('/admin/stats', {
+    const resp = await fetch(API_BASE + '/admin/stats', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ adminKey })
@@ -3029,7 +3033,7 @@ function adminRestore(code, origPhone) {
   if (!newPhone) return;
   if (!validatePhone(newPhone)) { showToast('请输入正确的11位手机号'); return; }
   showLoading('正在恢复…');
-  fetch('/admin/restore-account', {
+  fetch(API_BASE + '/admin/restore-account', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ adminKey, code, newPhone })
@@ -3044,7 +3048,7 @@ function adminDeleteTemp(code) {
   if (!adminKey) { showToast('请先验证管理员密码'); return; }
   if (!confirm('⚠️ 确认彻底删除该注销账号的所有数据？\n此操作不可恢复！')) return;
   showLoading('正在删除…');
-  fetch('/admin/delete-temp', {
+  fetch(API_BASE + '/admin/delete-temp', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ adminKey, code })
@@ -3078,7 +3082,7 @@ async function doAdminReset() {
   const admResetBody = { adminKey, phone, password: '12345678' };
   pwdDebug('管理员重置', admResetBody, null, '前端即将发送');
   try {
-    const resp = await fetch('/admin/reset', {
+    const resp = await fetch(API_BASE + '/admin/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(admResetBody)
@@ -3112,7 +3116,7 @@ function adminTap() {
 // 登录成功后自动从云端拉取该账号最新数据（合并到本地，不丢本地记录）
 async function autoSyncFromCloud(phone) {
   try {
-    const resp = await fetch('/backup?account=' + encodeURIComponent(phone));
+    const resp = await fetch(API_BASE + '/backup?account=' + encodeURIComponent(phone));
     const result = await resp.json();
     if (!(result && result.data && result.data.records)) return false;
     const cloud = result.data;
@@ -3164,7 +3168,7 @@ function renderCloudBackupStatus() {
 async function restoreFromCloud() {
   try {
     const deviceId = getDeviceId();
-    const resp = await fetch('/backup?deviceId=' + deviceId);
+    const resp = await fetch(API_BASE + '/backup?deviceId=' + deviceId);
     const result = await resp.json();
     if (result && result.data && result.data.records) {
       const cloud = result.data;
@@ -3392,8 +3396,8 @@ function triggerPhoto(type, mode) {
   input.type = 'file';
   input.accept = 'image/*';
   if (type === 'camera') input.setAttribute('capture', 'environment');
-  // 全屏透明覆盖（在可视区内、不可见但可聚焦），与 triggerAlbumInput 一致，PWA 下最稳
-  input.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;opacity:0;z-index:99999;cursor:pointer;';
+  // 不用全屏透明覆盖（避免返回后全屏劫持点击）。用视口中央小区域，任何路径都必须立即清理。
+  input.style.cssText = 'position:fixed;top:40%;left:40%;width:20%;height:20%;opacity:0;z-index:99999;';
   const cleanup = () => { try { document.body.removeChild(input); } catch (e) {} };
   input.onchange = (e) => {
     try {
@@ -3402,6 +3406,9 @@ function triggerPhoto(type, mode) {
     } catch (err) {}
     cleanup();
   };
+  // 用户取消/返回时立即清理，杜绝残留劫持点击
+  input.oncancel = cleanup;
+  input.onblur = cleanup;
   document.body.appendChild(input);
   input.click();
 }
@@ -4278,7 +4285,7 @@ function handleVoiceBlob() {
     const b64 = String(reader.result).split(',')[1] || '';
     showToast('🔍 正在识别语音…');
     try {
-      const resp = await fetch('/tcloud-asr', {
+      const resp = await fetch(API_BASE + '/tcloud-asr', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ audioBase64: b64, mime: mime, len: blob.size })
       });
@@ -4384,15 +4391,17 @@ function triggerAlbumInput(type) {
   if (el) {
     try { el.click(); } catch (e) {}
   }
-  // 方案2：动态创建可见 file input 触发（小米 WebView 需可见 input 才响应）
+  // 方案2：动态创建 file input 触发（非全屏，避免返回后全屏劫持；任何路径立即清理）
   try {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;opacity:0;z-index:99999;cursor:pointer;';
+    input.style.cssText = 'position:fixed;top:40%;left:40%;width:20%;height:20%;opacity:0;z-index:99999;';
     const cleanup = () => { try { document.body.removeChild(input); } catch (e) {} };
     if (type === 'store') input.onchange = (e) => { try { handleStorePhoto(e); } catch (err) {} cleanup(); };
     else input.onchange = (e) => { try { handlePhoto(e); } catch (err) {} cleanup(); };
+    input.oncancel = cleanup;
+    input.onblur = cleanup;
     document.body.appendChild(input);
     input.click();
   } catch (e) {}
@@ -4499,7 +4508,7 @@ async function doOCR(imageDataUrl, file) {
     let tcloudWords = null;
     try {
       updateLoadingStep('🔄 双引擎交叉验证…', 80);
-      const tcResp = await fetch('/tcloud', {
+      const tcResp = await fetch(API_BASE + '/tcloud', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageBase64: imgBase64 })
@@ -6233,7 +6242,9 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.14'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.15'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+// 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
+const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
