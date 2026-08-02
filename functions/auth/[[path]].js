@@ -38,10 +38,20 @@ async function handleDelete(body, env, json) {
   let acct;
   try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
   if (acct.password !== password) return json({ error: '密码错误' }, 401);
-  // 业务数据从 data_<phone> 读取（记录/筐/店面配置当前存在独立 key，account_ 内的是旧残留）
-  let biz = { records: [], goodsConfig: null, storeConfig: null };
+  // 业务数据从 data_<phone> 读取（记录/筐/店面配置/uiState）；data_ 缺失时回退 account_ 内残留业务，避免注销丢数据
+  let biz = { records: acct.records || [], goodsConfig: acct.goodsConfig || null, storeConfig: acct.storeConfig || null, uiState: acct.uiState || null };
   const bizRaw = await env.BACKUP_KV.get('data_' + phone);
-  if (bizRaw) { try { biz = JSON.parse(bizRaw); } catch (e) {} }
+  if (bizRaw) {
+    try {
+      const d = JSON.parse(bizRaw);
+      biz = {
+        records: d.records || biz.records,
+        goodsConfig: d.goodsConfig !== undefined ? d.goodsConfig : biz.goodsConfig,
+        storeConfig: d.storeConfig !== undefined ? d.storeConfig : biz.storeConfig,
+        uiState: d.uiState || biz.uiState
+      };
+    } catch (e) {}
+  }
   // 生成临时代码，冻结账号数据（保留原手机号便于管理员识别）
   const code = 'T' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6).toUpperCase();
   const tmpKey = 'tmp_' + code;
@@ -55,7 +65,8 @@ async function handleDelete(body, env, json) {
       securityA: acct.securityA || '',
       records: biz.records || [],
       goodsConfig: biz.goodsConfig || null,
-      storeConfig: biz.storeConfig || null
+      storeConfig: biz.storeConfig || null,
+      uiState: biz.uiState || null
     }
   }));
   // 释放手机号（删除账号记录，手机号可重新注册）

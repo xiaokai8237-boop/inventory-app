@@ -1026,7 +1026,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
   <!-- === 首页向导（默认显示） === -->
   <div id="homeWizard">
-    <div id="appVersion" style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v5.1.0</div>
+    <div id="appVersion" style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v6.0.0</div>
     <!-- 账号登录状态（原"数据账号"徽标位置） -->
     <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)" style="position:static;max-width:none;width:100%;justify-content:center;margin-bottom:8px;">🔑 登录</button>
     <div class="card" style="text-align:center;padding:16px 14px;">
@@ -2153,6 +2153,8 @@ function migrateDataToScope() {
       const globalVal = localStorage.getItem(base);
       if (globalVal !== null) localStorage.setItem(scoped, globalVal);
     }
+    // 迁移完成后清空全局 key（移动语义），保证退出登录/未登录时读到的是空而非旧数据，杜绝账号间串号
+    localStorage.removeItem(base);
   }
   localStorage.setItem('kuanwei_migrated__' + scope, '1');
 }
@@ -2175,6 +2177,8 @@ function loadData() {
 }
 function saveDataArr(arr) {
   localStorage.setItem(scopeKey(STORAGE_KEY), JSON.stringify(arr));
+  // 记录本地最后保存时间，供云端恢复时判断新旧（避免旧云数据覆盖新本地录入）
+  localStorage.setItem('kuanwei_last_save', new Date().toISOString());
   scheduleCloudBackup();
 }
 // ---- 命名配置读取（筐/店面共用一个解析逻辑，一条函数两种数据） ----
@@ -2420,13 +2424,6 @@ function applyUiState(ui) {
 function getCloudPhone() { return localStorage.getItem('kuanwei_phone') || ''; }
 function setCloudPhone(phone) { if (phone) localStorage.setItem('kuanwei_phone', phone); else localStorage.removeItem('kuanwei_phone'); }
 
-// 密码哈希（SHA-256）
-async function hashPassword(phone, password) {
-  const data = new TextEncoder().encode(phone + '::' + password);
-  const digest = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
 // 手机号格式校验
 function validatePhone(p) {
   return /^1\d{10}$/.test(p);
@@ -2650,12 +2647,10 @@ async function doLogin() {
       renderCloudBackupStatus();
       renderAccountBadge();
       showToast('✅ 登录成功，正在同步数据…');
+      refreshRecordViews(); // 登录后无条件刷新，避免切换账号时界面残留上一账号数据
       // 自动同步云端数据
       autoSyncFromCloud(phone).then(hasCloud => {
-        if (hasCloud) {
-          showToast('✅ 已同步云端数据');
-          refreshRecordViews();
-        }
+        if (hasCloud) { showToast('✅ 已同步云端数据'); refreshRecordViews(); }
       });
     } else {
       recordFail(phone);
@@ -2672,6 +2667,8 @@ function logout() {
   setCloudPhone('');
   renderAccountStatus();
   renderAccountBadge();
+  renderCloudBackupStatus();
+  refreshRecordViews(); // 刷新数据视图，避免退出后界面残留旧账号数据
   showToast('已退出登录，数据已隔离');
 }
 
@@ -2780,6 +2777,7 @@ async function doSetupAccount() {
       renderCloudBackupStatus();
       renderAccountBadge();
       setLoggedIn(true);
+      refreshRecordViews(); // 设置账号后刷新数据视图
       showToast('✅ 密码设置成功');
       // 登录成功 → 自动同步云端该账号数据（换手机场景：把旧手机的数据拉回来）
       autoSyncFromCloud(phone).then(hasCloud => {
@@ -4370,6 +4368,7 @@ function handlePhoto(event) {
 async function doOCR(imageDataUrl, file) {
   const keys = loadOcrKeys();
   if (!keys.apiKey || !keys.secretKey) {
+    hideLoading(); // 关键：未配置密钥时先关掉加载遮罩，避免全屏卡死
     showToast('请先在设置页配置百度OCR密钥');
     return;
   }
@@ -6015,6 +6014,7 @@ function handleStorePhoto(event) {
 async function doStoreOCR(imageDataUrl) {
   const keys = loadOcrKeys();
   if (!keys.apiKey || !keys.secretKey) {
+    hideLoading(); // 关键：未配置密钥时先关掉加载遮罩，避免全屏卡死
     showToast('请先在设置页配置百度OCR密钥');
     return;
   }
@@ -6184,7 +6184,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '5.1.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();

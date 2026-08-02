@@ -91,6 +91,7 @@ export async function onRequest(context) {
       records: tmp.data.records || [],
       goodsConfig: tmp.data.goodsConfig || null,
       storeConfig: tmp.data.storeConfig || null,
+      uiState: tmp.data.uiState || null,
       updatedAt: new Date().toISOString()
     }));
     // 删除临时代码（恢复完成）
@@ -115,7 +116,11 @@ export async function onRequest(context) {
     const errors = [];
     for (const p of valid) {
       if (keep.has(p)) { errors.push(p + '(保留)'); continue; }
+      // 完整删除：账号认证 + 业务数据 + 设备备份（避免孤儿数据）
+      const raw = await env.BACKUP_KV.get('account_' + p);
+      if (raw) { try { const a = JSON.parse(raw); if (a.lastDeviceId) await env.BACKUP_KV.delete('device_' + a.lastDeviceId); } catch (e) {} }
       await env.BACKUP_KV.delete('account_' + p);
+      await env.BACKUP_KV.delete('data_' + p);
       deleted++;
     }
     return json({ ok: true, deleted, skipped: errors });
