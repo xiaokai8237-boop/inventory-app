@@ -2109,6 +2109,23 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
 </div>
 
+<!-- 恢复结果弹窗：展示本次从云端恢复了哪些数据 -->
+<div class="store-ocr-modal" id="restoreResultModal">
+  <div class="store-ocr-content" style="max-width:330px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:700;font-size:16px;color:var(--text);">✅ 已恢复云端数据</span>
+      <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeRestoreResult()">×</span>
+    </div>
+    <div style="background:var(--bg-card,#f6f8fa);border-radius:10px;padding:12px;font-size:13px;color:var(--text);line-height:1.9;">
+      <div>🏪 店面：<b id="restoreStoreCount">0</b> 家</div>
+      <div>📦 筐类：<b id="restoreGoodsCount">0</b> 类</div>
+      <div>📋 记录：<b id="restoreRecordCount">0</b> 条</div>
+      <div style="color:var(--text-light);font-size:12px;">备份时间：<span id="restoreBackupTime">-</span></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="closeRestoreResult()">知道了</button>
+  </div>
+</div>
+
 <script>
 // ======== 配置 ========
 const STORAGE_KEY = 'kuanwei_inventory_data';
@@ -2856,7 +2873,12 @@ async function restoreLoggedIn(phone) {
       renderAccountStatus();
       renderCloudBackupStatus();
       refreshRecordViews();
-      showToast('✅ 已恢复云端数据');
+      // 弹窗展示恢复详情：店面数、筐数、记录数、备份时间
+      let storeCnt = (cloud.storeConfig && Array.isArray(cloud.storeConfig)) ? cloud.storeConfig.length : 0;
+      let goodsCnt = (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) ? cloud.goodsConfig.length : 0;
+      let recCnt = (Array.isArray(cloud.records) ? cloud.records.length : 0);
+      if (storeCnt === 0) storeCnt = loadStoreConfig().length; // 云端店面空但本地已导入则按本地算
+      showRestoreResult(storeCnt, goodsCnt, recCnt, (cloud.backupTime ? new Date(cloud.backupTime).toLocaleString('zh-CN') : '') || '');
     } else {
       showToast('云端暂无数据或恢复失败');
     }
@@ -3560,6 +3582,22 @@ function closeInstallModal() {
 }
 
 // ======== 面板切换（首页 6 大按钮控制） ========
+// 显示"恢复云端数据"结果弹窗：展示恢复了哪些数据
+function showRestoreResult(storeCount, goodsCount, recordCount, backupTime) {
+  const m = document.getElementById('restoreResultModal');
+  if (!m) return;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('restoreStoreCount', storeCount);
+  set('restoreGoodsCount', goodsCount);
+  set('restoreRecordCount', recordCount);
+  set('restoreBackupTime', backupTime || '-');
+  m.classList.add('show');
+}
+function closeRestoreResult() {
+  const m = document.getElementById('restoreResultModal');
+  if (m) m.classList.remove('show');
+}
+
 // 从「日报偏好」导入店面：把 kuanwei_daily_pref.stores 的店名补进店面管理（storeConfig）
 // 作用：用户可能只在日报里选过店、未在店面管理添加，导致 storeConfig 为空、上传时丢失。此函数自动把日报里保存的店导入店面管理。
 function importStoresFromDailyPref() {
@@ -6404,7 +6442,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.29'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.30'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
