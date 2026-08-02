@@ -3387,20 +3387,32 @@ function closePhotoInputModal() {
   document.getElementById('photoInputModal').classList.remove('show');
 }
 // 拍照/相册选（针对 PWA 桌面模式最可靠方案）：
-// 每次点击动态创建一个「原生可见」的 file input 并立即触发，触发后移除。
-// 原生可见 file input 在小米 PWA（WebView）下点击是系统级行为，最稳。
+// 每次点击动态创建一个「全屏透明可见」的 file input 并立即触发，触发后移除。
+// 注意：input 必须位于可视区内（不能 display:none / 移出可视区），否则 PWA/WebView 会阻止唤起系统选择器。
+// 同时拍照前主动请求相机权限，避免 PWA 下因未授权导致唤起被拒。
 function triggerPhoto(type, mode) {
+  // 拍照前主动请求相机权限（部分 PWA/WebView 需此步才能授权相机），获取后立即释放（仅为触发权限框）
+  if (type === 'camera' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(stream => { try { stream.getTracks().forEach(t => t.stop()); } catch (e) {} })
+      .catch(() => {}); // 权限被拒由系统选择器兜底，此处静默
+  }
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
   if (type === 'camera') input.setAttribute('capture', 'environment');
-  // 保持可见（不 display:none），确保系统文件选择器能正常唤起
-  input.style.position = 'fixed';
-  input.style.left = '-9999px'; // 移出可视区但保持可聚焦触发
-  input.onchange = (e) => (mode === 'store' ? handleStorePhoto(e) : handlePhoto(e));
+  // 全屏透明覆盖（在可视区内、不可见但可聚焦），与 triggerAlbumInput 一致，PWA 下最稳
+  input.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;opacity:0;z-index:99999;cursor:pointer;';
+  const cleanup = () => { try { document.body.removeChild(input); } catch (e) {} };
+  input.onchange = (e) => {
+    try {
+      if (mode === 'store') handleStorePhoto(e);
+      else handlePhoto(e);
+    } catch (err) {}
+    cleanup();
+  };
   document.body.appendChild(input);
   input.click();
-  setTimeout(() => { if (input.parentNode) input.parentNode.removeChild(input); }, 10000);
 }
 // ======== 新用户欢迎引导（首次打开自动弹出） ========
 function initWelcome() {
@@ -6240,7 +6252,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.9'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.10'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
