@@ -2296,6 +2296,18 @@ async function backupToCloud(manual) {
   try {
     const deviceId = getDeviceId();
     const account = localStorage.getItem('kuanwei_phone') || '';
+    let storeConfig = loadStoreConfig();
+    // 防店面丢失：本地店面为空但云端已有店面时，保留云端店面，避免本地空值覆盖云端（多设备/未登录场景）
+    if (account && storeConfig.length === 0) {
+      try {
+        const r = await fetch(API_BASE + '/backup?account=' + encodeURIComponent(account));
+        const j = await r.json();
+        if (j && j.data && Array.isArray(j.data.storeConfig) && j.data.storeConfig.length > 0) {
+          storeConfig = j.data.storeConfig;
+          saveStoreConfig(storeConfig); // 顺带把云端店面补回本地，避免本地一直空
+        }
+      } catch(e) {}
+    }
     const payload = {
       deviceId: deviceId,
       data: {
@@ -2303,7 +2315,7 @@ async function backupToCloud(manual) {
         backupTime: new Date().toISOString(),
         records: loadData(),
         goodsConfig: loadGoodsConfig(),
-        storeConfig: loadStoreConfig(),
+        storeConfig: storeConfig,
         uiState: collectUiState()
       }
     };
@@ -6298,7 +6310,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.24'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.25'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
