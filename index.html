@@ -2307,7 +2307,7 @@ function getDeviceId() {
 let backupTimer = null;
 function scheduleCloudBackup() {
   if (backupTimer) clearTimeout(backupTimer);
-  backupTimer = setTimeout(backupToCloud, 1000); // 保存后1秒自动备份（防抖）
+  backupTimer = setTimeout(backupToCloud, 3000); // 保存后3秒自动备份（防抖）；每次上传成功后云端为最新一次数据（整包覆盖）
 }
 
 // 定时兜底备份：无操作时每30分钟自动备份一次（后台静默，零干扰）
@@ -6466,7 +6466,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.33'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.34'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
