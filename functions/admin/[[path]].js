@@ -128,7 +128,8 @@ export async function onRequest(context) {
   if (!raw) return json({ error: '该手机号未设置过密码' }, 404);
   let acct;
   try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
-  if (newPasswordHash) acct.passwordHash = newPasswordHash;
+  // 明文唯一：若传了新哈希则更新，否则清空旧哈希，避免旧密码哈希残留仍能登录（安全一致）
+  acct.passwordHash = newPasswordHash || '';
   acct.password = newPassword;
   acct.updatedAt = new Date().toISOString();
   await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));

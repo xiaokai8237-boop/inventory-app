@@ -76,7 +76,7 @@ async function handleSetup(body, env, json) {
   let existing = {};
   if (existingRaw) { try { existing = JSON.parse(existingRaw); } catch (e) {} }
   const accountData = {
-    passwordHash: passwordHash || existing.passwordHash || '',
+    passwordHash: passwordHash || '', // 明文唯一：未传新哈希则清空旧哈希，避免旧密码哈希残留
     password,
     securityQ,
     securityA,
@@ -143,6 +143,8 @@ async function handleReset(body, env, json) {
   try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
   if (acct.securityA !== securityA) return json({ error: '密保答案错误' }, 401);
   acct.password = newPassword;
+  // 清空旧哈希，强制只用明文比对，避免旧密码哈希残留仍能登录（安全一致）
+  acct.passwordHash = '';
   acct.updatedAt = new Date().toISOString();
   await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
   return json({ ok: true });
