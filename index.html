@@ -1052,9 +1052,10 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
         <button class="home-btn" onclick="switchPage('summary')"><div class="hb-icon">📈</div>汇总</button>
         <button class="home-btn" onclick="switchPage('reconcile')"><div class="hb-icon">🔄</div>对账</button>
       </div>
-      <!-- 第四行：使用说明 -->
+      <!-- 第四行：使用说明/添加到主屏幕 -->
       <div class="home-grid-row">
         <button class="home-btn" onclick="switchPage('settings')"><div class="hb-icon">❓</div>使用说明</button>
+        <button class="home-btn" onclick="installApp()"><div class="hb-icon">📱</div>添加到桌面</button>
       </div>
     </div>
 
@@ -1892,6 +1893,33 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:8px;">💊 已注销账号（待恢复）</div>
       <div style="font-size:11px;color:var(--text-light);margin-bottom:8px;">用户注销后数据封存于此，凭临时代码可恢复其数据到任意手机号</div>
       <div id="adminPendingList" style="max-height:180px;overflow-y:auto;font-size:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 添加到桌面引导弹窗 -->
+<div class="store-ocr-modal" id="installModal" onclick="closeInstallModal()">
+  <div class="store-ocr-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;">📱 添加到桌面</span>
+      <button onclick="closeInstallModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:13px;line-height:1.9;color:var(--text);">
+      <div id="installWechatTip" style="display:none;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12.5px;color:#7c5a00;">
+        ⚠️ <b>微信里不能添加到桌面</b>，需要先用浏览器打开：<br>
+        ① 点右上角 <b>「⋯」</b><br>
+        ② 点 <b>「在浏览器打开」</b>（选 Chrome / 自带浏览器）<br>
+        ③ 打开后再点「📱 添加到桌面」
+      </div>
+      <div id="installNormalTip">
+        <div style="margin-bottom:8px;">按下面的步骤操作（苹果手机）：</div>
+        <div><b>①</b> 点底部 <b>「分享」</b> 按钮 <span style="background:#f0f7ff;padding:2px 8px;border-radius:6px;font-size:12px;">□↑</span></div>
+        <div><b>②</b> 向下滑动，找到 <b>「添加到主屏幕」</b></div>
+        <div><b>③</b> 点 <b>「添加」</b> → 桌面出现图标，像 App 一样用</div>
+        <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px;margin-top:12px;font-size:12.5px;color:#7c5a00;">
+          💡 安卓手机：浏览器菜单里点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b> 即可。
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -3402,10 +3430,42 @@ function backToHomeWizard() {
   renderTodayStatus();
 }
 
-// 静默阻止浏览器原生 PWA 安装提示（用户已要求移除"添加到主屏幕"功能）
+// ======== 添加到桌面（PWA） ========
+let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault(); // 阻止安卓/Chrome 系统级"添加到桌面"弹窗
+  e.preventDefault();
+  deferredPrompt = e; // 保存原生安装事件，点按钮时触发
 });
+function installApp() {
+  // 微信内置浏览器：无法添加桌面，引导到浏览器打开
+  const isWechat = /MicroMessenger/i.test(navigator.userAgent);
+  if (isWechat) {
+    const modal = document.getElementById('installModal');
+    if (modal) modal.classList.add('show');
+    const wx = document.getElementById('installWechatTip');
+    const normal = document.getElementById('installNormalTip');
+    if (wx) wx.style.display = 'block';
+    if (normal) normal.style.display = 'none';
+    return;
+  }
+  // Android/Chrome：触发原生安装提示
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+    return;
+  }
+  // iOS Safari 等：显示引导教程
+  const modal = document.getElementById('installModal');
+  if (modal) modal.classList.add('show');
+  const wx = document.getElementById('installWechatTip');
+  const normal = document.getElementById('installNormalTip');
+  if (wx) wx.style.display = 'none';
+  if (normal) normal.style.display = 'block';
+}
+function closeInstallModal() {
+  const modal = document.getElementById('installModal');
+  if (modal) modal.classList.remove('show');
+}
 
 // ======== 面板切换（首页 6 大按钮控制） ========
 function openStorePanel() {
