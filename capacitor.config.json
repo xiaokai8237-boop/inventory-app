@@ -1,0 +1,12 @@
+{
+  "appId": "com.kuanwei.inventory",
+  "appName": "物流筐",
+  "webDir": "www",
+  "server": {
+    "url": "https://inventory-app-9ql.pages.dev/",
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

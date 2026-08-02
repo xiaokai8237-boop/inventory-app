@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a73e8">
+  <title>物流筐</title>
+  <style>
+    html, body { margin:0; padding:0; height:100%; background:#f5f7fa; }
+    #loading { position:fixed; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f5f7fa; z-index:9999; }
+    .spinner { width:40px; height:40px; border:4px solid #e0e0e0; border-top-color:#1a73e8; border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    #loading p { margin-top:16px; color:#666; font-size:14px; }
+    #content { width:100%; height:100%; border:none; display:block; }
+  </style>
+</head>
+<body>
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>正在加载物流筐系统…</p>
+  </div>
+  <iframe id="content" src="https://inventory-app-9ql.pages.dev/" onload="document.getElementById('loading').style.display='none'"></iframe>
+</body>
+</html>
