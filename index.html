@@ -2298,19 +2298,26 @@ async function backupToCloud(manual) {
     const deviceId = getDeviceId();
     const account = localStorage.getItem('kuanwei_phone') || '';
     let storeConfig = loadStoreConfig();
+    let records = loadData();
     // 备份前健康检查：店面配置为空但日报偏好里保存了店名 → 自动导入，避免"空店面覆盖云端"再次发生
     if (storeConfig.length === 0) {
       const imported = importStoresFromDailyPref();
       if (imported) storeConfig = loadStoreConfig();
     }
-    // 防店面丢失：本地店面为空但云端已有店面时，保留云端店面，避免本地空值覆盖云端（多设备/未登录场景）
-    if (account && storeConfig.length === 0) {
+    // 防数据丢失：本地店面/记录为空但云端有数据时，保留云端数据，避免本地空值覆盖云端（多设备/清缓存/换设备场景）
+    if (account && (storeConfig.length === 0 || records.length === 0)) {
       try {
         const r = await fetch(API_BASE + '/backup?account=' + encodeURIComponent(account));
         const j = await r.json();
-        if (j && j.data && Array.isArray(j.data.storeConfig) && j.data.storeConfig.length > 0) {
-          storeConfig = j.data.storeConfig;
-          saveStoreConfig(storeConfig); // 顺带把云端店面补回本地，避免本地一直空
+        if (j && j.data) {
+          if (storeConfig.length === 0 && Array.isArray(j.data.storeConfig) && j.data.storeConfig.length > 0) {
+            storeConfig = j.data.storeConfig;
+            saveStoreConfig(storeConfig); // 顺带把云端店面补回本地，避免本地一直空
+          }
+          if (records.length === 0 && Array.isArray(j.data.records) && j.data.records.length > 0) {
+            records = j.data.records;
+            saveDataArr(records); // 顺带把云端记录补回本地，避免本地一直空
+          }
         }
       } catch(e) {}
     }
@@ -2319,7 +2326,7 @@ async function backupToCloud(manual) {
       data: {
         version: 2,
         backupTime: new Date().toISOString(),
-        records: loadData(),
+        records: records,
         goodsConfig: loadGoodsConfig(),
         storeConfig: storeConfig,
         uiState: collectUiState()
@@ -6397,7 +6404,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.28'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.29'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
