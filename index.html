@@ -2440,23 +2440,11 @@ function validatePassword(p) {
 
 // 登录失败锁定（输错5次锁10分钟）
 function checkLock(phone) {
-  const rec = JSON.parse(localStorage.getItem('kuanwei_lock') || '{}');
-  const r = rec[phone];
-  if (r && r.lockedUntil && Date.now() < r.lockedUntil) {
-    return Math.ceil((r.lockedUntil - Date.now()) / 60000);
-  }
+  // 【测试阶段】暂时取消连续错误锁定限制，后续需恢复
   return 0;
 }
 function recordFail(phone) {
-  const rec = JSON.parse(localStorage.getItem('kuanwei_lock') || '{}');
-  const r = rec[phone] || { count: 0 };
-  r.count = (r.count || 0) + 1;
-  if (r.count >= 5) {
-    r.lockedUntil = Date.now() + 10 * 60000;
-    r.count = 0;
-  }
-  rec[phone] = r;
-  localStorage.setItem('kuanwei_lock', JSON.stringify(rec));
+  // 【测试阶段】暂时取消连续错误锁定限制，后续需恢复
 }
 function clearLock(phone) {
   const rec = JSON.parse(localStorage.getItem('kuanwei_lock') || '{}');
