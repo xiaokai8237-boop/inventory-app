@@ -1007,6 +1007,15 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </head>
 <body>
 
+<!-- 启动加载遮罩：与 APP 原生启动页无缝衔接，避免网页加载期间闪白 -->
+<div id="bootOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#065A82;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+  <div style="font-size:46px;margin-bottom:14px;">📦</div>
+  <div style="color:#fff;font-size:17px;font-weight:600;letter-spacing:2px;">物流筐收发管理系统</div>
+  <div style="margin-top:18px;width:46px;height:46px;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:bootspin .9s linear infinite;"></div>
+  <div style="margin-top:16px;color:rgba(255,255,255,.75);font-size:12px;">正在加载…</div>
+</div>
+<style>@keyframes bootspin{to{transform:rotate(360deg)}}</style>
+
 <div class="header">
   <h1>📦 物流筐收发管理系统</h1>
   <div class="date-today" id="todayLabel"></div>
@@ -6242,7 +6251,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.15'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.16'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -6265,6 +6274,17 @@ if (isLoggedIn()) {
   const p = getCloudPhone();
   if (p) { autoSyncFromCloud(p); }
 }
+// 界面初始化完成：淡出移除启动加载遮罩（与 APP 原生启动页无缝衔接）
+(function removeBootOverlay() {
+  try {
+    const ov = document.getElementById('bootOverlay');
+    if (ov) {
+      ov.style.transition = 'opacity .3s';
+      ov.style.opacity = '0';
+      setTimeout(() => { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 350);
+    }
+  } catch (e) {}
+})();
 // 注册 Service Worker（离线可用 + 加载加速），禁用 HTTP 缓存，确保每次拿到最新 sw.js
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
