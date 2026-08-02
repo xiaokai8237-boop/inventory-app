@@ -1126,7 +1126,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
         <button class="home-btn" onclick="openPhotoInputModal()"><div class="hb-icon">📸</div>拍照识别</button>
       </div>
       <div class="home-grid-row" style="margin-top:10px;">
-        <button class="home-btn" style="background:#fff7ed;border-color:#fdba74;color:#c2410c;" onclick="openExtraModal()"><div class="hb-icon">➕</div>额外发收登记</button>
       </div>
     </div>
 
@@ -1252,6 +1251,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
   <div class="card" style="padding:10px;">
     <button class="btn btn-primary" style="width:100%;padding:10px;font-size:13px;" onclick="openDailyReport()">📋 生成日报</button>
+    <button class="btn btn-outline" style="width:100%;padding:10px;font-size:13px;margin-top:6px;background:#fff7ed;border-color:#fdba74;color:#c2410c;" onclick="openExtraModal()">➕ 额外发收登记</button>
     <div id="dailyPhotoInfo" style="font-size:11px;color:var(--text-light);margin-top:6px;"></div>
   </div>
   <div id="historyList"></div>
@@ -6230,7 +6230,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.6'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.7'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
