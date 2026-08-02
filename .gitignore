@@ -3,3 +3,7 @@
 
 # wrangler 本地缓存
 .wrangler/
+
+# 浏览器自动化/语法检查临时产物
+.playwright-cli/
+_check.js
