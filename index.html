@@ -3132,21 +3132,21 @@ async function autoSyncFromCloud(phone) {
     const result = await resp.json();
     if (!(result && result.data && result.data.records)) return false;
     const cloud = result.data;
-    // 合并：按 日期+店面+筐 去重（云端优先，因为登录时云端是最新的）
-    const local = loadData();
-    const byKey = new Map();
-    local.forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
-    (cloud.records || []).forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
-    // 配置数据做新旧判断：本地最后保存时间晚于云端备份时间则保留本地（避免云端旧数据覆盖刚保存的店面排序/筐配置）——须在 saveDataArr 之前读取，否则会被其更新时间戳
+    // 新旧判断：本地最后保存时间晚于云端备份时间则保留本地（避免云端旧数据覆盖刚保存的店面排序/筐配置/记录）——须在 saveDataArr 之前读取，否则会被其更新时间戳
     const localSave = localStorage.getItem('kuanwei_last_save');
     const cloudTime = cloud.backupTime || '';
     const cloudNewer = !localSave || !cloudTime || new Date(cloudTime) > new Date(localSave);
-    saveDataArr([...byKey.values()]);
-    if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig) && cloudNewer) saveGoodsConfig(cloud.goodsConfig);
-    if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloudNewer) saveStoreConfig(cloud.storeConfig);
-    if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig) && cloudNewer) saveGoodsConfig(cloud.goodsConfig);
-    if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloudNewer) saveStoreConfig(cloud.storeConfig);
-    if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
+    if (cloudNewer) {
+      // 云端较新：按 日期+店面+筐 去重合并（云端优先）
+      const local = loadData();
+      const byKey = new Map();
+      local.forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
+      (cloud.records || []).forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
+      saveDataArr([...byKey.values()]);
+      if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
+      if (cloud.storeConfig && Array.isArray(cloud.storeConfig)) saveStoreConfig(cloud.storeConfig);
+      if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
+    }
     refreshRecordViews();
     return true;
   } catch(e) { return false; }
@@ -3646,9 +3646,11 @@ function addStoreFromPanel() {
   initAllStores();
 }
 function removeStoreFromPanel(idx) {
-  const cfg = loadStoreConfig();
+  let cfg = loadStoreConfig();
   cfg.splice(idx, 1);
-  cfg = cfg.map((s, i) => ({ ...s, sort: i }));
+  // 保留剩余店的相对排序：按现有 sort 归一化（0..n-1），数组物理顺序不变
+  const sortedView = cfg.slice().sort((a, b) => (a.sort == null ? 0 : a.sort) - (b.sort == null ? 0 : b.sort)).map(s => cfg.indexOf(s));
+  sortedView.forEach((ri, k) => { cfg[ri].sort = k; });
   saveStoreConfig(cfg);
   renderStorePanelUI();
   initAllStores();
@@ -6238,7 +6240,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.8'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.9'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
