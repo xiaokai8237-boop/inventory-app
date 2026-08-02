@@ -2204,6 +2204,7 @@ function loadGoodsNames() {
 }
 function saveGoodsConfig(cfg) {
   localStorage.setItem(scopeKey(GOODS_KEY), JSON.stringify(cfg));
+  localStorage.setItem('kuanwei_last_save', new Date().toISOString()); // 记录本地最后保存时间（防云端旧数据覆盖）
   scheduleCloudBackup();
 }
 // ---- 店面配置 ----
@@ -2222,6 +2223,7 @@ function loadStoreNames() {
 }
 function saveStoreConfig(cfg) {
   localStorage.setItem(scopeKey(STORE_KEY), JSON.stringify(cfg));
+  localStorage.setItem('kuanwei_last_save', new Date().toISOString()); // 记录本地最后保存时间（防云端旧数据覆盖）
   scheduleCloudBackup();
 }
 // 默认百度OCR密钥（应用：物流筐收发管理系统 / AppID 134982254 / 通用文字识别高精度版）— 已预置，本机开箱即用
@@ -3135,9 +3137,15 @@ async function autoSyncFromCloud(phone) {
     const byKey = new Map();
     local.forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
     (cloud.records || []).forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
+    // 配置数据做新旧判断：本地最后保存时间晚于云端备份时间则保留本地（避免云端旧数据覆盖刚保存的店面排序/筐配置）——须在 saveDataArr 之前读取，否则会被其更新时间戳
+    const localSave = localStorage.getItem('kuanwei_last_save');
+    const cloudTime = cloud.backupTime || '';
+    const cloudNewer = !localSave || !cloudTime || new Date(cloudTime) > new Date(localSave);
     saveDataArr([...byKey.values()]);
-    if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
-    if (cloud.storeConfig && Array.isArray(cloud.storeConfig)) saveStoreConfig(cloud.storeConfig);
+    if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig) && cloudNewer) saveGoodsConfig(cloud.goodsConfig);
+    if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloudNewer) saveStoreConfig(cloud.storeConfig);
+    if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig) && cloudNewer) saveGoodsConfig(cloud.goodsConfig);
+    if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloudNewer) saveStoreConfig(cloud.storeConfig);
     if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
     refreshRecordViews();
     return true;
@@ -6230,7 +6238,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.7'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.8'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
