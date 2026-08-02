@@ -2146,11 +2146,11 @@ function scopeKey(base) {
 function migrateDataToScope() {
   const scope = getDataScope();
   if (!scope) return;
-  // 已迁移过则不再处理，避免每次登录都操作全局 key 造成覆盖/删除窗口
-  if (localStorage.getItem('kuanwei_migrated__' + scope) === '1') return;
+  // 每次登录都尝试把「全局旧数据」迁入账号作用域，但仅当该账号作用域为空且全局有数据时才迁入。
+  // 不再依赖 migrated 标记跳过（修复：标记已设但数据仍卡在全局时，店面/记录永远传不到云端的问题）。
+  // 账号作用域已有数据时不会覆盖；全局为空时无操作，保证安全幂等。
   for (const base of DATA_KEYS) {
     const scoped = scopeKey(base);
-    // 仅当该账号作用域尚不存在且全局有值时，才把全局旧数据迁入
     if (localStorage.getItem(scoped) === null) {
       const globalVal = localStorage.getItem(base);
       if (globalVal !== null) localStorage.setItem(scoped, globalVal);
@@ -6298,7 +6298,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.23'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.24'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
