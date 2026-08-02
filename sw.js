@@ -1,5 +1,5 @@
 // 物流筐收发管理系统 - Service Worker（离线完整可用）
-const CACHE = 'kuanwei-v65';
+const CACHE = 'kuanwei-v66';
 const ASSETS = [
   '/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png',
   // 预缓存 xlsx 库，保证离线时对账/导出可用
