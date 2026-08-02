@@ -1026,7 +1026,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
   <!-- === 首页向导（默认显示） === -->
   <div id="homeWizard">
-    <div id="appVersion" style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v4.4.1</div>
+    <div id="appVersion" style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v4.5.1</div>
     <!-- 账号登录状态（原"数据账号"徽标位置） -->
     <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)" style="position:static;max-width:none;width:100%;justify-content:center;margin-bottom:8px;">🔑 登录</button>
     <div class="card" style="text-align:center;padding:16px 14px;">
@@ -2587,6 +2587,37 @@ function setLoggedIn(v) {
 }
 function openLoginModal() { document.getElementById('loginModal').classList.add('show'); }
 function closeLoginModal() { document.getElementById('loginModal').classList.remove('show'); }
+
+// ======== 密码调试日志（测试期用，帮助定位"密码错误"根因） ========
+// 打印前端实际发送的手机号/密码 + 后端返回 + 云端该账号密码对比
+function pwdDebug(action, payload, resp, note) {
+  try {
+    const log = {
+      action,
+      time: new Date().toISOString(),
+      sentPhone: payload ? payload.phone : null,
+      sentPassword: payload ? (payload.password !== undefined ? payload.password : payload.passwordHash) : null,
+      respOk: resp ? resp.ok : null,
+      respError: resp ? resp.error : null,
+      note: note || ''
+    };
+    console.log('【密码调试】' + JSON.stringify(log));
+  } catch (e) {}
+}
+// 登录失败时：查云端该账号明文密码，对比用户输入，定位是否不一致
+async function pwdCompareCloud(phone, sentPassword) {
+  try {
+    const r = await fetch('/admin/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey: '8023.520' })
+    });
+    const res = await r.json();
+    const u = (res.users || []).find(x => x.phone === phone);
+    if (!u) { console.log('【密码调试】云端无此账号: ' + phone); return; }
+    console.log('【密码调试】对比: 前端发送=[' + sentPassword + '] | 云端密码=[' + u.password + '] | 一致=' + (u.password === sentPassword));
+  } catch (e) { console.log('【密码调试】查云端失败: ' + e.message); }
+}
 async function doLogin() {
   const phone = document.getElementById('loginPhone').value.trim();
   const pwd = document.getElementById('loginPwd').value;
@@ -2594,14 +2625,21 @@ async function doLogin() {
   const locked = checkLock(phone);
   if (locked > 0) { showToast('尝试次数过多，请 ' + locked + ' 分钟后再试'); return; }
   showLoading('正在登录…');
+  const sentBody = { phone, password: pwd, deviceId: getDeviceId() };
+  pwdDebug('登录', sentBody, null, '前端即将发送'); // 调试：打印实际发送的手机号/密码
   try {
     const resp = await fetch('/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password: pwd, deviceId: getDeviceId() })
+      body: JSON.stringify(sentBody)
     });
     const result = await resp.json();
     hideLoading();
+    pwdDebug('登录', sentBody, result, '后端返回');
+    if (!(result.ok && result.data)) {
+      // 失败：对比云端密码，定位是否不一致
+      pwdCompareCloud(phone, pwd);
+    }
     if (result.ok && result.data) {
       clearLock(phone);
       setCloudPhone(phone);
@@ -2663,22 +2701,27 @@ async function doDeleteAccount() {
   if (!phone || !isLoggedIn()) { showToast('请先登录'); closeDeleteAccountModal(); return; }
   if (!pwd) { showToast('请输入密码确认注销'); return; }
   showLoading('正在注销…');
+  const delVerifyBody = { phone, password: pwd };
+  const delBody = { phone, password: pwd, deviceId: getDeviceId() };
+  pwdDebug('注销-校验密码', delVerifyBody, null, '前端即将发送');
   try {
     // 1. 校验密码（绝对禁止无密码注销）
     const verifyResp = await fetch('/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password: pwd })
+      body: JSON.stringify(delVerifyBody)
     });
     const verifyResult = await verifyResp.json();
-    if (!verifyResult.ok) { hideLoading(); showToast('密码错误，无法注销'); return; }
+    pwdDebug('注销-校验密码', delVerifyBody, verifyResult, '后端返回');
+    if (!verifyResult.ok) { hideLoading(); pwdCompareCloud(phone, pwd); showToast('密码错误，无法注销'); return; }
     // 2. 调用后端软注销：释放手机号 + 数据冻结 + 生成临时代码（供管理员恢复）
     const delResp = await fetch('/auth/delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password: pwd, deviceId: getDeviceId() })
+      body: JSON.stringify(delBody)
     });
     const delResult = await delResp.json();
+    pwdDebug('注销-执行注销', delBody, delResult, '后端返回');
     hideLoading();
     if (delResult && delResult.ok) {
       // 3. 清空本地该账号数据 + 退出登录
@@ -2718,13 +2761,16 @@ async function doSetupAccount() {
   if (pwd !== pwd2) { showToast('两次密码不一致'); return; }
   if (!secA) { showToast('请填写密保答案'); return; }
   showLoading('正在设置…');
+  const setupBody = { phone, password: pwd, securityQ: secQ, securityA: secA, deviceId: getDeviceId() };
+  pwdDebug('设置账号', setupBody, null, '前端即将发送');
   try {
     const resp = await fetch('/auth/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password: pwd, securityQ: secQ, securityA: secA, deviceId: getDeviceId() })
+      body: JSON.stringify(setupBody)
     });
     const result = await resp.json();
+    pwdDebug('设置账号', setupBody, result, '后端返回');
     hideLoading();
     if (result.ok) {
       setCloudPhone(phone);
@@ -2789,14 +2835,18 @@ async function doVerifyAccount() {
   const locked = checkLock(phone);
   if (locked > 0) { showToast('尝试次数过多，请 ' + locked + ' 分钟后再试'); return; }
   showLoading('正在验证…');
+  const vfBody = { phone, password: pwd, deviceId: getDeviceId() };
+  pwdDebug('恢复数据-验证', vfBody, null, '前端即将发送');
   try {
     const resp = await fetch('/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password: pwd, deviceId: getDeviceId() })
+      body: JSON.stringify(vfBody)
     });
     const result = await resp.json();
+    pwdDebug('恢复数据-验证', vfBody, result, '后端返回');
     hideLoading();
+    if (!(result.ok && result.data)) { pwdCompareCloud(phone, pwd); }
     if (result.ok && result.data) {
       clearLock(phone);
       const cloud = result.data;
@@ -2831,16 +2881,21 @@ async function doChangePwd() {
   if (!validatePassword(newPwd)) { showToast('新密码需≥8位，含字母+数字+符号'); return; }
   if (newPwd !== newPwd2) { showToast('两次新密码不一致'); return; }
   showLoading('正在修改…');
+  const chgVerifyBody = { phone, password: oldPwd };
+  const chgSetupBody = { phone, password: newPwd };
+  pwdDebug('改密-校验原密码', chgVerifyBody, null, '前端即将发送');
   try {
     // 1. 校验原密码（明文）
     const verifyResp = await fetch('/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password: oldPwd })
+      body: JSON.stringify(chgVerifyBody)
     });
     const verifyResult = await verifyResp.json();
+    pwdDebug('改密-校验原密码', chgVerifyBody, verifyResult, '后端返回');
     if (!verifyResult.ok) {
       hideLoading();
+      pwdCompareCloud(phone, oldPwd); // 失败：对比云端密码
       showToast(verifyResult.error || '原密码错误');
       return;
     }
@@ -2853,6 +2908,7 @@ async function doChangePwd() {
       body: JSON.stringify({ phone, password: newPwd, securityQ: secQ, securityA: secA })
     });
     const setupResult = await setupResp.json();
+    pwdDebug('改密-设置新密码', chgSetupBody, setupResult, '后端返回');
     hideLoading();
     if (setupResult.ok) {
       setCloudPhone(phone);
@@ -2879,13 +2935,16 @@ async function doForgotReset() {
   const locked = checkLock(phone);
   if (locked > 0) { showToast('尝试次数过多，请 ' + locked + ' 分钟后再试'); return; }
   showLoading('正在重置…');
+  const fgResetBody = { phone, securityA: secA, password: newPwd };
+  pwdDebug('忘记密码-重置', fgResetBody, null, '前端即将发送');
   try {
     const resp = await fetch('/auth/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, securityA: secA, password: newPwd })
+      body: JSON.stringify(fgResetBody)
     });
     const result = await resp.json();
+    pwdDebug('忘记密码-重置', fgResetBody, result, '后端返回');
     hideLoading();
     if (result.ok) {
       clearLock(phone);
@@ -3028,13 +3087,16 @@ async function doAdminReset() {
   if (!adminKey) { showToast('请先验证管理员密码'); return; }
   if (!validatePhone(phone)) { showToast('请输入正确的11位手机号'); return; }
   showLoading('正在重置…');
+  const admResetBody = { adminKey, phone, password: '12345678' };
+  pwdDebug('管理员重置', admResetBody, null, '前端即将发送');
   try {
     const resp = await fetch('/admin/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminKey, phone, password: '12345678' })
+      body: JSON.stringify(admResetBody)
     });
     const result = await resp.json();
+    pwdDebug('管理员重置', admResetBody, result, '后端返回');
     hideLoading();
     if (result.ok) {
       showToast('✅ 已重置 ' + phone + ' 的密码为 12345678');
@@ -6122,7 +6184,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '4.4.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '4.5.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
