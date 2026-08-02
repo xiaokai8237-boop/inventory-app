@@ -2,6 +2,7 @@
   "name": "物流筐收发管理系统",
   "short_name": "物流筐",
   "description": "物流筐收发管理：每家店发出、回收、待回收一目了然",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -9,7 +10,7 @@
   "background_color": "#065A82",
   "theme_color": "#065A82",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
