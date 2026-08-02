@@ -6326,6 +6326,9 @@ function exportData() {
   const exportObj = {
     exportDate: new Date().toISOString(),
     goodsNames: goods,
+    goodsConfig: loadGoodsConfig(),      // 完整筐配置（含别名）
+    storeConfig: loadStoreConfig(),      // 店面配置（含 sort 顺序）
+    uiState: (typeof collectUiState === 'function') ? collectUiState() : undefined,
     records: data
   };
   const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
@@ -6362,9 +6365,29 @@ function importData(event) {
         saveDataArr([...byKey.values()]);
       }
       if (obj.goodsNames) saveGoodsConfig(obj.goodsNames);
+      // 导入店面配置（含 sort 顺序）——防止用导出/导入迁移时店面丢失
+      if (obj.storeConfig && Array.isArray(obj.storeConfig) && obj.storeConfig.length > 0) {
+        saveStoreConfig(obj.storeConfig);
+      } else if (Array.isArray(obj.goodsNames) && !obj.storeConfig) {
+        // 旧格式导出无 storeConfig 时，尝试从记录店名补店面（保守，不覆盖已有）
+        try {
+          const cur = loadStoreConfig();
+          const names = new Set(cur.map(s => s.name));
+          const recNames = new Set(obj.records.map(r => r.storeName).filter(Boolean));
+          const cfg = cur.slice();
+          recNames.forEach(n => { if (n && !names.has(n)) { cfg.push({ name: n, aliases: [], sort: cfg.length }); names.add(n); } });
+          if (cfg.length !== cur.length) saveStoreConfig(cfg);
+        } catch(e) {}
+      }
+      // 导入界面偏好
+      if (obj.uiState && typeof obj.uiState === 'object' && typeof applyUiState === 'function') {
+        try { applyUiState(obj.uiState); } catch(e) {}
+      }
       initGoodsFilter();
       renderGoodsInputList();
       renderTodayOverview();
+      renderStorePanelUI();
+      initAllStores();
       showToast('✅ 导入成功' + (overwrite ? '' : '（合并）'));
     } catch(err) {
       showToast('❌ 导入失败: ' + err.message);
@@ -6374,7 +6397,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.27'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.28'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
