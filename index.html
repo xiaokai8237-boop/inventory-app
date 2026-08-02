@@ -1165,8 +1165,12 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div class="import-zone" style="margin-top:16px;">
         <div class="iz-title">📸 批量导入店面</div>
         <div style="display:flex;gap:8px;">
-          <button type="button" class="btn btn-outline" style="flex:1;text-align:center;" onclick="triggerPhoto('camera','store')">📷 拍照</button>
-          <button type="button" class="btn btn-outline" style="flex:1;text-align:center;" onclick="triggerPhoto('album','store')">🖼️ 相册选</button>
+          <label class="btn btn-outline" style="flex:1;text-align:center;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">📷 拍照
+            <input type="file" accept="image/*" capture="environment" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;" onchange="handleStorePhoto(event)">
+          </label>
+          <label class="btn btn-outline" style="flex:1;text-align:center;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">🖼️ 相册选
+            <input type="file" accept="image/*" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;" onchange="handleStorePhoto(event)">
+          </label>
         </div>
         <div class="iz-tip">拍「配送路单店面表」类表格（含 HN40-01 编号），识别后可在弹窗里逐条修正再保存</div>
       </div>
@@ -2012,8 +2016,12 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <div style="font-size:12px;color:var(--text-light);margin-bottom:12px;text-align:center;">拍摄配送路单，自动识别物流箱合计</div>
     <div class="btn-row">
-      <button type="button" class="btn btn-outline store-file-btn" style="flex:1;text-align:center;" onclick="triggerPhoto('camera')">📷 拍照</button>
-      <button type="button" class="btn btn-outline store-file-btn" style="flex:1;text-align:center;" onclick="triggerPhoto('album')">🖼️ 相册选</button>
+      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">📷 拍照
+        <input type="file" accept="image/*" capture="environment" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;" onchange="handlePhoto(event)">
+      </label>
+      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">🖼️ 相册选
+        <input type="file" accept="image/*" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;" onchange="handlePhoto(event)">
+      </label>
     </div>
   </div>
 </div>
@@ -4422,6 +4430,8 @@ function triggerAlbumInput(type) {
 function handlePhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
+  // 静态 label input 需重置 value，保证再次选同一文件能触发 onchange
+  try { event.target.value = ''; } catch(e) {}
   // 立刻关闭拍照弹窗，显示加载动画
   closePhotoInputModal();
   showLoading('正在加载图片…');
@@ -6252,7 +6262,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.10'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.11'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
