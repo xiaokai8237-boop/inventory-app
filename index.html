@@ -4214,6 +4214,19 @@ function startVoice(mode) {
     showToast('浏览器不支持语音识别，请用Chrome');
     return;
   }
+  // 先请求麦克风权限（部分浏览器/PWA 不主动弹权限框，需先调用 getUserMedia）
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => { try { stream.getTracks().forEach(t => t.stop()); } catch (e) {} /* 立即释放，仅为触发权限框 */ })
+      .catch(err => {
+        // 权限被拒或设备不可用，给出明确引导
+        let tip = '麦克风权限被拒绝';
+        if (err && err.name === 'NotAllowedError') tip = '麦克风权限被拒绝，请在浏览器/PWA设置中允许麦克风权限后重试';
+        else if (err && err.name === 'NotFoundError') tip = '未检测到麦克风设备，请插入麦克风后重试';
+        else if (err && err.name === 'NotReadableError') tip = '麦克风被其它应用占用，请关闭后重试';
+        showToast('🔒 ' + tip);
+      });
+  }
   voiceRecognition = new SR();
   voiceRecognition.lang = 'zh-CN';
   voiceRecognition.continuous = false;
@@ -4244,8 +4257,25 @@ function startVoice(mode) {
   };
 
   voiceRecognition.onerror = function(event) {
-    voiceText.textContent = '识别出错: ' + event.error;
-    setTimeout(() => stopVoice(), 1500);
+    const err = event.error || '';
+    const tipMap = {
+      'not-allowed': '麦克风权限被拒绝，请在浏览器/PWA设置中允许麦克风权限后重试',
+      'service-not-allowed': '麦克风权限被拒绝，请在浏览器/PWA设置中允许麦克风权限后重试',
+      'audio-capture': '未检测到麦克风设备，请检查麦克风是否被占用或损坏',
+      'no-speech': '未检测到语音，请重试或说话大声些',
+      'network': '网络异常，语音识别需要联网，请检查网络',
+      'aborted': '识别已取消'
+    };
+    const tip = tipMap[err] || ('识别出错：' + err);
+    voiceText.textContent = '❌ ' + tip;
+    // 立即收起浮层（不等延迟），让用户能立即重试或改用手动输入
+    document.getElementById('voiceInBtn').classList.remove('recording');
+    document.getElementById('voiceOutBtn').classList.remove('recording');
+    overlay.classList.remove('show');
+    // 权限类错误用醒目 toast 提示
+    if (err === 'not-allowed' || err === 'service-not-allowed') {
+      showToast('🔒 ' + tip);
+    }
   };
 
   voiceRecognition.onend = function() {
@@ -4253,7 +4283,15 @@ function startVoice(mode) {
     setTimeout(() => overlay.classList.remove('show'), 500);
   };
 
-  voiceRecognition.start();
+  // 用 try/catch 包住 start()，捕获 InvalidStateError 等同步异常（连续启动/未停止场景）
+  try {
+    voiceRecognition.start();
+  } catch (e) {
+    overlay.classList.remove('show');
+    document.getElementById('voiceInBtn').classList.remove('recording');
+    document.getElementById('voiceOutBtn').classList.remove('recording');
+    showToast('启动语音识别失败：' + (e && e.message ? e.message : '未知错误'));
+  }
 }
 
 function stopVoice() {
@@ -6190,7 +6228,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.2'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.3'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
