@@ -83,12 +83,16 @@ export async function onRequest(context) {
       securityQ: tmp.data.securityQ || '',
       securityA: tmp.data.securityA || '',
       lastDeviceId: '',
-      updatedAt: new Date().toISOString(),
-      records: tmp.data.records || [],
-      goodsConfig: tmp.data.goodsConfig || null,
-      storeConfig: tmp.data.storeConfig || null
+      updatedAt: new Date().toISOString()
     };
     await env.BACKUP_KV.put('account_' + newPhone, JSON.stringify(acct));
+    // 业务数据独立存 data_<newPhone>，避免覆盖账号认证数据
+    await env.BACKUP_KV.put('data_' + newPhone, JSON.stringify({
+      records: tmp.data.records || [],
+      goodsConfig: tmp.data.goodsConfig || null,
+      storeConfig: tmp.data.storeConfig || null,
+      updatedAt: new Date().toISOString()
+    }));
     // 删除临时代码（恢复完成）
     await env.BACKUP_KV.delete('tmp_' + code);
     return json({ ok: true, message: '已恢复 ' + tmp.originalPhone + ' 的数据到 ' + newPhone });

@@ -117,15 +117,19 @@ async function handleVerify(body, env, json) {
     acct.updatedAt = new Date().toISOString();
     await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
   }
+  // 业务数据从 data_<phone> 读取（避免覆盖账号认证数据）；旧账号无 data_ 则用 account_ 内残留
+  let bizData = {};
+  const bizRaw = await env.BACKUP_KV.get('data_' + phone);
+  if (bizRaw) { try { bizData = JSON.parse(bizRaw); } catch (e) {} }
   return json({
     ok: true,
     data: {
-      records: acct.records || [],
-      goodsConfig: acct.goodsConfig || null,
-      storeConfig: acct.storeConfig || null,
+      records: bizData.records || acct.records || [],
+      goodsConfig: bizData.goodsConfig || acct.goodsConfig || null,
+      storeConfig: bizData.storeConfig || acct.storeConfig || null,
       securityQ: acct.securityQ || '',
       securityA: acct.securityA || '',
-      backupTime: acct.updatedAt
+      backupTime: bizData.updatedAt || acct.updatedAt
     }
   });
 }

@@ -22,10 +22,11 @@ export async function onRequest(context) {
   return json({ error: 'not found' }, 404);
 }
 
+// 注意：业务数据改用 data_<account> 前缀存储，避免与 auth 的 account_<phone>（账号认证+密码）冲突覆盖
 async function handleGet(url, env, json) {
   const account = (url.searchParams.get('account') || '').toString().trim().toLowerCase();
   const deviceId = url.searchParams.get('deviceId');
-  const key = account ? 'account_' + account : (deviceId ? 'device_' + deviceId : null);
+  const key = account ? 'data_' + account : (deviceId ? 'device_' + deviceId : null);
   if (!key) return json({ error: 'missing account or deviceId' }, 400);
   const raw = await env.BACKUP_KV.get(key);
   if (!raw) return json({ data: null });
@@ -37,7 +38,7 @@ async function handleBackupPost(body, env, json) {
   const deviceId = body.deviceId;
   const data = body.data;
   if ((!account && !deviceId) || !data) return json({ error: 'missing account/deviceId or data' }, 400);
-  if (account) await env.BACKUP_KV.put('account_' + account, JSON.stringify(data));
+  if (account) await env.BACKUP_KV.put('data_' + account, JSON.stringify(data));
   if (deviceId) await env.BACKUP_KV.put('device_' + deviceId, JSON.stringify(data));
   return json({ ok: true });
 }
