@@ -2803,7 +2803,12 @@ async function doSetupAccount() {
 
 // 恢复数据
 function openVerifyModal() {
-  // 按需求：绝对禁止无密码登录/恢复，一律走密码验证
+  // 已登录用户：恢复数据免验证（直接拉当前账号云端数据，不需再输密码）
+  if (isLoggedIn()) {
+    const p = getCloudPhone();
+    if (p) { restoreLoggedIn(p); return; }
+  }
+  // 未登录：走密码验证恢复
   document.getElementById('verifyModal').classList.add('show');
 }
 function closeVerifyModal() { document.getElementById('verifyModal').classList.remove('show'); }
@@ -6289,7 +6294,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.21'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.22'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
