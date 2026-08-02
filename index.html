@@ -106,16 +106,16 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
 }
-.header h1 { font-size: 18px; font-weight: 700; color: var(--primary); }
-.header .date-today { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+.header h1 { font-size: 18px; font-weight: 700; color: var(--primary); padding: 0 52px; }
+.header .date-today { font-size: 12px; color: var(--text-light); margin-top: 2px; padding: 0 52px; }
 
 /* 首页角落登录状态胶囊 */
 .login-pill {
-  position: absolute; left: 12px; top: 14px;
-  max-width: 46%;
-  padding: 6px 12px; border-radius: 20px;
+  position: absolute; left: 8px; top: 12px;
+  max-width: 38%;
+  padding: 5px 10px; border-radius: 16px;
   border: 1px solid var(--border); background: var(--card-bg);
-  color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer;
+  color: var(--primary); font-size: 12px; font-weight: 600; cursor: pointer;
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
   display: flex; align-items: center; gap: 4px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1028,7 +1028,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   <!-- === 首页向导（默认显示） === -->
   <div id="homeWizard">
     <div style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v2.0.0</div>
-    <div id="accountBadge" style="display:none;background:var(--soft-bg);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--text);margin-bottom:8px;"></div>
     <div class="card" style="text-align:center;padding:16px 14px;">
       <div style="font-size:16px;font-weight:600;margin-bottom:16px;">选择操作</div>
       <!-- 第一行：发出/回收（主操作，突出） -->
@@ -2480,7 +2479,7 @@ function maskPhone(p) {
   return p.slice(0, 3) + '****' + p.slice(7);
 }
 
-// 渲染首页角落登录状态胶囊 + 顶部账号徽标
+// 渲染首页角落登录状态胶囊（顶部已用胶囊显示账号，无需额外徽标）
 function renderAccountBadge() {
   const pill = document.getElementById('loginPill');
   if (pill) {
@@ -2492,17 +2491,6 @@ function renderAccountBadge() {
     } else {
       pill.textContent = '🔑 登录';
       pill.classList.remove('logged-in');
-    }
-  }
-  const el = document.getElementById('accountBadge');
-  if (el) {
-    const phone = getCloudPhone();
-    const logged = isLoggedIn();
-    if (phone && logged) {
-      el.style.display = '';
-      el.innerHTML = `🔗 数据账号：<b>${maskPhone(phone)}</b>（多账号数据已隔离）`;
-    } else {
-      el.style.display = 'none';
     }
   }
   updateLoginLock();
