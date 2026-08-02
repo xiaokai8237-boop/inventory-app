@@ -38,6 +38,10 @@ async function handleDelete(body, env, json) {
   let acct;
   try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
   if (acct.password !== password) return json({ error: '密码错误' }, 401);
+  // 业务数据从 data_<phone> 读取（记录/筐/店面配置当前存在独立 key，account_ 内的是旧残留）
+  let biz = { records: [], goodsConfig: null, storeConfig: null };
+  const bizRaw = await env.BACKUP_KV.get('data_' + phone);
+  if (bizRaw) { try { biz = JSON.parse(bizRaw); } catch (e) {} }
   // 生成临时代码，冻结账号数据（保留原手机号便于管理员识别）
   const code = 'T' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6).toUpperCase();
   const tmpKey = 'tmp_' + code;
@@ -49,13 +53,15 @@ async function handleDelete(body, env, json) {
       password: acct.password || '',
       securityQ: acct.securityQ || '',
       securityA: acct.securityA || '',
-      records: acct.records || [],
-      goodsConfig: acct.goodsConfig || null,
-      storeConfig: acct.storeConfig || null
+      records: biz.records || [],
+      goodsConfig: biz.goodsConfig || null,
+      storeConfig: biz.storeConfig || null
     }
   }));
   // 释放手机号（删除账号记录，手机号可重新注册）
   await env.BACKUP_KV.delete('account_' + phone);
+  // 删除该账号业务数据（已冻结到临时代码）
+  await env.BACKUP_KV.delete('data_' + phone);
   // 清理该账号的设备级备份（避免残留）
   if (acct.lastDeviceId) await env.BACKUP_KV.delete('device_' + acct.lastDeviceId);
   return json({ ok: true, tempCode: code });
