@@ -3444,6 +3444,21 @@ function backToHomeWizard() {
   renderTodayStatus();
 }
 
+// 是否运行在 Capacitor 原生 APP 内（安卓已打包成 APP；苹果仍用网页）
+function isInNativeApp() {
+  try {
+    return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  } catch (e) { return false; }
+}
+
+// 页面加载时：若在原生 APP 内，隐藏「添加到桌面」入口（APP 已安装无需添加到桌面）
+(function hideInstallIfInApp() {
+  if (isInNativeApp()) {
+    const btn = document.querySelector('[onclick*="installApp"]');
+    if (btn) { btn.style.display = 'none'; }
+  }
+})();
+
 // ======== 添加到桌面（PWA） ========
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -6251,7 +6266,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.17'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.18'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
