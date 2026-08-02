@@ -2126,6 +2126,19 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
 </div>
 
+<!-- 备份结果弹窗：展示本次备份到云端的完整内容（店面顺序/别称/记录数等） -->
+<div class="store-ocr-modal" id="backupResultModal">
+  <div class="store-ocr-content" style="max-width:340px;max-height:80vh;display:flex;flex-direction:column;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:700;font-size:16px;color:var(--text);">✅ 已备份到云端</span>
+      <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeBackupResult()">×</span>
+    </div>
+    <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">共 <b id="backupStoreCount">0</b> 家店 · <b id="backupGoodsCount">0</b> 类筐 · <b id="backupRecordCount">0</b> 条记录</div>
+    <div id="backupStoreList" style="flex:1;overflow-y:auto;background:var(--bg-card,#f6f8fa);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--text);line-height:1.9;"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="closeBackupResult()">知道了</button>
+  </div>
+</div>
+
 <script>
 // ======== 配置 ========
 const STORAGE_KEY = 'kuanwei_inventory_data';
@@ -2359,7 +2372,10 @@ async function backupToCloud(manual) {
     if (result && result.ok) {
       localStorage.setItem('kuanwei_last_backup', new Date().toISOString());
       if (manual) {
-        showToast('✅ 已备份到云端');
+        // 弹窗展示备份详情（店面顺序/别称/筐/记录数）
+        const goodsCount = (payload.data.goodsConfig && Array.isArray(payload.data.goodsConfig)) ? payload.data.goodsConfig.length : 0;
+        const recCount = (Array.isArray(payload.data.records) ? payload.data.records.length : 0);
+        showBackupResult(payload.data.storeConfig || [], goodsCount, recCount);
         renderCloudBackupStatus();
       }
     } else if (manual) {
@@ -3595,6 +3611,30 @@ function showRestoreResult(storeCount, goodsCount, recordCount, backupTime) {
 }
 function closeRestoreResult() {
   const m = document.getElementById('restoreResultModal');
+  if (m) m.classList.remove('show');
+}
+
+// 显示"备份到云端"结果弹窗：展示备份了哪些内容（店面顺序/别称/筐/记录数）
+function showBackupResult(stores, goodsCount, recordCount) {
+  const m = document.getElementById('backupResultModal');
+  if (!m) return;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('backupStoreCount', stores.length);
+  set('backupGoodsCount', goodsCount);
+  set('backupRecordCount', recordCount);
+  const listEl = document.getElementById('backupStoreList');
+  if (listEl) {
+    // 按 sort 排序显示店面 + 别称
+    const sorted = stores.slice().sort((a, b) => (a.sort === undefined ? 0 : a.sort) - (b.sort === undefined ? 0 : b.sort));
+    listEl.innerHTML = sorted.map((s, i) => {
+      const alias = (Array.isArray(s.aliases) && s.aliases.length) ? ' · <span style="color:var(--secondary,#e67e22);">' + s.aliases.join('、') + '</span>' : '';
+      return '<div>🔸 <b>' + (i + 1) + '.</b> ' + s.name + alias + '</div>';
+    }).join('') || '<div style="color:var(--text-light);">未备份店面</div>';
+  }
+  m.classList.add('show');
+}
+function closeBackupResult() {
+  const m = document.getElementById('backupResultModal');
   if (m) m.classList.remove('show');
 }
 
@@ -6442,7 +6482,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.30'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.31'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
