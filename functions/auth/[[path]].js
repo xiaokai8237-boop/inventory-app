@@ -23,7 +23,42 @@ export async function onRequest(context) {
   if (path.endsWith('/auth/setup')) return handleSetup(body, env, json);
   if (path.endsWith('/auth/verify')) return handleVerify(body, env, json);
   if (path.endsWith('/auth/reset')) return handleReset(body, env, json);
+  if (path.endsWith('/auth/delete')) return handleDelete(body, env, json);
   return json({ error: 'not found' }, 404);
+}
+
+// 账号注销（软删除）：校验密码 → 释放手机号 → 数据冻结为临时代码（供管理员恢复）
+async function handleDelete(body, env, json) {
+  const phone = (body.phone || '').toString().trim();
+  const passwordHash = (body.passwordHash || '').toString().trim();
+  if (!/^1\d{10}$/.test(phone)) return json({ error: '手机号格式不正确' }, 400);
+  if (passwordHash.length < 16) return json({ error: '密码无效' }, 400);
+  const raw = await env.BACKUP_KV.get('account_' + phone);
+  if (!raw) return json({ error: '该手机号未设置过密码' }, 404);
+  let acct;
+  try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
+  if (acct.passwordHash !== passwordHash) return json({ error: '密码错误' }, 401);
+  // 生成临时代码，冻结账号数据（保留原手机号便于管理员识别）
+  const code = 'T' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6).toUpperCase();
+  const tmpKey = 'tmp_' + code;
+  await env.BACKUP_KV.put(tmpKey, JSON.stringify({
+    originalPhone: phone,
+    deletedAt: new Date().toISOString(),
+    data: {
+      passwordHash: acct.passwordHash || '',
+      password: acct.password || '',
+      securityQ: acct.securityQ || '',
+      securityA: acct.securityA || '',
+      records: acct.records || [],
+      goodsConfig: acct.goodsConfig || null,
+      storeConfig: acct.storeConfig || null
+    }
+  }));
+  // 释放手机号（删除账号记录，手机号可重新注册）
+  await env.BACKUP_KV.delete('account_' + phone);
+  // 清理该账号的设备级备份（避免残留）
+  if (acct.lastDeviceId) await env.BACKUP_KV.delete('device_' + acct.lastDeviceId);
+  return json({ ok: true, tempCode: code });
 }
 
 // 设置/更新账号（保留已有记录数据）

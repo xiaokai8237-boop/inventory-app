@@ -87,6 +87,15 @@ body {
   background: #fef3c7; color: #b45309; border-bottom: 1px solid #fde68a;
 }
 html[data-theme="dark"] .offline-banner { background: #2a2406; color: #fbbf24; border-color: #7c6a16; }
+/* 未登录提醒横条 */
+.login-notice {
+  display: none; text-align: center; padding: 8px; font-size: 13px; font-weight: 600;
+  background: #ffedd5; color: #c2410c; border-bottom: 1px solid #fdba74; cursor: pointer;
+}
+html[data-theme="dark"] .login-notice { background: #2d1b0a; color: #fdba74; border-color: #9a4d0e; }
+/* 未登录时禁用的输入区 */
+.locked-input { pointer-events: none; opacity: .55; }
+html[data-theme="dark"] .locked-input { opacity: .45; }
 
 /* 顶部深色模式切换按钮 */
 .theme-toggle {
@@ -99,6 +108,39 @@ html[data-theme="dark"] .offline-banner { background: #2a2406; color: #fbbf24; b
 }
 .header h1 { font-size: 18px; font-weight: 700; color: var(--primary); }
 .header .date-today { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+
+/* 首页角落登录状态胶囊 */
+.login-pill {
+  position: absolute; left: 12px; top: 14px;
+  max-width: 46%;
+  padding: 6px 12px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--card-bg);
+  color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  display: flex; align-items: center; gap: 4px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.login-pill.logged-in { color: var(--success); }
+/* 账号操作下拉菜单 */
+.account-menu {
+  position: fixed; min-width: 180px; z-index: 9999;
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  overflow: hidden; padding: 4px 0;
+}
+.account-menu .am-head {
+  padding: 10px 14px; font-size: 12px; color: var(--text-light);
+  border-bottom: 1px solid var(--border); background: var(--soft-bg);
+}
+.account-menu .am-item {
+  padding: 11px 14px; font-size: 14px; color: var(--text); cursor: pointer;
+  display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border);
+}
+.account-menu .am-item:last-child { border-bottom: none; }
+.account-menu .am-item:hover { background: var(--soft-bg); }
+.account-menu .am-item.danger { color: var(--danger); }
+/* 注销/确认弹窗 */
+.cancel-pill { color: var(--text-light); font-size: 11px; text-align: right; margin-top: 6px; cursor: pointer; text-decoration: underline; }
 
 /* Tab */
 .tabs {
@@ -962,6 +1004,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 <body>
 
 <div class="header">
+  <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)">🔑 登录</button>
   <h1>📦 物流筐收发管理系统</h1>
   <div class="date-today" id="todayLabel"></div>
   <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="切换深浅色">🌙</button>
@@ -972,6 +1015,11 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 <div class="tabs">
   <div class="tab active" data-page="record">首页</div>
   <div class="tab" data-page="history">记录</div>
+</div>
+
+<!-- 未登录提醒横条（登录后隐藏） -->
+<div class="login-notice" id="loginNotice" onclick="openLoginModal()">
+  🔒 未登录：当前仅可查看。点击 <b>右上角登录</b> 后即可录入和保存
 </div>
 
 <!-- ========== 录入页（首页向导 + 手动录入） ========== -->
@@ -1741,6 +1789,69 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
 </div>
 
+<!-- 账号注销弹窗（两步确认 + 后悔药） -->
+<div class="store-ocr-modal" id="deleteAccountModal" onclick="closeDeleteAccountModal()">
+  <div class="store-ocr-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;color:var(--danger);">🗑️ 账号注销</span>
+      <button onclick="closeDeleteAccountModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <!-- 第一步：注销警告 -->
+    <div id="deleteStep1">
+      <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px;font-size:13px;line-height:1.9;color:#b91c1c;">
+        <b>⚠️ 账号注销</b><br>
+        账号注销后，本账号的<b>所有数据将被永久删除</b>：<br>
+        📊 全部收发记录 · 🏪 所有店面 · 📦 全部筐配置<br>
+        账号密码及登录信息也将一并清除。<br>
+        <b>数据删除后无法恢复、无法找回！</b><br>
+        此操作<b>不可撤销</b>，请谨慎决定。
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeDeleteAccountModal()">取消</button>
+        <button class="btn btn-danger" style="flex:1;" onclick="goDeleteStep2()">我已知晓，继续</button>
+      </div>
+    </div>
+    <!-- 第二步：输密码二次确认 + 后悔药 -->
+    <div id="deleteStep2" style="display:none;">
+      <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px;font-size:13px;line-height:1.8;color:#b91c1c;">
+        <b>🚫 再次确认注销</b><br>
+        你正在注销账号 <b><span id="delPhoneLabel"></span></b><br>
+        这是<b>最后一次确认</b>：点击确认后，该账号所有数据将<b>被永久清除，且无法恢复</b>。
+      </div>
+      <div class="form-group" style="margin-top:10px;">
+        <label class="form-label">请输入账号密码确认</label>
+        <div class="pwd-wrap"><input type="password" class="form-input" id="delPwd" placeholder="输入密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="delPwd_eye" onclick="togglePwd('delPwd')" tabindex="-1">👁</button></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeDeleteAccountModal()">取消</button>
+        <button class="btn btn-danger" style="flex:1;" onclick="doDeleteAccount()">确认注销</button>
+      </div>
+      <div class="cancel-pill" onclick="showDeleteRegret()">💊 后悔药</div>
+    </div>
+    <!-- 注销成功（含后悔药） -->
+    <div id="deleteSuccess" style="display:none;">
+      <div style="text-align:center;padding:8px 0;">
+        <div style="font-size:18px;font-weight:700;color:var(--success);margin-bottom:6px;">✅ 账号已注销</div>
+        <div style="font-size:13px;color:var(--text);">该账号及其所有数据<b>已永久删除</b>。</div>
+        <button class="btn btn-primary" style="width:100%;margin-top:14px;" onclick="closeDeleteAccountModal()">知道了</button>
+        <div class="cancel-pill" onclick="showDeleteRegret()">💊 后悔药</div>
+      </div>
+    </div>
+    <!-- 后悔药内容 -->
+    <div id="deleteRegret" style="display:none;">
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;font-size:13px;line-height:1.9;color:#166534;">
+        <b>😌 别担心，数据还在！</b><br>
+        其实你的数据<b>并没有真正删除</b>，只是暂时封存起来了。<br>
+        如果你后悔注销了，可以<b>联系程序管理员</b>帮你恢复：<br>
+        ① 告诉管理员你的<b>原手机号</b><br>
+        ② 管理员确认后即可恢复你的全部数据<br>
+        <div style="font-size:11px;color:#65a30d;margin-top:6px;">* 此提示仅显示给本次操作，用于防止误注销后悔。</div>
+      </div>
+      <button class="btn btn-outline" style="width:100%;margin-top:10px;" onclick="closeDeleteAccountModal()">知道了</button>
+    </div>
+  </div>
+</div>
+
 <!-- 管理员密码验证弹窗 -->
 <div class="store-ocr-modal" id="adminAuthModal" onclick="closeAdminAuthModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
@@ -1785,6 +1896,12 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:8px;">👥 用户列表</div>
       <input type="text" class="form-input" id="adminSearch" placeholder="🔍 搜索手机号或密码" oninput="renderAdminUsers()" style="margin-bottom:8px;">
       <div id="adminUserList" style="max-height:220px;overflow-y:auto;font-size:12px;"></div>
+    </div>
+    <!-- 已注销待恢复账号（临时代码 + 原手机号） -->
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px;">
+      <div style="font-weight:600;font-size:14px;color:var(--text);margin-bottom:8px;">💊 已注销账号（待恢复）</div>
+      <div style="font-size:11px;color:var(--text-light);margin-bottom:8px;">用户注销后数据封存于此，凭临时代码可恢复其数据到任意手机号</div>
+      <div id="adminPendingList" style="max-height:180px;overflow-y:auto;font-size:12px;"></div>
     </div>
   </div>
 </div>
@@ -2357,17 +2474,98 @@ function clearLock(phone) {
 }
 
 // 账号标识徽标（首页顶部，显示当前数据归属账号，明确多账号隔离）
+// 手机号脱敏：中间4位用星号（155****8023）
+function maskPhone(p) {
+  if (!p || p.length < 7) return p || '';
+  return p.slice(0, 3) + '****' + p.slice(7);
+}
+
+// 渲染首页角落登录状态胶囊 + 顶部账号徽标
 function renderAccountBadge() {
+  const pill = document.getElementById('loginPill');
+  if (pill) {
+    const phone = getCloudPhone();
+    const logged = isLoggedIn();
+    if (phone && logged) {
+      pill.textContent = '👤 ' + maskPhone(phone);
+      pill.classList.add('logged-in');
+    } else {
+      pill.textContent = '🔑 登录';
+      pill.classList.remove('logged-in');
+    }
+  }
   const el = document.getElementById('accountBadge');
-  if (!el) return;
+  if (el) {
+    const phone = getCloudPhone();
+    const logged = isLoggedIn();
+    if (phone && logged) {
+      el.style.display = '';
+      el.innerHTML = `🔗 数据账号：<b>${maskPhone(phone)}</b>（多账号数据已隔离）`;
+    } else {
+      el.style.display = 'none';
+    }
+  }
+  updateLoginLock();
+}
+
+// 未登录锁定：显示提醒横条 + 禁用录入/保存控件；登录后恢复
+function updateLoginLock() {
+  const notice = document.getElementById('loginNotice');
+  if (notice) notice.style.display = isLoggedIn() ? 'none' : '';
+  // 需要登录才能操作的元素 id 列表（未登录时禁用+半透明）
+  const lockIds = [
+    'goodsInputList',           // 手动录入筐输入区
+    'recordStoreChips',         // 店面选择
+    'recordDate',               // 日期选择
+    'extraGoodsList',           // 额外发收
+  ];
+  const logged = isLoggedIn();
+  lockIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('locked-input', !logged);
+  });
+  // 锁定手动录入/快捷录入相关按钮（用 onclick 属性包含匹配，规避引号嵌套问题）
+  const lockOnclick = ['saveManualRecord()', 'openExtraModal()', 'openVoiceInputModal()', 'openPhotoInputModal()', 'manualEntry('];
+  document.querySelectorAll('[onclick]').forEach(btn => {
+    const oc = btn.getAttribute('onclick') || '';
+    if (lockOnclick.some(k => oc.indexOf(k) >= 0)) btn.classList.toggle('locked-input', !logged);
+  });
+}
+
+// ======== 账号操作菜单（点击角落登录胶囊弹出） ========
+function closeAccountMenu() {
+  const m = document.getElementById('accountMenu');
+  if (m) m.remove();
+}
+function toggleAccountMenu(e) {
+  e.stopPropagation();
+  const existing = document.getElementById('accountMenu');
+  if (existing) { existing.remove(); return; }
   const phone = getCloudPhone();
   const logged = isLoggedIn();
-  if (phone && logged) {
-    el.style.display = '';
-    el.innerHTML = `🔗 数据账号：<b>${phone}</b>（多账号数据已隔离）`;
+  const rect = document.getElementById('loginPill').getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.id = 'accountMenu';
+  menu.className = 'account-menu';
+  let html = `<div class="am-head">${phone && logged ? '👤 当前账号：' + maskPhone(phone) : '账号管理'}</div>`;
+  if (!logged) {
+    html += `<div class="am-item" onclick="openLoginModal();closeAccountMenu()">🔐 登录账号</div>`;
+    html += `<div class="am-item" onclick="openSetupModal();closeAccountMenu()">🔑 设置账号密码</div>`;
   } else {
-    el.style.display = 'none';
+    html += `<div class="am-item" onclick="openLoginModal();closeAccountMenu()">🔄 切换用户</div>`;
+    html += `<div class="am-item" onclick="logout();closeAccountMenu()">🚪 退出登录</div>`;
+    html += `<div class="am-item danger" onclick="openDeleteAccountModal();closeAccountMenu()">🗑️ 注销账号</div>`;
   }
+  menu.innerHTML = html;
+  menu.style.top = (rect.bottom + 6) + 'px';
+  menu.style.left = Math.max(8, rect.left) + 'px';
+  document.body.appendChild(menu);
+  // 点击别处关闭
+  setTimeout(() => {
+    document.addEventListener('click', function handler(ev) {
+      if (!menu.contains(ev.target)) { menu.remove(); document.removeEventListener('click', handler); }
+    });
+  }, 0);
 }
 
 // 账号状态渲染
@@ -2473,6 +2671,74 @@ function logout() {
   showToast('已退出登录，数据已隔离');
 }
 
+// ======== 账号注销（两步确认 + 后悔药 + 软删除可恢复） ========
+function openDeleteAccountModal() {
+  document.getElementById('deleteStep1').style.display = '';
+  document.getElementById('deleteStep2').style.display = 'none';
+  document.getElementById('deleteSuccess').style.display = 'none';
+  document.getElementById('deleteRegret').style.display = 'none';
+  document.getElementById('delPhoneLabel').textContent = maskPhone(getCloudPhone());
+  document.getElementById('delPwd').value = '';
+  document.getElementById('deleteAccountModal').classList.add('show');
+}
+function closeDeleteAccountModal() { document.getElementById('deleteAccountModal').classList.remove('show'); }
+function goDeleteStep2() {
+  document.getElementById('deleteStep1').style.display = 'none';
+  document.getElementById('deleteStep2').style.display = '';
+}
+function showDeleteRegret() {
+  document.getElementById('deleteStep2').style.display = 'none';
+  document.getElementById('deleteSuccess').style.display = 'none';
+  document.getElementById('deleteRegret').style.display = '';
+}
+async function doDeleteAccount() {
+  const phone = getCloudPhone();
+  const pwd = document.getElementById('delPwd').value;
+  if (!phone || !isLoggedIn()) { showToast('请先登录'); closeDeleteAccountModal(); return; }
+  if (!pwd) { showToast('请输入密码确认注销'); return; }
+  showLoading('正在注销…');
+  try {
+    // 1. 校验密码（绝对禁止无密码注销）
+    const passwordHash = await hashPassword(phone, pwd);
+    const verifyResp = await fetch('/auth/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, passwordHash })
+    });
+    const verifyResult = await verifyResp.json();
+    if (!verifyResult.ok) { hideLoading(); showToast('密码错误，无法注销'); return; }
+    // 2. 调用后端软注销：释放手机号 + 数据冻结 + 生成临时代码（供管理员恢复）
+    const delResp = await fetch('/auth/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, passwordHash, deviceId: getDeviceId() })
+    });
+    const delResult = await delResp.json();
+    hideLoading();
+    if (delResult && delResult.ok) {
+      // 3. 清空本地该账号数据 + 退出登录
+      setLoggedIn(false);
+      setCloudPhone('');
+      removeLocalAccountData(phone);
+      renderAccountStatus();
+      renderAccountBadge();
+      document.getElementById('deleteStep2').style.display = 'none';
+      document.getElementById('deleteSuccess').style.display = '';
+      showToast('✅ 账号已注销');
+    } else {
+      showToast(delResult.error || '注销失败，请稍后再试');
+    }
+  } catch (e) { hideLoading(); showToast('❌ 网络错误，请稍后再试'); }
+}
+// 注销后清除本地该账号隔离数据
+function removeLocalAccountData(phone) {
+  try {
+    for (const base of ['kuanwei_inventory_data', 'kuanwei_goods_names', 'kuanwei_stores']) {
+      localStorage.removeItem(base + '__' + phone);
+    }
+  } catch(e) {}
+}
+
 // 设置密码
 function openSetupModal() { document.getElementById('setupModal').classList.add('show'); }
 function closeSetupModal() { document.getElementById('setupModal').classList.remove('show'); }
@@ -2523,11 +2789,7 @@ async function doSetupAccount() {
 
 // 恢复数据
 function openVerifyModal() {
-  // 已登录：免密直接恢复，不弹密码框
-  if (isLoggedIn()) {
-    const p = getCloudPhone();
-    if (p) { restoreLoggedIn(p); return; }
-  }
+  // 按需求：绝对禁止无密码登录/恢复，一律走密码验证
   document.getElementById('verifyModal').classList.add('show');
 }
 function closeVerifyModal() { document.getElementById('verifyModal').classList.remove('show'); }
@@ -2721,6 +2983,8 @@ async function loadAdminStats() {
       if (el) el.textContent = result.count;
       adminUsers = result.users || [];
       renderAdminUsers();
+      adminPending = result.pendingDelete || [];
+      renderAdminPending();
     } else {
       if (el) el.textContent = '-';
     }
@@ -2728,6 +2992,60 @@ async function loadAdminStats() {
     const el = document.getElementById('adminUserCount');
     if (el) el.textContent = '-';
   }
+}
+let adminPending = []; // 已注销待恢复账号列表
+// 渲染待恢复的注销账号
+function renderAdminPending() {
+  const box = document.getElementById('adminPendingList');
+  if (!box) return;
+  if (adminPending.length === 0) {
+    box.innerHTML = '<div style="color:var(--text-light);text-align:center;padding:10px;">暂无已注销账号</div>';
+    return;
+  }
+  box.innerHTML = adminPending.map(p => `
+    <div style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:6px;background:var(--soft-bg);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-weight:700;color:var(--primary);">${p.code}</span>
+        <span style="font-size:11px;color:var(--text-light);">📱 ${maskPhone(p.originalPhone)}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text-light);margin-bottom:6px;">原手机号 ${p.originalPhone} · 注销于 ${(p.deletedAt||'').slice(0,10)}</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-success" style="flex:1;padding:6px;font-size:12px;width:auto;" onclick="adminRestore('${p.code}','${p.originalPhone}')">♻️ 恢复</button>
+        <button class="btn btn-danger" style="flex:1;padding:6px;font-size:12px;width:auto;" onclick="adminDeleteTemp('${p.code}')">🗑️ 彻底删除</button>
+      </div>
+    </div>`).join('');
+}
+// 管理员恢复注销账号：把临时代码数据绑定到新手机号
+function adminRestore(code, origPhone) {
+  if (!adminKey) { showToast('请先验证管理员密码'); return; }
+  const newPhone = prompt('将把 ' + origPhone + ' 的数据恢复到哪个手机号？（输入新手机号）');
+  if (!newPhone) return;
+  if (!validatePhone(newPhone)) { showToast('请输入正确的11位手机号'); return; }
+  showLoading('正在恢复…');
+  fetch('/admin/restore-account', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ adminKey, code, newPhone })
+  }).then(r => r.json()).then(res => {
+    hideLoading();
+    if (res.ok) { showToast('✅ ' + res.message); loadAdminStats(); }
+    else showToast(res.error || '恢复失败');
+  }).catch(() => { hideLoading(); showToast('❌ 网络错误'); });
+}
+// 管理员彻底删除注销账号（不可恢复）
+function adminDeleteTemp(code) {
+  if (!adminKey) { showToast('请先验证管理员密码'); return; }
+  if (!confirm('⚠️ 确认彻底删除该注销账号的所有数据？\n此操作不可恢复！')) return;
+  showLoading('正在删除…');
+  fetch('/admin/delete-temp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ adminKey, code })
+  }).then(r => r.json()).then(res => {
+    hideLoading();
+    if (res.ok) { showToast('✅ ' + res.message); loadAdminStats(); }
+    else showToast(res.error || '删除失败');
+  }).catch(() => { hideLoading(); showToast('❌ 网络错误'); });
 }
 // 渲染用户列表（按搜索框过滤手机号或密码）
 function renderAdminUsers() {
@@ -3577,6 +3895,7 @@ function populateStoreFilter(selId) {
 
 // ======== 手动保存 ========
 function saveManualRecord() {
+  if (!isLoggedIn()) { showToast('🔒 请先登录后再录入'); openLoginModal(); return; }
   const date = document.getElementById('recordDate').value;
   if (!date) { showToast('请选择日期'); return; }
   const names = loadGoodsNames();
@@ -3647,6 +3966,7 @@ function closeExtraModal() {
 }
 // 保存额外发收登记：发出列记为 qtyIn，回收列记为 qtyOut，storeIdx=-1（所有门店）
 function saveExtraRecord() {
+  if (!isLoggedIn()) { showToast('🔒 请先登录后再登记'); openLoginModal(); return; }
   // 使用录入页选择的日期，而非强制今天（回填历史日期也能正确入账）
   const date = document.getElementById('recordDate')?.value || todayStr();
   const names = loadGoodsNames();
