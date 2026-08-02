@@ -121,15 +121,15 @@ export async function onRequest(context) {
 
   const phone = (body.phone || '').toString().trim();
   const newPasswordHash = (body.newPasswordHash || '').toString().trim();
-  const newPassword = (body.password || '').toString().trim();
+  const newPassword = (body.password || '').toString();
   if (!/^1\d{10}$/.test(phone)) return json({ error: '手机号格式不正确' }, 400);
-  if (newPasswordHash.length < 16) return json({ error: '新密码无效' }, 400);
+  if (newPassword.length < 6) return json({ error: '新密码无效' }, 400);
   const raw = await env.BACKUP_KV.get('account_' + phone);
   if (!raw) return json({ error: '该手机号未设置过密码' }, 404);
   let acct;
   try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
-  acct.passwordHash = newPasswordHash;
-  if (newPassword) acct.password = newPassword;
+  if (newPasswordHash) acct.passwordHash = newPasswordHash;
+  acct.password = newPassword;
   acct.updatedAt = new Date().toISOString();
   await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
   return json({ ok: true, message: '密码已重置' });

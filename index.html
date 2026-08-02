@@ -1026,7 +1026,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
   <!-- === 首页向导（默认显示） === -->
   <div id="homeWizard">
-    <div id="appVersion" style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v4.2.11</div>
+    <div id="appVersion" style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v4.3.1</div>
     <!-- 账号登录状态（原"数据账号"徽标位置） -->
     <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)" style="position:static;max-width:none;width:100%;justify-content:center;margin-bottom:8px;">🔑 登录</button>
     <div class="card" style="text-align:center;padding:16px 14px;">
@@ -2597,11 +2597,10 @@ async function doLogin() {
   if (locked > 0) { showToast('尝试次数过多，请 ' + locked + ' 分钟后再试'); return; }
   showLoading('正在登录…');
   try {
-    const passwordHash = await hashPassword(phone, pwd);
     const resp = await fetch('/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash, deviceId: getDeviceId() })
+      body: JSON.stringify({ phone, password: pwd, deviceId: getDeviceId() })
     });
     const result = await resp.json();
     hideLoading();
@@ -2668,11 +2667,10 @@ async function doDeleteAccount() {
   showLoading('正在注销…');
   try {
     // 1. 校验密码（绝对禁止无密码注销）
-    const passwordHash = await hashPassword(phone, pwd);
     const verifyResp = await fetch('/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash })
+      body: JSON.stringify({ phone, password: pwd })
     });
     const verifyResult = await verifyResp.json();
     if (!verifyResult.ok) { hideLoading(); showToast('密码错误，无法注销'); return; }
@@ -2680,7 +2678,7 @@ async function doDeleteAccount() {
     const delResp = await fetch('/auth/delete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash, deviceId: getDeviceId() })
+      body: JSON.stringify({ phone, password: pwd, deviceId: getDeviceId() })
     });
     const delResult = await delResp.json();
     hideLoading();
@@ -2723,11 +2721,10 @@ async function doSetupAccount() {
   if (!secA) { showToast('请填写密保答案'); return; }
   showLoading('正在设置…');
   try {
-    const passwordHash = await hashPassword(phone, pwd);
     const resp = await fetch('/auth/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash, password: pwd, pwd, securityQ: secQ, securityA: secA, deviceId: getDeviceId() })
+      body: JSON.stringify({ phone, password: pwd, securityQ: secQ, securityA: secA, deviceId: getDeviceId() })
     });
     const result = await resp.json();
     hideLoading();
@@ -2795,11 +2792,10 @@ async function doVerifyAccount() {
   if (locked > 0) { showToast('尝试次数过多，请 ' + locked + ' 分钟后再试'); return; }
   showLoading('正在验证…');
   try {
-    const passwordHash = await hashPassword(phone, pwd);
     const resp = await fetch('/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash, deviceId: getDeviceId() })
+      body: JSON.stringify({ phone, password: pwd, deviceId: getDeviceId() })
     });
     const result = await resp.json();
     hideLoading();
@@ -2838,13 +2834,11 @@ async function doChangePwd() {
   if (newPwd !== newPwd2) { showToast('两次新密码不一致'); return; }
   showLoading('正在修改…');
   try {
-    const oldHash = await hashPassword(phone, oldPwd);
-    const newHash = await hashPassword(phone, newPwd);
-    // 1. 校验原密码
+    // 1. 校验原密码（明文）
     const verifyResp = await fetch('/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash: oldHash })
+      body: JSON.stringify({ phone, password: oldPwd })
     });
     const verifyResult = await verifyResp.json();
     if (!verifyResult.ok) {
@@ -2858,7 +2852,7 @@ async function doChangePwd() {
     const setupResp = await fetch('/auth/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, passwordHash: newHash, password: newPwd, securityQ: secQ, securityA: secA })
+      body: JSON.stringify({ phone, password: newPwd, securityQ: secQ, securityA: secA })
     });
     const setupResult = await setupResp.json();
     hideLoading();
@@ -2888,11 +2882,10 @@ async function doForgotReset() {
   if (locked > 0) { showToast('尝试次数过多，请 ' + locked + ' 分钟后再试'); return; }
   showLoading('正在重置…');
   try {
-    const newHash = await hashPassword(phone, newPwd);
     const resp = await fetch('/auth/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, securityA: secA, newPasswordHash: newHash, password: newPwd })
+      body: JSON.stringify({ phone, securityA: secA, password: newPwd })
     });
     const result = await resp.json();
     hideLoading();
@@ -3038,11 +3031,10 @@ async function doAdminReset() {
   if (!validatePhone(phone)) { showToast('请输入正确的11位手机号'); return; }
   showLoading('正在重置…');
   try {
-    const newHash = await hashPassword(phone, '12345678');
     const resp = await fetch('/admin/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminKey, phone, newPasswordHash: newHash, password: '12345678' })
+      body: JSON.stringify({ adminKey, phone, password: '12345678' })
     });
     const result = await resp.json();
     hideLoading();
@@ -6132,7 +6124,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '4.2.11'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '4.3.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
