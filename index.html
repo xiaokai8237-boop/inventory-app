@@ -3541,9 +3541,39 @@ function closeInstallModal() {
 }
 
 // ======== 面板切换（首页 6 大按钮控制） ========
+// 从「日报偏好」导入店面：把 kuanwei_daily_pref.stores 的店名补进店面管理（storeConfig）
+// 作用：用户可能只在日报里选过店、未在店面管理添加，导致 storeConfig 为空、上传时丢失。此函数自动把日报里保存的店导入店面管理。
+function importStoresFromDailyPref() {
+  try {
+    const pref = JSON.parse(localStorage.getItem('kuanwei_daily_pref') || 'null');
+    if (!pref || !Array.isArray(pref.stores) || pref.stores.length === 0) return false;
+    const cfg = loadStoreConfig();
+    const existing = new Set(cfg.map(s => s.name));
+    let added = 0;
+    pref.stores.forEach(name => {
+      if (name && !existing.has(name)) {
+        cfg.push({ name, aliases: [], sort: cfg.length });
+        existing.add(name);
+        added++;
+      }
+    });
+    if (added > 0) {
+      saveStoreConfig(cfg);
+      renderStorePanelUI();
+      initAllStores();
+      showToast('✅ 已从日报偏好导入 ' + added + ' 家店面');
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
 function openStorePanel() {
   document.getElementById('homeWizard').style.display = 'none';
   document.getElementById('storeManagePanel').style.display = 'block';
+  // 店面管理为空时，自动从日报偏好导入店面（用户可能只在日报选过店、未添加为店面）
+  if (loadStoreConfig().length === 0) {
+    importStoresFromDailyPref();
+  }
   renderStorePanelUI();
 }
 function backFromStorePanel() {
@@ -6310,7 +6340,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.25'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.26'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
