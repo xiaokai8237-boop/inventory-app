@@ -1165,7 +1165,8 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <span class="panel-title">🏪 店面管理</span>
     </div>
     <div class="card">
-      <div style="font-size:15px;font-weight:700;margin-bottom:10px;color:var(--text);">🏪 我的店面 <span style="font-size:13px;color:var(--primary);font-weight:600;">(<span id="storeCount">0</span>)</span></div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px;color:var(--text);">🏪 我的店面 <span style="font-size:13px;color:var(--primary);font-weight:600;">(<span id="storeCount">0</span>)</span></div>
+      <div style="font-size:11px;color:var(--text-light);margin-bottom:10px;">💡 店面请在此维护，日报/记录/汇总会自动同步；若店面为空会从日报偏好自动导入</div>
       <div id="storeListPanel"></div>
       <div style="display:flex;gap:8px;margin-top:8px;">
         <button class="btn btn-primary" style="flex:1;" onclick="saveStorePanelChanges()">💾 保存修改</button>
@@ -2297,6 +2298,11 @@ async function backupToCloud(manual) {
     const deviceId = getDeviceId();
     const account = localStorage.getItem('kuanwei_phone') || '';
     let storeConfig = loadStoreConfig();
+    // 备份前健康检查：店面配置为空但日报偏好里保存了店名 → 自动导入，避免"空店面覆盖云端"再次发生
+    if (storeConfig.length === 0) {
+      const imported = importStoresFromDailyPref();
+      if (imported) storeConfig = loadStoreConfig();
+    }
     // 防店面丢失：本地店面为空但云端已有店面时，保留云端店面，避免本地空值覆盖云端（多设备/未登录场景）
     if (account && storeConfig.length === 0) {
       try {
@@ -2838,6 +2844,8 @@ async function restoreLoggedIn(phone) {
       // 仅当云端店面非空时才覆盖本地，避免云端空 storeConfig 误清用户本地已配置的店面
       if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0) saveStoreConfig(cloud.storeConfig);
       if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
+      // 恢复后校验：店面配置仍为空但日报偏好有店 → 自动导入，避免"店面空"导致后续丢失
+      if (loadStoreConfig().length === 0) importStoresFromDailyPref();
       renderAccountStatus();
       renderCloudBackupStatus();
       refreshRecordViews();
@@ -2879,6 +2887,8 @@ async function doVerifyAccount() {
       if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
       // 仅当云端店面非空时才覆盖本地，避免云端空 storeConfig 误清用户本地已配置的店面
       if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0) saveStoreConfig(cloud.storeConfig);
+      // 登录后校验：店面配置为空但日报偏好有店 → 自动导入，避免"店面空"导致后续丢失
+      if (loadStoreConfig().length === 0) importStoresFromDailyPref();
       closeVerifyModal();
       renderAccountStatus();
       renderCloudBackupStatus();
@@ -3166,6 +3176,8 @@ async function autoSyncFromCloud(phone) {
       // 仅当云端店面非空时才覆盖本地，避免云端空 storeConfig 误清用户本地已配置的店面
       if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0) saveStoreConfig(cloud.storeConfig);
       if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
+      // 同步后校验：店面配置为空但日报偏好有店 → 自动导入
+      if (loadStoreConfig().length === 0) importStoresFromDailyPref();
     }
     refreshRecordViews();
     return true;
@@ -5199,6 +5211,26 @@ function detectStoreLine(store) {
   return '';
 }
 
+// 预防措施：日报偏好与店面配置同步（店面是唯一数据源）
+// 避免"日报偏好存了已删/改名的店"导致数据源分裂。日报打开时用当前 storeConfig 校验并刷新 daily_pref.stores：
+// 只保留仍存在的店名、新店自动加入，使日报偏好始终是 storeConfig 的镜像。
+function syncDailyPrefWithStores() {
+  try {
+    const cfg = loadStoreConfig();
+    const storeNames = cfg.map(s => s.name);
+    if (storeNames.length === 0) return;
+    const raw = localStorage.getItem('kuanwei_daily_pref');
+    if (!raw) return;
+    const pref = JSON.parse(raw);
+    if (!pref || typeof pref !== 'object') return;
+    // 只保留仍存在于店面配置的店名
+    pref.stores = (Array.isArray(pref.stores) ? pref.stores : []).filter(n => storeNames.includes(n));
+    // 新店默认加入（保持店面顺序）
+    storeNames.forEach(n => { if (!pref.stores.includes(n)) pref.stores.push(n); });
+    localStorage.setItem('kuanwei_daily_pref', JSON.stringify(pref));
+    dailyReportState.stores = pref.stores;
+  } catch(e) {}
+}
 function openDailyReport() {
   const modal = document.getElementById('dailyReportModal');
   if (!modal) return;
@@ -5207,6 +5239,8 @@ function openDailyReport() {
     const saved = JSON.parse(localStorage.getItem('kuanwei_daily_pref') || 'null');
     if (saved) dailyReportState = { ...dailyReportState, ...saved };
   } catch(e) {}
+  // 预防：日报偏好与店面配置同步（店面唯一数据源，避免日报偏好残留已删店名）
+  syncDailyPrefWithStores();
   // 默认月份 = 本月
   const now = new Date();
   const defMonth = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
@@ -6340,7 +6374,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.26'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.27'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
