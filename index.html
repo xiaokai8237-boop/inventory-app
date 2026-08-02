@@ -1026,7 +1026,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
   <!-- === 首页向导（默认显示） === -->
   <div id="homeWizard">
-    <div id="appVersion" style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v4.3.1</div>
+    <div id="appVersion" style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v4.3.2</div>
     <!-- 账号登录状态（原"数据账号"徽标位置） -->
     <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)" style="position:static;max-width:none;width:100%;justify-content:center;margin-bottom:8px;">🔑 登录</button>
     <div class="card" style="text-align:center;padding:16px 14px;">
@@ -2096,15 +2096,13 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <!-- 新版本确认弹窗 -->
-<div class="store-ocr-modal" id="versionConfirmModal">
-  <div class="store-ocr-content" style="max-width:300px;text-align:center;">
+<div class="store-ocr-modal" id="versionConfirmModal" style="cursor:pointer;">
+  <div class="store-ocr-content" style="max-width:300px;text-align:center;" onclick="event.stopPropagation()">
     <div style="font-size:34px;margin-bottom:8px;">🔄</div>
     <div style="font-weight:600;font-size:16px;color:var(--text);margin-bottom:6px;">发现新版本</div>
-    <div style="font-size:13px;color:var(--text-light);margin-bottom:18px;">需要重启应用才能更新到最新版本，是否立即更新？</div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closeVersionConfirm()">稍后</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="applyNewVersion()">立即更新</button>
-    </div>
+    <div style="font-size:13px;color:var(--text-light);margin-bottom:10px;">已推出新版本 <b>v<span id="verNewLabel"></span></b>，为保证功能正常使用，<b>请立即更新</b>。</div>
+    <div style="font-size:11px;color:var(--text-light);margin-bottom:16px;">点击下方按钮重启应用，即可更新到最新版本。</div>
+    <button class="btn btn-primary" style="width:100%;" onclick="applyNewVersion()">🔄 立即更新</button>
   </div>
 </div>
 
@@ -6124,7 +6122,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '4.3.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '4.3.2'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
@@ -6167,10 +6165,16 @@ if ('serviceWorker' in navigator) {
   }
 }
 
-// 检测到新版本确认弹窗
+// 检测到新版本：强制更新弹窗（不可跳过，保证加载最新版顺利使用）
 function showVersionConfirm() {
   const m = document.getElementById('versionConfirmModal');
-  if (m) m.classList.add('show');
+  if (!m) return;
+  const nl = document.getElementById('verNewLabel');
+  if (nl) nl.textContent = APP_VERSION;
+  m.classList.add('show');
+  m.style.cursor = 'default';
+  // 遮罩点击不关闭（强制更新），只允许点"立即更新"
+  m.onclick = () => {};
 }
 function closeVersionConfirm() {
   const m = document.getElementById('versionConfirmModal');
