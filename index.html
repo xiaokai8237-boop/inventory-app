@@ -3573,7 +3573,7 @@ function moveStore(idx, dir) {
 
 // 保存店面管理面板的所有修改（店名/别名）
 function saveStorePanelChanges() {
-  const cfg = loadStoreConfig();
+  let cfg = loadStoreConfig(); // 用 let：下方会重赋值（sort 归一化）
   let changed = 0;
   cfg.forEach((s, i) => {
     if (!s.aliases) s.aliases = [];
@@ -6229,7 +6229,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.4'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.5'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
