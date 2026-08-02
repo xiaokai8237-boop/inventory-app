@@ -947,6 +947,16 @@ html[data-theme="dark"] div[style*="color:#b45309"] { color: #fbbf24 !important;
 html[data-theme="dark"] div[style*="#f0fdf4"], html[data-theme="dark"] span[style*="#f0fdf4"] { background: #16301f !important; }
 html[data-theme="dark"] div[style*="background:#eaf3fc"] { background: var(--soft-bg) !important; }
 html[data-theme="dark"] div[style*="background:#f0f7ff"] { background: var(--soft-bg) !important; }
+/* 类名定义的浅色背景，深色下统一转深（库存表头/备份步骤/别名校验/导入区/对账差异行） */
+html[data-theme="dark"] .track-tbl th { background: var(--soft-bg) !important; color: var(--text) !important; }
+html[data-theme="dark"] .backup-step { background: var(--soft-bg) !important; }
+html[data-theme="dark"] .sc-alias { background: var(--soft-bg) !important; color: var(--primary) !important; }
+html[data-theme="dark"] .import-zone { background: var(--soft-bg) !important; }
+html[data-theme="dark"] .compare-result .diff-row { background: #2a2406 !important; color: var(--text) !important; }
+html[data-theme="dark"] .compare-result .diff-row.match { background: #16301f !important; }
+html[data-theme="dark"] .alias-chip { color: #60a5fa !important; }
+html[data-theme="dark"] .table-striped tbody tr:nth-child(odd) { background: var(--soft-bg) !important; }
+html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-striped th { border-color: var(--border) !important; color: var(--text) !important; }
 </style>
 </head>
 <body>
@@ -2028,15 +2038,17 @@ function scopeKey(base) {
 function migrateDataToScope() {
   const scope = getDataScope();
   if (!scope) return;
+  // 已迁移过则不再处理，避免每次登录都操作全局 key 造成覆盖/删除窗口
+  if (localStorage.getItem('kuanwei_migrated__' + scope) === '1') return;
   for (const base of DATA_KEYS) {
     const scoped = scopeKey(base);
+    // 仅当该账号作用域尚不存在且全局有值时，才把全局旧数据迁入
     if (localStorage.getItem(scoped) === null) {
       const globalVal = localStorage.getItem(base);
       if (globalVal !== null) localStorage.setItem(scoped, globalVal);
     }
-    // 已迁入账号作用域，清除全局残留，杜绝账号间串数据
-    if (localStorage.getItem(base) !== null) localStorage.removeItem(base);
   }
+  localStorage.setItem('kuanwei_migrated__' + scope, '1');
 }
 function loadData() {
   try {
@@ -2059,20 +2071,20 @@ function saveDataArr(arr) {
   localStorage.setItem(scopeKey(STORAGE_KEY), JSON.stringify(arr));
   scheduleCloudBackup();
 }
-// ---- 筐配置 ----
-function loadGoodsConfig() {
+// ---- 命名配置读取（筐/店面共用一个解析逻辑，一条函数两种数据） ----
+function loadNamedConfig(key, defaults) {
   try {
-    const raw = localStorage.getItem(scopeKey(GOODS_KEY));
+    const raw = localStorage.getItem(scopeKey(key));
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        if (typeof parsed[0] === 'string') return parsed.map(n => ({ name: n, aliases: [] }));
-        return parsed;
-      }
+      if (Array.isArray(parsed))
+        return typeof parsed[0] === 'string' ? parsed.map(n => ({ name: n, aliases: [] })) : parsed;
     }
   } catch(e) {}
-  return DEFAULT_GOODS.map(g => ({ name: g.name, aliases: [...g.aliases] }));
+  return defaults.map(g => ({ name: g.name, aliases: [...g.aliases] }));
 }
+// ---- 筐配置 ----
+function loadGoodsConfig() { return loadNamedConfig(GOODS_KEY, DEFAULT_GOODS); }
 function loadGoodsNames() {
   return loadGoodsConfig().map(g => g.name);
 }
@@ -2080,24 +2092,8 @@ function saveGoodsConfig(cfg) {
   localStorage.setItem(scopeKey(GOODS_KEY), JSON.stringify(cfg));
   scheduleCloudBackup();
 }
-function saveGoodsNamesStorage(names) {
-  localStorage.setItem(scopeKey(GOODS_KEY), JSON.stringify(names));
-  scheduleCloudBackup();
-}
 // ---- 店面配置 ----
-function loadStoreConfig() {
-  try {
-    const raw = localStorage.getItem(scopeKey(STORE_KEY));
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        if (typeof parsed[0] === 'string') return parsed.map(n => ({ name: n, aliases: [] }));
-        return parsed;
-      }
-    }
-  } catch(e) {}
-  return DEFAULT_STORES.map(s => ({ name: s.name, aliases: [...s.aliases] }));
-}
+function loadStoreConfig() { return loadNamedConfig(STORE_KEY, DEFAULT_STORES); }
 // 店面排序视图：按 sort 字段升序（无 sort 视为 sort=下标），不改变数组物理顺序（storeIdx 保持稳定）
 function getSortedStores() {
   const cfg = loadStoreConfig();
@@ -2260,11 +2256,7 @@ function initTheme() { applyTheme(loadTheme()); }
 function updateOfflineBanner() {
   const el = document.getElementById('offlineBanner');
   if (!el) return;
-  if (navigator.onLine) {
-    el.style.display = 'none';
-  } else {
-    el.style.display = '';
-  }
+  el.style.display = navigator.onLine ? 'none' : 'block';
 }
 function initOffline() {
   updateOfflineBanner();
@@ -2460,8 +2452,7 @@ async function doLogin() {
       autoSyncFromCloud(phone).then(hasCloud => {
         if (hasCloud) {
           showToast('✅ 已同步云端数据');
-          renderTodayOverview();
-          try { initStoreSelect('recordStore'); renderStoreChips(); renderGoodsInputList(); } catch(e) {}
+          refreshRecordViews();
         }
       });
     } else {
@@ -2475,6 +2466,8 @@ function logout() {
   const phone = getCloudPhone();
   if (phone) backupToCloud(false);
   setLoggedIn(false);
+  // 清除账号作用域，避免退出后数据仍写入旧账号隔离空间
+  setCloudPhone('');
   renderAccountStatus();
   renderAccountBadge();
   showToast('已退出登录，数据已隔离');
@@ -2553,7 +2546,7 @@ async function restoreLoggedIn(phone) {
       if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
       renderAccountStatus();
       renderCloudBackupStatus();
-      try { initStoreSelect('recordStore'); renderStoreChips(); renderGoodsInputList(); initGoodsFilter(); renderTodayOverview(); } catch(e) {}
+      refreshRecordViews();
       showToast('✅ 已恢复云端数据');
     } else {
       showToast('云端暂无数据或恢复失败');
@@ -2592,9 +2585,7 @@ async function doVerifyAccount() {
       renderAccountStatus();
       renderCloudBackupStatus();
       renderAccountBadge();
-      try {
-        initStoreSelect('recordStore'); renderStoreChips(); renderGoodsInputList(); initGoodsFilter(); renderTodayOverview();
-      } catch(e) {}
+      refreshRecordViews();
       showToast('✅ 已恢复 ' + (cloud.records || []).length + ' 条记录');
     } else {
       recordFail(phone);
@@ -2807,9 +2798,7 @@ async function autoSyncFromCloud(phone) {
     if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
     if (cloud.storeConfig && Array.isArray(cloud.storeConfig)) saveStoreConfig(cloud.storeConfig);
     if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
-    try {
-      initStoreSelect('recordStore'); renderStoreChips(); renderGoodsInputList(); initGoodsFilter(); renderTodayOverview();
-    } catch(e) {}
+    refreshRecordViews();
     return true;
   } catch(e) { return false; }
 }
@@ -3480,6 +3469,12 @@ function closeBackupTutorialModal() {
 }
 
 // ======== 页面切换 ========
+// 刷新记录页全部视图（店面下拉/店面chips/录入行/筐筛选/今日概览/今日状态）
+function refreshRecordViews() {
+  try {
+    initStoreSelect('recordStore'); renderStoreChips(); renderGoodsInputList(); initGoodsFilter(); renderTodayOverview(); renderTodayStatus();
+  } catch(e) {}
+}
 function switchPage(pageName) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -3487,8 +3482,8 @@ function switchPage(pageName) {
   if (pageEl) pageEl.classList.add('active');
   const tabEl = document.querySelector(`.tab[data-page="${pageName}"]`);
   if (tabEl) tabEl.classList.add('active');
-  if (pageName === 'record') { initStoreSelect('recordStore'); renderTodayOverview(); }
-  if (pageName === 'history') { renderHistory(); updateDailyPhotoInfo(); }
+  if (pageName === 'record') refreshRecordViews();
+  if (pageName === 'history') { renderHistory(); updateDailyPhotoInfo(); initGoodsFilter(); }
   if (pageName === 'summary') renderSummary();
   if (pageName === 'settings') renderSettings();
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
@@ -3652,7 +3647,8 @@ function closeExtraModal() {
 }
 // 保存额外发收登记：发出列记为 qtyIn，回收列记为 qtyOut，storeIdx=-1（所有门店）
 function saveExtraRecord() {
-  const date = todayStr();
+  // 使用录入页选择的日期，而非强制今天（回填历史日期也能正确入账）
+  const date = document.getElementById('recordDate')?.value || todayStr();
   const names = loadGoodsNames();
   const data = loadData();
   let hasAny = false;
@@ -3731,8 +3727,8 @@ function renderTodayOverview() {
   names.forEach((name, i) => { totals[i] = { in: 0, out: 0 }; });
   todayRecords.forEach(r => {
     if (totals[r.goodsIdx]) {
-      totals[r.goodsIdx].in += r.qtyIn;
-      totals[r.goodsIdx].out += r.qtyOut;
+      totals[r.goodsIdx].in += r.qtyIn || 0;
+      totals[r.goodsIdx].out += r.qtyOut || 0;
     }
   });
   let html = '<div class="stat-grid">';
@@ -3755,15 +3751,16 @@ function renderTodayOverview() {
   const storeMap = {};
   todayRecords.forEach(r => {
     if (!storeMap[r.storeIdx]) storeMap[r.storeIdx] = { name: r.storeName || '未知店', rows: {} };
-    names.forEach((n, i) => {
-      if (!storeMap[r.storeIdx].rows[i]) storeMap[r.storeIdx].rows[i] = { in: 0, out: 0 };
-    });
-    if (storeMap[r.storeIdx].rows[r.goodsIdx]) {
-      storeMap[r.storeIdx].rows[r.goodsIdx].in += r.qtyIn;
-      storeMap[r.storeIdx].rows[r.goodsIdx].out += r.qtyOut;
+  });
+  // 一次性初始化各店所有筐行，避免每条记录内重复遍历
+  const storeKeys = Object.keys(storeMap);
+  storeKeys.forEach(sk => { names.forEach((n, i) => { if (!storeMap[sk].rows[i]) storeMap[sk].rows[i] = { in: 0, out: 0 }; }); });
+  todayRecords.forEach(r => {
+    if (storeMap[r.storeIdx] && storeMap[r.storeIdx].rows[r.goodsIdx]) {
+      storeMap[r.storeIdx].rows[r.goodsIdx].in += r.qtyIn || 0;
+      storeMap[r.storeIdx].rows[r.goodsIdx].out += r.qtyOut || 0;
     }
   });
-  const storeKeys = Object.keys(storeMap);
   if (storeKeys.length > 0) {
     html += '<div style="margin-top:10px;"><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">📋 今日各店明细</div><div style="overflow-x:auto;"><table class="summary-table" style="min-width:100%;"><thead><tr><th style="text-align:left;">店面</th>';
     names.forEach((n, i) => { html += `<th>${n}<br><span style="font-weight:400;font-size:10px;">发/回</span></th>`; });
@@ -3795,10 +3792,10 @@ function renderTodayStatus() {
   // 今日各店是否已录入（含额外发收记录，storeIdx=-1 单列）
   const todayRecords = data.filter(r => r.date === today);
   let totalIn = 0, totalOut = 0;
-  todayRecords.forEach(r => { totalIn += r.qtyIn || 0; totalOut += r.qtyOut || 0; });
   const doneSet = new Set();
   let hasExtra = false;
   todayRecords.forEach(r => {
+    totalIn += r.qtyIn || 0; totalOut += r.qtyOut || 0;
     if (r.storeIdx === -1) { hasExtra = true; return; }
     if (r.storeIdx !== undefined) doneSet.add(r.storeIdx);
   });
@@ -4793,7 +4790,7 @@ function generateDailyReport() {
   // 累计欠框（本月 发出-回收）
   const owe = {};
   names.forEach((n, i) => { owe[i] = { emit: 0, recv: 0 }; });
-  monthData.forEach(r => { if (owe[r.goodsIdx]) { owe[r.goodsIdx].emit += r.qtyIn; owe[r.goodsIdx].recv += r.qtyOut; } });
+  monthData.forEach(r => { if (owe[r.goodsIdx]) { owe[r.goodsIdx].emit += r.qtyIn || 0; owe[r.goodsIdx].recv += r.qtyOut || 0; } });
 
   const f = dailyReportState.fields;
   let lines = [];
@@ -5174,10 +5171,10 @@ function renderSummary() {
   let grandIn = 0, grandOut = 0;
   data.forEach(r => {
     if (totals[r.goodsIdx]) {
-      totals[r.goodsIdx].in += r.qtyIn;
-      totals[r.goodsIdx].out += r.qtyOut;
-      grandIn += r.qtyIn;
-      grandOut += r.qtyOut;
+      totals[r.goodsIdx].in += r.qtyIn || 0;
+      totals[r.goodsIdx].out += r.qtyOut || 0;
+      grandIn += r.qtyIn || 0;
+      grandOut += r.qtyOut || 0;
     }
   });
   let html = '';
@@ -5596,8 +5593,8 @@ function isEmptyStoreName(s) {
 }
 function cleanStoreName(s) {
   let r = String(s).trim();
-  // 去掉常见噪音词
-  STORE_OCR_NOISE.forEach(n => { r = r.split(n).join(''); });
+  // 去掉常见噪音词（一次正则替换，替代逐个 split/join）
+  r = r.replace(new RegExp('(' + STORE_OCR_NOISE.join('|') + ')', 'g'), '');
   // 去掉粘连在文字末尾的时间，如 "全家20:" → "全家"
   r = r.replace(/(\D)\d{1,2}[:：](?:\d{2}(?:[:：]\d{2})?)?$/, '$1');
   // 按空白切分，逐 token 过滤时间/数量/纯数字，保留店名文字
@@ -5819,7 +5816,7 @@ function importData(event) {
         obj.records.forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
         saveDataArr([...byKey.values()]);
       }
-      if (obj.goodsNames) saveGoodsNamesStorage(obj.goodsNames);
+      if (obj.goodsNames) saveGoodsConfig(obj.goodsNames);
       initGoodsFilter();
       renderGoodsInputList();
       renderTodayOverview();
