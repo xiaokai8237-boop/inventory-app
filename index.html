@@ -3389,6 +3389,11 @@ function backToHomeWizard() {
   renderTodayStatus();
 }
 
+// 静默阻止浏览器原生 PWA 安装提示（用户已要求移除"添加到主屏幕"功能）
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault(); // 阻止安卓/Chrome 系统级"添加到桌面"弹窗
+});
+
 // ======== 面板切换（首页 6 大按钮控制） ========
 function openStorePanel() {
   document.getElementById('homeWizard').style.display = 'none';
@@ -6160,7 +6165,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.13'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.14'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
