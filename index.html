@@ -1037,8 +1037,8 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div style="font-size:16px;font-weight:600;margin-bottom:16px;">选择操作</div>
       <!-- 第一行：发出/回收（主操作，突出） -->
       <div class="home-grid-row" style="margin-bottom:12px;">
-        <button class="home-btn-main home-btn-issue" onclick="manualEntry('in')"><span class="hb-icon">📤</span>发出</button>
-        <button class="home-btn-main home-btn-recover" onclick="manualEntry('out')"><span class="hb-icon">📥</span>回收</button>
+        <button class="home-btn-main home-btn-issue" onclick="startTrayFlow('in')"><span class="hb-icon">📤</span>发出</button>
+        <button class="home-btn-main home-btn-recover" onclick="startTrayFlow('out')"><span class="hb-icon">📥</span>回收</button>
       </div>
       <!-- 第二行：数据备份/店面管理/框名设置 -->
       <div class="home-grid-row" style="margin-bottom:10px;">
@@ -1963,6 +1963,31 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <input type="text" id="manualVoiceInput" placeholder="或手动输入，如：鲜食1面包2" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;box-sizing:border-box;">
     <button class="btn btn-primary" style="margin-top:8px;padding:10px;font-size:14px;" onclick="parseManualVoiceInput()">识别并填入</button>
+  </div>
+</div>
+
+<!-- 框类型选择弹窗（发出/回收 第一步） -->
+<div class="store-ocr-modal" id="trayTypeModal" onclick="closeTrayTypeModal()">
+  <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:360px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:600;font-size:15px;" id="trayTypeTitle">📦 选择筐类型</span>
+      <button onclick="closeTrayTypeModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div id="trayTypeList" style="max-height:60vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- 按店面录入弹窗（选定筐类型后，按店面顺序录入各店数量） -->
+<div class="store-ocr-modal" id="trayEntryModal" onclick="closeTrayEntryModal()">
+  <div class="store-ocr-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <span style="font-weight:600;font-size:15px;" id="trayEntryTitle">📦 发出</span>
+      <button onclick="closeTrayEntryModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:11px;color:var(--text-light);margin-bottom:8px;">按店面顺序，在每店后面填数量，点保存自动入账</div>
+    <div id="trayEntryHint" style="font-size:11px;color:var(--text-light);margin-bottom:8px;"></div>
+    <div id="trayStoreList" style="max-height:55vh;overflow-y:auto;"></div>
+    <button class="btn btn-primary" style="margin-top:12px;padding:11px;font-size:15px;" onclick="saveTrayEntry()">💾 保存</button>
   </div>
 </div>
 
@@ -3343,6 +3368,96 @@ document.addEventListener('click', () => {
 });
 
 // ======== 首页向导（录入 Tab 内的向导首页） ========
+// ======== 按筐类型·按店面顺序录入（发出/回收新流程） ========
+let trayFlowMode = 'in'; // 'in'=发出 'out'=回收
+let trayFlowGoodsIdx = null;
+
+function startTrayFlow(mode) {
+  trayFlowMode = mode;
+  currentActionType = mode;
+  const names = loadGoodsNames();
+  if (!names || names.length === 0) { showToast('请先到「框名设置」添加筐类型'); return; }
+  const title = document.getElementById('trayTypeTitle');
+  if (title) title.textContent = mode === 'in' ? '📦 选择筐类型（发出）' : '📥 选择筐类型（回收）';
+  const list = document.getElementById('trayTypeList');
+  list.innerHTML = names.map((n, i) =>
+    `<button class="btn btn-outline" style="width:100%;padding:12px;font-size:14px;margin-bottom:8px;text-align:center;" onclick="openTrayEntry(${i})">${n}</button>`
+  ).join('');
+  document.getElementById('trayTypeModal').classList.add('show');
+}
+function closeTrayTypeModal() {
+  document.getElementById('trayTypeModal').classList.remove('show');
+}
+
+function openTrayEntry(goodsIdx) {
+  trayFlowGoodsIdx = goodsIdx;
+  closeTrayTypeModal();
+  const names = loadGoodsNames();
+  const view = getSortedStores(); // 按店面顺序
+  const title = document.getElementById('trayEntryTitle');
+  const isIn = trayFlowMode === 'in';
+  title.textContent = (isIn ? '📦 发出' : '📥 回收') + ' · ' + (names[goodsIdx] || '');
+  // 无店面时提示
+  const hint = document.getElementById('trayEntryHint');
+  const list = document.getElementById('trayStoreList');
+  if (!view || view.length === 0) {
+    hint.innerHTML = '<div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:8px;padding:10px 12px;font-size:13px;color:#7c5a00;">🏪 还没有店面，回首页点「🏪 店面管理」→「➕ 新增店面」</div>';
+    list.innerHTML = '';
+    document.getElementById('trayEntryModal').classList.add('show');
+    return;
+  }
+  hint.textContent = '共 ' + view.length + ' 家店面，按顺序填写「' + names[goodsIdx] + '」的' + (isIn ? '发出' : '回收') + '数量';
+  list.innerHTML = view.map((x, idx) => {
+    const isLast = idx === view.length - 1;
+    return `<div class="goods-input-item tray-store-row" style="${isLast ? '' : 'border-bottom:1px solid var(--border);'}padding:6px 0;align-items:center;">
+      <div class="gi-name" style="font-weight:500;">${idx + 1}. ${x.s.name}</div>
+      <input type="number" min="0" inputmode="numeric" data-store-idx="${x._idx}" data-store-name="${x.s.name}" placeholder="0" style="width:70px;text-align:center;padding:6px 4px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;">
+    </div>`;
+  }).join('');
+  document.getElementById('trayEntryModal').classList.add('show');
+}
+function closeTrayEntryModal() {
+  document.getElementById('trayEntryModal').classList.remove('show');
+}
+
+function saveTrayEntry() {
+  if (!isLoggedIn()) { showToast('🔒 请先登录后再录入'); openLoginModal(); return; }
+  if (trayFlowGoodsIdx == null) { showToast('请先选择筐类型'); return; }
+  const goodsIdx = trayFlowGoodsIdx;
+  const goodsName = loadGoodsNames()[goodsIdx] || '';
+  const isIn = trayFlowMode === 'in';
+  const date = todayStr();
+  const inputs = document.querySelectorAll('#trayStoreList .tray-store-row input');
+  let saved = 0, total = 0;
+  const data = loadData();
+  inputs.forEach(inp => {
+    const qty = parseInt(inp.value, 10) || 0;
+    if (qty <= 0) return;
+    const storeIdx = parseInt(inp.getAttribute('data-store-idx'), 10);
+    const storeName = inp.getAttribute('data-store-name') || '';
+    total += qty;
+    // 合并到对应 日期+店面+筐 的记录
+    let rec = data.find(r => String(r.date) === String(date) && r.storeIdx === storeIdx && r.goodsIdx === goodsIdx);
+    if (rec) {
+      if (isIn) rec.qtyIn = qty; else rec.qtyOut = qty;
+      rec.source = 'manual';
+    } else {
+      data.push({
+        id: Date.now() + '-tray-' + storeIdx + '-' + goodsIdx + '-' + Math.random().toString(36).slice(2, 6),
+        date, storeIdx, storeName,
+        goodsIdx, goodsName,
+        qtyIn: isIn ? qty : 0, qtyOut: isIn ? 0 : qty,
+        source: 'manual', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+      });
+    }
+    saved++;
+  });
+  saveDataArr(data);
+  closeTrayEntryModal();
+  if (saved === 0) { showToast('请至少填写一项数量'); return; }
+  showToast('✅ 已保存 ' + total + ' 个' + goodsName + '（' + saved + ' 家店面）');
+}
+
 function manualEntry(type) {
   if (!type) { showToast('请选择操作类型'); return; }
   currentActionType = type;
@@ -6242,7 +6357,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.15'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.16'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
