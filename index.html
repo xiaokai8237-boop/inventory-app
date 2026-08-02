@@ -1941,7 +1941,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div style="font-size:13px;color:var(--text-light);margin-bottom:14px;">帮你把每个筐的去向记得清清楚楚</div>
     <div style="font-size:13px;color:var(--text);line-height:1.8;margin-bottom:16px;text-align:left;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;">
       <b>第一次用，建议先做 3 件事：</b><br>
-      ① 📱 把软件加到手机桌面（像App一样用）<br>
+      <span data-app-hide>① 📱 把软件加到手机桌面（像App一样用）<br></span>
       ② 🏪 设置你要记的店面<br>
       ③ 🔑 设置密码（防止数据丢失）<br>
       <span style="color:var(--text-light);font-size:12px;">详细步骤看「使用说明」，每一步都写得清清楚楚</span>
@@ -3444,18 +3444,36 @@ function backToHomeWizard() {
   renderTodayStatus();
 }
 
-// 是否运行在 Capacitor 原生 APP 内（安卓已打包成 APP；苹果仍用网页）
-function isInNativeApp() {
-  try {
-    return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
-  } catch (e) { return false; }
-}
+// ======== 运行环境检测 ========
+// IS_APP：是否运行在 Capacitor 原生 APP 内（安卓 APK 打包）。APK 用户看不到任何"安装/添加到桌面/苹果操作"内容。
+// IS_IOS：是否苹果设备（保留"添加到主屏幕"引导给苹果网页用户）
+var IS_APP = (typeof window !== 'undefined') && (navigator.userAgent.indexOf('Capacitor') >= 0 || window.Capacitor !== undefined);
+var IS_IOS = (typeof navigator !== 'undefined') && /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-// 页面加载时：若在原生 APP 内，隐藏「添加到桌面」入口（APP 已安装无需添加到桌面）
+// 页面加载时：APK 用户隐藏所有「添加到桌面/安装引导」相关元素
 (function hideInstallIfInApp() {
-  if (isInNativeApp()) {
-    const btn = document.querySelector('[onclick*="installApp"]');
-    if (btn) { btn.style.display = 'none'; }
+  if (IS_APP) {
+    try {
+      // 首页「添加到桌面」按钮
+      const btn = document.querySelector('[onclick*="installApp"]');
+      if (btn) { btn.style.display = 'none'; }
+      // 使用说明/常见问题里所有按环境隐藏的区块
+      document.querySelectorAll('[data-app-hide]').forEach(function(el) { el.style.display = 'none'; });
+      // 欢迎弹窗：隐藏"加桌面"后，把"3件事/②③"调整为"2件事/①②"
+      try {
+        const wm = document.getElementById('welcomeModal');
+        if (wm) {
+          const text = wm.textContent || '';
+          if (text.indexOf('建议先做 3 件事') >= 0) {
+            const inner = wm.querySelector('div[style*="text-align:left"]');
+            if (inner) inner.innerHTML = inner.innerHTML
+              .replace('建议先做 3 件事', '建议先做 2 件事')
+              .replace('② 🏪', '① 🏪')
+              .replace('③ 🔑', '② 🔑');
+          }
+        }
+      } catch (e) {}
+    } catch (e) {}
   }
 })();
 
@@ -3466,6 +3484,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
   deferredPrompt = e; // 保存原生安装事件，点按钮时触发
 });
 function installApp() {
+  // APK 用户已是 APP，无需添加到桌面
+  if (IS_APP) { showToast('你已安装 App，无需添加到桌面'); return; }
   // 微信内置浏览器：无法添加桌面，引导到浏览器打开
   const isWechat = /MicroMessenger/i.test(navigator.userAgent);
   if (isWechat) {
@@ -6266,7 +6286,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.18'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.19'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
