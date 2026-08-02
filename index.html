@@ -1026,7 +1026,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
   <!-- === 首页向导（默认显示） === -->
   <div id="homeWizard">
-    <div style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v2.0.0</div>
+    <div id="appVersion" style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v3.0.0</div>
     <!-- 账号登录状态（原"数据账号"徽标位置） -->
     <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)" style="position:static;max-width:none;width:100%;justify-content:center;margin-bottom:8px;">🔑 登录</button>
     <div class="card" style="text-align:center;padding:16px 14px;">
@@ -6132,6 +6132,9 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
+const APP_VERSION = '3.0.0'; // 大更新升X，小更新升小数（每次改这里+同步递增sw缓存版本）
+const appVerEl = document.getElementById('appVersion');
+if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 initTheme();
 initOffline();
 renderAccountBadge();
