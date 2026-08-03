@@ -1634,22 +1634,22 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       　顶部<b>点店名切换店面</b> → 填 5 种筐的<b>回收</b>数量 → 点下面的 <b>「💾 保存当日记录」</b><br>
       <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">💡 没填的框留空就行，不会出错</span>
       <br><br>
-      <b>方法二 🎤 用嘴说（最快）</b><br>
+      <b>方法二 🎤 用嘴说（最快，AI 听得懂）</b><br>
       ① 进「📤 发出」或「📥 回收」页后，点页面上的 <b>「🎤 语音录入」</b> 按钮<br>
       ② 手机上会弹出一个录音框<br>
       ③ 对着手机说：<span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">"鲜食1 面包2 低温3 冷冻5 常温6"</span><br>
       ④ 说完点「结束」，数字会自动填进去<br>
       ⑤ 检查一遍没问题，点 <b>「💾 保存当日记录」</b><br>
-      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">💡 说"1"就是数量1；也可以说简称"鲜1 面2 低3 冻5 常6"</span>
+      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">💡 AI 能听懂中文数字和口语：说"鲜食五"、"面包来一十二个"、"先食两个"（同音字也能纠对）都行</span>
       <br><br>
-      <b>方法三 📸 拍照识别（最省事，低温/冷冻/常温路单可用）</b><br>
+      <b>方法三 📸 拍照识别（最省事，AI 智能识别）</b><br>
       ① 进「📤 发出」或「📥 回收」页后，点页面上的 <b>「📸 拍照识别」</b> 按钮<br>
       ② 点 <b>「📷 拍照」</b>（现拍）或 <b>「🖼️ 相册选」</b>（用已有的照片）<br>
-      ③ 对准路单拍照，等一两秒，屏幕上会出现转圈的"正在识别"<br>
+      ③ 对准路单拍照，等一两秒，AI 会自动看懂整张表格：每家店一行、编号自动补齐、模糊数字结合表格位置判对（比如把 4 看成 3 的会纠正回来）<br>
       ④ 识别完成后，会弹出一个表格，每行是一家店，黄色那列是物流箱数量<br>
       ⑤ <b>仔细核对一下数字</b>，不对的直接点数字改掉<br>
       ⑥ 全对了点 <b>「✅ 确认录入」</b><br>
-      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">💡 万一哪家店没识别出来，点表格下面的「➕ 新增一行」自己补上</span>
+      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">💡 万一哪家店没识别出来，点表格下面的「➕ 新增一行」自己补上；没网时自动退回普通识别</span>
     </div>
   </div>
 
@@ -1694,7 +1694,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <b>❓ 登录时提示密码不对怎么办？</b><br>
       ① 先点密码框右边的 <b>👁</b> 看看有没有打错（大小写/空格/符号）；② 还是不对就点「❓ 忘记密码」→ 答密保问题重置新密码。<br><br>
       <b>❓ 拍照识别出来的数字不准怎么办？</b><br>
-      弹窗里每个数字都可以<b>直接点进去改</b>，改成对的再点「确认录入」。绿色=可信，黄色=建议核对。拍照时尽量拍正、光线亮一点，识别更准。<br><br>
+      AI 识别结果每个数字都可以<b>直接点进去改</b>，改成对的再点「确认录入」。绿色=AI 高置信，黄色=建议核对。拍照时尽量拍正、光线亮一点，识别更准。<br><br>
       <b>❓ 识别漏了一家店怎么办？</b><br>
       点表格下面 <b>「➕ 新增一行」</b>，自己把编号、店名、数量填进去。<br><br>
       <b>❓ 填错了已经保存了，怎么改？</b><br>
@@ -1704,7 +1704,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <b>❓ 手写单据能识别吗？</b><br>
       手写单会走「手写增强识别」，尽量拍清晰；如果个别数字识别不到，在弹窗里手动改或补填。<br><br>
       <b>❓ 识别要等好几秒，是卡住了吗？</b><br>
-      不是，识别过程有进度条和步骤提示（定位表格→识别文字→汇总），一般 3-5 秒出结果；急的话可以点「取消识别」重拍。<br><br>
+      不是，AI 识别会先看懂整张表格再填数，一般 1-3 秒出结果；没网或识别繁忙时会退回普通识别稍慢一点。急的话可以点「取消识别」重拍。<br><br>
       <b>❓ 两台手机的数据能合并吗？</b><br>
       能。点底部「管理」→「备份与恢复」→「选择文件导入」时，点「取消」就是<b>合并</b>（不会覆盖），两台手机数据合到一起。<br><br>
       <b>❓ 没网络能用吗？</b><br>
@@ -2096,8 +2096,8 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       欢迎使用本系统。为向您提供服务，我们会收集和使用以下信息：<br>
       1. <b>账号信息</b>：手机号码（用于登录、账号隔离与云端备份）。<br>
       2. <b>业务数据</b>：店面名称、每日收发记录、各筐库存数据。<br>
-      3. <b>识别内容</b>：您上传的照片/路单图片（仅用于文字识别，识别后即处理）。<br>
-      4. <b>语音内容</b>：语音录入的音频（仅用于转文字，不长期保存）。<br><br>
+      3. <b>识别内容</b>：您上传的照片/路单图片（由 AI 大模型识别，仅用于本次文字识别，识别后即处理，不保存）。<br>
+      4. <b>语音内容</b>：语音录入的音频（由 AI 转文字并理解，仅用于本次录入，不长期保存）。<br><br>
       <b>信息用途</b>：仅用于本系统的数据录入、汇总统计与多设备云端同步。<br>
       <b>信息存储</b>：数据存储于腾讯云/Cloudflare 服务端，仅供您的账号访问。<br>
       <b>信息保护</b>：我们不会向第三方出售您的任何数据。<br><br>
@@ -2201,7 +2201,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <b>第一次用，建议先做 3 件事：</b><br>
       <span data-app-hide>① 📱 把软件加到手机桌面（像App一样用）<br></span>
       ② 🏪 设置你要记的店面<br>
-      ③ 🔑 设置密码（防止数据丢失）<br>
+      ③ 🔑 设置账号密码（数据云端备份）<br>
       <span style="color:var(--text-light);font-size:12px;">详细步骤看「使用说明」，每一步都写得清清楚楚</span>
     </div>
     <div style="display:flex;gap:8px;">
@@ -7488,7 +7488,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.73'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.74'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -7512,14 +7512,18 @@ function initPrivacyConsent() {
 function acceptPrivacy() {
   try { localStorage.setItem('kuanwei_privacy_consent', '1'); } catch(e) {}
   document.getElementById('privacyModal').classList.remove('show');
+  // 隐私同意后，再弹欢迎引导（使用说明入口）——保证顺序：隐私 → 使用说明
+  initWelcome();
 }
 function rejectPrivacy() {
   showToast('不同意隐私政策将无法使用本系统');
 }
 
-// 新用户首次打开自动弹出欢迎引导（含使用说明入口）
-try { initWelcome(); } catch(e) { console.error('initWelcome fail', e); }
+// 弹窗顺序：隐私政策（首次必须同意）优先于 欢迎引导/使用说明。
+// 未同意过隐私 → 先弹隐私，同意后（acceptPrivacy）再弹使用说明；
+// 已同意过隐私（老用户/再次打开）→ 直接按需弹使用说明。
 try { initPrivacyConsent(); } catch(e) { console.error('initPrivacyConsent fail', e); }
+try { if (localStorage.getItem('kuanwei_privacy_consent')) initWelcome(); } catch(e) { console.error('initWelcome fail', e); }
 // 云备份恢复（清缓存/换手机后自动从云端拉取数据）— 用 try/catch 包裹避免阻塞主流程
 try { restoreFromCloud(); } catch(e) { console.error('restoreFromCloud fail', e); }
 // 定时兜底备份：无操作时每30分钟自动备份一次（后台静默）
