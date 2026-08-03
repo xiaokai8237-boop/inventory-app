@@ -1,27 +1,13 @@
-// Cloudflare Pages Function — 腾讯混元视觉大模型 路单表格识别（密钥复用 TENCENT_SECRET_ID / TENCENT_SECRET_KEY）
+// Cloudflare Pages Function — 腾讯混元视觉大模型 路单表格识别（TokenHub OpenAI 兼容通道）
 // POST /hunyuan  body: { imageBase64 }  → 返回 { ok, text }  text 为模型输出的 JSON 字符串
-// 说明：与 functions/tcloud 同一套腾讯云密钥（TC3-HMAC-SHA256 签名），无需新增环境变量
-// 模型：hunyuan-vision（多模态视觉大模型，理解表格结构，可补漏行/正列）
-
-async function sha256Hex(msg) {
-  const data = new TextEncoder().encode(msg);
-  const d = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(d)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-async function hmacSha256(keyBytes, msg) {
-  const data = new TextEncoder().encode(msg);
-  const key = await crypto.subtle.importKey('raw', keyBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const sig = await crypto.subtle.sign('HMAC', key, data);
-  return new Uint8Array(sig);
-}
-async function hmacSha256Hex(keyBytes, msg) {
-  return Array.from(await hmacSha256(keyBytes, msg)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
+// 说明：走 TokenHub（https://tokenhub.tencentmaas.com/v1），使用 OpenAI 兼容协议
+// 环境变量（Pages 设置 → 环境变量）：
+//   HUNYUAN_API_KEY  TokenHub API Key（sk- 开头，控制台 https://console.cloud.tencent.com/tokenhub/apikey 创建）
+// 模型：HY-Vision-2.0-Instruct（TokenHub 多模态视觉模型，理解表格结构，可补漏行/正列）
 
 export async function onRequest(context) {
   const { request, env } = context;
-  const TENCENT_SECRET_ID = env.TENCENT_SECRET_ID || '';
-  const TENCENT_SECRET_KEY = env.TENCENT_SECRET_KEY || '';
+  const API_KEY = env.HUNYUAN_API_KEY || '';
   const cors = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
@@ -32,7 +18,7 @@ export async function onRequest(context) {
 
   if (request.method === 'OPTIONS') return new Response('', { status: 200, headers: cors });
   if (request.method !== 'POST') return json({ error: 'method not allowed' }, 405);
-  if (!TENCENT_SECRET_ID || !TENCENT_SECRET_KEY) return json({ error: '腾讯云密钥未配置（TENCENT_SECRET_ID / TENCENT_SECRET_KEY）' }, 500);
+  if (!API_KEY) return json({ error: 'TokenHub API Key 未配置（请在 Cloudflare Pages 环境变量配置 HUNYUAN_API_KEY）' }, 500);
 
   let body;
   try { body = await request.json(); } catch (e) { return json({ error: 'invalid json' }, 400); }
@@ -40,24 +26,13 @@ export async function onRequest(context) {
   if (!imageBase64) return json({ error: 'missing imageBase64' }, 400);
 
   try {
-    return await callHunyuanVision(imageBase64, json, TENCENT_SECRET_ID, TENCENT_SECRET_KEY);
+    return await callHunyuanVision(imageBase64, json, API_KEY);
   } catch (e) {
     return json({ error: 'hunyuan error: ' + e.message }, 500);
   }
 }
 
-async function callHunyuanVision(imageBase64, json, TENCENT_SECRET_ID, TENCENT_SECRET_KEY) {
-  const service = 'hunyuan';
-  const host = 'hunyuan.tencentcloudapi.com';
-  const region = 'ap-guangzhou';
-  const action = 'ChatCompletions';
-  const version = '2023-09-01';
-  const algorithm = 'TC3-HMAC-SHA256';
-  const date = new Date().toISOString().slice(0, 10);
-
-  const ts = Math.floor(Date.now() / 1000);
-  const isoTime = new Date(ts * 1000).toISOString().replace(/\.\d{3}Z$/, 'Z');
-
+async function callHunyuanVision(imageBase64, json, API_KEY) {
   const prompt = [
     '你是物流路单表格识别专家。请识别图片中的配送路单表格。',
     '表格每一行包含：路线编号（形如 HR42-1 / 42-1）、门店名称、各数量列。',
@@ -72,51 +47,30 @@ async function callHunyuanVision(imageBase64, json, TENCENT_SECRET_ID, TENCENT_S
   ].join('\n');
 
   const payload = JSON.stringify({
-    Model: 'hunyuan-vision',
-    Messages: [{
-      Role: 'user',
-      Contents: [
-        { Type: 'text', Text: prompt },
-        { Type: 'image_url', ImageUrl: { Url: 'data:image/jpeg;base64,' + imageBase64 } }
+    model: 'HY-Vision-2.0-Instruct',
+    messages: [{
+      role: 'user',
+      content: [
+        { type: 'text', text: prompt },
+        { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + imageBase64 } }
       ]
     }],
-    Stream: false,
-    Temperature: 0.1,
-    TopP: 0.5
+    temperature: 0.1,
+    top_p: 0.5
   });
 
-  const canonicalHeaders = 'content-type:application/json; charset=utf-8\nhost:' + host + '\n';
-  const signedHeaders = 'content-type;host';
-  const canonicalRequest = ['POST', '/', '', canonicalHeaders, signedHeaders, await sha256Hex(payload)].join('\n');
-
-  const credentialScope = date + '/' + service + '/tc3_request';
-  const stringToSign = [algorithm, String(ts), credentialScope, await sha256Hex(canonicalRequest)].join('\n');
-
-  const secretDate = await hmacSha256(new TextEncoder().encode('TC3' + TENCENT_SECRET_KEY), date);
-  const secretService = await hmacSha256(secretDate, service);
-  const secretSigning = await hmacSha256(secretService, 'tc3_request');
-  const signature = await hmacSha256Hex(secretSigning, stringToSign);
-
-  const authorization = [algorithm + ' Credential=' + TENCENT_SECRET_ID + '/' + credentialScope, 'SignedHeaders=' + signedHeaders, 'Signature=' + signature].join(', ');
-
-  const resp = await fetch('https://' + host + '/', {
+  const resp = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': authorization,
-      'Content-Type': 'application/json; charset=utf-8',
-      'Host': host,
-      'X-TC-Action': action,
-      'X-TC-Version': version,
-      'X-TC-Timestamp': String(ts),
-      'X-TC-Region': region,
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + API_KEY
     },
     body: payload
   });
   const data = await resp.json();
-  const resp2 = data.Response || {};
-  if (resp2.Error) throw new Error(resp2.Error.Message || '混元错误');
-  const choices = resp2.Choices || [];
-  const text = (choices[0] && choices[0].Message && choices[0].Message.Content) || '';
+  if (data.error) throw new Error(data.error.message || data.error.message_zh || 'TokenHub 错误');
+  const choices = data.choices || [];
+  const text = (choices[0] && choices[0].message && choices[0].message.content) || '';
   if (!text) throw new Error('混元未返回内容');
   return json({ ok: true, text });
 }
