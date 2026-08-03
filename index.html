@@ -791,31 +791,6 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   line-height: 1.5;
 }
 
-/* 对账 */
-.compare-result {
-  margin-top: 10px;
-}
-.compare-result .diff-row {
-  display: flex;
-  gap: 6px;
-  padding: 8px;
-  border-radius: 6px;
-  margin-bottom: 4px;
-  font-size: 13px;
-  background: var(--amber-soft);
-  border-left: 3px solid var(--warning);
-}
-.compare-result .diff-row.match {
-  background: var(--green-soft);
-  border-left-color: var(--success);
-}
-.compare-result .diff-row .diff-date { flex: 0 0 70px; font-weight: 600; }
-.compare-result .diff-row .diff-goods { flex: 0 0 70px; }
-.compare-result .diff-row .diff-vals { flex: 1; }
-.compare-result .diff-row .diff-vals .dv-mine { color: var(--primary); }
-.compare-result .diff-row .diff-vals .dv-his { color: var(--text-light); }
-.compare-result .diff-row .diff-vals .dv-gap { color: var(--danger); font-weight: 700; }
-
 /* 空状态 */
 .empty {
   text-align: center;
@@ -1143,8 +1118,6 @@ html[data-theme="dark"] div[style*="background:#f0f7ff"] { background: var(--sof
 html[data-theme="dark"] .backup-step { background: var(--soft-bg) !important; }
 html[data-theme="dark"] .sc-alias { background: var(--soft-bg) !important; color: var(--primary) !important; }
 html[data-theme="dark"] .import-zone { background: var(--soft-bg) !important; }
-html[data-theme="dark"] .compare-result .diff-row { background: #2a2406 !important; color: var(--text) !important; }
-html[data-theme="dark"] .compare-result .diff-row.match { background: #16301f !important; }
 html[data-theme="dark"] .alias-chip { color: var(--primary) !important; }
 html[data-theme="dark"] .table-striped tbody tr:nth-child(odd) { background: var(--soft-bg) !important; }
 html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-striped th { border-color: var(--border) !important; color: var(--text) !important; }
@@ -1572,13 +1545,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <button class="btn btn-outline" style="flex:1;" onclick="exportSummaryExcel()">📊 导出汇总</button>
     </div>
   </div>
-
-  <div class="card">
-    <div class="form-label" style="margin-bottom:10px;">📥 导入管理员表格对比</div>
-    <button class="btn btn-outline" onclick="document.getElementById(&#39;reconcileFile&#39;).click()">选择管理员的Excel文件</button>
-    <input type="file" id="reconcileFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="importReconcile(event)">
-    <div class="compare-result" id="compareResult"></div>
-  </div>
 </div>
 
 <!-- ========== 设置页 ========== -->
@@ -1683,11 +1649,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       ② 选日期范围（或点"近3天"）<br>
       ③ 选店面（选"全部店"看所有店加起来）<br>
       ④ 下面表格就是每种筐的发出、回收、差异数<br><br>
-      <b>🔄 月底要和仓库管理员对账？</b><br>
-      ① 点 <b>「首页」</b> → 点 <b>「🔄 对账」</b> 按钮<br>
-      ② <b>把你这边的数据给他看</b>：选日期范围 → 点「导出Excel」→ 文件保存到手机 → 发给他<br>
-      ③ <b>把他的表格拿来对比</b>：点「选择管理员的Excel文件」→ 选他发的文件 → 自动对比<br>
-      ④ 结果里：绿色 = 两边一致；黄色 = 有差异，旁边会标出差多少
     </div>
   </div>
 
@@ -6779,154 +6740,6 @@ function exportSummaryExcel() {
   showToast('✅ 汇总已导出');
 }
 
-function importReconcile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  showLoading('正在读取对比…');
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const wb = XLSX.read(e.target.result, { type: 'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const sheetData = XLSX.utils.sheet_to_json(ws, { header: 1 });
-      hideLoading();
-      compareReconcile(sheetData);
-    } catch(err) {
-      hideLoading();
-      showToast('读取失败: ' + err.message);
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function compareReconcile(sheetData) {
-  if (sheetData.length < 2) {
-    showToast('表格数据为空');
-    return;
-  }
-  const names = loadGoodsNames();
-  const headerRow = sheetData[0].map(h => String(h || '').trim());
-  // 找日期列
-  let dateCol = headerRow.findIndex(h => h.includes('日期') || h.includes('时间') || h.includes('Date'));
-  if (dateCol < 0) dateCol = 0;
-
-  // 找筐名列（支持各种格式）
-  const colMap = {}; // goodsIdx -> {inCol, outCol}
-  names.forEach((name, i) => {
-    let inCol = -1, outCol = -1;
-    headerRow.forEach((h, col) => {
-      if (h.includes(name) || h.includes(name.replace('筐',''))) {
-        if (h.includes('发出') || h.includes('发')) inCol = col;
-        if (h.includes('回收') || h.includes('回')) outCol = col;
-      }
-    });
-    if (inCol >= 0 || outCol >= 0) colMap[i] = { inCol, outCol };
-  });
-
-  // 如果没匹配到带"发出/回收"的列，尝试只按筐名匹配（数字列）
-  if (Object.keys(colMap).length === 0) {
-    names.forEach((name, i) => {
-      headerRow.forEach((h, col) => {
-        if (h.includes(name) || h.includes(name.replace('筐',''))) {
-          colMap[i] = { inCol: -1, outCol: col };
-        }
-      });
-    });
-  }
-
-  // 获取我的数据
-  const myData = loadData();
-  const myByDate = {};
-  myData.forEach(r => {
-    if (!myByDate[r.date]) myByDate[r.date] = {};
-    myByDate[r.date][r.goodsIdx] = { in: r.qtyIn, out: r.qtyOut, store: r.storeName };
-  });
-
-  // 逐行对比
-  let html = '';
-  let diffCount = 0;
-  let matchCount = 0;
-
-  for (let row = 1; row < sheetData.length; row++) {
-    const rowData = sheetData[row];
-    if (!rowData[dateCol]) continue;
-    const dateStr = String(rowData[dateCol]).trim();
-    // 标准化日期格式
-    const normalizedDate = normalizeDate(dateStr);
-    if (!normalizedDate) continue;
-
-    for (let idx in colMap) {
-      const cm = colMap[idx];
-      const hisOut = cm.outCol >= 0 ? (parseInt(rowData[cm.outCol]) || 0) : 0;
-      const hisIn = cm.inCol >= 0 ? (parseInt(rowData[cm.inCol]) || 0) : 0;
-      const mine = myByDate[normalizedDate] && myByDate[normalizedDate][idx];
-      const myOut = mine ? mine.out : 0;
-      const myIn = mine ? mine.in : 0;
-      const gapOut = hisOut - myOut;
-      const gapIn = hisIn - myIn;
-
-      if (hisOut !== myOut || hisIn !== myIn) {
-        diffCount++;
-        html += `<div class="diff-row">
-          <div class="diff-date">${normalizedDate}</div>
-          <div class="diff-goods">${mine.store ? '🏪'+mine.store+' ' : ''}${names[idx]}</div>
-          <div class="diff-vals">
-            <div>我:<span class="dv-mine">发${myIn}回${myOut}</span> 他:<span class="dv-his">发${hisIn}回${hisOut}</span> 差:<span class="dv-gap">发${gapIn>0?'+':''}${gapIn} 回${gapOut>0?'+':''}${gapOut}</span></div>
-          </div>
-        </div>`;
-      } else if (hisOut > 0 || hisIn > 0) {
-        matchCount++;
-        html += `<div class="diff-row match">
-          <div class="diff-date">${normalizedDate}</div>
-          <div class="diff-goods">${mine.store ? '🏪'+mine.store+' ' : ''}${names[idx]}</div>
-          <div class="diff-vals">
-            <div>✅ 发${myIn} 回${myOut}</div>
-          </div>
-        </div>`;
-      }
-    }
-  }
-
-  let summaryHtml = `<div style="font-size:14px;margin-bottom:8px;">`;
-  summaryHtml += `共对比 ${matchCount + diffCount} 项，`;
-  summaryHtml += `<span style="color:var(--success);font-weight:600;">一致 ${matchCount}</span>，`;
-  summaryHtml += `<span style="color:var(--danger);font-weight:600;">差异 ${diffCount}</span>`;
-  summaryHtml += `</div>`;
-
-  if (diffCount === 0 && matchCount > 0) {
-    summaryHtml += '<div style="color:var(--success);font-weight:600;padding:8px;background:var(--green-soft);border-radius:6px;">🎉 全部一致，数据吻合！</div>';
-  }
-
-  const container = document.getElementById('compareResult');
-  container.innerHTML = summaryHtml + (html || '<div class="empty">无对比数据</div>');
-}
-
-function normalizeDate(str) {
-  str = String(str).trim();
-  // 已是 yyyy-mm-dd
-  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-  // yyyy/mm/dd 或 yyyy.mm.dd
-  let m = str.match(/(\d{4})[\/.](\d{1,2})[\/.](\d{1,2})/);
-  if (m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
-  // Excel数字日期
-  m = str.match(/^(\d{5})$/);
-  if (m) {
-    const excelDate = new Date(Date.UTC(1899, 11, 30) + parseInt(m[1]) * 86400000);
-    return `${excelDate.getUTCFullYear()}-${String(excelDate.getUTCMonth()+1).padStart(2,'0')}-${String(excelDate.getUTCDate()).padStart(2,'0')}`;
-  }
-  // mm/dd 或 m月d日
-  m = str.match(/(\d{1,2})\/(\d{1,2})/);
-  if (m) {
-    const year = new Date().getFullYear();
-    return `${year}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
-  }
-  m = str.match(/(\d{1,2})月(\d{1,2})日/);
-  if (m) {
-    const year = new Date().getFullYear();
-    return `${year}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
-  }
-  return null;
-}
 
 // ======== 设置页 ========
 function renderSettings() {
@@ -7506,7 +7319,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.61'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.62'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
