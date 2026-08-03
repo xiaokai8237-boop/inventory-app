@@ -2598,10 +2598,10 @@ async function callHunyuanVision(imageBase64) {
   } catch (e) { return null; }
 }
 
-// AI 识别提速：按固定格式模板裁剪表格区域（只把表格主体发给混元，减少 token → 提速 30%+）
-// 模板按图片宽高比例存储（兼容不同拍摄尺寸）：{left, top, width, height} 均为 0~1 比例
+// AI 识别提速：裁剪表格区域（只把表格主体发给混元，减少 token → 提速 30%+）
+// 顶部固定裁掉抬头区；底部动态检测到表格最后一行内容，行数多（10~20家店）也不会漏
 const CROP_TEMPLATE_KEY = 'kuanwei_crop_template';
-const DEFAULT_CROP_TEMPLATE = { left: 0.04, top: 0.30, width: 0.95, height: 0.42 }; // 实测 4 种筐类型路单通用
+const DEFAULT_CROP_TEMPLATE = { left: 0.04, top: 0.30, width: 0.95, height: 0.42 }; // 保守默认（可被动态检测覆盖）
 function getCropTemplate() {
   try {
     const raw = localStorage.getItem(CROP_TEMPLATE_KEY);
@@ -2612,7 +2612,7 @@ function getCropTemplate() {
   } catch (e) {}
   return DEFAULT_CROP_TEMPLATE;
 }
-// 图片裁剪为表格区域（canvas 本地处理，毫秒级），失败返回原图 dataUrl
+// 图片裁剪为表格区域（canvas 本地处理）：顶部裁到 top，底部动态检测"最后内容行"确定高度
 function cropImageToTable(dataUrl) {
   return new Promise((resolve) => {
     try {
@@ -2624,7 +2624,31 @@ function cropImageToTable(dataUrl) {
           const L = Math.max(0, Math.round(w * tpl.left));
           const T = Math.max(0, Math.round(h * tpl.top));
           const CW = Math.min(w - L, Math.round(w * tpl.width));
-          const CH = Math.min(h - T, Math.round(h * tpl.height));
+          // 动态检测底部：从下往上找最后一行有表格内容的横线（深色像素较多）
+          let bottomY = Math.min(h, T + Math.round(h * 0.85)); // 上限：最多到 85% 高度
+          try {
+            const probe = document.createElement('canvas');
+            probe.width = w; probe.height = h;
+            const pctx = probe.getContext('2d');
+            pctx.drawImage(img, 0, 0);
+            const idata = pctx.getImageData(0, 0, w, h).data;
+            const startY = Math.max(T + 10, Math.round(h * 0.15));
+            let lastContentY = -1;
+            for (let y = h - 1; y >= startY; y -= 3) {
+              let darkCount = 0;
+              for (let x = Math.round(w * 0.02); x < w * 0.98; x += 5) {
+                const idx = (y * w + x) * 4;
+                const r = idata[idx], g = idata[idx + 1], b = idata[idx + 2];
+                // 深色像素（表格线/文字），排除浅色水印
+                if (r < 110 && g < 110 && b < 110) darkCount++;
+              }
+              if (darkCount > 4) { lastContentY = y; break; }
+            }
+            if (lastContentY > T) {
+              bottomY = Math.min(h, lastContentY + Math.round(h * 0.05)); // 底部留 5% 余量
+            }
+          } catch (e) { /* 检测失败用默认高度 */ }
+          const CH = Math.max(50, bottomY - T);
           if (CW < 100 || CH < 100) return resolve(dataUrl);
           const canvas = document.createElement('canvas');
           canvas.width = CW; canvas.height = CH;
@@ -5606,6 +5630,22 @@ async function doOCR(imageDataUrl, file) {
         if (hunyuanRows) updateLoadingStep('🤖 AI 识别完成，正在整理…', 70);
       }
     } catch(e) {}
+    // 4.6 保险：裁剪可能漏底部行（店多时），识别行数 < 店面配置数 → 用原图重试一次
+    if (hunyuanRows && hunyuanRows.length > 0) {
+      try {
+        const storeCfgCount = loadStoreConfig().length;
+        if (storeCfgCount > 0 && hunyuanRows.length < storeCfgCount) {
+          updateLoadingStep('🤖 店数较多，用全图复核…', 68);
+          const retryData = await callHunyuanVision(imgBase64);
+          if (retryData && retryData.ok && retryData.text) {
+            const retryRows = parseHunyuanRows(retryData.text);
+            if (retryRows && retryRows.length > hunyuanRows.length) {
+              hunyuanRows = retryRows; // 全图识别到更多行 → 采用全图结果
+            }
+          }
+        }
+      } catch(e) {}
+    }
     if (!hunyuanRows) {
       // 混元失败/超时 → 标记需要回退，不报错（老流程兜底）
       updateLoadingStep('🤖 AI 识别不可用，走双引擎兜底…', 45);
@@ -7547,7 +7587,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.76'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.77'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
