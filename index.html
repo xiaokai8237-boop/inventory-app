@@ -997,6 +997,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   border-radius: 14px;
 }
 .manage-user-head { display: flex; align-items: center; gap: 14px; }
+.manage-user-card { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .manage-user-head .muh-avatar {
   width: 52px; height: 52px; border-radius: 50%;
   background: rgba(255,255,255,.22);
@@ -1004,11 +1005,32 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   border: 2px solid rgba(255,255,255,.35);
+  overflow: hidden;
 }
+.manage-user-head .muh-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .manage-user-head .muh-info { flex: 1; min-width: 0; }
 .manage-user-head .muh-name { font-size: 16px; font-weight: 700; color: #fff; }
 .manage-user-head .muh-sub { font-size: 12px; color: rgba(255,255,255,.85); margin-top: 3px; }
 .manage-user-head .muh-arrow { color: rgba(255,255,255,.85); font-size: 22px; font-weight: 300; }
+
+/* 头像设置弹窗：裁剪器 */
+.avatar-crop-wrap {
+  width: 240px; height: 240px; margin: 10px auto;
+  border-radius: 50%; overflow: hidden; position: relative;
+  background: #000;
+  touch-action: none;
+}
+.avatar-crop-wrap img {
+  position: absolute; top: 0; left: 0;
+  transform-origin: center center;
+  pointer-events: none; user-select: none; -webkit-user-select: none;
+}
+.avatar-crop-hint { font-size: 12px; color: var(--text-light); text-align: center; margin-bottom: 6px; }
+.avatar-slider-row { display: flex; align-items: center; gap: 8px; padding: 0 10px; }
+.avatar-slider-row input[type="range"] { flex: 1; accent-color: var(--primary); }
+.avatar-slider-icon { font-size: 14px; color: var(--text-light); }
+.avatar-btn-row { display: flex; gap: 8px; margin-top: 12px; }
+.avatar-btn-row button { flex: 1; }
 
 /* 管理页：菜单列表 */
 .manage-item {
@@ -1128,11 +1150,20 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 <body>
 
 <!-- 启动加载遮罩：与 APP 原生启动页无缝衔接，避免网页加载期间闪白 -->
-<div id="bootOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(160deg,#1b2a8f,#3d5afe 45%,#1d1f5e);z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-  <div style="font-size:46px;margin-bottom:14px;">📦</div>
-  <div style="color:#fff;font-size:17px;font-weight:600;letter-spacing:2px;">物流筐收发管理系统</div>
-  <div style="margin-top:18px;width:46px;height:46px;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:bootspin .9s linear infinite;"></div>
-  <div style="margin-top:16px;color:rgba(255,255,255,.75);font-size:12px;">正在加载…</div>
+<div id="bootOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,#0f6e9c 0%,#134d7a 50%,#0a3d5e 100%);z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:26vh;overflow:hidden;">
+  <div style="position:absolute;top:-130px;right:-110px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(47,230,191,.22),transparent 65%);"></div>
+  <div style="position:absolute;bottom:-110px;left:-90px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(124,155,255,.18),transparent 65%);"></div>
+  <img src="icon-512.png" alt="logo" style="width:132px;height:132px;border-radius:30px;box-shadow:0 0 50px rgba(255,255,255,.18),0 14px 30px rgba(0,0,0,.25);position:relative;">
+  <div style="color:#fff;font-size:28px;font-weight:900;letter-spacing:2px;text-align:center;line-height:1.4;margin-top:36px;position:relative;">我们只做一件事<br><span style="color:#2fe6bf;">让筐数清清楚楚</span></div>
+  <div style="width:56px;height:4px;background:#2fe6bf;border-radius:2px;box-shadow:0 0 14px rgba(47,230,191,.7);margin-top:22px;position:relative;"></div>
+  <div style="margin-top:42px;display:flex;flex-direction:column;gap:15px;position:relative;">
+    <div style="display:flex;align-items:flex-start;gap:12px;"><div style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:rgba(47,230,191,.18);border:1.5px solid #2fe6bf;display:flex;align-items:center;justify-content:center;color:#2fe6bf;font-size:13px;font-weight:900;line-height:1;">✓</div><div style="color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;">语音录入<span style="color:rgba(255,255,255,.6);font-size:11px;margin-left:6px;font-weight:400;">说句话就完成</span></div></div>
+    <div style="display:flex;align-items:flex-start;gap:12px;"><div style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:rgba(47,230,191,.18);border:1.5px solid #2fe6bf;display:flex;align-items:center;justify-content:center;color:#2fe6bf;font-size:13px;font-weight:900;line-height:1;">✓</div><div style="color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;">拍照识别<span style="color:rgba(255,255,255,.6);font-size:11px;margin-left:6px;font-weight:400;">路单一扫自动填</span></div></div>
+    <div style="display:flex;align-items:flex-start;gap:12px;"><div style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:rgba(47,230,191,.18);border:1.5px solid #2fe6bf;display:flex;align-items:center;justify-content:center;color:#2fe6bf;font-size:13px;font-weight:900;line-height:1;">✓</div><div style="color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;">云端同步<span style="color:rgba(255,255,255,.6);font-size:11px;margin-left:6px;font-weight:400;">换设备无缝接续</span></div></div>
+    <div style="display:flex;align-items:flex-start;gap:12px;"><div style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:rgba(47,230,191,.18);border:1.5px solid #2fe6bf;display:flex;align-items:center;justify-content:center;color:#2fe6bf;font-size:13px;font-weight:900;line-height:1;">✓</div><div style="color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;">离线可用<span style="color:rgba(255,255,255,.6);font-size:11px;margin-left:6px;font-weight:400;">没网照录不丢</span></div></div>
+    <div style="display:flex;align-items:flex-start;gap:12px;"><div style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:rgba(47,230,191,.18);border:1.5px solid #2fe6bf;display:flex;align-items:center;justify-content:center;color:#2fe6bf;font-size:13px;font-weight:900;line-height:1;">✓</div><div style="color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;">每日汇总<span style="color:rgba(255,255,255,.6);font-size:11px;margin-left:6px;font-weight:400;">一眼看清发收</span></div></div>
+  </div>
+  <div id="bootVer" style="position:absolute;bottom:56px;color:rgba(255,255,255,.4);font-size:11px;letter-spacing:3px;">v6.0.47</div>
 </div>
 <style>@keyframes bootspin{to{transform:rotate(360deg)}}</style>
 
@@ -1332,6 +1363,30 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响回收页顺序）</div>
       <div id="recoverStoreOrderList" style="max-height:50vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:6px;"></div>
       <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="saveRecoverStoreOrder()">💾 保存店序</button>
+    </div>
+  </div>
+
+  <!-- 设置头像弹窗 -->
+  <div class="store-ocr-modal" id="avatarModal">
+    <div class="store-ocr-content" style="max-width:340px;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-weight:700;font-size:16px;color:var(--text);">🖼️ 设置头像</span>
+        <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeAvatarModal()">×</span>
+      </div>
+      <div class="avatar-crop-wrap" id="avatarCropWrap">
+        <img id="avatarCropImg" alt="" style="display:none;">
+      </div>
+      <div class="avatar-crop-hint" id="avatarCropHint">点击「更换头像」选择图片，拖动调整位置、滑块缩放</div>
+      <div class="avatar-slider-row" id="avatarSliderRow" style="display:none;">
+        <span class="avatar-slider-icon">🔍</span>
+        <input type="range" id="avatarZoom" min="1" max="4" step="0.01" value="1" oninput="avatarSetZoom(this.value)">
+        <span class="avatar-slider-icon">＋</span>
+      </div>
+      <div class="avatar-btn-row">
+        <button class="btn btn-outline" style="flex:1;" onclick="triggerAvatarFile()">🖼️ 更换头像</button>
+        <button class="btn btn-primary" style="flex:1;" id="avatarSaveBtn" onclick="saveAvatar()">💾 保存</button>
+      </div>
+      <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="onAvatarFileChange(event)">
     </div>
   </div>
 
@@ -2731,6 +2786,13 @@ function collectUiState() {
     }
     ui._photos = photos;
   } catch(e) {}
+  // 账号头像（账号隔离 key，但头像需跨设备同步 → 单独打包）
+  try {
+    const avPhone = getCloudPhone();
+    const avKey = 'kuanwei_avatar__' + avPhone;
+    const av = localStorage.getItem(avKey);
+    if (avPhone && av) { ui._avatar = {}; ui._avatar[avPhone] = av; }
+  } catch(e) {}
   return ui;
 }
 function applyUiState(ui) {
@@ -2748,6 +2810,16 @@ function applyUiState(ui) {
     try {
       for (const k of Object.keys(ui._photos)) {
         if (!localStorage.getItem(k)) localStorage.setItem(k, ui._photos[k]);
+      }
+    } catch(e) {}
+  }
+  // 还原账号头像（仅当账号匹配时写入，换设备登录同账号即自动同步）
+  if (ui._avatar && typeof ui._avatar === 'object') {
+    try {
+      const avPhone = getCloudPhone();
+      if (avPhone && ui._avatar[avPhone]) {
+        localStorage.setItem('kuanwei_avatar__' + avPhone, ui._avatar[avPhone]);
+        if (typeof renderManage === 'function') renderManage();
       }
     } catch(e) {}
   }
@@ -6943,19 +7015,28 @@ function renderSettings() {
 }
 
 // ======== 管理页 ========
+function getAvatarSrc() {
+  const phone = getCloudPhone();
+  if (!phone) return '';
+  try { return localStorage.getItem('kuanwei_avatar__' + phone) || ''; } catch(e) { return ''; }
+}
 function renderManage() {
-  // 1) 用户头部卡片：圆形头像 + 昵称/手机号 + 时间
+  // 1) 用户头部卡片：圆形头像 + 昵称/手机号 + 时间，点击弹出账号功能气泡
   const phone = (localStorage.getItem('kuanwei_phone') || '').slice(-4) || '----';
   const phoneFull = localStorage.getItem('kuanwei_phone') || '未登录';
   const now = new Date();
   const hh = String(now.getHours()).padStart(2, '0');
   const mm = String(now.getMinutes()).padStart(2, '0');
   const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const av = getAvatarSrc();
+  const avatarHtml = av
+    ? `<div class="muh-avatar"><img src="${av}" alt="头像"></div>`
+    : `<div class="muh-avatar">店</div>`;
   const userCard = document.getElementById('manageUserCard');
   if (userCard) {
     userCard.innerHTML = `
-      <div class="manage-user-head">
-        <div class="muh-avatar">店</div>
+      <div class="manage-user-head" onclick="toggleManageAccountMenu(event)">
+        ${avatarHtml}
         <div class="muh-info">
           <div class="muh-name">店长，你好！</div>
           <div class="muh-sub">${escapeHtml(phoneFull)}${phoneFull !== '未登录' ? ' · ' + dateStr + ' ' + hh + ':' + mm : ''}</div>
@@ -6969,6 +7050,172 @@ function renderManage() {
   if (badge) {
     if (stores.length > 0) { badge.style.display = ''; badge.textContent = stores.length; }
     else { badge.style.display = 'none'; }
+  }
+}
+// 管理页头部账号功能气泡（含设置头像）
+function toggleManageAccountMenu(e) {
+  e.stopPropagation();
+  const existing = document.getElementById('accountMenu');
+  if (existing) { existing.remove(); return; }
+  const phone = getCloudPhone();
+  const logged = isLoggedIn();
+  const menu = document.createElement('div');
+  menu.id = 'accountMenu';
+  menu.className = 'account-menu';
+  let html = `<div class="am-head">${phone && logged ? '👤 当前账号：' + maskPhone(phone) : '账号管理'}</div>`;
+  if (!logged) {
+    html += `<div class="am-item" onclick="openLoginModal();closeAccountMenu()">🔐 登录账号</div>`;
+    html += `<div class="am-item" onclick="openSetupModal();closeAccountMenu()">🔑 设置账号密码</div>`;
+  } else {
+    html += `<div class="am-item" onclick="openAvatarModal();closeAccountMenu()">🖼️ 设置头像</div>`;
+    html += `<div class="am-item" onclick="openLoginModal();closeAccountMenu()">🔄 切换用户</div>`;
+    html += `<div class="am-item" onclick="openChangePwdModal();closeAccountMenu()">✏️ 更改密码</div>`;
+    html += `<div class="am-item" onclick="logout();closeAccountMenu()">🚪 退出登录</div>`;
+    html += `<div class="am-item danger" onclick="openDeleteAccountModal();closeAccountMenu()">🗑️ 注销账号</div>`;
+  }
+  menu.innerHTML = html;
+  const rect = e.currentTarget.getBoundingClientRect();
+  menu.style.top = (rect.bottom + 6) + 'px';
+  menu.style.right = Math.max(8, window.innerWidth - rect.right) + 'px';
+  menu.style.left = 'auto';
+  document.body.appendChild(menu);
+  setTimeout(() => {
+    document.addEventListener('click', function handler(ev) {
+      if (!menu.contains(ev.target)) { menu.remove(); document.removeEventListener('click', handler); }
+    });
+  }, 0);
+}
+
+// ======== 设置头像（裁剪 + 保存） ========
+let avatarState = { img: null, baseW: 0, baseH: 0, scale: 1, tx: 0, ty: 0, drag: null };
+const AVATAR_WRAP = 240;
+const AVATAR_OUT = 512;
+function openAvatarModal() {
+  // modal 在 page-record 内，若当前是 manage page 会被 display:none 父元素隐藏，需先切到 record
+  switchPage('record');
+  const modal = document.getElementById('avatarModal');
+  const img = document.getElementById('avatarCropImg');
+  const hint = document.getElementById('avatarCropHint');
+  const sliderRow = document.getElementById('avatarSliderRow');
+  const saveBtn = document.getElementById('avatarSaveBtn');
+  const av = getAvatarSrc();
+  img.style.display = 'none';
+  sliderRow.style.display = 'none';
+  saveBtn.disabled = true;
+  if (av) {
+    hint.textContent = '正在载入当前头像…';
+    const tmp = new Image();
+    tmp.onload = () => { initAvatarCrop(tmp); };
+    tmp.onerror = () => { hint.textContent = '点击「更换头像」选择图片，拖动调整位置、滑块缩放'; };
+    tmp.src = av;
+  } else {
+    hint.textContent = '点击「更换头像」选择图片，拖动调整位置、滑块缩放';
+  }
+  modal.classList.add('show');
+}
+function closeAvatarModal() {
+  document.getElementById('avatarModal').classList.remove('show');
+  const img = document.getElementById('avatarCropImg');
+  if (img) img.style.display = 'none';
+}
+function triggerAvatarFile() {
+  document.getElementById('avatarFileInput').click();
+}
+function onAvatarFileChange(e) {
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const tmp = new Image();
+    tmp.onload = function() { initAvatarCrop(tmp); };
+    tmp.onerror = function() { showToast('图片加载失败'); };
+    tmp.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function initAvatarCrop(natImg) {
+  const img = document.getElementById('avatarCropImg');
+  const baseScale = Math.max(AVATAR_WRAP / natImg.naturalWidth, AVATAR_WRAP / natImg.naturalHeight);
+  const baseW = natImg.naturalWidth * baseScale;
+  const baseH = natImg.naturalHeight * baseScale;
+  avatarState = { img: natImg, baseW: baseW, baseH: baseH, scale: 1, tx: (AVATAR_WRAP - baseW) / 2, ty: (AVATAR_WRAP - baseH) / 2, drag: null };
+  img.src = natImg.src;
+  img.style.display = 'block';
+  img.style.width = baseW + 'px';
+  img.style.height = baseH + 'px';
+  applyAvatarTransform();
+  const sliderRow = document.getElementById('avatarSliderRow');
+  sliderRow.style.display = 'flex';
+  const zoomEl = document.getElementById('avatarZoom');
+  zoomEl.value = 1;
+  document.getElementById('avatarCropHint').textContent = '拖动调整位置，滑块缩放，点「保存」完成';
+  const saveBtn = document.getElementById('avatarSaveBtn');
+  saveBtn.disabled = false;
+  saveBtn.textContent = '💾 保存';
+  bindAvatarDrag();
+}
+function applyAvatarTransform() {
+  const img = document.getElementById('avatarCropImg');
+  if (img) img.style.transform = `translate(${avatarState.tx}px, ${avatarState.ty}px) scale(${avatarState.scale})`;
+}
+function bindAvatarDrag() {
+  const wrap = document.getElementById('avatarCropWrap');
+  wrap.onpointerdown = function(ev) {
+    if (avatarState.img === null) return;
+    avatarState.drag = { x: ev.clientX - avatarState.tx, y: ev.clientY - avatarState.ty };
+    try { wrap.setPointerCapture(ev.pointerId); } catch(e) {}
+  };
+  wrap.onpointermove = function(ev) {
+    if (!avatarState.drag) return;
+    const dispW = avatarState.baseW * avatarState.scale;
+    const dispH = avatarState.baseH * avatarState.scale;
+    const minX = AVATAR_WRAP - dispW, minY = AVATAR_WRAP - dispH;
+    let nx = ev.clientX - avatarState.drag.x;
+    let ny = ev.clientY - avatarState.drag.y;
+    nx = Math.min(0, Math.max(minX, nx));
+    ny = Math.min(0, Math.max(minY, ny));
+    avatarState.tx = nx; avatarState.ty = ny;
+    applyAvatarTransform();
+  };
+  wrap.onpointerup = wrap.onpointercancel = function() { avatarState.drag = null; };
+}
+function avatarSetZoom(v) {
+  if (avatarState.img === null) return;
+  const scale = parseFloat(v) || 1;
+  const dispW = avatarState.baseW * scale;
+  const dispH = avatarState.baseH * scale;
+  const cx = AVATAR_WRAP / 2, cy = AVATAR_WRAP / 2;
+  avatarState.tx = cx - dispW / 2;
+  avatarState.ty = cy - dispH / 2;
+  const minX = AVATAR_WRAP - dispW, minY = AVATAR_WRAP - dispH;
+  avatarState.tx = Math.min(0, Math.max(minX, avatarState.tx));
+  avatarState.ty = Math.min(0, Math.max(minY, avatarState.ty));
+  avatarState.scale = scale;
+  applyAvatarTransform();
+}
+function saveAvatar() {
+  const st = avatarState;
+  if (!st.img) { showToast('请先选择图片'); return; }
+  const phone = getCloudPhone();
+  if (!phone) { showToast('请先登录账号再设置头像'); return; }
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = AVATAR_OUT; canvas.height = AVATAR_OUT;
+    const ctx = canvas.getContext('2d');
+    const totalScale = (st.baseW / st.img.naturalWidth) * st.scale;
+    const sx = -st.tx / totalScale;
+    const sy = -st.ty / totalScale;
+    const sw = AVATAR_WRAP / totalScale;
+    const sh = AVATAR_WRAP / totalScale;
+    ctx.drawImage(st.img, sx, sy, sw, sh, 0, 0, AVATAR_OUT, AVATAR_OUT);
+    localStorage.setItem('kuanwei_avatar__' + phone, canvas.toDataURL('image/png'));
+    showToast('✅ 头像已保存');
+    closeAvatarModal();
+    renderManage();
+    scheduleCloudBackup();
+  } catch(err) {
+    showToast('保存失败，图片过大');
   }
 }
 
@@ -7329,7 +7576,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.53'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.54'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -7354,6 +7601,9 @@ startPeriodicBackup();
   try {
     const ov = document.getElementById('bootOverlay');
     if (ov) {
+      // 启动页版本号与 APP_VERSION 自动同步
+      const bv = document.getElementById('bootVer');
+      if (bv) bv.textContent = 'v' + APP_VERSION;
       ov.style.transition = 'opacity .3s';
       ov.style.opacity = '0';
       setTimeout(() => { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 350);
