@@ -1163,7 +1163,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div style="display:flex;align-items:flex-start;gap:12px;"><div style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:rgba(47,230,191,.18);border:1.5px solid #2fe6bf;display:flex;align-items:center;justify-content:center;color:#2fe6bf;font-size:13px;font-weight:900;line-height:1;">✓</div><div style="color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;">离线可用<span style="color:rgba(255,255,255,.6);font-size:11px;margin-left:6px;font-weight:400;">没网照录不丢</span></div></div>
     <div style="display:flex;align-items:flex-start;gap:12px;"><div style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:rgba(47,230,191,.18);border:1.5px solid #2fe6bf;display:flex;align-items:center;justify-content:center;color:#2fe6bf;font-size:13px;font-weight:900;line-height:1;">✓</div><div style="color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;">每日汇总<span style="color:rgba(255,255,255,.6);font-size:11px;margin-left:6px;font-weight:400;">一眼看清发收</span></div></div>
   </div>
-  <div id="bootVer" style="position:absolute;bottom:56px;color:rgba(255,255,255,.4);font-size:11px;letter-spacing:3px;">v6.0.47</div>
+  <div id="bootVer" style="position:absolute;bottom:56px;color:rgba(255,255,255,.4);font-size:11px;letter-spacing:3px;">v6.0.55</div>
 </div>
 <style>@keyframes bootspin{to{transform:rotate(360deg)}}</style>
 
@@ -7576,7 +7576,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.54'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.55'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
