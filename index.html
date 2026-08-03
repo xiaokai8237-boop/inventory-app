@@ -1153,7 +1153,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div class="form-group">
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <label class="form-label" style="margin-bottom:0;">🏪 店面（点击切换）</label>
-          <button id="recoverOrderBtn" class="btn btn-outline" style="padding:4px 10px;font-size:12px;display:none;" onclick="openRecoverStoreOrderModal()">✏️ 调整店序</button>
+          <button id="recoverOrderBtn" style="display:none;background:none;border:none;padding:6px 10px;font-size:16px;color:var(--primary);font-weight:600;cursor:pointer;" onclick="openRecoverStoreOrderModal()">调整店序</button>
         </div>
         <div class="store-chip-list" id="recordStoreChips"></div>
         <select class="form-select" id="recordStore" onchange="onRecordStoreChange()" style="display:none;"></select>
@@ -7244,7 +7244,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.49'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.50'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
