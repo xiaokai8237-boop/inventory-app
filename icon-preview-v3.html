@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>应用图标设计 v3 · impeccable</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #14161a; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; padding: 36px 24px; }
+  .head { text-align: center; color: #e8e6e1; margin-bottom: 30px; }
+  .head h1 { font-size: 24px; font-weight: 800; letter-spacing: 2px; }
+  .head p { color: #8f8d88; font-size: 13px; margin-top: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 300px); gap: 38px; justify-content: center; }
+  .item { text-align: center; }
+  .item .tag { color: #e8e6e1; font-size: 14px; font-weight: 700; margin-bottom: 12px; letter-spacing: 1px; }
+  .item .tag small { color: #8f8d88; font-weight: 400; font-size: 11px; margin-left: 6px; display: block; margin-top: 3px; }
+  .icon-wrap { width: 210px; height: 210px; margin: 0 auto; border-radius: 48px; overflow: hidden; box-shadow: 0 0 0 2px rgba(255,255,255,.07), 0 22px 55px rgba(0,0,0,.55); }
+  .icon-wrap svg { display: block; width: 100%; height: 100%; }
+  .note { color: #8f8d88; font-size: 12px; margin-top: 10px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>🚚 应用图标设计 v3 · 放弃旧思路</h1>
+    <p>impeccable 设计原则：克制配色 / 有意图 / 非 AI 俗套 · 全部原创 SVG</p>
+  </div>
+  <div class="grid">
+
+    <!-- A 墨绿鎏金 Art Deco -->
+    <div class="item">
+      <div class="tag">A · 墨绿鎏金<small>Art Deco 装饰艺术 / 奢华</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <defs>
+            <linearGradient id="va" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#12352a"/><stop offset=".6" stop-color="#0b241d"/><stop offset="1" stop-color="#061410"/>
+            </linearGradient>
+          </defs>
+          <rect width="256" height="256" fill="url(#va)"/>
+          <!-- Art Deco 放射角线 -->
+          <path d="M22 22 L64 22 M22 22 L22 64 M22 34 L48 22 M34 22 L22 48" stroke="#d9b96a" stroke-width="2.5" opacity=".5"/>
+          <path d="M234 22 L192 22 M234 22 L234 64 M234 34 L208 22 M222 22 L234 48" stroke="#d9b96a" stroke-width="2.5" opacity=".5"/>
+          <path d="M22 234 L22 192 M22 234 L64 234 M22 222 L48 234 M34 234 L22 208" stroke="#d9b96a" stroke-width="2.5" opacity=".5"/>
+          <path d="M234 234 L234 192 M234 234 L192 234 M234 222 L208 234 M222 234 L234 208" stroke="#d9b96a" stroke-width="2.5" opacity=".5"/>
+          <!-- 双线提手 -->
+          <path d="M96 96 h64 v16 H96z" fill="#d9b96a"/>
+          <path d="M104 96 h48" stroke="#f2dc9b" stroke-width="4"/>
+          <!-- 筐体双线 -->
+          <rect x="74" y="112" width="108" height="84" rx="6" fill="none" stroke="#d9b96a" stroke-width="8"/>
+          <rect x="88" y="112" width="80" height="84" rx="4" fill="none" stroke="#f2dc9b" stroke-width="2.5"/>
+          <line x1="74" y1="140" x2="182" y2="140" stroke="#d9b96a" stroke-width="3"/>
+          <line x1="74" y1="168" x2="182" y2="168" stroke="#d9b96a" stroke-width="3" opacity=".7"/>
+          <line x1="128" y1="112" x2="128" y2="196" stroke="#d9b96a" stroke-width="3" opacity=".5"/>
+          <path d="M96 196 v5 a5 5 0 0 0 5 5 h46 a5 5 0 0 0 5 -5 v-5" fill="none" stroke="#d9b96a" stroke-width="4"/>
+        </svg>
+      </div>
+      <div class="note">深墨绿（非蓝）+ 双线金筐 + 四角 Art Deco 放射线，高定奢华</div>
+    </div>
+
+    <!-- B 奶油印刷 编辑风 -->
+    <div class="item">
+      <div class="tag">B · 奶油印刷<small>杂志编辑 / 大留白</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <rect width="256" height="256" fill="#f2ede2"/>
+          <rect x="34" y="34" width="188" height="188" rx="10" fill="none" stroke="#22262b" stroke-width="3"/>
+          <path d="M92 92 h72 v14 H92z" fill="#22262b"/>
+          <rect x="74" y="106" width="108" height="82" rx="8" fill="none" stroke="#22262b" stroke-width="10"/>
+          <line x1="74" y1="132" x2="182" y2="132" stroke="#22262b" stroke-width="4"/>
+          <line x1="74" y1="158" x2="182" y2="158" stroke="#22262b" stroke-width="4" opacity=".75"/>
+          <line x1="128" y1="106" x2="128" y2="188" stroke="#22262b" stroke-width="4" opacity=".6"/>
+          <circle cx="196" cy="68" r="9" fill="#c8402e"/>
+          <path d="M196 68 h34" stroke="#c8402e" stroke-width="3"/>
+          <path d="M92 118 h72" stroke="#22262b" stroke-width="2" opacity=".3"/>
+        </svg>
+      </div>
+      <div class="note">奶油白 + 炭黑粗线筐 + 朱红一点，杂志封面般的编辑感</div>
+    </div>
+
+    <!-- C 砖红图章 复古徽章 -->
+    <div class="item">
+      <div class="tag">C · 砖红图章<small>复古印刷 / 印章</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <defs>
+            <radialGradient id="vc" cx=".5" cy=".42" r=".75">
+              <stop offset="0" stop-color="#b04a38"/><stop offset="1" stop-color="#7e2f24"/>
+            </radialGradient>
+          </defs>
+          <rect width="256" height="256" fill="url(#vc)"/>
+          <circle cx="128" cy="128" r="86" fill="#f0e4cc"/>
+          <circle cx="128" cy="128" r="86" fill="none" stroke="#7e2f24" stroke-width="4"/>
+          <circle cx="128" cy="128" r="72" fill="none" stroke="#7e2f24" stroke-width="2" stroke-dasharray="6 5"/>
+          <path d="M100 104 h56 v12 H100z" fill="#7e2f24"/>
+          <rect x="86" y="116" width="84" height="62" rx="6" fill="none" stroke="#7e2f24" stroke-width="9"/>
+          <line x1="86" y1="138" x2="170" y2="138" stroke="#7e2f24" stroke-width="4"/>
+          <line x1="128" y1="116" x2="128" y2="178" stroke="#7e2f24" stroke-width="4" opacity=".6"/>
+          <circle cx="128" cy="104" r="5" fill="#7e2f24"/>
+        </svg>
+      </div>
+      <div class="note">砖红底 + 米白印章圆徽（虚线环），复古可靠的信赖感</div>
+    </div>
+
+    <!-- D 包豪斯 三原色 -->
+    <div class="item">
+      <div class="tag">D · 包豪斯<small>现代主义 / 三原色</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <rect width="256" height="256" fill="#15181d"/>
+          <rect x="66" y="102" width="124" height="86" fill="none" stroke="#e6e3dd" stroke-width="6"/>
+          <path d="M96 102 v-14 h64 v14" fill="none" stroke="#e6e3dd" stroke-width="6"/>
+          <!-- 三原色几何块拼成筐格 -->
+          <rect x="74" y="110" width="34" height="34" fill="#d84a32"/>
+          <rect x="112" y="110" width="34" height="34" fill="#e8b93a"/>
+          <rect x="150" y="110" width="32" height="34" fill="#2e5f9e"/>
+          <rect x="74" y="148" width="34" height="32" fill="#2e5f9e"/>
+          <rect x="112" y="148" width="34" height="32" fill="#d84a32"/>
+          <rect x="150" y="148" width="32" height="32" fill="#e8b93a"/>
+        </svg>
+      </div>
+      <div class="note">炭黑底 + 红黄蓝三原色几何块（筐格秩序），包豪斯纯粹美学</div>
+    </div>
+
+    <!-- E 暖灰克制 现代极简 -->
+    <div class="item">
+      <div class="tag">E · 暖灰克制<small>现代极简 / 低饱和</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <defs>
+            <linearGradient id="ve" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ece9e4"/><stop offset="1" stop-color="#dcd8d0"/>
+            </linearGradient>
+          </defs>
+          <rect width="256" height="256" fill="url(#ve)"/>
+          <rect x="62" y="78" width="132" height="106" rx="12" fill="none" stroke="#262b31" stroke-width="12"/>
+          <path d="M94 78 v-16 h68 v16" fill="none" stroke="#262b31" stroke-width="12" stroke-linecap="round"/>
+          <line x1="62" y1="112" x2="194" y2="112" stroke="#262b31" stroke-width="4" opacity=".85"/>
+          <line x1="62" y1="146" x2="194" y2="146" stroke="#262b31" stroke-width="4" opacity=".55"/>
+          <line x1="128" y1="78" x2="128" y2="184" stroke="#262b31" stroke-width="4" opacity=".7"/>
+          <circle cx="194" cy="184" r="13" fill="#d97a3d"/>
+        </svg>
+      </div>
+      <div class="note">暖灰底 + 炭黑粗线筐 + 一点陶土橙，克制不喧哗</div>
+    </div>
+
+    <!-- F 酒红金 高定 -->
+    <div class="item">
+      <div class="tag">F · 酒红鎏金<small>高定商务 / 酒红金线</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <defs>
+            <linearGradient id="vf" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#6b2334"/><stop offset=".6" stop-color="#4a1626"/><stop offset="1" stop-color="#2c0d17"/>
+            </linearGradient>
+          </defs>
+          <rect width="256" height="256" fill="url(#vf)"/>
+          <circle cx="128" cy="128" r="72" fill="none" stroke="#d4af37" stroke-width="3"/>
+          <circle cx="128" cy="128" r="60" fill="none" stroke="#d4af37" stroke-width="1.5" opacity=".6"/>
+          <path d="M128 78 l18 16 -18 16 -18 -16z" fill="none" stroke="#d4af37" stroke-width="4"/>
+          <rect x="88" y="112" width="80" height="62" rx="6" fill="none" stroke="#d4af37" stroke-width="7"/>
+          <line x1="88" y1="132" x2="168" y2="132" stroke="#d4af37" stroke-width="3" opacity=".8"/>
+          <line x1="88" y1="152" x2="168" y2="152" stroke="#d4af37" stroke-width="3" opacity=".5"/>
+          <line x1="128" y1="112" x2="128" y2="174" stroke="#d4af37" stroke-width="3" opacity=".65"/>
+          <path d="M106 174 v4 a4 4 0 0 0 4 4 h36 a4 4 0 0 0 4 -4 v-4" fill="none" stroke="#d4af37" stroke-width="3.5" opacity=".8"/>
+        </svg>
+      </div>
+      <div class="note">酒红底 + 金线双环圆徽 + 中央菱形吊环筐，高定珠宝感</div>
+    </div>
+
+  </div>
+</body>
+</html>
