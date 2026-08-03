@@ -191,30 +191,51 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
 /* 注销/确认弹窗 */
 .cancel-pill { color: var(--text-light); font-size: 11px; text-align: right; margin-top: 6px; cursor: pointer; text-decoration: underline; }
 
-/* Tab */
+/* Tab：固定底部，图标+文字，选中高亮 */
 .tabs {
   display: flex;
   background: var(--tabs-bg);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 56px; z-index: 99;
+  border-top: 1px solid var(--border);
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 999;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -2px 12px rgba(0,0,0,.06);
 }
 .tab {
   flex: 1;
   text-align: center;
-  padding: 12px 0 10px;
-  font-size: 14px;
+  padding: 7px 0 6px;
+  font-size: 11px;
   color: var(--text-light);
-  border-bottom: 2px solid transparent;
   cursor: pointer;
   transition: all .2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.tab .tab-icon {
+  font-size: 20px;
+  line-height: 1;
+  filter: grayscale(1) opacity(.6);
+  transition: filter .2s;
 }
 .tab.active {
   color: var(--primary);
-  border-bottom-color: var(--primary);
   font-weight: 600;
 }
-.page { display: none; padding: 12px; }
+.tab.active .tab-icon {
+  filter: none;
+}
+.tab.active::after {
+  content: '';
+  width: 20px; height: 3px;
+  border-radius: 2px;
+  background: var(--primary);
+  margin-top: 1px;
+}
+.page { display: none; padding: 12px; padding-bottom: 76px; }
 .page.active { display: block; animation: pageFadeIn .25s ease; }
 @keyframes pageFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .card {
@@ -1152,9 +1173,9 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 <div class="offline-banner" id="offlineBanner">📡 当前离线，已切换为离线模式，数据保存在本机，联网后自动同步</div>
 
 <div class="tabs">
-  <div class="tab active" data-page="record">首页</div>
-  <div class="tab" data-page="history">记录</div>
-  <div class="tab" data-page="manage">管理</div>
+  <div class="tab active" data-page="record"><span class="tab-icon">🏠</span>首页</div>
+  <div class="tab" data-page="history"><span class="tab-icon">📋</span>记录</div>
+  <div class="tab" data-page="manage"><span class="tab-icon">⚙️</span>管理</div>
 </div>
 
 <!-- 未登录提醒横条（登录后隐藏） -->
@@ -7440,7 +7461,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.67'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.68'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
