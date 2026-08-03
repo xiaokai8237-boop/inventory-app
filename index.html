@@ -504,8 +504,15 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 @keyframes numPop { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: scale(1); } }
 /* 今日发出：按筐分列（紧凑） */
 .today-emit-list { flex: 1.4; display: flex; flex-direction: column; gap: 3px; padding: 8px; border-radius: 10px; background: var(--soft-bg); border: 1px solid var(--border); }
+.today-emit-list .ter-head { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text-light); padding: 0 4px 4px; border-bottom: 1px dashed var(--border); margin-bottom: 2px; }
+.today-emit-list .ter-head .ter-head-cells { display: flex; gap: 10px; }
+.today-emit-list .ter-head .ter-head-cells span { min-width: 38px; text-align: right; }
 .today-emit-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; padding: 1px 4px; line-height: 1.5; }
 .today-emit-row .ter-name { display: flex; align-items: center; gap: 5px; color: var(--text); }
+.today-emit-row .ter-cells { display: flex; gap: 10px; }
+.today-emit-row .ter-cell { min-width: 38px; text-align: right; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.today-emit-row .ter-cell.ter-emit { color: var(--success); }
+.today-emit-row .ter-cell.ter-recover { color: var(--warning); }
 .today-emit-row .ter-num { font-size: 15px; font-weight: 700; color: var(--success); }
 .today-status-progress { margin-top: 4px; }
 .today-status-progress .tsp-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-light); margin-bottom: 4px; }
@@ -5103,12 +5110,14 @@ function renderTodayStatus() {
   const names = loadGoodsNames();
   let totalIn = 0, totalOut = 0;
   const emitByBasket = {};
-  names.forEach((n, i) => { emitByBasket[i] = 0; });
+  const recoverByBasket = {};
+  names.forEach((n, i) => { emitByBasket[i] = 0; recoverByBasket[i] = 0; });
   const doneSet = new Set();
   let hasExtra = false;
   todayRecords.forEach(r => {
     totalIn += r.qtyIn || 0; totalOut += r.qtyOut || 0;
     if (emitByBasket[r.goodsIdx] !== undefined) emitByBasket[r.goodsIdx] += r.qtyIn || 0;
+    if (recoverByBasket[r.goodsIdx] !== undefined) recoverByBasket[r.goodsIdx] += r.qtyOut || 0;
     if (r.storeIdx === -1) { hasExtra = true; return; }
     if (r.storeIdx !== undefined) doneSet.add(r.storeIdx);
   });
@@ -5124,10 +5133,10 @@ function renderTodayStatus() {
     <div class="today-status-title">📊 今日状态</div>
     <div class="today-status-date">${today}</div>
   </div>`;
-  // 今日发出：按筐分列（5种筐各显示发出数，无数据为0）
-  let emitRows = '';
+  // 今日发出：按筐分列（5种筐各显示发出数+回收数，无数据为0）
+  let emitRows = `<div class="ter-head"><span>筐类型</span><div class="ter-head-cells"><span>发出</span><span>回收</span></div></div>`;
   names.forEach((n, i) => {
-    emitRows += `<div class="today-emit-row"><div class="ter-name">${goodsIcon(n)}<span>${escapeHtml(n)}</span></div><div class="ter-num">${emitByBasket[i]}</div></div>`;
+    emitRows += `<div class="today-emit-row"><div class="ter-name">${goodsIcon(n)}<span>${escapeHtml(n)}</span></div><div class="ter-cells"><div class="ter-cell ter-emit">${emitByBasket[i]}</div><div class="ter-cell ter-recover">${recoverByBasket[i]}</div></div></div>`;
   });
   html += `<div class="today-status-sum">
     <div class="today-emit-list">${emitRows}</div>
@@ -7232,7 +7241,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.47'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.48'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
