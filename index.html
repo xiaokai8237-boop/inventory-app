@@ -2449,6 +2449,22 @@ function collectUiState() {
   for (const k of UI_KEYS) {
     try { const v = localStorage.getItem(k); if (v !== null && v !== undefined) ui[k] = v; } catch(e) {}
   }
+  // 动态收集所有其他 kuanwei_ 用户状态 key（如后续新增的偏好/操作习惯），确保"完整快照"无遗漏
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || typeof k !== 'string') continue;
+      if (!k.startsWith('kuanwei_')) continue;
+      if (ui[k] !== undefined) continue; // 已收集
+      // 跳过账号隔离/登录态/设备/时间戳/迁移标记/照片(已单独处理)等无需云同步的 key
+      if (k.indexOf('__') !== -1) continue;                       // 账号作用域 key
+      if (k === 'kuanwei_phone' || k === 'kuanwei_logged_in' || k === 'kuanwei_device_id' ||
+          k === 'kuanwei_last_save' || k === 'kuanwei_last_backup' || k === 'kuanwei_web_ver' ||
+          k === 'kuanwei_lock' || k.startsWith('kuanwei_photos_') ||
+          k.startsWith('kuanwei_migrated')) continue;
+      try { const v = localStorage.getItem(k); if (v !== null && v !== undefined) ui[k] = v; } catch(e) {}
+    }
+  } catch(e) {}
   // 每日相册照片（当天+昨天），便于换设备后照片不丢
   try {
     const photos = {};
@@ -6466,7 +6482,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.34'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.35'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
