@@ -1146,15 +1146,13 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div style="display:flex;align-items:center;">
         <button onclick="backToHomeWizard()" style="background:none;border:none;font-size:16px;cursor:pointer;padding:6px 10px;color:var(--primary);font-weight:600;">← 返回</button>
         <span style="flex:1;text-align:center;font-size:14px;font-weight:600;" id="manualHeaderLabel">发出 - 手动录入</span>
+        <button id="recoverOrderBtn" style="display:none;background:none;border:none;font-size:16px;cursor:pointer;padding:6px 10px;color:var(--primary);font-weight:600;" onclick="openRecoverStoreOrderModal()">调整店序</button>
       </div>
     </div>
 
     <div class="card">
       <div class="form-group">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <label class="form-label" style="margin-bottom:0;">🏪 店面（点击切换）</label>
-          <button id="recoverOrderBtn" style="display:none;background:none;border:none;padding:6px 10px;font-size:16px;color:var(--primary);font-weight:600;cursor:pointer;" onclick="openRecoverStoreOrderModal()">调整店序</button>
-        </div>
+        <label class="form-label">🏪 店面（点击切换）</label>
         <div class="store-chip-list" id="recordStoreChips"></div>
         <select class="form-select" id="recordStore" onchange="onRecordStoreChange()" style="display:none;"></select>
       </div>
@@ -7244,7 +7242,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.50'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.51'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
