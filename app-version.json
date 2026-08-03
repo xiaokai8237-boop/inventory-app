@@ -1,0 +1,7 @@
+{
+  "versionCode": 75,
+  "versionName": "6.0.75",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/kuanwei-app-v6.0.75.apk",
+  "note": "【v6.0.75 更新内容】\n1. 新增 APK 自动更新：以后有新版本，打开 APP 会提示一键更新，不用再手动装安装包\n2. 使用说明与隐私弹窗只在首次打开弹出\n3. 使用说明更新：拍照识别（AI 智能识别）、语音录入（AI 听懂中文数字/口语）说明已更新",
+  "force": false
+}

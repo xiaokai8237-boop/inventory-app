@@ -25,6 +25,8 @@ android/app/capacitor.build.gradle
 android/app/capacitor.plugins.json
 android/app/src/main/assets/public/
 *.apk
+!apk/
+!apk/*.apk
 
 # 改动前的备份目录（本地保留，保留7天供回退，不入库）
 backup_*/

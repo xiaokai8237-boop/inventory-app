@@ -1,0 +1,6 @@
+/apk/*
+  Content-Type: application/vnd.android.package-archive
+  Cache-Control: public, max-age=3600
+
+/app-version.json
+  Cache-Control: no-store
