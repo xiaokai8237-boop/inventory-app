@@ -1203,7 +1203,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
   <!-- === 首页向导（默认显示） === -->
   <div id="homeWizard">
-    <div id="appVersion" style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;">v6.0.0</div>
+    <div id="appVersion" style="text-align:right;font-size:10px;color:var(--text-light);opacity:.7;margin-bottom:4px;"></div>
     <!-- 账号登录状态（原"数据账号"徽标位置） -->
     <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)" style="position:static;max-width:none;width:100%;justify-content:center;margin-bottom:8px;">🔑 登录</button>
     <div class="card" style="text-align:center;padding:16px 14px;">
@@ -1555,7 +1555,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <button class="manage-item" onclick="switchPage('settings')"><span class="mi-icon">❓</span><span class="mi-title">使用说明</span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="installApp()"><span class="mi-icon">📱</span><span class="mi-title">添加到桌面</span><span class="mi-arrow">›</span></button>
   </div>
-  <div class="footer">物流筐收发管理系统 v6.0.53</div>
+  <div class="footer" id="footerVer">物流筐收发管理系统 <span id="footerVerNum"></span></div>
 </div>
 
 <!-- ========== 汇总页 ========== -->
@@ -7601,11 +7601,13 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.59'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.60'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
+const footerVerNumEl = document.getElementById('footerVerNum');
+if (footerVerNumEl) footerVerNumEl.textContent = 'v' + APP_VERSION;
 initTheme();
 initOffline();
 renderAccountBadge();
