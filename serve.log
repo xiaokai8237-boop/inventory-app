@@ -1,25 +1,23 @@
  INFO  Accepting connections at http://localhost:5000
- HTTP  2026/8/3 13:53:36 127.0.0.1 GET /version.txt
- HTTP  2026/8/3 13:53:36 127.0.0.1 Returned 200 in 14 ms
- HTTP  2026/8/3 13:53:46 127.0.0.1 GET /
- HTTP  2026/8/3 13:53:46 127.0.0.1 Returned 200 in 3 ms
- HTTP  2026/8/3 13:53:48 127.0.0.1 GET /sw.js
- HTTP  2026/8/3 13:53:48 127.0.0.1 Returned 200 in 2 ms
- HTTP  2026/8/3 13:53:48 127.0.0.1 GET /
- HTTP  2026/8/3 13:53:48 127.0.0.1 GET /index.html
- HTTP  2026/8/3 13:53:48 127.0.0.1 Returned 301 in 1 ms
- HTTP  2026/8/3 13:53:48 127.0.0.1 GET /manifest.json
- HTTP  2026/8/3 13:53:48 127.0.0.1 Returned 304 in 3 ms
- HTTP  2026/8/3 13:53:48 127.0.0.1 GET /index
- HTTP  2026/8/3 13:53:48 127.0.0.1 Returned 301 in 0 ms
- HTTP  2026/8/3 13:53:48 127.0.0.1 Returned 200 in 3 ms
- HTTP  2026/8/3 13:53:48 127.0.0.1 GET /
- HTTP  2026/8/3 13:53:48 127.0.0.1 GET /icon-192.png
- HTTP  2026/8/3 13:53:48 127.0.0.1 Returned 304 in 1 ms
- HTTP  2026/8/3 13:53:48 127.0.0.1 GET /icon-512.png
- HTTP  2026/8/3 13:53:48 127.0.0.1 Returned 200 in 3 ms
- HTTP  2026/8/3 13:53:48 127.0.0.1 Returned 200 in 2 ms
- HTTP  2026/8/3 13:55:19 127.0.0.1 GET /
- HTTP  2026/8/3 13:55:19 127.0.0.1 Returned 200 in 2 ms
- HTTP  2026/8/3 13:55:21 127.0.0.1 GET /sw.js
- HTTP  2026/8/3 13:55:21 127.0.0.1 Returned 304 in 3 ms
+ HTTP  2026/8/3 14:02:51 127.0.0.1 GET /version.txt
+ HTTP  2026/8/3 14:02:51 127.0.0.1 Returned 200 in 10 ms
+ HTTP  2026/8/3 14:03:05 127.0.0.1 GET /
+ HTTP  2026/8/3 14:03:05 127.0.0.1 Returned 200 in 3 ms
+ HTTP  2026/8/3 14:03:05 127.0.0.1 GET /icon-512.png
+ HTTP  2026/8/3 14:03:05 127.0.0.1 Returned 200 in 2 ms
+ HTTP  2026/8/3 14:03:07 127.0.0.1 GET /sw.js
+ HTTP  2026/8/3 14:03:07 127.0.0.1 Returned 200 in 2 ms
+ HTTP  2026/8/3 14:03:07 127.0.0.1 GET /
+ HTTP  2026/8/3 14:03:07 127.0.0.1 GET /index.html
+ HTTP  2026/8/3 14:03:07 127.0.0.1 Returned 301 in 1 ms
+ HTTP  2026/8/3 14:03:07 127.0.0.1 GET /manifest.json
+ HTTP  2026/8/3 14:03:07 127.0.0.1 Returned 304 in 3 ms
+ HTTP  2026/8/3 14:03:07 127.0.0.1 GET /index
+ HTTP  2026/8/3 14:03:07 127.0.0.1 Returned 301 in 1 ms
+ HTTP  2026/8/3 14:03:07 127.0.0.1 Returned 200 in 3 ms
+ HTTP  2026/8/3 14:03:07 127.0.0.1 GET /
+ HTTP  2026/8/3 14:03:07 127.0.0.1 GET /icon-192.png
+ HTTP  2026/8/3 14:03:07 127.0.0.1 Returned 304 in 2 ms
+ HTTP  2026/8/3 14:03:07 127.0.0.1 GET /icon-512.png
+ HTTP  2026/8/3 14:03:07 127.0.0.1 Returned 200 in 2 ms
+ HTTP  2026/8/3 14:03:07 127.0.0.1 Returned 304 in 1 ms

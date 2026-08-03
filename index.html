@@ -1008,6 +1008,18 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   overflow: hidden;
 }
 .manage-user-head .muh-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.manage-user-head .muh-avatar-empty { background: rgba(255,255,255,.12); border-style: dashed; }
+.manage-user-extra { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.18); }
+.manage-avatar-btn {
+  background: rgba(255,255,255,.18); color: #fff;
+  border: 1px solid rgba(255,255,255,.4);
+  padding: 7px 14px; border-radius: 8px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background .15s;
+  font-family: inherit;
+}
+.manage-avatar-btn:hover { background: rgba(255,255,255,.28); }
+.manage-avatar-btn:active { background: rgba(255,255,255,.38); }
 .manage-user-head .muh-info { flex: 1; min-width: 0; }
 .manage-user-head .muh-name { font-size: 16px; font-weight: 700; color: #fff; }
 .manage-user-head .muh-sub { font-size: 12px; color: rgba(255,255,255,.85); margin-top: 3px; }
@@ -7031,7 +7043,7 @@ function renderManage() {
   const av = getAvatarSrc();
   const avatarHtml = av
     ? `<div class="muh-avatar"><img src="${av}" alt="头像"></div>`
-    : `<div class="muh-avatar">店</div>`;
+    : `<div class="muh-avatar muh-avatar-empty"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M9 2L7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg></div>`;
   const userCard = document.getElementById('manageUserCard');
   if (userCard) {
     userCard.innerHTML = `
@@ -7042,6 +7054,12 @@ function renderManage() {
           <div class="muh-sub">${escapeHtml(phoneFull)}${phoneFull !== '未登录' ? ' · ' + dateStr + ' ' + hh + ':' + mm : ''}</div>
         </div>
         <div class="muh-arrow">›</div>
+      </div>
+      <div class="manage-user-extra">
+        <button class="manage-avatar-btn" onclick="event.stopPropagation();openAvatarModal();">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M9 2L7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
+          设置头像
+        </button>
       </div>`;
   }
   // 2) 店面管理角标：当前店面数
