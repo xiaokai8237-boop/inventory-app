@@ -1200,10 +1200,10 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
 
     <!-- 今日状态（主页面下方） -->
-    <div class="card" id="todayStatusCard" style="padding:14px;"></div>
+    <div class="card" id="todayStatusCard" style="padding:14px;"><div style="font-size:12px;color:var(--text-light);">📊 今日状态加载中…</div></div>
 
     <!-- 今日各店明细（主页最下方） -->
-    <div class="card" id="todayStoreDetailCard" style="padding:14px;"></div>
+    <div class="card" id="todayStoreDetailCard" style="padding:14px;"><div style="font-size:12px;color:var(--text-light);">📋 今日各店明细加载中…</div></div>
   </div>
 
   <!-- === 手动录入表单（点击手动录入后显示） === -->
@@ -7461,7 +7461,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.68'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.69'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -7491,13 +7491,12 @@ function rejectPrivacy() {
 }
 
 // 新用户首次打开自动弹出欢迎引导（含使用说明入口）
-initWelcome();
-initPrivacyConsent();
-// 云备份恢复（清缓存/换手机后自动从云端拉取数据）
-restoreFromCloud();
+try { initWelcome(); } catch(e) { console.error('initWelcome fail', e); }
+try { initPrivacyConsent(); } catch(e) { console.error('initPrivacyConsent fail', e); }
+// 云备份恢复（清缓存/换手机后自动从云端拉取数据）— 用 try/catch 包裹避免阻塞主流程
+try { restoreFromCloud(); } catch(e) { console.error('restoreFromCloud fail', e); }
 // 定时兜底备份：无操作时每30分钟自动备份一次（后台静默）
-startPeriodicBackup();
-// 已登录用户：打开时不再自动同步云端（恢复/同步改为用户手动点击「恢复云端数据」，避免自动同步覆盖本地设置）
+try { startPeriodicBackup(); } catch(e) { console.error('startPeriodicBackup fail', e); }
 // 原自动同步逻辑已移除：if (isLoggedIn()) { const p = getCloudPhone(); if (p) { autoSyncFromCloud(p); } }
 // 界面初始化完成：淡出移除启动加载遮罩，并通知原生隐藏启动页（自适应：网页加载完才消失）
 (function removeBootOverlay() {
