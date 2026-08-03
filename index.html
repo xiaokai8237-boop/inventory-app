@@ -2427,6 +2427,16 @@ function compareStoreByNumber(a, b) {
   }
   return ka.text.localeCompare(kb.text, 'zh');
 }
+// 提取店面编号标签（优先别名[0]，否则从店名匹配首个数字段，如"35-12 上塘店"→"35-12"）
+function storeNumberLabel(store) {
+  if (!store) return '';
+  if (Array.isArray(store.aliases) && store.aliases[0]) return String(store.aliases[0]);
+  if (store.name) {
+    const m = store.name.match(/\d+(?:[-–—]\d+)?/);
+    if (m) return m[0];
+  }
+  return '';
+}
 // 店面管理固定排序视图：按门店编号自然排序（含原始下标 _idx）
 function getStoresSortedByNumber() {
   const cfg = loadStoreConfig();
@@ -3733,12 +3743,13 @@ function renderRecoverStoreOrder() {
   if (!container) return;
   container.innerHTML = order.map((storeName, i) => {
     const store = cfg.find(s => s.name === storeName);
-    const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
-    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);" draggable="true" ondragstart="recoverDragStart(event, ${i})" ondragover="event.preventDefault()" ondrop="recoverDrop(event, ${i})">
-      <span style="cursor:grab;color:var(--text-light);font-size:18px;">☰</span>
-      <span style="flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(storeName)}<span style="color:var(--secondary,#e67e22);font-size:11px;">${alias}</span></span>
-      <button class="btn btn-outline" style="padding:2px 8px;font-size:12px;" onclick="recoverMoveOrder(${i}, -1)">▲</button>
-      <button class="btn btn-outline" style="padding:2px 8px;font-size:12px;" onclick="recoverMoveOrder(${i}, 1)">▼</button>
+    const num = storeNumberLabel(store);
+    return `<div style="display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid var(--border);" draggable="true" ondragstart="recoverDragStart(event, ${i})" ondragover="event.preventDefault()" ondrop="recoverDrop(event, ${i})">
+      <span style="cursor:grab;color:var(--text-light);font-size:18px;flex:0 0 auto;">☰</span>
+      <span style="flex:1;min-width:0;font-size:15px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(storeName)}</span>
+      <span style="flex:0 0 auto;font-size:11px;color:#fff;background:var(--primary);padding:3px 10px;border-radius:12px;line-height:1.4;white-space:nowrap;">🏪 ${num ? escapeHtml(num) : '无编号'}</span>
+      <button style="padding:2px 8px;font-size:12px;width:auto;flex:0 0 auto;border:1px solid var(--border);background:var(--card-bg);color:var(--text);border-radius:6px;cursor:pointer;" onclick="recoverMoveOrder(${i}, -1)">▲</button>
+      <button style="padding:2px 8px;font-size:12px;width:auto;flex:0 0 auto;border:1px solid var(--border);background:var(--card-bg);color:var(--text);border-radius:6px;cursor:pointer;" onclick="recoverMoveOrder(${i}, 1)">▼</button>
     </div>`;
   }).join('');
   recoverDragFrom = -1;
@@ -3949,12 +3960,13 @@ function renderEmitStoreOrder() {
   if (!container) return;
   container.innerHTML = order.map((storeName, i) => {
     const store = cfg.find(s => s.name === storeName);
-    const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
-    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);" draggable="true" ondragstart="emitDragStart(event, ${i})" ondragover="event.preventDefault()" ondrop="emitDrop(event, ${i})">
-      <span style="cursor:grab;color:var(--text-light);font-size:18px;">☰</span>
-      <span style="flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(storeName)}<span style="color:var(--secondary,#e67e22);font-size:11px;">${alias}</span></span>
-      <button class="btn btn-outline" style="padding:2px 8px;font-size:12px;" onclick="emitMoveOrder(${i}, -1)">▲</button>
-      <button class="btn btn-outline" style="padding:2px 8px;font-size:12px;" onclick="emitMoveOrder(${i}, 1)">▼</button>
+    const num = storeNumberLabel(store);
+    return `<div style="display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid var(--border);" draggable="true" ondragstart="emitDragStart(event, ${i})" ondragover="event.preventDefault()" ondrop="emitDrop(event, ${i})">
+      <span style="cursor:grab;color:var(--text-light);font-size:18px;flex:0 0 auto;">☰</span>
+      <span style="flex:1;min-width:0;font-size:15px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(storeName)}</span>
+      <span style="flex:0 0 auto;font-size:11px;color:#fff;background:var(--primary);padding:3px 10px;border-radius:12px;line-height:1.4;white-space:nowrap;">🏪 ${num ? escapeHtml(num) : '无编号'}</span>
+      <button style="padding:2px 8px;font-size:12px;width:auto;flex:0 0 auto;border:1px solid var(--border);background:var(--card-bg);color:var(--text);border-radius:6px;cursor:pointer;" onclick="emitMoveOrder(${i}, -1)">▲</button>
+      <button style="padding:2px 8px;font-size:12px;width:auto;flex:0 0 auto;border:1px solid var(--border);background:var(--card-bg);color:var(--text);border-radius:6px;cursor:pointer;" onclick="emitMoveOrder(${i}, 1)">▼</button>
     </div>`;
   }).join('');
   emitDragFrom = -1;
@@ -7220,7 +7232,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.45'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.46'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
