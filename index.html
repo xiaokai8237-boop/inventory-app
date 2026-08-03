@@ -3584,30 +3584,50 @@ document.addEventListener('click', () => {
 // 状态：当前所选筐、发出页独立店序
 let emitGoodsIdx = -1;
 let emitGoodsName = '';
-let emitOrder = null;          // 发出页独立店序（存店名下标顺序）
-const EMIT_ORDER_KEY = 'kuanwei_emit_store_order';
+let emitOrderCache = {};       // 发出页按筐种独立店序缓存 {筐名: [店名顺序]}
+const EMIT_ORDER_KEY = 'kuanwei_emit_store_order';  // 结构升级：{v:2, orders:{筐名:[店序]}}；key不变→自动纳入云备份全量快照
+const EMIT_ORDER_VER = 2;
 
-// 发出页独立店序（存店名顺序数组）；默认按店面管理 sort 顺序
-function getEmitOrder() {
+// ===== 发出页独立店序（按筐种各自一套，互不干扰）=====
+// 存储结构：localStorage[EMIT_ORDER_KEY] = { v:2, orders: { 筐名: [店名顺序...] } }
+// key 保持 kuanwei_ 前缀不变 → 自动纳入云备份全量快照，换设备原样还原
+function currentEmitGoodsName() {
+  const names = loadGoodsNames();
+  return names[emitGoodsIdx] || names[0] || '';
+}
+function persistEmitOrders() {
+  try { localStorage.setItem(EMIT_ORDER_KEY, JSON.stringify({ v: EMIT_ORDER_VER, orders: emitOrderCache })); } catch(e) {}
+}
+// 读取当前筐种的店序；自动迁移旧版全局数组、自动同步新店到末尾
+function getEmitOrder(goodsName) {
   const cfg = loadStoreConfig();
   const names = cfg.map(s => s.name);
-  if (!emitOrder || emitOrder.length === 0) {
+  const gName = goodsName || currentEmitGoodsName();
+  if (!emitOrderCache[gName]) {
     const saved = (() => { try { return JSON.parse(localStorage.getItem(EMIT_ORDER_KEY)); } catch(e){ return null; } })();
-    if (Array.isArray(saved) && saved.length > 0) {
-      // 过滤掉已不存在的店，保留有效顺序
-      emitOrder = saved.filter(n => names.includes(n));
-      if (emitOrder.length === 0) emitOrder = names.slice();
+    if (saved && typeof saved === 'object' && !Array.isArray(saved) && saved.v === EMIT_ORDER_VER && saved.orders && typeof saved.orders === 'object') {
+      emitOrderCache = saved.orders;          // v2 字典结构
+    } else if (Array.isArray(saved) && saved.length > 0) {
+      // 旧版全局数组 → 迁移：作为所有筐种的默认顺序，一次性落盘
+      const valid = saved.filter(n => names.includes(n));
+      const def = valid.length ? valid : names.slice();
+      loadGoodsNames().forEach(n => { emitOrderCache[n] = def.slice(); });
+      persistEmitOrders();
     } else {
-      emitOrder = names.slice();
+      // 全新：所有筐种默认按店面管理 sort 顺序
+      loadGoodsNames().forEach(n => { emitOrderCache[n] = names.slice(); });
     }
   }
-  // 同步新添加的店（店名不在 order 里的追加到末尾）
-  names.forEach(n => { if (!emitOrder.includes(n)) emitOrder.push(n); });
-  return emitOrder.slice();
+  // 过滤已不存在的店 + 同步新添加的店（追加到末尾，不漏店）
+  emitOrderCache[gName] = (emitOrderCache[gName] || []).filter(n => names.includes(n));
+  names.forEach(n => { if (!emitOrderCache[gName].includes(n)) emitOrderCache[gName].push(n); });
+  return emitOrderCache[gName].slice();
 }
-function saveEmitOrder(order) {
-  emitOrder = order.slice();
-  try { localStorage.setItem(EMIT_ORDER_KEY, JSON.stringify(emitOrder)); } catch(e) {}
+// 保存当前筐种的店序（只影响该筐种，其他筐种不受干扰）
+function saveEmitOrder(order, goodsName) {
+  const gName = goodsName || currentEmitGoodsName();
+  emitOrderCache[gName] = order.slice();
+  persistEmitOrders();
 }
 
 // 筐类型 → 专属图标（5种筐各不相同）
@@ -7060,7 +7080,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.43'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.44'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
