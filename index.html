@@ -5280,7 +5280,9 @@ function handleVoiceBlob() {
       });
       const data = await resp.json();
       if (data.ok && data.text) {
-        parseVoiceText(data.text, voiceRecMode);
+        // AI 理解优先（中文数字/同音字/口语），失败自动回退正则解析
+        const usedAI = await parseVoiceWithAI(data.text, voiceRecMode);
+        if (!usedAI) parseVoiceText(data.text, voiceRecMode);
       } else {
         showToast('语音识别失败: ' + (data.error || ''));
       }
@@ -5303,14 +5305,16 @@ function stopVoice() {
 function parseManualVoiceInput() {
   const text = document.getElementById('manualVoiceInput').value.trim();
   if (!text) { showToast('请输入内容'); return; }
-  parseVoiceText(text, currentActionType);
+  parseVoiceWithAI(text, currentActionType).then(usedAI => {
+    if (!usedAI) parseVoiceText(text, currentActionType);
+  });
   document.getElementById('manualVoiceInput').value = '';
   showToast('✅ 已填入');
 }
 
 function parseVoiceText(text, mode) {
   const names = loadGoodsNames();
-  const results = matchGoodsFromText(text); // {idx: qty}，基于筐名+别名模糊匹配
+  const results = matchGoodsFromText(text); // {idx: qty}，基于筐名+别名模糊匹配（兜底）
   const count = Object.keys(results).length;
   if (count === 0) {
     document.getElementById('voiceTranscript').textContent = '未识别到筐名+数量，请重试';
@@ -5324,6 +5328,38 @@ function parseVoiceText(text, mode) {
   // 立即收起语音识别浮层（不等 onend 的500ms延迟），让确认框完全置顶显示
   document.getElementById('voiceOverlay').classList.remove('show');
   document.getElementById('voiceConfirmModal').classList.add('show');
+}
+
+// AI 语音理解入口：ASR 文本 → 大模型理解（中文数字/同音字/口语）→ 回退正则
+async function parseVoiceWithAI(text, mode) {
+  const names = loadGoodsNames();
+  const cfg = loadGoodsConfig();
+  const goodsConfig = cfg.map(g => ({ name: g.name, aliases: g.aliases || [] }));
+  let aiItems = null;
+  try {
+    const resp = await fetch(API_BASE + '/ai-voice', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, goodsConfig, mode })
+    });
+    const data = await resp.json();
+    if (data.ok && Array.isArray(data.items) && data.items.length > 0) {
+      aiItems = data.items;
+    }
+  } catch (e) { aiItems = null; }
+
+  if (aiItems && aiItems.length > 0) {
+    // AI 结果：合并同筐、转成 {idx: qty}
+    const results = {};
+    aiItems.forEach(it => { results[it.goodsIdx] = it.qty; });
+    pendingVoiceResults = { results, mode };
+    const rows = Object.keys(results).map(idx => `${names[idx]}：${results[idx]}`).join('，');
+    document.getElementById('voiceConfirmInfo').textContent = rows;
+    document.getElementById('voiceOverlay').classList.remove('show');
+    document.getElementById('voiceConfirmModal').classList.add('show');
+    return true;
+  }
+  return false; // AI 不可用/没解析出来 → 走正则兜底
 }
 let pendingVoiceResults = null;
 function confirmVoiceFill() {
@@ -7404,7 +7440,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.66'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.67'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
