@@ -18,8 +18,17 @@ export async function onRequest(context) {
   let body;
   try { body = await request.json(); } catch (e) { return json({ error: 'invalid json' }, 400); }
 
+  // 管理员密钥从环境变量读取（不写死在代码/前端），未配置则拒绝
+  const ADMIN_KEY = env.ADMIN_KEY || '';
   const adminKey = (body.adminKey || '').toString();
-  if (adminKey !== '8023.520') return json({ error: '管理员密钥错误' }, 401);
+
+  // POST /admin/verify  {adminKey}  验证管理员密钥（前端不保存/不写死密钥，仅本接口校验）
+  if (url.pathname.endsWith('/admin/verify')) {
+    if (!ADMIN_KEY) return json({ error: '管理员密钥未配置', ok: false }, 500);
+    return json({ ok: adminKey === ADMIN_KEY });
+  }
+
+  if (!ADMIN_KEY || adminKey !== ADMIN_KEY) return json({ error: '管理员密钥错误' }, 401);
 
   if (url.pathname.endsWith('/admin/stats')) {
     // 统计注册人数 + 用户列表（手机号+密码）+ 待恢复的注销账号（临时代码）

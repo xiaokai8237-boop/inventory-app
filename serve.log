@@ -1,0 +1,25 @@
+ INFO  Accepting connections at http://localhost:5000
+ HTTP  2026/8/3 16:35:54 127.0.0.1 GET /version.txt
+ HTTP  2026/8/3 16:35:54 127.0.0.1 Returned 200 in 11 ms
+ HTTP  2026/8/3 16:36:03 127.0.0.1 GET /
+ HTTP  2026/8/3 16:36:03 127.0.0.1 Returned 200 in 4 ms
+ HTTP  2026/8/3 16:36:03 127.0.0.1 GET /icon-512.png
+ HTTP  2026/8/3 16:36:03 127.0.0.1 Returned 200 in 3 ms
+ HTTP  2026/8/3 16:36:05 127.0.0.1 GET /sw.js
+ HTTP  2026/8/3 16:36:05 127.0.0.1 Returned 200 in 2 ms
+ HTTP  2026/8/3 16:36:05 127.0.0.1 GET /
+ HTTP  2026/8/3 16:36:05 127.0.0.1 GET /index.html
+ HTTP  2026/8/3 16:36:05 127.0.0.1 Returned 301 in 1 ms
+ HTTP  2026/8/3 16:36:05 127.0.0.1 GET /manifest.json
+ HTTP  2026/8/3 16:36:05 127.0.0.1 Returned 304 in 3 ms
+ HTTP  2026/8/3 16:36:05 127.0.0.1 GET /index
+ HTTP  2026/8/3 16:36:05 127.0.0.1 Returned 301 in 1 ms
+ HTTP  2026/8/3 16:36:05 127.0.0.1 Returned 200 in 3 ms
+ HTTP  2026/8/3 16:36:05 127.0.0.1 GET /
+ HTTP  2026/8/3 16:36:05 127.0.0.1 GET /icon-192.png
+ HTTP  2026/8/3 16:36:05 127.0.0.1 Returned 304 in 2 ms
+ HTTP  2026/8/3 16:36:05 127.0.0.1 GET /icon-512.png
+ HTTP  2026/8/3 16:36:05 127.0.0.1 Returned 304 in 1 ms
+ HTTP  2026/8/3 16:36:05 127.0.0.1 Returned 200 in 3 ms
+ HTTP  2026/8/3 16:37:49 127.0.0.1 POST /admin/verify
+ HTTP  2026/8/3 16:37:49 127.0.0.1 Returned 404 in 2 ms

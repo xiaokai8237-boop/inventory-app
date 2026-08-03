@@ -2065,6 +2065,30 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
 </div>
 
+<!-- 隐私政策同意弹窗 -->
+<div class="store-ocr-modal" id="privacyModal">
+  <div class="store-ocr-content" style="max-width:360px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span style="font-weight:700;font-size:16px;color:var(--text);">🔒 隐私政策与用户协议</span>
+    </div>
+    <div style="font-size:12px;color:var(--text);line-height:1.8;max-height:45vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:12px;margin-bottom:10px;">
+      欢迎使用本系统。为向您提供服务，我们会收集和使用以下信息：<br>
+      1. <b>账号信息</b>：手机号码（用于登录、账号隔离与云端备份）。<br>
+      2. <b>业务数据</b>：店面名称、每日收发记录、各筐库存数据。<br>
+      3. <b>识别内容</b>：您上传的照片/路单图片（仅用于文字识别，识别后即处理）。<br>
+      4. <b>语音内容</b>：语音录入的音频（仅用于转文字，不长期保存）。<br><br>
+      <b>信息用途</b>：仅用于本系统的数据录入、汇总统计与多设备云端同步。<br>
+      <b>信息存储</b>：数据存储于腾讯云/Cloudflare 服务端，仅供您的账号访问。<br>
+      <b>信息保护</b>：我们不会向第三方出售您的任何数据。<br><br>
+      继续使用即表示您已阅读并同意本隐私政策。您可以随时在「管理 → 使用说明」中查看。
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="rejectPrivacy()">不同意</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="acceptPrivacy()">同意并继续</button>
+    </div>
+  </div>
+</div>
+
 <!-- 管理员密码验证弹窗 -->
 <div class="store-ocr-modal" id="adminAuthModal" onclick="closeAdminAuthModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
@@ -2504,43 +2528,20 @@ function saveStoreConfig(cfg) {
   localStorage.setItem('kuanwei_last_save', new Date().toISOString()); // 记录本地最后保存时间（防云端旧数据覆盖）
   scheduleCloudBackup();
 }
-// 默认百度OCR密钥（应用：物流筐收发管理系统 / AppID 134982254 / 通用文字识别高精度版）— 已预置，本机开箱即用
-const DEFAULT_OCR_KEYS = { apiKey: 'iswwim5FqTQx8jVSjtJaFaIa', secretKey: 'sh3ji9lbaBNunDyHJTRfkbdUrh4xCZuZ' };
-
-// 本机 CORS 代理（同源，绕开浏览器跨域拦截；python proxy_server.py 提供）
+// 百度OCR：密钥已从前端移除，改由服务端（functions/baidu-ocr.js）持有，前端只传图片、由后端转发识别
+// 本机 CORS 代理（保留定义，兼容本地 python proxy_server.py 调试场景）
 const CORS_PROXY = (location.protocol === 'http:' || location.protocol === 'https:')
   ? '/proxy?url='
   : 'http://localhost:8080/proxy?url=';
 
-function loadOcrKeys() {
-  try {
-    const raw = localStorage.getItem(OCR_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return { apiKey: DEFAULT_OCR_KEYS.apiKey, secretKey: DEFAULT_OCR_KEYS.secretKey };
-}
-function saveOcrKeysStorage(keys) {
-  localStorage.setItem(OCR_KEY, JSON.stringify(keys));
-}
-
-// 获取百度 OCR access_token（带缓存：token 有效期30天，缓存24小时，避免每次都请求）
-async function getOcrAccessToken(apiKey, secretKey) {
-  const cacheKey = 'kuanwei_ocr_token_' + String(apiKey).slice(-6);
-  try {
-    const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
-    if (cached && cached.token && cached.expire > Date.now()) return cached.token;
-  } catch(e) {}
-  const tokenResp = await fetch(CORS_PROXY + encodeURIComponent('https://aip.baidubce.com/oauth/2.0/token'), {
+// 调用后端百度OCR转发接口（密钥在后端环境变量 BAIDU_API_KEY / BAIDU_SECRET_KEY）
+async function callBaiduOcr(imageBase64, endpoint) {
+  const resp = await fetch(API_BASE + '/baidu-ocr', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `grant_type=client_credentials&client_id=${apiKey}&client_secret=${secretKey}`
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ imageBase64, endpoint })
   });
-  const tokenData = await tokenResp.json();
-  if (!tokenData.access_token) throw new Error('获取token失败');
-  try {
-    localStorage.setItem(cacheKey, JSON.stringify({ token: tokenData.access_token, expire: Date.now() + 24 * 3600 * 1000 }));
-  } catch(e) {}
-  return tokenData.access_token;
+  return resp.json();
 }
 
 // ======== 云备份（Cloudflare KV） ========
@@ -2951,7 +2952,7 @@ async function pwdCompareCloud(phone, sentPassword) {
     const r = await fetch(API_BASE + '/admin/stats', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminKey: '8023.520' })
+      body: JSON.stringify({ adminKey: adminKey })
     });
     const res = await r.json();
     const u = (res.users || []).find(x => x.phone === phone);
@@ -3315,14 +3316,24 @@ let adminUsers = [];
 let adminKey = ''; // 验证通过后保存的管理员密码，供面板内操作使用（无需二次输入）
 function openAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('show'); document.getElementById('adminAuthErr').style.display = 'none'; }
 function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.remove('show'); }
-function doAdminAuth() {
+async function doAdminAuth() {
   const pwd = document.getElementById('adminAuthPwd').value;
-  if (pwd === '8023.520') {
-    adminKey = pwd;
-    document.getElementById('adminAuthPwd').value = '';
-    closeAdminAuthModal();
-    openAdminModal();
-  } else {
+  try {
+    const resp = await fetch(API_BASE + '/admin/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey: pwd })
+    });
+    const res = await resp.json();
+    if (res.ok) {
+      adminKey = pwd; // 仅保存在内存变量中，供本次会话面板操作使用，不写入前端源码/localStorage
+      document.getElementById('adminAuthPwd').value = '';
+      closeAdminAuthModal();
+      openAdminModal();
+    } else {
+      document.getElementById('adminAuthErr').style.display = 'block';
+    }
+  } catch(e) {
     document.getElementById('adminAuthErr').style.display = 'block';
   }
 }
@@ -5362,46 +5373,26 @@ function handlePhoto(event) {
 }
 
 async function doOCR(imageDataUrl, file) {
-  const keys = loadOcrKeys();
-  if (!keys.apiKey || !keys.secretKey) {
-    hideLoading(); // 关键：未配置密钥时先关掉加载遮罩，避免全屏卡死
-    showToast('请先在设置页配置百度OCR密钥');
-    return;
-  }
-
   showLoading('正在识别…');
   try {
-    // 1. 获取 access token（带缓存，24小时内不重复请求）
-    updateLoadingStep('正在准备…', 5);
-    const accessToken = await getOcrAccessToken(keys.apiKey, keys.secretKey);
-    if (!accessToken) throw new Error('获取token失败');
-    checkOcrCancel();
-
-    // 2. 压缩图片（本地预处理，毫秒级）
+    // 1. 压缩图片（本地预处理，毫秒级）
     updateLoadingStep('正在处理图片…', 10);
     const compressedBase64 = await compressImage(imageDataUrl, 1600);
     const imgBase64 = compressedBase64.replace(/^data:image\/\w+;base64,/, '');
-    const imgEnc = encodeURIComponent(imgBase64);
     checkOcrCancel();
 
-    // 3. 并行调用：表格识别（结构化）+ 通用高精度（兜底/交叉验证）
+    // 2. 并行调用后端：表格识别（结构化）+ 通用高精度（兜底/交叉验证）
     updateLoadingStep('🔍 正在定位表格…', 25);
     let ocrData = null;
     let usedTable = false;
     let generalWords = null;
     try {
-      const [tblPromise, genPromise] = await Promise.all([
-        fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/table?access_token=${accessToken}`), {
-          method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: `image=${imgEnc}`
-        }),
-        fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=${accessToken}`), {
-          method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `image=${imgEnc}&language_type=CHN_ENG&detect_direction=true&paragraph=false&probability=false`
-        })
+      const [tblData, genData] = await Promise.all([
+        callBaiduOcr(imgBase64, 'table'),
+        callBaiduOcr(imgBase64, 'accurate_basic')
       ]);
       checkOcrCancel();
       updateLoadingStep('🔍 正在识别文字…', 55);
-      const [tblData, genData] = await Promise.all([tblPromise.json(), genPromise.json()]);
       if (genData.words_result) generalWords = genData.words_result.map(x => x.words);
       // 表格识别成功 → 用表格结构化结果
       if (tblData.tables_result && tblData.tables_result.length > 0) {
@@ -5429,10 +5420,7 @@ async function doOCR(imageDataUrl, file) {
       if (/(鲜食|手写|顶汇|当日出框)/.test(blob)) {
         try {
           updateLoadingStep('✍️ 检测到手写单，增强识别…', 70);
-          const hwResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/handwriting?access_token=${accessToken}`), {
-            method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: `image=${imgEnc}&language_type=CHN_ENG`
-          });
-          const hwData = await hwResp.json();
+          const hwData = await callBaiduOcr(imgBase64, 'handwriting');
           if (hwData.words_result) handwritingWords = hwData.words_result.map(x => x.words);
         } catch(e) {}
       }
@@ -7098,24 +7086,11 @@ function handleStorePhoto(event) {
 }
 
 async function doStoreOCR(imageDataUrl) {
-  const keys = loadOcrKeys();
-  if (!keys.apiKey || !keys.secretKey) {
-    hideLoading(); // 关键：未配置密钥时先关掉加载遮罩，避免全屏卡死
-    showToast('请先在设置页配置百度OCR密钥');
-    return;
-  }
   showLoading('正在识别店面…');
   try {
-    // 获取 access token（带缓存）
-    const accessToken = await getOcrAccessToken(keys.apiKey, keys.secretKey);
     const compressedBase64 = await compressImage(imageDataUrl, 1600);
     const imgBase64 = compressedBase64.replace(/^data:image\/\w+;base64,/, '');
-    const ocrResp = await fetch(CORS_PROXY + encodeURIComponent(`https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=${accessToken}`), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `image=${encodeURIComponent(imgBase64)}&language_type=CHN_ENG&detect_direction=true&paragraph=false&probability=false`
-    });
-    const ocrData = await ocrResp.json();
+    const ocrData = await callBaiduOcr(imgBase64, 'accurate_basic');
     hideLoading();
     if (!ocrData.words_result) throw new Error(ocrData.error_msg || '识别失败');
     showStoreOcrResult(ocrData);
@@ -7293,7 +7268,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.63'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.64'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -7307,8 +7282,24 @@ renderTodayStatus();
 initRecordPage();
 initGoodsFilter();
 initSummaryPage();
+// 隐私政策同意（首次进入必须同意，否则阻止使用）
+function initPrivacyConsent() {
+  try {
+    if (localStorage.getItem('kuanwei_privacy_consent')) return;
+    document.getElementById('privacyModal').classList.add('show');
+  } catch(e) {}
+}
+function acceptPrivacy() {
+  try { localStorage.setItem('kuanwei_privacy_consent', '1'); } catch(e) {}
+  document.getElementById('privacyModal').classList.remove('show');
+}
+function rejectPrivacy() {
+  showToast('不同意隐私政策将无法使用本系统');
+}
+
 // 新用户首次打开自动弹出欢迎引导（含使用说明入口）
 initWelcome();
+initPrivacyConsent();
 // 云备份恢复（清缓存/换手机后自动从云端拉取数据）
 restoreFromCloud();
 // 定时兜底备份：无操作时每30分钟自动备份一次（后台静默）
