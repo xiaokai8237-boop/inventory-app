@@ -1093,14 +1093,6 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   flex: 1; text-align: center; font-size: 14px; font-weight: 600;
 }
 
-/* 库存追踪 */
-.track-row {
-  display: flex; gap: 6px; align-items: center; margin-bottom: 8px;
-}
-.track-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-.track-tbl th { background: var(--soft-bg); padding: 7px 4px; text-align: center; font-weight: 600; }
-.track-tbl td { padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--border); }
-
 /* 备份页 */
 .backup-step {
   background: var(--soft-bg); border-radius: 8px; padding: 10px; margin-bottom: 8px;
@@ -1147,8 +1139,7 @@ html[data-theme="dark"] div[style*="color:#b45309"] { color: #fbbf24 !important;
 html[data-theme="dark"] div[style*="#f0fdf4"], html[data-theme="dark"] span[style*="#f0fdf4"] { background: #16301f !important; }
 html[data-theme="dark"] div[style*="background:#eaf3fc"] { background: var(--soft-bg) !important; }
 html[data-theme="dark"] div[style*="background:#f0f7ff"] { background: var(--soft-bg) !important; }
-/* 类名定义的浅色背景，深色下统一转深（库存表头/备份步骤/别名校验/导入区/对账差异行） */
-html[data-theme="dark"] .track-tbl th { background: var(--soft-bg) !important; color: var(--text) !important; }
+/* 类名定义的浅色背景，深色下统一转深（备份步骤/别名校验/导入区/对账差异行） */
 html[data-theme="dark"] .backup-step { background: var(--soft-bg) !important; }
 html[data-theme="dark"] .sc-alias { background: var(--soft-bg) !important; color: var(--primary) !important; }
 html[data-theme="dark"] .import-zone { background: var(--soft-bg) !important; }
@@ -1473,28 +1464,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
   </div>
 
-  <!-- === 库存追踪面板 === -->
-  <div class="manage-panel" id="trackPanel">
-    <div class="card panel-header">
-      <button class="back-btn" onclick="backFromTrackPanel()">← 返回</button>
-      <span class="panel-title">📊 库存追踪</span>
-    </div>
-    <div class="card">
-      <div class="track-row">
-        <span style="font-size:13px;font-weight:600;flex:0 0 50px;">发出日</span>
-        <input type="date" class="form-input" id="trackDate" style="flex:1;padding:8px;font-size:13px;" onchange="renderTrack()">
-      </div>
-      <div class="track-row">
-        <span style="font-size:13px;font-weight:600;flex:0 0 50px;">店面</span>
-        <select class="form-select" id="trackStore" style="flex:1;padding:8px;font-size:13px;" onchange="renderTrack()"><option value="">所有店</option></select>
-      </div>
-    </div>
-    <div class="card">
-      <div style="font-size:14px;font-weight:600;margin-bottom:6px;">追踪结果</div>
-      <div id="trackResult" style="font-size:13px;color:var(--text-light);">请选择发出日期后查看</div>
-    </div>
-  </div>
-
   <!-- === 数据备份面板 === -->
   <div class="manage-panel" id="backupPanel">
     <div class="card panel-header">
@@ -1548,7 +1517,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   <div class="card" style="padding:0;overflow:hidden;">
     <button class="manage-item" onclick="openStorePanel()"><span class="mi-icon">🏪</span><span class="mi-title">店面管理</span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openGoodsPanel()"><span class="mi-icon">📦</span><span class="mi-title">框名设置</span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="openTrackPanel()"><span class="mi-icon">📊</span><span class="mi-title">库存追踪</span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openBackupPanel()"><span class="mi-icon">💾</span><span class="mi-title">备份与恢复</span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('summary')"><span class="mi-icon">📈</span><span class="mi-title">汇总</span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('reconcile')"><span class="mi-icon">🔄</span><span class="mi-title">对账</span><span class="mi-arrow">›</span></button>
@@ -4580,20 +4548,6 @@ function backFromGoodsPanel() {
   document.getElementById('goodsManagePanel').style.display = 'none';
   switchPage('manage');
 }
-function openTrackPanel() {
-  switchPage('record');
-  document.getElementById('homeWizard').style.display = 'none';
-  document.getElementById('trackPanel').style.display = 'block';
-  document.getElementById('trackDate').value = todayStr();
-  const sel = document.getElementById('trackStore');
-  populateStoreFilter('trackStore');
-  sel.value = '';
-  renderTrack();
-}
-function backFromTrackPanel() {
-  document.getElementById('trackPanel').style.display = 'none';
-  switchPage('manage');
-}
 function openBackupPanel() {
   switchPage('record');
   document.getElementById('homeWizard').style.display = 'none';
@@ -4749,8 +4703,6 @@ function initAllStores() {
   populateStoreFilter('filterStore');
   populateStoreFilter('summaryStore');
   populateStoreFilter('exportStore');
-  const ts = document.getElementById('trackStore');
-  if (ts) populateStoreFilter('trackStore');
 }
 
 // ======== 框名管理面板 ========
@@ -4861,53 +4813,6 @@ function goViewGoodsData() {
 function setFilterDateRange(idFrom, fromDate, toDate) {
   const inp = document.getElementById(idFrom);
   if (inp) inp.value = fromDate;
-}
-
-// ======== 库存追踪 ========
-function renderTrack() {
-  const date = document.getElementById('trackDate').value;
-  if (!date) { document.getElementById('trackResult').innerHTML = '<span style="color:var(--text-light);">请选择发出日期后查看</span>'; return; }
-  const storeSel = document.getElementById('trackStore');
-  const storeVal = storeSel ? storeSel.value : '';
-  let data = loadData();
-  // 筛选：只取该发出日期 + 符合条件的店面（排除额外发收，无店面归属不追踪）
-  const outRecords = data.filter(r => r.date === date && r.qtyIn > 0 && !r.extra && r.storeIdx !== -1 && (storeVal === '' || r.storeIdx === parseInt(storeVal)));
-  // 对于每个店面+筐，统计发出量 vs 截止今日的回收量
-  const today = todayStr();
-  const names = loadGoodsConfig();
-  const track = {}; // key: "storeIdx-goodsIdx"
-  outRecords.forEach(r => {
-    const key = r.storeIdx + '-' + r.goodsIdx;
-    if (!track[key]) track[key] = { storeIdx: r.storeIdx, goodsIdx: r.goodsIdx, name: names[r.goodsIdx]?.name || '?' , sent: 0, returned: 0 };
-    track[key].sent += r.qtyIn;
-  });
-  // 对每个店面+筐，查该店在发出日期之后的所有回收记录
-  Object.keys(track).forEach(key => {
-    const t = track[key];
-    const rets = data.filter(r =>
-      r.date > date && r.date <= today &&
-      r.storeIdx === t.storeIdx &&
-      r.goodsIdx === t.goodsIdx &&
-      r.qtyOut > 0
-    );
-    rets.forEach(r => t.returned += r.qtyOut);
-  });
-  const entries = Object.values(track);
-  if (entries.length === 0) {
-    document.getElementById('trackResult').innerHTML = '<span style="color:var(--text-light);">该日期无发出记录</span>';
-    return;
-  }
-  let html = '<table class="track-tbl"><thead><tr><th>店面</th><th>筐类型</th><th>发出</th><th>已回收</th><th>待回收</th></tr></thead><tbody>';
-  let totalSent = 0, totalRet = 0;
-  entries.forEach(t => {
-    const pending = t.sent - t.returned;
-    html += `<tr><td>${escapeHtml(loadStoreNames()[t.storeIdx] || '?')}</td><td>${escapeHtml(t.name)}</td><td>${t.sent}</td><td>${t.returned}</td><td style="color:${pending>0?'var(--danger)':'var(--success)'};font-weight:600;">${pending}</td></tr>`;
-    totalSent += t.sent; totalRet += t.returned;
-  });
-  const totalPending = totalSent - totalRet;
-  html += `<tr class="total-row"><td>合计</td><td></td><td>${totalSent}</td><td>${totalRet}</td><td style="color:${totalPending>0?'var(--danger)':'var(--success)'};font-weight:600;">${totalPending}</td></tr>`;
-  html += '</tbody></table>';
-  document.getElementById('trackResult').innerHTML = html;
 }
 
 // ======== 备份教程弹窗 ========
@@ -7601,7 +7506,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.60'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.61'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
