@@ -1180,6 +1180,9 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
     <!-- 今日状态（主页面下方） -->
     <div class="card" id="todayStatusCard" style="padding:14px;"></div>
+
+    <!-- 今日各店明细（主页最下方） -->
+    <div class="card" id="todayStoreDetailCard" style="padding:14px;"></div>
   </div>
 
   <!-- === 手动录入表单（点击手动录入后显示） === -->
@@ -1247,11 +1250,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       </div>
       <div class="home-grid-row" style="margin-top:10px;">
       </div>
-    </div>
-
-    <div class="card">
-      <div class="form-label" style="margin-bottom:8px;">📊 今日各筐统计（全部门店）</div>
-      <div id="todayOverview"></div>
     </div>
 
     <!-- 额外发收登记弹窗（针对所有门店） -->
@@ -5037,42 +5035,18 @@ function autoNextStore() {
   reloadRecordInputs();
 }
 
-// ======== 今日概览 ========
+// ======== 今日概览（主页最下方：今日各店明细） ========
 function renderTodayOverview() {
   const today = todayStr();
   const data = loadData();
   const names = loadGoodsNames();
   // 今日全部门店的记录（不再限定当前店面）
   const todayRecords = data.filter(r => r.date === today);
-  const container = document.getElementById('todayOverview');
+  const container = document.getElementById('todayStoreDetailCard');
   if (todayRecords.length === 0) {
-    container.innerHTML = '<div class="empty">今日暂无记录</div>';
+    container.innerHTML = '<div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">📋 今日各店明细</div><div class="empty">今日暂无记录</div>';
     return;
   }
-  const totals = {};
-  names.forEach((name, i) => { totals[i] = { in: 0, out: 0 }; });
-  todayRecords.forEach(r => {
-    if (totals[r.goodsIdx]) {
-      totals[r.goodsIdx].in += r.qtyIn || 0;
-      totals[r.goodsIdx].out += r.qtyOut || 0;
-    }
-  });
-  let html = '<div class="stat-grid">';
-  let anyShow = false;
-  names.forEach((name, i) => {
-    if (totals[i].in === 0 && totals[i].out === 0) return;
-    anyShow = true;
-    html += `
-      <div class="stat-card">
-        <div class="stat-name">${name}</div>
-        <div class="stat-vals">
-          <div><div class="stat-lbl">发</div><div class="stat-val in">${totals[i].in}</div></div>
-          <div><div class="stat-lbl">回</div><div class="stat-val out">${totals[i].out}</div></div>
-        </div>
-      </div>`;
-  });
-  html += '</div>';
-
   // 今日各店明细表（每店一行，各筐发出/回收）
   const storeMap = {};
   todayRecords.forEach(r => {
@@ -5087,8 +5061,9 @@ function renderTodayOverview() {
       storeMap[r.storeIdx].rows[r.goodsIdx].out += r.qtyOut || 0;
     }
   });
+  let html = '<div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">📋 今日各店明细</div>';
   if (storeKeys.length > 0) {
-    html += '<div style="margin-top:10px;"><div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">📋 今日各店明细</div><div style="overflow-x:auto;"><table class="summary-table" style="min-width:100%;"><thead><tr><th style="text-align:left;">店面</th>';
+    html += '<div style="overflow-x:auto;"><table class="summary-table" style="min-width:100%;"><thead><tr><th style="text-align:left;">店面</th>';
     names.forEach((n, i) => { html += `<th>${n}<br><span style="font-weight:400;font-size:10px;">发/回</span></th>`; });
     html += '</tr></thead><tbody>';
     storeKeys.forEach(sk => {
@@ -5100,10 +5075,11 @@ function renderTodayOverview() {
       });
       html += '</tr>';
     });
-    html += '</tbody></table></div></div>';
+    html += '</tbody></table></div>';
+  } else {
+    html += '<div class="empty">今日暂无记录</div>';
   }
-
-  container.innerHTML = anyShow ? html : '<div class="empty">今日暂无记录</div>';
+  container.innerHTML = html;
   renderTodayStatus(); // 同步刷新今日状态卡片
 }
 
@@ -7319,7 +7295,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.62'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.63'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
