@@ -7,6 +7,12 @@
 # 浏览器自动化/语法检查临时产物
 .playwright-cli/
 _check.js
+_shot_*.js
+layout-preview.png
+palette-preview.png
+shot-fixed-*.png
+ui-pages.png
+ui-popups.png
 
 # Capacitor / Android 构建产物（不提交）
 node_modules/
