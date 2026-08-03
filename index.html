@@ -1166,10 +1166,10 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <button class="back-btn" onclick="openEmitStoreOrderModal()">调整店序</button>
     </div>
 
-    <div class="card" style="padding:10px 12px;">
+    <div class="card" style="padding:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-size:14px;font-weight:700;color:var(--text);">📦 <span id="emitGoodsLabel">请选择筐</span></span>
-        <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;" onclick="openEmitGoodsSelect()">切换筐</button>
+        <span style="display:flex;align-items:center;gap:8px;font-size:22px;font-weight:800;color:var(--primary);"><span id="emitGoodsIcon">🗳️</span><span id="emitGoodsLabel">请选择筐</span></span>
+        <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;width:auto;min-width:0;" onclick="openEmitGoodsSelect()">切换</button>
       </div>
       <div style="font-size:11px;color:var(--text-light);">在各店面后填写「<span id="emitModeLabel">发出</span>」数量，输完点键盘"确定"自动跳下一家</div>
     </div>
@@ -1231,6 +1231,17 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
         <button class="btn btn-outline" style="flex:1;" onclick="closeEmitVoiceConfirm()">✕ 取消</button>
         <button class="btn btn-primary" style="flex:1;" onclick="applyEmitVoice()">✅ 确认填入</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 保存成功提示框：回到主页 / 切换筐 -->
+  <div class="store-ocr-modal" id="emitSaveResultModal">
+    <div class="store-ocr-content" style="max-width:320px;" onclick="event.stopPropagation()">
+      <div style="text-align:center;font-size:20px;margin-bottom:6px;">✅</div>
+      <div style="text-align:center;font-weight:700;font-size:17px;color:var(--text);margin-bottom:4px;">保存成功</div>
+      <div id="emitSaveSummary" style="text-align:center;font-size:13px;color:var(--text-light);margin-bottom:14px;"></div>
+      <button class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;margin-bottom:8px;" onclick="emitSaveGoHome()">🏠 回到主页</button>
+      <button class="btn btn-outline" style="width:100%;padding:12px;font-size:15px;" onclick="emitSaveSwitchGoods()">🔁 切换筐</button>
     </div>
   </div>
 
@@ -3539,13 +3550,26 @@ function saveEmitOrder(order) {
   try { localStorage.setItem(EMIT_ORDER_KEY, JSON.stringify(emitOrder)); } catch(e) {}
 }
 
+// 筐类型 → 专属图标（5种筐各不相同）
+function goodsIcon(name) {
+  const n = name || '';
+  if (n.indexOf('鲜') !== -1 || n.indexOf('冷鲜') !== -1) return '🥬';
+  if (n.indexOf('面包') !== -1 || n.indexOf('面') !== -1) return '🍞';
+  if (n.indexOf('低温') !== -1) return '🧊';
+  if (n.indexOf('冷冻') !== -1) return '❄️';
+  if (n.indexOf('常温') !== -1) return '📦';
+  if (n.indexOf('回收') !== -1 || n.indexOf('脏') !== -1) return '♻️';
+  if (n.indexOf('可回收') !== -1) return '🔄';
+  return '🗳️';
+}
+
 // 打开筐类型选择弹窗
 function openEmitGoodsSelect() {
   const names = loadGoodsNames();
   const container = document.getElementById('emitGoodsButtons');
   if (!container) return;
   container.innerHTML = names.map((n, i) =>
-    `<button class="btn btn-outline" style="width:100%;padding:12px;font-size:15px;" onclick="selectEmitGoods(${i})">📦 ${escapeHtml(n)}</button>`
+    `<button class="btn btn-outline" style="width:100%;padding:12px;font-size:15px;display:flex;align-items:center;gap:10px;" onclick="selectEmitGoods(${i})"><span style="font-size:22px;">${goodsIcon(n)}</span><span style="flex:1;text-align:left;">${escapeHtml(n)}</span></button>`
   ).join('');
   document.getElementById('emitGoodsSelectModal').classList.add('show');
 }
@@ -3558,6 +3582,7 @@ function selectEmitGoods(idx) {
   emitGoodsIdx = idx;
   emitGoodsName = names[idx];
   document.getElementById('emitGoodsLabel').textContent = emitGoodsName;
+  document.getElementById('emitGoodsIcon').textContent = goodsIcon(emitGoodsName);
   closeEmitGoodsSelect();
   renderEmitStoreList();
   // 如果发出面板还没开，则打开
@@ -3671,10 +3696,21 @@ function saveEmitRecords() {
   });
   if (records.length === 0) { showToast('请至少填一家店的数量'); return; }
   saveDataArr([...filtered, ...records]);
-  showToast('✅ 已保存 ' + records.length + ' 家店 · 共 ' + records.reduce((s, r) => s + r.qtyIn, 0) + ' 个');
   renderTodayOverview();
   refreshRecordViews();
+  // 弹保存成功提示框（回到主页 / 切换筐）
+  const total = records.reduce((s, r) => s + r.qtyIn, 0);
+  document.getElementById('emitSaveSummary').textContent = '已保存 ' + records.length + ' 家店 · 共 ' + total + ' 个「' + goodsName + '」';
+  document.getElementById('emitSaveResultModal').classList.add('show');
+}
+function emitSaveGoHome() {
+  document.getElementById('emitSaveResultModal').classList.remove('show');
   closeEmitPanel();
+}
+function emitSaveSwitchGoods() {
+  document.getElementById('emitSaveResultModal').classList.remove('show');
+  // 保留当前店序，弹出筐选择；发出页保持打开
+  openEmitGoodsSelect();
 }
 
 // ===== 调整店序弹窗 =====
@@ -6959,7 +6995,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.37'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.38'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
