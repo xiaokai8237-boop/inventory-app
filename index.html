@@ -448,6 +448,11 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 .today-status-box .tsb-num.in { color: var(--success); }
 .today-status-box .tsb-num.out { color: var(--danger); }
 .today-status-box .tsb-lbl { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+/* 今日发出：按筐分列（紧凑） */
+.today-emit-list { flex: 1.4; display: flex; flex-direction: column; gap: 3px; padding: 8px; border-radius: 10px; background: var(--soft-bg); border: 1px solid var(--border); }
+.today-emit-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; padding: 1px 4px; line-height: 1.5; }
+.today-emit-row .ter-name { display: flex; align-items: center; gap: 5px; color: var(--text); }
+.today-emit-row .ter-num { font-size: 15px; font-weight: 700; color: var(--success); }
 .today-status-progress { margin-top: 4px; }
 .today-status-progress .tsp-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-light); margin-bottom: 4px; }
 .today-status-bar { height: 8px; background: var(--soft-bg); border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
@@ -4868,11 +4873,15 @@ function renderTodayStatus() {
   const stores = getSortedStores();
   // 今日各店是否已录入（含额外发收记录，storeIdx=-1 单列）
   const todayRecords = data.filter(r => r.date === today);
+  const names = loadGoodsNames();
   let totalIn = 0, totalOut = 0;
+  const emitByBasket = {};
+  names.forEach((n, i) => { emitByBasket[i] = 0; });
   const doneSet = new Set();
   let hasExtra = false;
   todayRecords.forEach(r => {
     totalIn += r.qtyIn || 0; totalOut += r.qtyOut || 0;
+    if (emitByBasket[r.goodsIdx] !== undefined) emitByBasket[r.goodsIdx] += r.qtyIn || 0;
     if (r.storeIdx === -1) { hasExtra = true; return; }
     if (r.storeIdx !== undefined) doneSet.add(r.storeIdx);
   });
@@ -4888,9 +4897,13 @@ function renderTodayStatus() {
     <div class="today-status-title">📊 今日状态</div>
     <div class="today-status-date">${today}</div>
   </div>`;
+  // 今日发出：按筐分列（5种筐各显示发出数，无数据为0）
+  let emitRows = '';
+  names.forEach((n, i) => {
+    emitRows += `<div class="today-emit-row"><div class="ter-name">${goodsIcon(n)}<span>${escapeHtml(n)}</span></div><div class="ter-num">${emitByBasket[i]}</div></div>`;
+  });
   html += `<div class="today-status-sum">
-    <div class="today-status-box"><div class="tsb-num in">${totalIn}</div><div class="tsb-lbl">今日发出</div></div>
-    <div class="today-status-box"><div class="tsb-num out">${totalOut}</div><div class="tsb-lbl">今日回收</div></div>
+    <div class="today-emit-list">${emitRows}</div>
     <div class="today-status-box"><div class="tsb-num">${doneCount}/${totalStores}</div><div class="tsb-lbl">已录店面</div></div>
   </div>`;
   // 录入进度条
@@ -6992,7 +7005,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.40'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.41'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
