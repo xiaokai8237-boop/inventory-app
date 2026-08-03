@@ -2544,6 +2544,46 @@ async function callBaiduOcr(imageBase64, endpoint) {
   return resp.json();
 }
 
+// 调用后端腾讯混元视觉大模型（/hunyuan，密钥在后端 TENCENT_SECRET_ID/KEY）
+async function callHunyuanVision(imageBase64) {
+  try {
+    const resp = await fetch(API_BASE + '/hunyuan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64 })
+    });
+    return await resp.json();
+  } catch (e) { return null; }
+}
+
+// 解析混元返回的 JSON 文本（可能带 markdown 代码块或前后噪音）→ rows 数组
+function parseHunyuanRows(text) {
+  if (!text) return null;
+  let t = String(text).trim();
+  // 去掉 ```json ... ``` 包裹
+  const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fence) t = fence[1].trim();
+  // 提取第一个 [ 到最后一个 ]
+  const start = t.indexOf('[');
+  const end = t.lastIndexOf(']');
+  if (start < 0 || end <= start) return null;
+  let arr;
+  try { arr = JSON.parse(t.slice(start, end + 1)); } catch (e) { return null; }
+  if (!Array.isArray(arr) || arr.length === 0) return null;
+  const rows = [];
+  for (const it of arr) {
+    if (!it || typeof it !== 'object') continue;
+    const rawCode = String(it.code || '');
+    const m = rawCode.match(/(\d{1,3})\s*[-–−_]\s*(\d{1,3})/);
+    if (!m) continue;
+    const code = parseInt(m[1], 10) + '-' + parseInt(m[2], 10);
+    let qty = parseInt(it.qty, 10);
+    if (isNaN(qty) || qty < 0) qty = 0;
+    rows.push({ code, name: String(it.name || '').trim(), nums: [qty], _rawNums: [qty], _highConf: true, _ai: true });
+  }
+  return rows.length > 0 ? rows : null;
+}
+
 // ======== 云备份（Cloudflare KV） ========
 function getDeviceId() {
   let id = localStorage.getItem('kuanwei_device_id');
@@ -5381,6 +5421,10 @@ async function doOCR(imageDataUrl, file) {
     const imgBase64 = compressedBase64.replace(/^data:image\/\w+;base64,/, '');
     checkOcrCancel();
 
+    // 1.5 并行启动腾讯混元视觉大模型识别（AI 主通道，理解表格结构）
+    updateLoadingStep('🤖 AI 视觉识别启动…', 15);
+    const hunyuanPromise = callHunyuanVision(imgBase64).catch(() => null);
+
     // 2. 并行调用后端：表格识别（结构化）+ 通用高精度（兜底/交叉验证）
     updateLoadingStep('🔍 正在定位表格…', 25);
     let ocrData = null;
@@ -5412,6 +5456,22 @@ async function doOCR(imageDataUrl, file) {
     if (!ocrData && generalWords && generalWords.length > 0) {
       ocrData = { words_result: generalWords.map(w => ({ words: w })) };
     }
+
+    // 4.5 等混元结果：AI 识别成功则作为主结果（高置信）
+    let hunyuanRows = null;
+    let hcData = null;
+    try {
+      hcData = await hunyuanPromise;
+      if (hcData && hcData.ok && hcData.text) {
+        hunyuanRows = parseHunyuanRows(hcData.text);
+        if (hunyuanRows) updateLoadingStep('🤖 AI 识别完成，正在整理…', 70);
+      }
+    } catch(e) {}
+    if (!hunyuanRows) {
+      // 混元失败/超时 → 标记需要回退，不报错（老流程兜底）
+      updateLoadingStep('🤖 AI 识别不可用，走双引擎兜底…', 45);
+    }
+    checkOcrCancel();
 
     // 5. 手写单增强：检测「鲜食/手写」→ 调用手写专用 API 补充（提高数字识别率）
     let handwritingWords = null;
@@ -5447,7 +5507,8 @@ async function doOCR(imageDataUrl, file) {
     hideLoading();
     checkOcrCancel();
 
-    if (!ocrData || !ocrData.words_result) {
+    // 混元 AI 成功 → 不需要百度结果；否则必须要有百度结果，否则失败
+    if (!hunyuanRows && (!ocrData || !ocrData.words_result)) {
       throw new Error(ocrData?.error_msg || '识别失败');
     }
 
@@ -5455,9 +5516,49 @@ async function doOCR(imageDataUrl, file) {
     ocrData._highConf = !!usedTable;
 
     // 6. 解析识别结果
-    parseOcrResult(ocrData);
-    // 7. 交叉验证：腾讯云结果与百度结果对比，不一致标黄
-    crossValidateOcr(ocrCurrentResult, tcloudWords);
+    if (hunyuanRows) {
+      // ===== AI 主通道：直接用混元结构化结果（无需百度解析） =====
+      const names = loadGoodsNames();
+      const cfg = loadGoodsConfig();
+      // 抬头判断筐类型（复用现有逻辑，用混元原始文本）
+      let goodsIdx = -1;
+      const allText = (hcData && hcData.text || '') + ' ' + (ocrData ? (ocrData.words_result || []).map(x => x.words).join(' ') : '');
+      const headerKeywords = cfg.map((g, idx) => {
+        const base = [g.name, ...g.aliases].filter(Boolean);
+        const ws = [];
+        base.forEach(b => { ws.push(b); ws.push(b + '配送'); ws.push(b + '路单'); });
+        return { idx, words: ws };
+      });
+      for (let p of headerKeywords) {
+        for (let kw of p.words) {
+          if (allText.includes(kw)) { goodsIdx = p.idx; break; }
+        }
+        if (goodsIdx >= 0) break;
+      }
+      ocrCurrentResult = {
+        goodsIdx,
+        rows: hunyuanRows.map(r => ({ ...r, nums: r.nums.slice() })),
+        _rawTotalNums: [],
+        totalNums: [0],
+        logisticsColIdx: 0,
+        rawText: allText,
+        words: allText.split('\n').slice(0, 30),
+        trayType: goodsIdx >= 0 ? names[goodsIdx] : '未识别',
+        _aiUsed: true
+      };
+      // AI 结果也做"门店固定"补行（双保险：混元漏行时按配置店补 0）
+      ocrCurrentResult.rows = fillMissingStores(ocrCurrentResult.rows, loadStoreConfig());
+      document.getElementById('ocrModeLabel').textContent = currentActionType === 'out' ? '回收' : '发出';
+      document.getElementById('ocrGoodsLabel').textContent = ocrCurrentResult.trayType;
+      const rawEl = document.getElementById('ocrRawText');
+      if (rawEl) rawEl.textContent = ocrCurrentResult.rawText;
+      refreshOcrQtyCol();
+      document.getElementById('ocrResultModal').classList.add('show');
+    } else {
+      parseOcrResult(ocrData);
+      // 7. 交叉验证：腾讯云结果与百度结果对比，不一致标黄
+      crossValidateOcr(ocrCurrentResult, tcloudWords);
+    }
     refreshOcrQtyCol();
 
     // 7. 识别完成，关闭拍照弹窗，只保留结果弹窗
@@ -7268,7 +7369,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.64'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.65'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
