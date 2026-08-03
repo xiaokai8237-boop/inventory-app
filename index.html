@@ -1546,7 +1546,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 <div class="page" id="page-manage">
   <div class="card manage-user-card" id="manageUserCard" style="padding:14px;"></div>
   <div class="card" style="padding:0;overflow:hidden;">
-    <button class="manage-item" onclick="openStorePanel()"><span class="mi-icon">🏪</span><span class="mi-title">店面管理</span><span class="mi-badge" id="manageStoreBadge" style="display:none;">0</span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openStorePanel()"><span class="mi-icon">🏪</span><span class="mi-title">店面管理</span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openGoodsPanel()"><span class="mi-icon">📦</span><span class="mi-title">框名设置</span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openTrackPanel()"><span class="mi-icon">📊</span><span class="mi-title">库存追踪</span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openBackupPanel()"><span class="mi-icon">💾</span><span class="mi-title">备份与恢复</span><span class="mi-arrow">›</span></button>
@@ -7074,13 +7074,6 @@ function renderManage() {
       </div>
       ${extraBtn ? `<div class="manage-user-extra">${extraBtn}</div>` : ''}`;
   }
-  // 2) 店面管理角标：当前店面数
-  const stores = loadStoreConfig();
-  const badge = document.getElementById('manageStoreBadge');
-  if (badge) {
-    if (stores.length > 0) { badge.style.display = ''; badge.textContent = stores.length; }
-    else { badge.style.display = 'none'; }
-  }
 }
 // 管理页头部账号功能气泡（含设置头像）
 function toggleManageAccountMenu(e) {
@@ -7606,7 +7599,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.56'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.57'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
