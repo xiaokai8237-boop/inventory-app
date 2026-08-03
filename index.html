@@ -1046,7 +1046,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div style="font-size:16px;font-weight:600;margin-bottom:16px;">选择操作</div>
       <!-- 第一行：发出/回收（主操作，突出） -->
       <div class="home-grid-row" style="margin-bottom:12px;">
-        <button class="home-btn-main home-btn-issue" onclick="manualEntry('in')"><span class="hb-icon">📤</span>发出</button>
+        <button class="home-btn-main home-btn-issue" onclick="openEmitFlow()"><span class="hb-icon">📤</span>发出</button>
         <button class="home-btn-main home-btn-recover" onclick="manualEntry('out')"><span class="hb-icon">📥</span>回收</button>
       </div>
       <!-- 第二行：数据备份/店面管理/框名设置 -->
@@ -1154,6 +1154,82 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
         <div class="goods-input-list" id="extraGoodsList" style="margin-bottom:10px;"></div>
         <button class="btn btn-primary" style="width:100%;" onclick="saveExtraRecord()">💾 保存登记</button>
         <button class="btn btn-outline" style="width:100%;margin-top:8px;" onclick="closeExtraModal()">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === 发出页（新设计：先选筐类型，然后所有店面+每店输入框） === -->
+  <div class="manage-panel" id="emitPanel" style="display:none;">
+    <div class="card panel-header">
+      <button class="back-btn" onclick="closeEmitPanel()">← 返回</button>
+      <span style="flex:1;text-align:center;font-weight:700;color:var(--text);">📤 发出</span>
+      <button class="back-btn" onclick="openEmitStoreOrderModal()">调整店序</button>
+    </div>
+
+    <div class="card" style="padding:10px 12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:14px;font-weight:700;color:var(--text);">📦 <span id="emitGoodsLabel">请选择筐</span></span>
+        <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;" onclick="openEmitGoodsSelect()">切换筐</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-light);">在各店面后填写「<span id="emitModeLabel">发出</span>」数量，输完点键盘"确定"自动跳下一家</div>
+    </div>
+
+    <div class="card" style="padding:10px 12px;">
+      <div style="display:flex;gap:10px;margin-bottom:10px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="emitStartVoice()">🎤 语音录入</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="emitTriggerPhoto()">📷 拍照识别</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-light);">语音：间隔说数字（如 3 6 2…），按店面从上到下自动填入</div>
+    </div>
+
+    <div class="card">
+      <div id="emitStoreList" style="font-size:13px;color:var(--text);">
+        <div style="font-size:12px;color:var(--text-light);padding:8px 0;">请先选择筐类型</div>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <button class="btn btn-primary" style="width:100%;font-size:15px;padding:12px;" onclick="saveEmitRecords()">💾 保存当日发出</button>
+      <div style="font-size:11px;color:var(--text-light);margin-top:6px;">保存后自动返回主页</div>
+    </div>
+  </div>
+
+  <!-- 筐类型选择弹窗（发出前选筐） -->
+  <div class="store-ocr-modal" id="emitGoodsSelectModal">
+    <div class="store-ocr-content" style="max-width:320px;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-weight:700;font-size:16px;color:var(--text);">📦 选择发出的筐类型</span>
+        <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitGoodsSelect()">×</span>
+      </div>
+      <div id="emitGoodsButtons" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+
+  <!-- 调整店序弹窗（只在发出页生效） -->
+  <div class="store-ocr-modal" id="emitStoreOrderModal">
+    <div class="store-ocr-content" style="max-width:330px;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-weight:700;font-size:16px;color:var(--text);">✏️ 调整店序</span>
+        <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitStoreOrderModal()">×</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响发出页顺序）</div>
+      <div id="emitStoreOrderList" style="max-height:50vh;overflow-y:auto;background:var(--bg-card,#f6f8fa);border-radius:10px;padding:6px;"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="saveEmitStoreOrder()">💾 保存店序</button>
+    </div>
+  </div>
+
+  <!-- 语音识别结果确认弹窗 -->
+  <div class="store-ocr-modal" id="emitVoiceConfirmModal">
+    <div class="store-ocr-content" style="max-width:330px;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-weight:700;font-size:16px;color:var(--text);">🎤 语音识别结果确认</span>
+        <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitVoiceConfirm()">×</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">识别出的数字按顺序对应各店面，可修改后确认</div>
+      <div id="emitVoiceConfirmList" style="max-height:50vh;overflow-y:auto;background:var(--bg-card,#f6f8fa);border-radius:10px;padding:6px;"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeEmitVoiceConfirm()">✕ 取消</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="applyEmitVoice()">✅ 确认填入</button>
       </div>
     </div>
   </div>
@@ -3433,6 +3509,360 @@ document.addEventListener('click', () => {
 });
 
 // ======== 首页向导（录入 Tab 内的向导首页） ========
+// ========== 发出页（新设计）==========
+// 状态：当前所选筐、发出页独立店序
+let emitGoodsIdx = -1;
+let emitGoodsName = '';
+let emitOrder = null;          // 发出页独立店序（存店名下标顺序）
+const EMIT_ORDER_KEY = 'kuanwei_emit_store_order';
+
+// 发出页独立店序（存店名顺序数组）；默认按店面管理 sort 顺序
+function getEmitOrder() {
+  const cfg = loadStoreConfig();
+  const names = cfg.map(s => s.name);
+  if (!emitOrder || emitOrder.length === 0) {
+    const saved = (() => { try { return JSON.parse(localStorage.getItem(EMIT_ORDER_KEY)); } catch(e){ return null; } })();
+    if (Array.isArray(saved) && saved.length > 0) {
+      // 过滤掉已不存在的店，保留有效顺序
+      emitOrder = saved.filter(n => names.includes(n));
+      if (emitOrder.length === 0) emitOrder = names.slice();
+    } else {
+      emitOrder = names.slice();
+    }
+  }
+  // 同步新添加的店（店名不在 order 里的追加到末尾）
+  names.forEach(n => { if (!emitOrder.includes(n)) emitOrder.push(n); });
+  return emitOrder.slice();
+}
+function saveEmitOrder(order) {
+  emitOrder = order.slice();
+  try { localStorage.setItem(EMIT_ORDER_KEY, JSON.stringify(emitOrder)); } catch(e) {}
+}
+
+// 打开筐类型选择弹窗
+function openEmitGoodsSelect() {
+  const names = loadGoodsNames();
+  const container = document.getElementById('emitGoodsButtons');
+  if (!container) return;
+  container.innerHTML = names.map((n, i) =>
+    `<button class="btn btn-outline" style="width:100%;padding:12px;font-size:15px;" onclick="selectEmitGoods(${i})">📦 ${escapeHtml(n)}</button>`
+  ).join('');
+  document.getElementById('emitGoodsSelectModal').classList.add('show');
+}
+function closeEmitGoodsSelect() {
+  document.getElementById('emitGoodsSelectModal').classList.remove('show');
+}
+function selectEmitGoods(idx) {
+  const names = loadGoodsNames();
+  if (!names[idx]) return;
+  emitGoodsIdx = idx;
+  emitGoodsName = names[idx];
+  document.getElementById('emitGoodsLabel').textContent = emitGoodsName;
+  closeEmitGoodsSelect();
+  renderEmitStoreList();
+  // 如果发出面板还没开，则打开
+  if (document.getElementById('emitPanel').style.display !== 'block') {
+    document.getElementById('homeWizard').style.display = 'none';
+    document.getElementById('manualForm').style.display = 'none';
+    document.getElementById('emitPanel').style.display = 'block';
+  }
+}
+
+// 首页「发出」入口：先弹筐类型选择
+function openEmitFlow() {
+  if (!isLoggedIn()) { showToast('🔒 请先登录后再录入'); openLoginModal(); return; }
+  const storeNames = loadStoreNames();
+  if (!storeNames || storeNames.length === 0) { showToast('请先到「店面管理」添加店面'); return; }
+  openEmitGoodsSelect();
+}
+
+function closeEmitPanel() {
+  document.getElementById('emitPanel').style.display = 'none';
+  document.getElementById('homeWizard').style.display = 'block';
+  emitGoodsIdx = -1;
+  emitGoodsName = '';
+}
+
+// 渲染发出页：所有店面（按发出页独立店序）+ 每店一个输入框
+function renderEmitStoreList() {
+  const container = document.getElementById('emitStoreList');
+  if (!container) return;
+  if (emitGoodsIdx < 0) { container.innerHTML = '<div style="font-size:12px;color:var(--text-light);padding:8px 0;">请先选择筐类型</div>'; return; }
+  const order = getEmitOrder();
+  const cfg = loadStoreConfig();
+  const date = todayStr();
+  const data = loadData();
+  const names = loadGoodsNames();
+  const goodsName = names[emitGoodsIdx] || '';
+  // 已有记录（当天该筐各店）用于回显
+  const existing = {};
+  data.forEach(r => {
+    if (r.date === date && r.goodsIdx === emitGoodsIdx && r.qtyIn > 0) {
+      existing[r.storeName] = r.qtyIn;
+    }
+  });
+  container.innerHTML = order.map((storeName, i) => {
+    const store = cfg.find(s => s.name === storeName);
+    const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
+    const val = existing[storeName] !== undefined ? existing[storeName] : '';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--border);">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:var(--secondary,#e67e22);font-size:12px;">${alias}</span></div>
+        <div style="font-size:11px;color:var(--text-light);">${goodsName}</div>
+      </div>
+      <input type="number" inputmode="numeric" min="0" placeholder="0"
+        style="width:92px;text-align:center;font-size:18px;font-weight:700;padding:8px 6px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);"
+        value="${val}" data-emit-store="${escapeHtml(storeName)}" data-emit-idx="${i}" oninput="emitNextOnDone(this)" onkeydown="emitOnEnter(event, this)">
+    </div>`;
+  }).join('');
+}
+
+// 键盘"确定/Enter"自动跳下一框（最后一框跳保存按钮）
+function emitOnEnter(e, input) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const inputs = Array.from(document.querySelectorAll('#emitStoreList input[data-emit-idx]'));
+    const cur = inputs.indexOf(input);
+    if (cur < inputs.length - 1) {
+      inputs[cur + 1].focus();
+      inputs[cur + 1].select();
+    } else {
+      // 最后一框 → 跳保存按钮
+      document.querySelector('#emitPanel .btn[onclick="saveEmitRecords()"]')?.focus();
+    }
+  }
+}
+function emitNextOnDone(input) {
+  // 移动端数字键盘点"完成/确定"后自动跳下一框
+  if (document.activeElement === input && input.value && input.value.length >= 1) {
+    // 交由 onblur 处理也可；这里仅记录，避免误跳
+  }
+}
+
+// 保存发出记录
+function saveEmitRecords() {
+  if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
+  const date = todayStr();
+  const data = loadData();
+  const names = loadGoodsNames();
+  const goodsName = names[emitGoodsIdx] || '';
+  const inputs = Array.from(document.querySelectorAll('#emitStoreList input[data-emit-idx]'));
+  // 移除当天+所选筐的所有旧记录（各店）
+  const filtered = data.filter(r => !(r.date === date && r.goodsIdx === emitGoodsIdx));
+  const records = [];
+  inputs.forEach(input => {
+    const qty = parseInt(input.value) || 0;
+    if (qty <= 0) return;
+    const storeName = input.getAttribute('data-emit-store');
+    const cfg = loadStoreConfig();
+    const storeIdx = cfg.findIndex(s => s.name === storeName);
+    records.push({
+      id: Date.now() + '-emit-' + storeIdx + '-' + emitGoodsIdx,
+      date: date,
+      storeIdx: storeIdx >= 0 ? storeIdx : -1,
+      storeName: storeName,
+      goodsIdx: emitGoodsIdx,
+      goodsName: goodsName,
+      qtyIn: qty,
+      qtyOut: 0,
+      source: 'manual',
+      createdAt: new Date().toISOString()
+    });
+  });
+  if (records.length === 0) { showToast('请至少填一家店的数量'); return; }
+  saveDataArr([...filtered, ...records]);
+  showToast('✅ 已保存 ' + records.length + ' 家店 · 共 ' + records.reduce((s, r) => s + r.qtyIn, 0) + ' 个');
+  renderTodayOverview();
+  refreshRecordViews();
+  closeEmitPanel();
+}
+
+// ===== 调整店序弹窗 =====
+function openEmitStoreOrderModal() {
+  renderEmitStoreOrder();
+  document.getElementById('emitStoreOrderModal').classList.add('show');
+}
+function closeEmitStoreOrderModal() {
+  document.getElementById('emitStoreOrderModal').classList.remove('show');
+}
+function renderEmitStoreOrder() {
+  const order = getEmitOrder();
+  const cfg = loadStoreConfig();
+  const container = document.getElementById('emitStoreOrderList');
+  if (!container) return;
+  container.innerHTML = order.map((storeName, i) => {
+    const store = cfg.find(s => s.name === storeName);
+    const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);" draggable="true" ondragstart="emitDragStart(event, ${i})" ondragover="event.preventDefault()" ondrop="emitDrop(event, ${i})">
+      <span style="cursor:grab;color:var(--text-light);font-size:18px;">☰</span>
+      <span style="flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(storeName)}<span style="color:var(--secondary,#e67e22);font-size:11px;">${alias}</span></span>
+      <button class="btn btn-outline" style="padding:2px 8px;font-size:12px;" onclick="emitMoveOrder(${i}, -1)">▲</button>
+      <button class="btn btn-outline" style="padding:2px 8px;font-size:12px;" onclick="emitMoveOrder(${i}, 1)">▼</button>
+    </div>`;
+  }).join('');
+  emitDragFrom = -1;
+}
+let emitDragFrom = -1;
+function emitDragStart(e, i) { emitDragFrom = i; }
+function emitDrop(e, to) {
+  e.preventDefault();
+  if (emitDragFrom < 0 || emitDragFrom === to) return;
+  const order = getEmitOrder();
+  const [moved] = order.splice(emitDragFrom, 1);
+  order.splice(to, 0, moved);
+  saveEmitOrder(order);
+  renderEmitStoreOrder();
+  renderEmitStoreList();
+}
+function emitMoveOrder(i, dir) {
+  const order = getEmitOrder();
+  const to = i + dir;
+  if (to < 0 || to >= order.length) return;
+  const [moved] = order.splice(i, 1);
+  order.splice(to, 0, moved);
+  saveEmitOrder(order);
+  renderEmitStoreOrder();
+  renderEmitStoreList();
+}
+function saveEmitStoreOrder() {
+  // 顺序已实时保存到 localStorage；保存后关闭并刷新发出页
+  closeEmitStoreOrderModal();
+  renderEmitStoreList();
+  showToast('✅ 店序已更新（仅发出页）');
+}
+
+// ===== 语音录入（发出页：只说数字序列，按店顺序填入）=====
+let emitVoiceRec = null;
+let emitVoiceChunks = [];
+let emitVoiceStream = null;
+let emitPendingNums = [];
+
+function emitStartVoice() {
+  if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+    showToast('当前浏览器不支持录音'); return;
+  }
+  showToast('🔴 正在录音，说完数字后点「结束」…');
+  try {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      emitVoiceStream = stream;
+      emitVoiceChunks = [];
+      let mime = '';
+      if (MediaRecorder.isTypeSupported('audio/mp4')) mime = 'audio/mp4';
+      else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mime = 'audio/webm;codecs=opus';
+      else if (MediaRecorder.isTypeSupported('audio/webm')) mime = 'audio/webm';
+      try { emitVoiceRec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined); }
+      catch (e) { emitVoiceRec = new MediaRecorder(stream); }
+      emitVoiceRec.ondataavailable = e => { if (e.data && e.data.size > 0) emitVoiceChunks.push(e.data); };
+      emitVoiceRec.onstop = emitHandleVoiceBlob;
+      emitVoiceRec.start();
+      emitShowVoiceStopBtn();
+    }).catch(err => {
+      let tip = '无法录音，请检查麦克风权限';
+      if (err && err.name === 'NotAllowedError') tip = '麦克风权限被拒绝，请在设置中允许后重试';
+      showToast('🔒 ' + tip);
+    });
+  } catch (e) { showToast('🔒 ' + e.message); }
+}
+function emitStopVoice() {
+  if (emitVoiceRec && emitVoiceRec.state !== 'inactive') emitVoiceRec.stop();
+  emitHideVoiceStopBtn();
+}
+function emitShowVoiceStopBtn() {
+  // 复用顶部快捷区，显示一个"结束录音"按钮（用 toast 提示，或临时按钮）
+  const container = document.getElementById('emitPanel');
+  if (!container) return;
+  let btn = document.getElementById('emitVoiceStopBtn');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'emitVoiceStopBtn';
+    btn.className = 'btn btn-primary';
+    btn.style.cssText = 'position:fixed;top:60%;left:50%;transform:translate(-50%,-50%);z-index:20000;font-size:16px;padding:16px 32px;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
+    btn.textContent = '⏹ 结束录音';
+    btn.onclick = () => emitStopVoice();
+    document.body.appendChild(btn);
+  } else { btn.style.display = 'block'; }
+}
+function emitHideVoiceStopBtn() {
+  const btn = document.getElementById('emitVoiceStopBtn');
+  if (btn) btn.style.display = 'none';
+}
+async function emitHandleVoiceBlob() {
+  emitHideVoiceStopBtn();
+  const mime = emitVoiceRec ? emitVoiceRec.mimeType : '';
+  const blob = new Blob(emitVoiceChunks, { type: mime });
+  const reader = new FileReader();
+  reader.onload = async function() {
+    const b64 = String(reader.result).split(',')[1] || '';
+    showToast('🔍 正在识别语音…');
+    try {
+      const resp = await fetch(API_BASE + '/tcloud-asr', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audioBase64: b64, mime: mime, len: blob.size })
+      });
+      const data = await resp.json();
+      if (data.ok && data.text) {
+        emitParseVoiceNums(data.text);
+      } else {
+        showToast('语音识别失败: ' + (data.error || ''));
+      }
+    } catch (e) { showToast('语音识别失败，请检查网络'); }
+    finally {
+      if (emitVoiceStream) { try { emitVoiceStream.getTracks().forEach(t => t.stop()); } catch(e){} emitVoiceStream = null; }
+    }
+  };
+  reader.readAsDataURL(blob);
+}
+// 从语音文本中提取数字序列（按出现顺序）
+function emitParseVoiceNums(text) {
+  const nums = (text.match(/\d+/g) || []).map(n => parseInt(n));
+  if (nums.length === 0) { showToast('未识别到数字，请重试'); return; }
+  emitPendingNums = nums;
+  renderEmitVoiceConfirm(nums);
+  document.getElementById('emitVoiceConfirmModal').classList.add('show');
+}
+function renderEmitVoiceConfirm(nums) {
+  const order = getEmitOrder();
+  const cfg = loadStoreConfig();
+  const container = document.getElementById('emitVoiceConfirmList');
+  if (!container) return;
+  container.innerHTML = nums.map((n, i) => {
+    const storeName = order[i] || ('第' + (i + 1) + '家店');
+    const store = cfg.find(s => s.name === storeName);
+    const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);">
+      <span style="flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:var(--secondary,#e67e22);font-size:11px;">${alias}</span></span>
+      <input type="number" inputmode="numeric" min="0" value="${n}"
+        style="width:90px;text-align:center;font-size:16px;font-weight:700;padding:6px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);"
+        data-emit-confirm-idx="${i}">
+    </div>`;
+  }).join('');
+}
+function closeEmitVoiceConfirm() {
+  document.getElementById('emitVoiceConfirmModal').classList.remove('show');
+}
+function applyEmitVoice() {
+  const order = getEmitOrder();
+  const confirmInputs = Array.from(document.querySelectorAll('#emitVoiceConfirmList input[data-emit-confirm-idx]'));
+  // 把确认后的数字覆盖填入发出页对应店面输入框（按顺序，覆盖已有值）
+  const emitInputs = Array.from(document.querySelectorAll('#emitStoreList input[data-emit-idx]'));
+  confirmInputs.forEach((ci, i) => {
+    const qty = parseInt(ci.value) || 0;
+    if (i < emitInputs.length) {
+      emitInputs[i].value = qty > 0 ? qty : '';
+    }
+  });
+  closeEmitVoiceConfirm();
+  showToast('✅ 已按店面顺序填入');
+  // 聚焦第一个已填的输入框，方便继续
+  const first = emitInputs.find(inp => inp.value !== '');
+  if (first) first.focus();
+}
+function emitTriggerPhoto() {
+  if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
+  showToast('📷 拍照识别即将开放，请先手动填写');
+}
+
 function manualEntry(type) {
   if (!type) { showToast('请选择操作类型'); return; }
   currentActionType = type;
@@ -6482,7 +6912,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.35'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.36'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
