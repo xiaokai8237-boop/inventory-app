@@ -37,6 +37,14 @@
   --shadow-glow: 0 8px 28px rgba(61,90,254,.14);
   --input-bg: #ffffff;
   --soft-bg: #f5f8fe;
+  /* 深空蓝晶·辅助色（浅色套） */
+  --blue-soft: #e8ecff;
+  --green-soft: #d9f8f0;
+  --amber-soft: #fff3d6;
+  --red-soft: #ffe9e9;
+  --glass-bg: rgba(255,255,255,.72);
+  --glass-border: rgba(61,90,254,.14);
+  --focus-ring: rgba(61,90,254,.14);
 }
 /* 深色模式 */
 html[data-theme="dark"] {
@@ -59,11 +67,26 @@ html[data-theme="dark"] {
   --shadow-glow: 0 8px 28px rgba(124,155,255,.16);
   --input-bg: #0a0f1e;
   --soft-bg: #18213a;
+  /* 深空蓝晶·辅助色（深色套） */
+  --blue-soft: #1a2450;
+  --green-soft: #0f2f27;
+  --amber-soft: #2a2406;
+  --red-soft: #3a1620;
+  --glass-bg: rgba(19,26,46,.78);
+  --glass-border: rgba(124,155,255,.16);
+  --focus-ring: rgba(124,155,255,.22);
 }
 * {
   margin: 0; padding: 0; box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
+/* 滚动条美化（深浅两套） */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(61,90,254,.25); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(61,90,254,.45); }
+html[data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(124,155,255,.3); }
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: rgba(124,155,255,.5); }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   background: var(--bg);
@@ -78,10 +101,20 @@ body {
   padding-bottom: 10px;
   font-size: 15px;
   line-height: 1.5;
+  transition: background-color .3s ease, color .3s ease;
 }
 html[data-theme="dark"] body {
   background-image: radial-gradient(1200px 600px at 80% -10%, rgba(124,155,255,.12), transparent 60%),
-                    radial-gradient(900px 500px at 10% 110%, rgba(47,230,191,.08), transparent 60%);
+                    radial-gradient(900px 500px at 10% 110%, rgba(47,230,191,.08), transparent 60%),
+                    radial-gradient(1px 1px at 12% 22%, rgba(255,255,255,.14), transparent 100%),
+                    radial-gradient(1px 1px at 32% 8%, rgba(255,255,255,.10), transparent 100%),
+                    radial-gradient(1.5px 1.5px at 55% 30%, rgba(255,255,255,.10), transparent 100%),
+                    radial-gradient(1px 1px at 72% 14%, rgba(255,255,255,.12), transparent 100%),
+                    radial-gradient(1px 1px at 88% 26%, rgba(255,255,255,.09), transparent 100%),
+                    radial-gradient(1.2px 1.2px at 20% 55%, rgba(255,255,255,.07), transparent 100%),
+                    radial-gradient(1px 1px at 45% 68%, rgba(255,255,255,.08), transparent 100%),
+                    radial-gradient(1.5px 1.5px at 66% 82%, rgba(255,255,255,.07), transparent 100%),
+                    radial-gradient(1px 1px at 90% 74%, rgba(255,255,255,.09), transparent 100%);
 }
 
 /* 顶部 */
@@ -100,15 +133,15 @@ html[data-theme="dark"] body {
 /* 离线提示条 */
 .offline-banner {
   display: none; text-align: center; padding: 8px; font-size: 13px; font-weight: 600;
-  background: #fef3c7; color: #b45309; border-bottom: 1px solid #fde68a;
+  background: var(--amber-soft); color: var(--warning); border-bottom: 1px solid var(--warning);
 }
 html[data-theme="dark"] .offline-banner { background: #2a2406; color: #fbbf24; border-color: #7c6a16; }
 /* 未登录提醒横条 */
 .login-notice {
   display: none; text-align: center; padding: 8px; font-size: 13px; font-weight: 600;
-  background: #ffedd5; color: #c2410c; border-bottom: 1px solid #fdba74; cursor: pointer;
+  background: var(--amber-soft); color: var(--warning); border-bottom: 1px solid var(--warning); cursor: pointer;
 }
-html[data-theme="dark"] .login-notice { background: #2d1b0a; color: #fdba74; border-color: #9a4d0e; }
+html[data-theme="dark"] .login-notice { background: var(--amber-soft); color: var(--warning); border-color: var(--warning); }
 /* 未登录时禁用的输入区 */
 .locked-input { pointer-events: none; opacity: .55; }
 html[data-theme="dark"] .locked-input { opacity: .45; }
@@ -182,7 +215,8 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
   font-weight: 600;
 }
 .page { display: none; padding: 12px; }
-.page.active { display: block; }
+.page.active { display: block; animation: pageFadeIn .25s ease; }
+@keyframes pageFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .card {
   background: var(--card-bg);
   border-radius: 14px;
@@ -190,6 +224,7 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
   margin-bottom: 12px;
   box-shadow: var(--shadow);
   border: 1px solid var(--card-border);
+  transition: background .25s, border-color .25s, box-shadow .25s;
 }
 
 /* 表单 */
@@ -215,7 +250,7 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
 .form-input:focus, .form-select:focus {
   border-color: var(--primary);
   background: var(--input-bg);
-  box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 /* 深色下 date/select 下拉箭头可见 */
 html[data-theme="dark"] .form-input,
@@ -274,8 +309,8 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   text-align: center;
   outline: none;
 }
-.goods-input-item .gi-in input { border-color: #c8e6c9; }
-.goods-input-item .gi-out input { border-color: #ffcdd2; }
+.goods-input-item .gi-in input { border-color: rgba(0,184,148,.45); }
+.goods-input-item .gi-out input { border-color: rgba(239,74,74,.45); }
 .goods-input-item .gi-in input:focus { border-color: var(--success); }
 .goods-input-item .gi-out input:focus { border-color: var(--danger); }
 
@@ -306,7 +341,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   background: var(--primary);
   color: #fff;
 }
-.store-chip .chip-alias { margin-left: 4px; font-size: 12px; color: #94a3b8; }
+.store-chip .chip-alias { margin-left: 4px; font-size: 12px; color: var(--text-light); }
 
 /* 透明 toast（大字号，醒目） */
 .transparent-toast {
@@ -348,7 +383,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   cursor: pointer;
   transition: all .15s;
 }
-.btn:active { transform: scale(.97); }
+.btn:active { transform: scale(.97); box-shadow: 0 1px 4px rgba(0,0,0,.08); filter: brightness(.97); }
 .btn-primary {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: #fff;
@@ -424,7 +459,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   display: flex;
   justify-content: space-between;
   padding: 4px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border);
 }
 .ocr-result .ocr-row:last-child { border-bottom: none; }
 
@@ -464,6 +499,9 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 .today-status-box .tsb-num.in { color: var(--success); }
 .today-status-box .tsb-num.out { color: var(--danger); }
 .today-status-box .tsb-lbl { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+/* 数字弹入动画（每次渲染触发） */
+.today-emit-row .ter-num, .today-status-box .tsb-num, .stat-val { animation: numPop .45s cubic-bezier(.2,.8,.3,1.2); }
+@keyframes numPop { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: scale(1); } }
 /* 今日发出：按筐分列（紧凑） */
 .today-emit-list { flex: 1.4; display: flex; flex-direction: column; gap: 3px; padding: 8px; border-radius: 10px; background: var(--soft-bg); border: 1px solid var(--border); }
 .today-emit-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; padding: 1px 4px; line-height: 1.5; }
@@ -486,8 +524,8 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   border-radius: 12px;
   padding: 14px;
   margin-bottom: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.04);
-  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--card-border);
 }
 .record-item .record-top {
   display: flex;
@@ -512,7 +550,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   border-radius: 6px;
   transition: all .15s;
 }
-.del-btn:active { background: #fef2f2; color: var(--danger); }
+.del-btn:active { background: var(--red-soft); color: var(--danger); }
 
 /* 汇总表 */
 .summary-table {
@@ -534,14 +572,14 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 .summary-table td {
   padding: 10px 8px;
   text-align: center;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border);
   font-size: 14px;
 }
 .summary-table td.in { color: var(--success); font-weight: 600; }
 .summary-table td.out { color: var(--danger); font-weight: 600; }
 .summary-table .total-row {
   font-weight: 700;
-  background: #f8fafc;
+  background: var(--soft-bg);
 }
 .summary-table .total-row td {
   border-top: 2px solid var(--border);
@@ -576,7 +614,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 
 /* 店面管理卡片 */
 .store-card {
-  background: #fff;
+  background: var(--card-bg);
   border: 1px solid var(--border);
   border-left: 4px solid var(--primary);
   border-radius: 12px;
@@ -588,7 +626,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 }
 .store-card:active { transform: translateY(-1px); box-shadow: var(--shadow-glow); }
 .store-card.dragging { opacity: .45; border-style: dashed; border-color: var(--primary); }
-.store-card.drag-over { border-left-color: #22c55e; background: #f0fdf4; }
+.store-card.drag-over { border-left-color: var(--success); background: var(--green-soft); }
 .store-card .sc-head {
   display: flex;
   align-items: center;
@@ -631,21 +669,21 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   line-height: 1;
   padding: 0;
   border: 1px solid var(--border);
-  background: #fff;
+  background: var(--card-bg);
   color: var(--primary);
   border-radius: 6px;
   cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
 }
-.store-card .sc-move:active { background: #eff6ff; }
-.store-card .sc-move:disabled { opacity: .3; cursor: default; background: #f1f5f9; }
-.store-card .sc-move:active { background: #eff6ff; }
+.store-card .sc-move:active { background: var(--blue-soft); }
+.store-card .sc-move:disabled { opacity: .3; cursor: default; background: var(--soft-bg); }
+.store-card .sc-move:active { background: var(--blue-soft); }
 .store-card .sc-del {
   flex: 0 0 auto;
   padding: 8px 12px;
   font-size: 13px;
-  border: 1.5px solid #ffcdd2;
-  background: #fff;
+  border: 1.5px solid rgba(239,74,74,.4);
+  background: var(--card-bg);
   color: var(--danger);
   border-radius: 8px;
   cursor: pointer;
@@ -663,7 +701,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   font-size: 12.5px;
   opacity: .85;
 }
-.store-card .sc-del:active { background: #ffebee; }
+.store-card .sc-del:active { background: var(--red-soft); }
 .store-card .sc-alias-label {
   font-size: 12px;
   color: var(--text-light);
@@ -676,8 +714,8 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   display: flex; flex-wrap: wrap; gap: 6px;
 }
 .store-card .sc-alias {
-  background: #eaf3fc;
-  color: var(--primary-dark);
+  background: var(--blue-soft);
+  color: var(--primary);
   font-size: 12px;
   padding: 4px 10px;
   border-radius: 14px;
@@ -757,11 +795,11 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   border-radius: 6px;
   margin-bottom: 4px;
   font-size: 13px;
-  background: #fff3cd;
+  background: var(--amber-soft);
   border-left: 3px solid var(--warning);
 }
 .compare-result .diff-row.match {
-  background: #d4edda;
+  background: var(--green-soft);
   border-left-color: var(--success);
 }
 .compare-result .diff-row .diff-date { flex: 0 0 70px; font-weight: 600; }
@@ -857,10 +895,10 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 .loading-overlay .spinner {
   width: 54px; height: 54px;
   border: 5px solid rgba(255,255,255,.2);
-  border-top: 5px solid #4fc3f7;
+  border-top: 5px solid var(--primary);
   border-radius: 50%;
   animation: spin .9s linear infinite;
-  box-shadow: 0 0 30px rgba(79,195,247,.3);
+  box-shadow: 0 0 30px var(--primary-glow);
 }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 .loading-overlay .bar-track {
@@ -874,7 +912,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 .loading-overlay .bar-fill {
   width: 30%;
   height: 100%;
-  background: linear-gradient(90deg, #4fc3f7, #29b6f6, #039be5);
+  background: linear-gradient(90deg, var(--primary), var(--success));
   border-radius: 3px;
   animation: barSweep 1.4s ease-in-out infinite;
 }
@@ -893,7 +931,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 /* 店面拍照识别弹窗 */
 .store-ocr-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); z-index: 9998; align-items: center; justify-content: center; }
 .store-ocr-modal.show { display: flex; }
-.store-ocr-content { background: var(--card-bg); border-radius: 16px; padding: 14px; max-width: 95%; width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+.store-ocr-content { background: var(--glass-bg); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%); border: 1px solid var(--glass-border); border-radius: 16px; padding: 14px; max-width: 95%; width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,.3); }
 /* 子弹窗置顶：从父弹窗内打开、或随时弹出的强制更新框，保证不被任何父弹窗/浮层盖住 */
 #voiceConfirmModal.store-ocr-modal.show,
 #dailyPreviewModal.store-ocr-modal.show,
@@ -910,7 +948,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   padding: 20px 0;
   border: 2px solid var(--border);
   border-radius: 14px;
-  background: #fff;
+  background: var(--card-bg);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -971,7 +1009,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 
 /* 备份页 */
 .backup-step {
-  background: #f8f9fa; border-radius: 8px; padding: 10px; margin-bottom: 8px;
+  background: var(--soft-bg); border-radius: 8px; padding: 10px; margin-bottom: 8px;
   font-size: 13px; line-height: 1.7;
 }
 .backup-step .step-num {
@@ -985,7 +1023,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 /* 筐删除弹窗 */
 .gd-modal { display: none; position: fixed; top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:9998;align-items:center;justify-content:center; }
 .gd-modal.show { display:flex; }
-.gd-content { background:var(--card-bg); border-radius:12px; padding:14px; max-width:320px; width:90%; box-shadow:0 4px 20px rgba(0,0,0,.3); }
+.gd-content { background: var(--glass-bg); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%); border: 1px solid var(--glass-border); border-radius:12px; padding:14px; max-width:320px; width:90%; box-shadow:0 4px 20px rgba(0,0,0,.3); }
 
 /* ===== 深色模式兼容（覆盖 JS 内联硬编码浅色底） ===== */
 html[data-theme="dark"] .native-file-btn { background: var(--card-bg); color: var(--primary); }
@@ -1022,7 +1060,7 @@ html[data-theme="dark"] .sc-alias { background: var(--soft-bg) !important; color
 html[data-theme="dark"] .import-zone { background: var(--soft-bg) !important; }
 html[data-theme="dark"] .compare-result .diff-row { background: #2a2406 !important; color: var(--text) !important; }
 html[data-theme="dark"] .compare-result .diff-row.match { background: #16301f !important; }
-html[data-theme="dark"] .alias-chip { color: #60a5fa !important; }
+html[data-theme="dark"] .alias-chip { color: var(--primary) !important; }
 html[data-theme="dark"] .table-striped tbody tr:nth-child(odd) { background: var(--soft-bg) !important; }
 html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-striped th { border-color: var(--border) !important; color: var(--text) !important; }
 </style>
@@ -1235,7 +1273,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
         <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitStoreOrderModal()">×</span>
       </div>
       <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响发出页顺序）</div>
-      <div id="emitStoreOrderList" style="max-height:50vh;overflow-y:auto;background:var(--bg-card,#f6f8fa);border-radius:10px;padding:6px;"></div>
+      <div id="emitStoreOrderList" style="max-height:50vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:6px;"></div>
       <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="saveEmitStoreOrder()">💾 保存店序</button>
     </div>
   </div>
@@ -1248,7 +1286,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
         <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitVoiceConfirm()">×</span>
       </div>
       <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">识别出的数字按顺序对应各店面，可修改后确认</div>
-      <div id="emitVoiceConfirmList" style="max-height:50vh;overflow-y:auto;background:var(--bg-card,#f6f8fa);border-radius:10px;padding:6px;"></div>
+      <div id="emitVoiceConfirmList" style="max-height:50vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:6px;"></div>
       <div style="display:flex;gap:8px;margin-top:12px;">
         <button class="btn btn-outline" style="flex:1;" onclick="closeEmitVoiceConfirm()">✕ 取消</button>
         <button class="btn btn-primary" style="flex:1;" onclick="applyEmitVoice()">✅ 确认填入</button>
@@ -1374,7 +1412,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
   <div class="card" style="padding:10px;">
     <button class="btn btn-primary" style="width:100%;padding:10px;font-size:13px;" onclick="openDailyReport()">📋 生成日报</button>
-    <button class="btn btn-outline" style="width:100%;padding:10px;font-size:13px;margin-top:6px;background:#fff7ed;border-color:#fdba74;color:#c2410c;" onclick="openExtraModal()">➕ 额外发收登记</button>
+    <button class="btn btn-outline" style="width:100%;padding:10px;font-size:13px;margin-top:6px;background:var(--amber-soft);border-color:var(--warning);color:var(--warning);" onclick="openExtraModal()">➕ 额外发收登记</button>
     <div id="dailyPhotoInfo" style="font-size:11px;color:var(--text-light);margin-top:6px;"></div>
   </div>
   <div id="historyList"></div>
@@ -1466,7 +1504,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       ③ 点 <b>「➕ 新增店面」</b> 按钮<br>
       ④ 在最上面那个输入框里，把店的名字打进去（比如"北区店"）<br>
       ⑤ 点下面的 <b>「💾 保存修改」</b> 按钮<br>
-      <span style="background:#f0f7ff;padding:2px 8px;border-radius:6px;font-size:12px;">✅ 完成！以后选店面就能看到它了</span><br><br>
+      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">✅ 完成！以后选店面就能看到它了</span><br><br>
       <b>顺便说下「别名」是干嘛的：</b><br>
       比如店全名叫"北区总店"，但你想叫它"北区"，就点「添加」把"北区"加进去。以后说话、拍照识别时叫"北区"也能找到这家店。
     </div>
@@ -1480,12 +1518,12 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       ① 点 <b>「首页」</b> → 点 <b>「💾 数据备份与恢复」</b><br>
       ② 看到"🔑 账号（未设置）"那一块，点 <b>「🔑 设置账号密码」</b><br>
       ③ 手机号：填你的 11 位手机号（只能填数字，不是手机号填不了）<br>
-      ④ 密码：随便想一个，但<b>必须同时包含：字母 + 数字 + 符号</b>，而且<b>至少 8 位</b>。比如：<span style="background:#fff3cd;padding:2px 8px;border-radius:6px;font-size:12px;">Abc@123456</span><br>
+      ④ 密码：随便想一个，但<b>必须同时包含：字母 + 数字 + 符号</b>，而且<b>至少 8 位</b>。比如：<span style="background:var(--amber-soft);padding:2px 8px;border-radius:6px;font-size:12px;">Abc@123456</span><br>
       <span style="font-size:12px;color:var(--text-light);">💡 密码框右边有个 <b>👁</b> 按钮，点一下能看到你输的密码，防止打错</span><br>
       ⑤ 再输入一遍同样的密码（两次必须一模一样）<br>
       ⑥ 选一个密保问题（有很多可选），再填上答案（<b>这个答案一定要记住！</b>忘了密码靠它找回）<br>
       ⑦ 点 <b>「✅ 设置密码」</b><br>
-      <span style="background:#f0fdf4;padding:2px 8px;border-radius:6px;font-size:12px;">✅ 完成！以后数据会自动备份到云端</span><br><br>
+      <span style="background:var(--green-soft);padding:2px 8px;border-radius:6px;font-size:12px;">✅ 完成！以后数据会自动备份到云端</span><br><br>
       <b>🔐 下次用手机打开怎么登录？</b><br>
       ① 数据备份与恢复 → 看到"🔑 账号（未登录）"→ 点 <b>「🔐 登录」</b><br>
       ② 输入手机号 + 密码 → 登录成功 → 自动同步云端数据<br><br>
@@ -1494,8 +1532,8 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
   </div>
 
-  <div class="card" style="border-left:4px solid #2ecc71;">
-    <div style="font-size:14px;font-weight:700;color:#15803d;">📝 第3步：每天怎么录入数据（3种方法，随便选）</div>
+  <div class="card" style="border-left:4px solid var(--success);">
+    <div style="font-size:14px;font-weight:700;color:var(--success);">📝 第3步：每天怎么录入数据（3种方法，随便选）</div>
     <div style="margin-top:8px;font-size:13px;line-height:2;">
       <b>方法一 ✍️ 手动输入（最稳）</b><br>
       ① 点 <b>「📤 发出」</b>（或「📥 回收」）按钮<br>
@@ -1503,15 +1541,15 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       ③ 日期不用改（默认就是今天）<br>
       ④ 在每一行的「发出」（或「回收」）框里填数字，比如鲜食筐发出 5 就填 5<br>
       ⑤ 全填完，点最下面的 <b>「💾 保存当日记录」</b><br>
-      <span style="background:#f0f7ff;padding:2px 8px;border-radius:6px;font-size:12px;">💡 没填的框留空就行，不会出错</span>
+      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">💡 没填的框留空就行，不会出错</span>
       <br><br>
       <b>方法二 🎤 用嘴说（最快）</b><br>
       ① 点 <b>「🎤 语音录入」</b> 按钮<br>
       ② 手机上会弹出一个录音框<br>
-      ③ 对着手机说：<span style="background:#f0f7ff;padding:2px 8px;border-radius:6px;font-size:12px;">"鲜食1 面包2 低温3 冷冻5 常温6"</span><br>
+      ③ 对着手机说：<span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">"鲜食1 面包2 低温3 冷冻5 常温6"</span><br>
       ④ 说完点「结束」，数字会自动填进去<br>
       ⑤ 检查一遍没问题，点 <b>「💾 保存当日记录」</b><br>
-      <span style="background:#f0f7ff;padding:2px 8px;border-radius:6px;font-size:12px;">💡 说"1"就是数量1；也可以说简称"鲜1 面2 低3 冻5 常6"</span>
+      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">💡 说"1"就是数量1；也可以说简称"鲜1 面2 低3 冻5 常6"</span>
       <br><br>
       <b>方法三 📸 拍照识别（最省事，低温/冷冻/常温路单可用）</b><br>
       ① 点 <b>「📸 拍照识别」</b> 按钮<br>
@@ -1520,7 +1558,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       ④ 识别完成后，会弹出一个表格，每行是一家店，黄色那列是物流箱数量<br>
       ⑤ <b>仔细核对一下数字</b>，不对的直接点数字改掉<br>
       ⑥ 全对了点 <b>「✅ 确认录入」</b><br>
-      <span style="background:#f0f7ff;padding:2px 8px;border-radius:6px;font-size:12px;">💡 万一哪家店没识别出来，点表格下面的「➕ 新增一行」自己补上</span>
+      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">💡 万一哪家店没识别出来，点表格下面的「➕ 新增一行」自己补上</span>
     </div>
   </div>
 
@@ -1565,7 +1603,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
 
   <div class="card" style="border-left:4px solid var(--warning);">
-    <div style="font-size:14px;font-weight:700;color:#b45309;">❓ 常见问题</div>
+    <div style="font-size:14px;font-weight:700;color:var(--warning);">❓ 常见问题</div>
     <div style="margin-top:8px;font-size:13px;line-height:2;">
       <b>❓ 登录时提示密码不对怎么办？</b><br>
       ① 先点密码框右边的 <b>👁</b> 看看有没有打错（大小写/空格/符号）；② 还是不对就点「❓ 忘记密码」→ 答密保问题重置新密码。<br><br>
@@ -1643,7 +1681,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <button onclick="closeRecordDeleteModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
     </div>
     <p style="font-size:14px;line-height:1.6;margin-bottom:14px;">确定要删除这条记录吗？删除后不可恢复。</p>
-    <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:14px;">
+    <div style="background:var(--soft-bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:14px;">
       <div style="font-size:12px;color:var(--text-light);margin-bottom:6px;">不再提醒：</div>
       <label style="display:flex;align-items:center;gap:6px;font-size:14px;padding:6px 0;cursor:pointer;">
         <input type="checkbox" id="delNoRemindToday" style="width:18px;height:18px;"> 今日不再提醒
@@ -1668,11 +1706,11 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <div style="font-size:13px;color:var(--text);margin-bottom:12px;" id="editRecordInfo"></div>
     <div style="display:flex;gap:10px;margin-bottom:14px;">
-      <div style="flex:1;background:#f0f7ff;border-radius:8px;padding:10px;text-align:center;">
+      <div style="flex:1;background:var(--blue-soft);border-radius:8px;padding:10px;text-align:center;">
         <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">发出</div>
         <input type="number" id="editQtyIn" min="0" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:6px;font-size:16px;text-align:center;">
       </div>
-      <div style="flex:1;background:#f0fdf4;border-radius:8px;padding:10px;text-align:center;">
+      <div style="flex:1;background:var(--green-soft);border-radius:8px;padding:10px;text-align:center;">
         <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">回收</div>
         <input type="number" id="editQtyOut" min="0" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:6px;font-size:16px;text-align:center;">
       </div>
@@ -1721,15 +1759,15 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <div style="font-size:13px;color:var(--text-light);margin-bottom:10px;">
       当前模式：<span id="ocrModeLabel" style="color:var(--primary);font-weight:600;font-size:14px;">发出</span>
-      · 筐类型：<span id="ocrGoodsLabel" style="color:#fff;font-weight:700;font-size:24px;background:linear-gradient(135deg,#3b82f6,#2563eb);padding:4px 16px;border-radius:10px;margin-left:4px;box-shadow:0 2px 8px rgba(59,130,246,.3);display:inline-block;">常温筐</span>
+      · 筐类型：<span id="ocrGoodsLabel" style="color:#fff;font-weight:700;font-size:24px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));padding:4px 16px;border-radius:10px;margin-left:4px;box-shadow:0 2px 8px var(--primary-glow);display:inline-block;">常温筐</span>
     </div>
     <div style="font-size:11.5px;color:var(--text-light);margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap;">
-      <span><span style="display:inline-block;width:10px;height:10px;background:#10b981;border-radius:2px;margin-right:3px;"></span>绿色=高置信</span>
-      <span><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:2px;margin-right:3px;"></span>黄色=建议核对</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--success);border-radius:2px;margin-right:3px;"></span>绿色=高置信</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:var(--warning);border-radius:2px;margin-right:3px;"></span>黄色=建议核对</span>
       <span style="color:var(--warning);">黄色列=物流箱（自动录入该列）</span>
     </div>
     <div id="ocrEditFields"></div>
-    <div style="background:#fff3cd;border:1.5px solid #f59e0b;border-radius:8px;padding:8px 12px;margin-top:10px;font-size:13px;color:#b45309;font-weight:600;text-align:center;">
+    <div style="background:var(--amber-soft);border:1.5px solid var(--warning);border-radius:8px;padding:8px 12px;margin-top:10px;font-size:13px;color:var(--warning);font-weight:600;text-align:center;">
       ⚠️ 请核对好每行数据后再点「确认录入」
     </div>
     <div style="display:flex;gap:8px;margin-top:10px;">
@@ -1908,7 +1946,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <!-- 第一步：注销警告 -->
     <div id="deleteStep1">
-      <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px;font-size:13px;line-height:1.9;color:#b91c1c;">
+      <div style="background:var(--red-soft);border:1.5px solid rgba(239,74,74,.4);border-radius:10px;padding:12px;font-size:13px;line-height:1.9;color:var(--danger);">
         <b>⚠️ 账号注销</b><br>
         账号注销后，本账号的<b>所有数据将被永久删除</b>：<br>
         📊 全部收发记录 · 🏪 所有店面 · 📦 全部筐配置<br>
@@ -1923,7 +1961,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <!-- 第二步：输密码二次确认 + 后悔药 -->
     <div id="deleteStep2" style="display:none;">
-      <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px;font-size:13px;line-height:1.8;color:#b91c1c;">
+      <div style="background:var(--red-soft);border:1.5px solid rgba(239,74,74,.4);border-radius:10px;padding:12px;font-size:13px;line-height:1.8;color:var(--danger);">
         <b>🚫 再次确认注销</b><br>
         你正在注销账号 <b><span id="delPhoneLabel"></span></b><br>
         这是<b>最后一次确认</b>：点击确认后，该账号所有数据将<b>被永久清除，且无法恢复</b>。
@@ -1949,13 +1987,13 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <!-- 后悔药内容 -->
     <div id="deleteRegret" style="display:none;">
-      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;font-size:13px;line-height:1.9;color:#166534;">
+      <div style="background:var(--green-soft);border:1.5px solid rgba(0,184,148,.35);border-radius:10px;padding:12px;font-size:13px;line-height:1.9;color:var(--success);">
         <b>😌 别担心，数据还在！</b><br>
         其实你的数据<b>并没有真正删除</b>，只是暂时封存起来了。<br>
         如果你后悔注销了，可以<b>联系程序管理员</b>帮你恢复：<br>
         ① 告诉管理员你的<b>原手机号</b><br>
         ② 管理员确认后即可恢复你的全部数据<br>
-        <div style="font-size:11px;color:#65a30d;margin-top:6px;">* 此提示仅显示给本次操作，用于防止误注销后悔。</div>
+        <div style="font-size:11px;color:var(--text-light);margin-top:6px;">* 此提示仅显示给本次操作，用于防止误注销后悔。</div>
       </div>
       <button class="btn btn-outline" style="width:100%;margin-top:10px;" onclick="closeDeleteAccountModal()">知道了</button>
     </div>
@@ -1989,10 +2027,10 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <span style="font-weight:600;font-size:15px;">🛠️ 管理员面板</span>
       <button onclick="closeAdminModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
     </div>
-    <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+    <div style="background:var(--green-soft);border:1.5px solid rgba(0,184,148,.35);border-radius:10px;padding:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-size:12px;color:#15803d;">👥 注册人数</div>
-        <div style="font-size:28px;font-weight:700;color:#15803d;" id="adminUserCount">-</div>
+        <div style="font-size:12px;color:var(--success);">👥 注册人数</div>
+        <div style="font-size:28px;font-weight:700;color:var(--success);" id="adminUserCount">-</div>
       </div>
       <button class="btn btn-outline" style="width:auto;padding:8px 14px;font-size:12px;display:inline-block;" onclick="loadAdminStats()">📊 刷新统计</button>
     </div>
@@ -2024,7 +2062,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <button onclick="closeInstallModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
     </div>
     <div style="font-size:13px;line-height:1.9;color:var(--text);">
-      <div id="installWechatTip" style="display:none;background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px;margin-bottom:10px;font-size:12.5px;color:#7c5a00;">
+      <div id="installWechatTip" style="display:none;background:var(--amber-soft);border:1px solid var(--warning);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12.5px;color:var(--warning);">
         ⚠️ <b>微信里不能添加到桌面</b>，需要先用浏览器打开：<br>
         ① 点右上角 <b>「⋯」</b><br>
         ② 点 <b>「在浏览器打开」</b>（选 Chrome / 自带浏览器）<br>
@@ -2032,10 +2070,10 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       </div>
       <div id="installNormalTip">
         <div style="margin-bottom:8px;">按下面的步骤操作（苹果手机）：</div>
-        <div><b>①</b> 点底部 <b>「分享」</b> 按钮 <span style="background:#f0f7ff;padding:2px 8px;border-radius:6px;font-size:12px;">□↑</span></div>
+        <div><b>①</b> 点底部 <b>「分享」</b> 按钮 <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">□↑</span></div>
         <div><b>②</b> 向下滑动，找到 <b>「添加到主屏幕」</b></div>
         <div><b>③</b> 点 <b>「添加」</b> → 桌面出现图标，像 App 一样用</div>
-        <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:10px;margin-top:12px;font-size:12.5px;color:#7c5a00;">
+        <div style="background:var(--amber-soft);border:1px solid var(--warning);border-radius:8px;padding:10px;margin-top:12px;font-size:12.5px;color:var(--warning);">
           💡 安卓手机：浏览器菜单里点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b> 即可。
         </div>
       </div>
@@ -2049,7 +2087,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div style="font-size:40px;margin-bottom:8px;">👋</div>
     <div style="font-weight:700;font-size:18px;margin-bottom:6px;">欢迎使用 物流筐收发管理系统</div>
     <div style="font-size:13px;color:var(--text-light);margin-bottom:14px;">帮你把每个筐的去向记得清清楚楚</div>
-    <div style="font-size:13px;color:var(--text);line-height:1.8;margin-bottom:16px;text-align:left;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;">
+    <div style="font-size:13px;color:var(--text);line-height:1.8;margin-bottom:16px;text-align:left;background:var(--soft-bg);border:1px solid var(--border);border-radius:8px;padding:10px;">
       <b>第一次用，建议先做 3 件事：</b><br>
       <span data-app-hide>① 📱 把软件加到手机桌面（像App一样用）<br></span>
       ② 🏪 设置你要记的店面<br>
@@ -2093,7 +2131,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <button onclick="cancelVoiceFill()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
     </div>
     <div style="font-size:14px;color:var(--text);margin-bottom:6px;">识别到：</div>
-    <div id="voiceConfirmInfo" style="font-size:15px;font-weight:600;color:var(--primary);background:#f0f7ff;border-radius:8px;padding:12px;margin-bottom:6px;"></div>
+    <div id="voiceConfirmInfo" style="font-size:15px;font-weight:600;color:var(--primary);background:var(--blue-soft);border-radius:8px;padding:12px;margin-bottom:6px;"></div>
     <div style="font-size:12px;color:var(--text-light);margin-bottom:14px;">确认无误后点「填入」；说错了点「取消」重说</div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-primary" style="flex:1;" onclick="confirmVoiceFill()">✅ 填入</button>
@@ -2162,13 +2200,13 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <div style="margin-bottom:8px;">
       <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">👁 实时预览（勾选变化自动更新）</div>
-      <div id="dailyLivePreview" style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;white-space:pre-wrap;max-height:180px;overflow-y:auto;"></div>
+      <div id="dailyLivePreview" style="background:var(--soft-bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;white-space:pre-wrap;max-height:180px;overflow-y:auto;"></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:8px;">
       <button class="btn btn-primary" style="flex:1;" onclick="generateDailyReport()">📋 生成日报</button>
       <button class="btn btn-outline" style="flex:1;" onclick="closeDailyReportModal()">取消</button>
     </div>
-    <div id="dailyReportPreview" style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;white-space:pre-wrap;max-height:200px;overflow-y:auto;display:none;"></div>
+    <div id="dailyReportPreview" style="background:var(--soft-bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;white-space:pre-wrap;max-height:200px;overflow-y:auto;display:none;"></div>
     <button class="btn btn-success" id="dailyReportCopyBtn" style="margin-top:8px;width:100%;display:none;" onclick="copyDailyReport()">📋 一键复制（粘贴到微信发仓库）</button>
   </div>
 </div>
@@ -2225,7 +2263,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <span style="font-weight:700;font-size:16px;color:var(--text);">✅ 已恢复云端数据</span>
       <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeRestoreResult()">×</span>
     </div>
-    <div style="background:var(--bg-card,#f6f8fa);border-radius:10px;padding:12px;font-size:13px;color:var(--text);line-height:1.9;">
+    <div style="background:var(--soft-bg);border-radius:10px;padding:12px;font-size:13px;color:var(--text);line-height:1.9;">
       <div>🏪 店面：<b id="restoreStoreCount">0</b> 家</div>
       <div>📦 筐类：<b id="restoreGoodsCount">0</b> 类</div>
       <div>📋 记录：<b id="restoreRecordCount">0</b> 条</div>
@@ -2243,7 +2281,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeBackupResult()">×</span>
     </div>
     <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">共 <b id="backupStoreCount">0</b> 家店 · <b id="backupGoodsCount">0</b> 类筐 · <b id="backupRecordCount">0</b> 条记录</div>
-    <div id="backupStoreList" style="flex:1;overflow-y:auto;background:var(--bg-card,#f6f8fa);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--text);line-height:1.9;"></div>
+    <div id="backupStoreList" style="flex:1;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--text);line-height:1.9;"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="closeBackupResult()">知道了</button>
   </div>
 </div>
@@ -2728,8 +2766,8 @@ function renderAccountStatus() {
   if (!phone) {
     // 从未设置过：显示注册 + 登录入口
     el.innerHTML = `
-      <div style="background:#fff8e1;border:1.5px solid #ffe082;border-radius:10px;padding:12px;">
-        <div style="font-weight:600;font-size:14px;color:#b45309;margin-bottom:4px;">🔑 账号（未设置）</div>
+      <div style="background:var(--amber-soft);border:1.5px solid var(--warning);border-radius:10px;padding:12px;">
+        <div style="font-weight:600;font-size:14px;color:var(--warning);margin-bottom:4px;">🔑 账号（未设置）</div>
         <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">设置密码后，换手机/清缓存输入手机号+密码即可恢复数据（当前使用设备自动备份）</div>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-primary" style="flex:1;padding:10px;" onclick="openSetupModal()">🔑 设置账号密码</button>
@@ -2741,8 +2779,8 @@ function renderAccountStatus() {
   // 有手机号（设置过密码）
   // 退出登录/更改密码已整合到首页登录胶囊菜单，此处只保留核心操作
   el.innerHTML = `
-    <div style="background:${logged ? '#f0fdf4' : '#fff8e1'};border:1.5px solid ${logged ? '#bbf7d0' : '#ffe082'};border-radius:10px;padding:12px;">
-      <div style="font-weight:600;font-size:14px;color:${logged ? '#15803d' : '#b45309'};margin-bottom:4px;">🔑 账号${logged ? '（已登录）' : '（未登录）'}</div>
+    <div style="background:${logged ? 'var(--green-soft)' : 'var(--amber-soft)'};border:1.5px solid ${logged ? 'var(--success)' : 'var(--warning)'};border-radius:10px;padding:12px;">
+      <div style="font-weight:600;font-size:14px;color:${logged ? 'var(--success)' : 'var(--warning)'};margin-bottom:4px;">🔑 账号${logged ? '（已登录）' : '（未登录）'}</div>
       <div style="font-size:13px;margin-bottom:8px;">📱 ${maskPhone(phone)}</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;">
         ${logged
@@ -3261,7 +3299,7 @@ function renderAdminUsers() {
     return;
   }
   box.innerHTML = list.map(u => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:#f8fafc;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--soft-bg);">
       <span style="font-weight:600;color:var(--text);">📱 ${u.phone || '-'}</span>
       <span style="color:var(--text-light);font-family:monospace;">${u.password ? '🔒 ' + u.password : '<i>未存明文</i>'}</span>
     </div>`).join('');
@@ -3352,8 +3390,8 @@ function renderCloudBackupStatus() {
   }
   const account = getCloudPhone() || '';
   el.innerHTML = `
-    <div style="background:#f0f7ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:12px;">
-      <div style="font-weight:600;font-size:14px;color:var(--primary-dark);margin-bottom:6px;">☁️ 云备份状态</div>
+    <div style="background:var(--blue-soft);border:1.5px solid var(--card-border);border-radius:10px;padding:12px;margin-bottom:12px;">
+      <div style="font-weight:600;font-size:14px;color:var(--primary);margin-bottom:6px;">☁️ 云备份状态</div>
       <div style="font-size:13px;line-height:1.8;color:var(--text);">
         <div>🕐 上次备份：<b>${timeText}</b></div>
         ${account ? `<div>🔗 云账号：<b>${account}</b></div>` : ''}
@@ -3477,7 +3515,7 @@ function renderStoreChips() {
   // 无店面时提示去新增
   if (!view || view.length === 0) {
     container.innerHTML = `
-      <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:8px;padding:10px 12px;font-size:13px;color:#7c5a00;">
+      <div style="background:var(--amber-soft);border:1.5px solid var(--warning);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--warning);">
         🏪 还没有店面，先去添加吧：<br>
         回首页 → 点「🏪 店面管理」→「➕ 新增店面」<br>
         <span style="font-size:12px;">（或拍照路单批量导入，会自动带上编号别名）</span>
@@ -4405,7 +4443,7 @@ function renderGoodsPanelUI() {
         <input type="text" id="gName${i}" value="${escapeHtml(g.name)}" maxlength="20" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;">
       </div>
       <div class="alias-box" id="gAliases${i}" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
-        ${g.aliases.map((a, ai) => `<span class="alias-chip" style="background:#eef;color:#357abd;font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${escapeHtml(a)}<span style="cursor:pointer;color:#e74c3c;font-weight:700;" onclick="removeGoodsAlias(${i},${ai})">×</span></span>`).join('')}
+        ${g.aliases.map((a, ai) => `<span class="alias-chip" style="background:var(--blue-soft);color:var(--primary);font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${escapeHtml(a)}<span style="cursor:pointer;color:var(--danger);font-weight:700;" onclick="removeGoodsAlias(${i},${ai})">×</span></span>`).join('')}
       </div>
       <div style="display:flex;gap:6px;margin-top:6px;">
         <input type="text" id="gAliasInput${i}" placeholder="加别名，如 冷藏" style="flex:1;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
@@ -5621,18 +5659,18 @@ function refreshOcrQtyCol() {
     const isHighConf = r._highConf;
     // 双引擎不一致：标黄待核对（优先于绿色）
     const isConflict = r._conflict;
-    const rowBg = isMissing || isConflict ? ' style="background:#fff3cd;"' : '';
-    const hint = isMissing ? ' <span style="color:var(--warning);font-size:11px;">⚠️可能漏识别</span>' : (isConflict ? ' <span style="color:#e65100;font-size:11px;">⚠️两引擎结果不同</span>' : '');
+    const rowBg = isMissing || isConflict ? ' style="background:var(--amber-soft);"' : '';
+    const hint = isMissing ? ' <span style="color:var(--warning);font-size:11px;">⚠️可能漏识别</span>' : (isConflict ? ' <span style="color:var(--warning);font-size:11px;">⚠️两引擎结果不同</span>' : '');
     html += '<tr' + rowBg + '>';
     html += '<td><input type="text" id="ocrCode_' + i + '" value="' + escapeHtml(r.code || '') + '" maxlength="10" style="width:60px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;text-align:center;"></td>';
     html += '<td style="text-align:left;padding-left:6px;"><input type="text" id="ocrName_' + i + '" value="' + escapeHtml(r.name || '') + '" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;">' + hint + '</td>';
     const v = r.nums[0] !== undefined ? r.nums[0] : 0;
     const qtyStyle = (isHighConf && !isConflict)
-      ? 'width:64px;padding:5px;border:1.5px solid #10b981;border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#15803d;background:#f0fdf4;'
+      ? 'width:64px;padding:5px;border:1.5px solid var(--success);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:var(--success);background:var(--green-soft);'
       : (isConflict
-        ? 'width:64px;padding:5px;border:2px solid #e65100;border-radius:6px;font-size:14px;text-align:center;font-weight:700;color:#e65100;background:#fff3cd;'
-        : 'width:64px;padding:5px;border:1.5px solid var(--warning);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#b35900;');
-    html += '<td style="background:' + (isHighConf && !isConflict ? '#f0fdf4;' : (isConflict ? '#fff3cd;' : '#fffde7;')) + '"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="' + qtyStyle + '"></td>';
+        ? 'width:64px;padding:5px;border:2px solid var(--warning);border-radius:6px;font-size:14px;text-align:center;font-weight:700;color:var(--warning);background:var(--amber-soft);'
+        : 'width:64px;padding:5px;border:1.5px solid var(--warning);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:var(--warning);');
+    html += '<td style="background:' + (isHighConf && !isConflict ? 'var(--green-soft);' : (isConflict ? 'var(--amber-soft);' : 'var(--amber-soft);')) + '"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="' + qtyStyle + '"></td>';
     html += '<td><button onclick="removeOcrRow(' + i + ')" style="background:none;border:none;color:var(--danger);font-size:20px;cursor:pointer;padding:0 6px;line-height:1;">×</button></td>';
     html += '</tr>';
   });
@@ -5642,10 +5680,10 @@ function refreshOcrQtyCol() {
       const inp = document.getElementById('ocrQty_' + i);
       if (inp) sum += parseInt(inp.value) || 0;
     });
-    html += '<tr class="total-row"><td>合计</td><td></td><td style="background:#fff3cd;font-weight:700;color:#b35900;" id="ocrTotalCell_0">' + sum + '</td><td></td></tr>';
+    html += '<tr class="total-row"><td>合计</td><td></td><td style="background:var(--amber-soft);font-weight:700;color:var(--warning);" id="ocrTotalCell_0">' + sum + '</td><td></td></tr>';
   }
   html += '</tbody></table></div>';
-  html += '<button onclick="addOcrRow()" style="margin-top:10px;padding:9px 14px;border:1.5px dashed var(--primary);border-radius:8px;background:#f0f7ff;color:var(--primary);font-size:13px;font-weight:600;cursor:pointer;width:100%;">➕ 新增一行（识别漏了时手动添加）</button>';
+  html += '<button onclick="addOcrRow()" style="margin-top:10px;padding:9px 14px;border:1.5px dashed var(--primary);border-radius:8px;background:var(--blue-soft);color:var(--primary);font-size:13px;font-weight:600;cursor:pointer;width:100%;">➕ 新增一行（识别漏了时手动添加）</button>';
   document.getElementById('ocrEditFields').innerHTML = html;
   // 绑定 input 事件：编号/门店 改 r.code/r.name；物流箱 改 r.nums[0] 并重算合计
   rows.forEach((r, i) => {
@@ -6204,11 +6242,11 @@ function renderHistory() {
       const sourceIcon = r.source === 'ocr' ? '📸' : (r.source === 'voice' ? '🎤' : '✍️');
       const storeTag = r.storeName ? `<span style="font-size:11px;color:var(--primary);margin-left:6px;">🏪${r.storeName}</span>` : '';
       html += `
-        <div class="record-item" style="box-shadow:none;border:1px solid #f0f0f0;margin-bottom:6px;">
+        <div class="record-item" style="box-shadow:none;border:1px solid var(--card-border);margin-bottom:6px;">
           <div class="record-top">
             <span class="record-goods">${sourceIcon} ${r.goodsName}${storeTag}</span>
             <div style="display:flex;gap:6px;">
-              <button class="del-btn" style="background:#f0f7ff;color:var(--primary);" onclick="openEditRecord('${r.id}')">编辑</button>
+              <button class="del-btn" style="background:var(--blue-soft);color:var(--primary);" onclick="openEditRecord('${r.id}')">编辑</button>
               <button class="del-btn" onclick="deleteRecord('${r.id}')">删除</button>
             </div>
           </div>
@@ -6626,7 +6664,7 @@ function compareReconcile(sheetData) {
   summaryHtml += `</div>`;
 
   if (diffCount === 0 && matchCount > 0) {
-    summaryHtml += '<div style="color:var(--success);font-weight:600;padding:8px;background:#d4edda;border-radius:6px;">🎉 全部一致，数据吻合！</div>';
+    summaryHtml += '<div style="color:var(--success);font-weight:600;padding:8px;background:var(--green-soft);border-radius:6px;">🎉 全部一致，数据吻合！</div>';
   }
 
   const container = document.getElementById('compareResult');
@@ -6678,7 +6716,7 @@ function renderStoreConfigUI() {
         <button class="btn btn-outline" style="flex:0 0 auto;padding:6px 10px;font-size:12px;color:var(--danger);" onclick="removeStore(${i})">删除</button>
       </div>
       <div class="alias-box" id="storeAliases${i}" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
-        ${s.aliases.map((a, ai) => `<span class="alias-chip" style="background:#eef;color:#357abd;font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${a}<span style="cursor:pointer;color:#e74c3c;font-weight:700;" onclick="removeAlias(${i},${ai},'store')">×</span></span>`).join('')}
+        ${s.aliases.map((a, ai) => `<span class="alias-chip" style="background:var(--blue-soft);color:var(--primary);font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${a}<span style="cursor:pointer;color:var(--danger);font-weight:700;" onclick="removeAlias(${i},${ai},'store')">×</span></span>`).join('')}
       </div>
       <div style="display:flex;gap:6px;margin-top:6px;">
         <input type="text" id="storeAliasInput${i}" placeholder="加别名" style="flex:1;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
@@ -6694,7 +6732,7 @@ function renderAliasChips(idx, type) {
   const cfg = type === 'goods' ? loadGoodsConfig() : loadStoreConfig();
   const box = document.getElementById((type === 'goods' ? 'aliases' : 'storeAliases') + idx);
   if (!box) return;
-  box.innerHTML = cfg[idx].aliases.map((a, ai) => `<span class="alias-chip" style="background:#eef;color:#357abd;font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${a}<span style="cursor:pointer;color:#e74c3c;font-weight:700;" onclick="removeAlias(${idx},${ai},'${type}')">×</span></span>`).join('');
+  box.innerHTML = cfg[idx].aliases.map((a, ai) => `<span class="alias-chip" style="background:var(--blue-soft);color:var(--primary);font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${a}<span style="cursor:pointer;color:var(--danger);font-weight:700;" onclick="removeAlias(${idx},${ai},'${type}')">×</span></span>`).join('');
 }
 
 function addAlias(idx, type) {
@@ -7022,7 +7060,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.42'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.43'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
