@@ -1144,7 +1144,10 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
     <div class="card">
       <div class="form-group">
-        <label class="form-label">🏪 店面（点击切换）</label>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <label class="form-label" style="margin-bottom:0;">🏪 店面（点击切换）</label>
+          <button id="recoverOrderBtn" class="btn btn-outline" style="padding:4px 10px;font-size:12px;display:none;" onclick="openRecoverStoreOrderModal()">✏️ 调整店序</button>
+        </div>
         <div class="store-chip-list" id="recordStoreChips"></div>
         <select class="form-select" id="recordStore" onchange="onRecordStoreChange()" style="display:none;"></select>
       </div>
@@ -1275,6 +1278,19 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响发出页顺序）</div>
       <div id="emitStoreOrderList" style="max-height:50vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:6px;"></div>
       <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="saveEmitStoreOrder()">💾 保存店序</button>
+    </div>
+  </div>
+
+  <!-- 调整回收店序弹窗（只在回收页生效） -->
+  <div class="store-ocr-modal" id="recoverStoreOrderModal">
+    <div class="store-ocr-content" style="max-width:330px;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-weight:700;font-size:16px;color:var(--text);">✏️ 调整回收店序</span>
+        <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeRecoverStoreOrderModal()">×</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响回收页顺序）</div>
+      <div id="recoverStoreOrderList" style="max-height:50vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:6px;"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="saveRecoverStoreOrder()">💾 保存店序</button>
     </div>
   </div>
 
@@ -2390,6 +2406,31 @@ function getSortedStores() {
   const cfg = loadStoreConfig();
   return cfg.map((s, i) => ({ _idx: i, sort: (s.sort === undefined ? i : s.sort), s }))
            .sort((a, b) => a.sort - b.sort);
+}
+// 门店编号自然排序：1店 < 2店 < ... < 15店；编号优先取别名（如 35-12、12店），无别名用店名
+function storeSortKey(s) {
+  const t = (s.aliases && s.aliases[0]) || s.name || '';
+  const nums = (t.match(/\d+/g) || []).map(Number);
+  return { nums, text: t };
+}
+function compareStoreByNumber(a, b) {
+  const ka = storeSortKey(a), kb = storeSortKey(b);
+  // 无编号的店面排在有编号的后面
+  if (ka.nums.length === 0 && kb.nums.length === 0) return ka.text.localeCompare(kb.text, 'zh');
+  if (ka.nums.length === 0) return 1;
+  if (kb.nums.length === 0) return -1;
+  const len = Math.max(ka.nums.length, kb.nums.length);
+  for (let i = 0; i < len; i++) {
+    const na = ka.nums[i] !== undefined ? ka.nums[i] : 0;
+    const nb = kb.nums[i] !== undefined ? kb.nums[i] : 0;
+    if (na !== nb) return na - nb;
+  }
+  return ka.text.localeCompare(kb.text, 'zh');
+}
+// 店面管理固定排序视图：按门店编号自然排序（含原始下标 _idx）
+function getStoresSortedByNumber() {
+  const cfg = loadStoreConfig();
+  return cfg.map((s, i) => ({ _idx: i, s })).sort((a, b) => compareStoreByNumber(a.s, b.s));
 }
 function getSortedStoreNames() {
   return getSortedStores().map(x => x.s.name);
@@ -3508,10 +3549,21 @@ function checkOcrCancel() {
 }
 
 // ======== 店面 chip 切换（手动录入页） ========
+// 排序分流：回收模式(out)用回收页独立店序；手动录入-发出(in)/其他用店面管理排序
 function renderStoreChips() {
-  const view = getSortedStores();
+  const cfg = loadStoreConfig();
   const container = document.getElementById('recordStoreChips');
   if (!container) return;
+  let orderNames;
+  if (currentActionType === 'out') {
+    orderNames = getRecoverOrder();
+  } else {
+    orderNames = getSortedStores().map(x => x.s.name);
+  }
+  const view = orderNames.map(n => {
+    const idx = cfg.findIndex(s => s.name === n);
+    return { _idx: idx, s: cfg[idx] };
+  });
   // 无店面时提示去新增
   if (!view || view.length === 0) {
     container.innerHTML = `
@@ -3628,6 +3680,95 @@ function saveEmitOrder(order, goodsName) {
   const gName = goodsName || currentEmitGoodsName();
   emitOrderCache[gName] = order.slice();
   persistEmitOrders();
+}
+
+// ===== 回收页独立店序（一套全局序，不按筐种；只作用于回收页）=====
+// 存储：kuanwei_recover_store_order = {v:1, order:[店名...]}；kuanwei_ 前缀自动纳入云备份全量快照
+let recoverOrder = null;
+let recoverOrderCustomized = false;
+const RECOVER_ORDER_KEY = 'kuanwei_recover_store_order';
+const RECOVER_ORDER_VER = 1;
+
+function getRecoverOrder() {
+  const cfg = loadStoreConfig();
+  const names = cfg.map(s => s.name);
+  if (!recoverOrder) {
+    const saved = (() => { try { return JSON.parse(localStorage.getItem(RECOVER_ORDER_KEY)); } catch(e){ return null; } })();
+    if (saved && typeof saved === 'object' && !Array.isArray(saved) && saved.v === RECOVER_ORDER_VER && Array.isArray(saved.order)) {
+      recoverOrder = saved.order;
+      recoverOrderCustomized = true;
+    } else {
+      recoverOrder = getStoresSortedByNumber().map(x => x.s.name); // 默认按门店编号自然排序（1店→15店）
+      recoverOrderCustomized = false;
+    }
+  }
+  if (recoverOrderCustomized) {
+    // 用户自定义模式：过滤已删除的店 + 新店追加末尾
+    recoverOrder = recoverOrder.filter(n => names.includes(n));
+    names.forEach(n => { if (!recoverOrder.includes(n)) recoverOrder.push(n); });
+  } else {
+    // 默认模式：始终按编号排序重算（新店自动归位）
+    recoverOrder = getStoresSortedByNumber().map(x => x.s.name);
+  }
+  return recoverOrder.slice();
+}
+function saveRecoverOrder(order) {
+  recoverOrder = order.slice();
+  recoverOrderCustomized = true;
+  try { localStorage.setItem(RECOVER_ORDER_KEY, JSON.stringify({ v: RECOVER_ORDER_VER, order: recoverOrder })); } catch(e) {}
+}
+
+// ===== 回收页调整店序弹窗（拖动 + ▲▼，实时保存）=====
+function openRecoverStoreOrderModal() {
+  renderRecoverStoreOrder();
+  document.getElementById('recoverStoreOrderModal').classList.add('show');
+}
+function closeRecoverStoreOrderModal() {
+  document.getElementById('recoverStoreOrderModal').classList.remove('show');
+}
+function renderRecoverStoreOrder() {
+  const order = getRecoverOrder();
+  const cfg = loadStoreConfig();
+  const container = document.getElementById('recoverStoreOrderList');
+  if (!container) return;
+  container.innerHTML = order.map((storeName, i) => {
+    const store = cfg.find(s => s.name === storeName);
+    const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);" draggable="true" ondragstart="recoverDragStart(event, ${i})" ondragover="event.preventDefault()" ondrop="recoverDrop(event, ${i})">
+      <span style="cursor:grab;color:var(--text-light);font-size:18px;">☰</span>
+      <span style="flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(storeName)}<span style="color:var(--secondary,#e67e22);font-size:11px;">${alias}</span></span>
+      <button class="btn btn-outline" style="padding:2px 8px;font-size:12px;" onclick="recoverMoveOrder(${i}, -1)">▲</button>
+      <button class="btn btn-outline" style="padding:2px 8px;font-size:12px;" onclick="recoverMoveOrder(${i}, 1)">▼</button>
+    </div>`;
+  }).join('');
+  recoverDragFrom = -1;
+}
+let recoverDragFrom = -1;
+function recoverDragStart(e, i) { recoverDragFrom = i; }
+function recoverDrop(e, to) {
+  e.preventDefault();
+  if (recoverDragFrom < 0 || recoverDragFrom === to) return;
+  const order = getRecoverOrder();
+  const [moved] = order.splice(recoverDragFrom, 1);
+  order.splice(to, 0, moved);
+  saveRecoverOrder(order);
+  renderRecoverStoreOrder();
+  renderStoreChips();
+}
+function recoverMoveOrder(i, dir) {
+  const order = getRecoverOrder();
+  const to = i + dir;
+  if (to < 0 || to >= order.length) return;
+  const [moved] = order.splice(i, 1);
+  order.splice(to, 0, moved);
+  saveRecoverOrder(order);
+  renderRecoverStoreOrder();
+  renderStoreChips();
+}
+function saveRecoverStoreOrder() {
+  closeRecoverStoreOrderModal();
+  renderStoreChips();
+  showToast('✅ 回收店序已更新（仅回收页）');
 }
 
 // 筐类型 → 专属图标（5种筐各不相同）
@@ -4034,6 +4175,9 @@ function manualEntry(type) {
   document.getElementById('entryModeLabel').textContent = label;
   document.getElementById('homeWizard').style.display = 'none';
   document.getElementById('manualForm').style.display = 'block';
+  // 回收模式才显示"调整店序"按钮（回收页独立店序）
+  const ob = document.getElementById('recoverOrderBtn');
+  if (ob) ob.style.display = type === 'out' ? '' : 'none';
   initStoreSelect('recordStore');
   document.getElementById('recordDate').value = todayStr();
   renderGoodsInputList();
@@ -4309,7 +4453,7 @@ function backFromBackupPanel() {
 
 // ======== 店面管理面板 ========
 function renderStorePanelUI() {
-  const view = getSortedStores(); // 排序视图（含原始下标 _idx）
+  const view = getStoresSortedByNumber(); // 固定按门店编号自然排序（1店→15店），用户不可调整顺序
   const container = document.getElementById('storeListPanel');
   let html = '';
   view.forEach((x, i) => {
@@ -4318,10 +4462,6 @@ function renderStorePanelUI() {
     html += `<div class="store-card">
       <div class="sc-head">
         <div class="sc-idx">${i+1}</div>
-        <div class="sc-move-col">
-          <button class="sc-move" onclick="moveStore(${idx},-1)" ${i===0?'disabled':''}>▲</button>
-          <button class="sc-move" onclick="moveStore(${idx},1)" ${i===view.length-1?'disabled':''}>▼</button>
-        </div>
         <input type="text" class="sc-name" id="sName${idx}" value="${escapeHtml(s.name)}" maxlength="20">
       </div>
       <div class="sc-alias-label">🏷️ 别名（识别时可替代店名）</div>
@@ -7080,7 +7220,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.44'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.45'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
