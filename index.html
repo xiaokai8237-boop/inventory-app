@@ -1282,7 +1282,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
         <span style="font-weight:700;font-size:16px;color:var(--text);">✏️ 调整店序</span>
         <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitStoreOrderModal()">×</span>
       </div>
-      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响发出页顺序）</div>
+      <div id="emitStoreOrderHint" style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响发出页顺序）</div>
       <div id="emitStoreOrderList" style="max-height:50vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:6px;"></div>
       <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="saveEmitStoreOrder()">💾 保存店序</button>
     </div>
@@ -3954,6 +3954,9 @@ function emitSaveSwitchGoods() {
 
 // ===== 调整店序弹窗 =====
 function openEmitStoreOrderModal() {
+  const gName = currentEmitGoodsName();
+  const hint = document.getElementById('emitStoreOrderHint');
+  if (hint && gName) hint.textContent = '按住 ☰ 拖动，或点 ▲▼ 调整（仅影响' + gName + '页顺序）';
   renderEmitStoreOrder();
   document.getElementById('emitStoreOrderModal').classList.add('show');
 }
@@ -7241,7 +7244,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.48'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.49'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
