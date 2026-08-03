@@ -1253,7 +1253,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <div class="card">
       <div style="font-size:15px;font-weight:700;margin-bottom:6px;color:var(--text);">🏪 我的店面 <span style="font-size:13px;color:var(--primary);font-weight:600;">(<span id="storeCount">0</span>)</span></div>
-      <div style="font-size:11px;color:var(--text-light);margin-bottom:10px;">💡 店面请在此维护，日报/记录/汇总会自动同步；若店面为空会从日报偏好自动导入</div>
+      <div style="font-size:11px;color:var(--text-light);margin-bottom:10px;">💡 店面请在此维护，日报/记录/汇总会自动同步；可通过下方"批量导入"用拍照/相册快速添加</div>
       <div id="storeListPanel"></div>
       <div style="display:flex;gap:8px;margin-top:8px;">
         <button class="btn btn-primary" style="flex:1;" onclick="saveStorePanelChanges()">💾 保存修改</button>
@@ -6992,7 +6992,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.39'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.40'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
