@@ -6562,7 +6562,7 @@ function renderSummary() {
       <th>筐类型</th><th>发出</th><th>回收</th><th>差异</th>
     </tr></thead><tbody>`;
   names.forEach((name, i) => {
-    const net = totals[i].in - totals[i].out;
+    const net = totals[i].out - totals[i].in;
     const netStr = net >= 0 ? `+${net}` : `${net}`;
     html += `<tr>
       <td>${name}</td>
@@ -6571,7 +6571,7 @@ function renderSummary() {
       <td style="color:${net>=0?'var(--success)':'var(--danger)'};font-weight:600;">${netStr}</td>
     </tr>`;
   });
-  const grandNet = grandIn - grandOut;
+  const grandNet = grandOut - grandIn;
   const grandNetStr = grandNet >= 0 ? `+${grandNet}` : `${grandNet}`;
   html += `<tr class="total-row">
     <td>合计</td>
@@ -7232,7 +7232,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.46'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.47'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
