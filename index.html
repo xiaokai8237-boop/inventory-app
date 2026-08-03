@@ -1574,7 +1574,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       </div>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
-      <button class="btn btn-outline" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(7)">近7天</button>
+      <button class="btn btn-outline" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(3)">近3天</button>
       <button class="btn btn-outline" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(30)">近30天</button>
       <button class="btn btn-outline" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(0)">全部</button>
     </div>
@@ -1712,7 +1712,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       进「📤 发出」或「📥 回收」页，底部有「今日各筐统计（全部门店）」和「📋 今日各店明细」，每家店每个筐都列出来了<br><br>
       <b>📈 想看统计总数？</b><br>
       ① 点 <b>「首页」</b> → 点 <b>「📈 汇总」</b> 按钮<br>
-      ② 选日期范围（或点"近7天"）<br>
+      ② 选日期范围（或点"近3天"）<br>
       ③ 选店面（选"全部店"看所有店加起来）<br>
       ④ 下面表格就是每种筐的发出、回收、差异数<br><br>
       <b>🔄 月底要和仓库管理员对账？</b><br>
@@ -7601,7 +7601,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.58'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.59'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
