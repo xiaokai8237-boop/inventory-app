@@ -7488,7 +7488,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.71'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.72'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -7525,11 +7525,13 @@ try { restoreFromCloud(); } catch(e) { console.error('restoreFromCloud fail', e)
 // 定时兜底备份：无操作时每30分钟自动备份一次（后台静默）
 try { startPeriodicBackup(); } catch(e) { console.error('startPeriodicBackup fail', e); }
 // 原自动同步逻辑已移除：if (isLoggedIn()) { const p = getCloudPhone(); if (p) { autoSyncFromCloud(p); } }
-// 界面初始化完成：淡出移除启动加载遮罩，并通知原生隐藏启动页（自适应：网页加载完才消失）
-(function removeBootOverlay() {
+// 启动页显示规则：只在页面加载完成之前显示。
+// 页面完全加载完成（含图片/字体等所有资源，window load 事件）后才淡出移除；
+// 加超时兜底，避免个别资源加载失败导致遮罩永不消失。
+function hideBootOverlay() {
   try {
     const ov = document.getElementById('bootOverlay');
-    if (ov) {
+    if (ov && ov.parentNode) {
       // 启动页版本号与 APP_VERSION 自动同步
       const bv = document.getElementById('bootVer');
       if (bv) bv.textContent = 'v' + APP_VERSION;
@@ -7542,7 +7544,15 @@ try { startPeriodicBackup(); } catch(e) { console.error('startPeriodicBackup fai
       try { window.Capacitor.Plugins.SplashScreen.hide(); } catch (e) {}
     }
   } catch (e) {}
-})();
+}
+// 页面加载完成（load 事件，所有资源就绪）→ 隐藏启动页；若已加载完则立即隐藏
+if (document.readyState === 'complete') {
+  hideBootOverlay();
+} else {
+  window.addEventListener('load', hideBootOverlay);
+  // 兜底：最多 5 秒强制隐藏，防止资源加载失败/过慢导致启动页卡住不消失
+  setTimeout(hideBootOverlay, 5000);
+}
 // APP 版本检查：对比云端 version.txt，有新版本弹可选更新提示（旧版 APP 打开也能提示）
 setTimeout(checkAppVersion, 1500);
 // 注册 Service Worker（离线可用 + 加载加速），禁用 HTTP 缓存，确保每次拿到最新 sw.js
