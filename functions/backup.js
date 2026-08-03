@@ -38,9 +38,13 @@ async function handleBackupPost(body, env, json) {
   const deviceId = body.deviceId;
   const data = body.data;
   if ((!account && !deviceId) || !data) return json({ error: 'missing account/deviceId or data' }, 400);
+  // 用户主动删除标记：客户端删除过数据时传 userDeleted=true，允许空记录/空店面覆盖云端
+  // （否则"防数据丢失"保护会把已删数据从云端拉回，导致用户永远删不掉）
+  const userDeleted = !!body.userDeleted;
   // 服务器端防数据丢失（终极保护，客户端无论新旧版本都无法绕过）：
   // 本地记录/店面为空数组但云端已有数据时，保留云端数据，避免"清缓存/换设备/旧版本"上传空值覆盖云端。
-  if (account) {
+  // 例外：用户主动删除（userDeleted=true）时允许空覆盖，尊重删除意图。
+  if (!userDeleted && account) {
     const key = 'data_' + account;
     const raw = await env.BACKUP_KV.get(key);
     if (raw) {
@@ -59,6 +63,9 @@ async function handleBackupPost(body, env, json) {
       } catch (e) {}
     }
     await env.BACKUP_KV.put(key, JSON.stringify(data));
+  }
+  if (account && userDeleted) {
+    await env.BACKUP_KV.put('data_' + account, JSON.stringify(data));
   }
   if (deviceId) await env.BACKUP_KV.put('device_' + deviceId, JSON.stringify(data));
   return json({ ok: true });
