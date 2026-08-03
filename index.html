@@ -990,6 +990,59 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   box-shadow: 0 6px 20px rgba(0,184,148,.3);
 }
 
+/* 管理页：用户头部卡片 */
+.manage-user-card {
+  background: linear-gradient(135deg, var(--primary), #00b894);
+  color: #fff;
+  border-radius: 14px;
+}
+.manage-user-head { display: flex; align-items: center; gap: 14px; }
+.manage-user-head .muh-avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: rgba(255,255,255,.22);
+  color: #fff; font-size: 22px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,.35);
+}
+.manage-user-head .muh-info { flex: 1; min-width: 0; }
+.manage-user-head .muh-name { font-size: 16px; font-weight: 700; color: #fff; }
+.manage-user-head .muh-sub { font-size: 12px; color: rgba(255,255,255,.85); margin-top: 3px; }
+.manage-user-head .muh-arrow { color: rgba(255,255,255,.85); font-size: 22px; font-weight: 300; }
+
+/* 管理页：菜单列表 */
+.manage-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  background: none; border: none; cursor: pointer;
+  text-align: left; width: 100%; font-size: 15px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+  font-family: inherit;
+}
+.manage-item:last-child { border-bottom: none; }
+.manage-item:active { background: var(--soft-bg); }
+.manage-item .mi-icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; border-radius: 10px;
+  background: var(--soft-bg);
+}
+.manage-item .mi-title { flex: 1; font-weight: 500; }
+.manage-item .mi-badge {
+  background: var(--primary); color: #fff;
+  border-radius: 10px; padding: 1px 8px;
+  font-size: 12px; font-weight: 600; min-width: 20px;
+  text-align: center;
+}
+.manage-item .mi-arrow { color: var(--text-light); font-size: 20px; font-weight: 300; }
+
+.footer {
+  text-align: center; font-size: 12px; color: var(--text-light);
+  padding: 20px 0 30px;
+}
+
 /* 管理面板通用 */
 .manage-panel { display: none; }
 .manage-panel .panel-header {
@@ -1094,6 +1147,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 <div class="tabs">
   <div class="tab active" data-page="record">首页</div>
   <div class="tab" data-page="history">记录</div>
+  <div class="tab" data-page="manage">管理</div>
 </div>
 
 <!-- 未登录提醒横条（登录后隐藏） -->
@@ -1110,28 +1164,10 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <!-- 账号登录状态（原"数据账号"徽标位置） -->
     <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)" style="position:static;max-width:none;width:100%;justify-content:center;margin-bottom:8px;">🔑 登录</button>
     <div class="card" style="text-align:center;padding:16px 14px;">
-      <div style="font-size:16px;font-weight:600;margin-bottom:16px;">选择操作</div>
       <!-- 第一行：发出/回收（主操作，突出） -->
-      <div class="home-grid-row" style="margin-bottom:12px;">
+      <div class="home-grid-row" style="margin-bottom:0;">
         <button class="home-btn-main home-btn-issue" onclick="openEmitFlow()"><span class="hb-icon">📤</span>发出</button>
         <button class="home-btn-main home-btn-recover" onclick="manualEntry('out')"><span class="hb-icon">📥</span>回收</button>
-      </div>
-      <!-- 第二行：数据备份/店面管理/框名设置 -->
-      <div class="home-grid-row" style="margin-bottom:10px;">
-        <button class="home-btn" onclick="openBackupPanel()"><div class="hb-icon">💾</div>备份与恢复</button>
-        <button class="home-btn" onclick="openStorePanel()"><div class="hb-icon">🏪</div>店面管理</button>
-        <button class="home-btn" onclick="openGoodsPanel()"><div class="hb-icon">📦</div>框名设置</button>
-      </div>
-      <!-- 第三行：库存追踪/汇总/对账 -->
-      <div class="home-grid-row" style="margin-bottom:10px;">
-        <button class="home-btn" onclick="openTrackPanel()"><div class="hb-icon">📊</div>库存追踪</button>
-        <button class="home-btn" onclick="switchPage('summary')"><div class="hb-icon">📈</div>汇总</button>
-        <button class="home-btn" onclick="switchPage('reconcile')"><div class="hb-icon">🔄</div>对账</button>
-      </div>
-      <!-- 第四行：使用说明/添加到主屏幕 -->
-      <div class="home-grid-row">
-        <button class="home-btn" onclick="switchPage('settings')"><div class="hb-icon">❓</div>使用说明</button>
-        <button class="home-btn" onclick="installApp()"><div class="hb-icon">📱</div>添加到桌面</button>
       </div>
     </div>
 
@@ -1437,6 +1473,22 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div id="dailyPhotoInfo" style="font-size:11px;color:var(--text-light);margin-top:6px;"></div>
   </div>
   <div id="historyList"></div>
+</div>
+
+<!-- ========== 管理页 ========== -->
+<div class="page" id="page-manage">
+  <div class="card manage-user-card" id="manageUserCard" style="padding:14px;"></div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <button class="manage-item" onclick="openStorePanel()"><span class="mi-icon">🏪</span><span class="mi-title">店面管理</span><span class="mi-badge" id="manageStoreBadge" style="display:none;">0</span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openGoodsPanel()"><span class="mi-icon">📦</span><span class="mi-title">框名设置</span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openTrackPanel()"><span class="mi-icon">📊</span><span class="mi-title">库存追踪</span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openBackupPanel()"><span class="mi-icon">💾</span><span class="mi-title">备份与恢复</span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="switchPage('summary')"><span class="mi-icon">📈</span><span class="mi-title">汇总</span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="switchPage('reconcile')"><span class="mi-icon">🔄</span><span class="mi-title">对账</span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="switchPage('settings')"><span class="mi-icon">❓</span><span class="mi-title">使用说明</span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="installApp()"><span class="mi-icon">📱</span><span class="mi-title">添加到桌面</span><span class="mi-arrow">›</span></button>
+  </div>
+  <div class="footer">物流筐收发管理系统 v6.0.53</div>
 </div>
 
 <!-- ========== 汇总页 ========== -->
@@ -4422,6 +4474,7 @@ function importStoresFromDailyPref() {
   return false;
 }
 function openStorePanel() {
+  switchPage('record');
   document.getElementById('homeWizard').style.display = 'none';
   document.getElementById('storeManagePanel').style.display = 'block';
   // 不再自动导入/恢复：店面数据完全由用户在店面管理手动维护（用户要求去掉自动恢复备份）
@@ -4429,18 +4482,20 @@ function openStorePanel() {
 }
 function backFromStorePanel() {
   document.getElementById('storeManagePanel').style.display = 'none';
-  document.getElementById('homeWizard').style.display = 'block';
+  switchPage('manage');
 }
 function openGoodsPanel() {
+  switchPage('record');
   document.getElementById('homeWizard').style.display = 'none';
   document.getElementById('goodsManagePanel').style.display = 'block';
   renderGoodsPanelUI();
 }
 function backFromGoodsPanel() {
   document.getElementById('goodsManagePanel').style.display = 'none';
-  document.getElementById('homeWizard').style.display = 'block';
+  switchPage('manage');
 }
 function openTrackPanel() {
+  switchPage('record');
   document.getElementById('homeWizard').style.display = 'none';
   document.getElementById('trackPanel').style.display = 'block';
   document.getElementById('trackDate').value = todayStr();
@@ -4451,9 +4506,10 @@ function openTrackPanel() {
 }
 function backFromTrackPanel() {
   document.getElementById('trackPanel').style.display = 'none';
-  document.getElementById('homeWizard').style.display = 'block';
+  switchPage('manage');
 }
 function openBackupPanel() {
+  switchPage('record');
   document.getElementById('homeWizard').style.display = 'none';
   document.getElementById('backupPanel').style.display = 'block';
   renderCloudBackupStatus();
@@ -4468,7 +4524,7 @@ function openBackupPanel() {
 }
 function backFromBackupPanel() {
   document.getElementById('backupPanel').style.display = 'none';
-  document.getElementById('homeWizard').style.display = 'block';
+  switchPage('manage');
 }
 
 // ======== 店面管理面板 ========
@@ -4802,6 +4858,7 @@ function switchPage(pageName) {
   if (pageName === 'summary') renderSummary();
   if (pageName === 'settings') renderSettings();
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
+  if (pageName === 'manage') renderManage();
 }
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => switchPage(tab.dataset.page));
@@ -6885,6 +6942,36 @@ function renderSettings() {
   // 设置页现为使用说明，无动态内容需渲染
 }
 
+// ======== 管理页 ========
+function renderManage() {
+  // 1) 用户头部卡片：圆形头像 + 昵称/手机号 + 时间
+  const phone = (localStorage.getItem('kuanwei_phone') || '').slice(-4) || '----';
+  const phoneFull = localStorage.getItem('kuanwei_phone') || '未登录';
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const userCard = document.getElementById('manageUserCard');
+  if (userCard) {
+    userCard.innerHTML = `
+      <div class="manage-user-head">
+        <div class="muh-avatar">店</div>
+        <div class="muh-info">
+          <div class="muh-name">店长，你好！</div>
+          <div class="muh-sub">${escapeHtml(phoneFull)}${phoneFull !== '未登录' ? ' · ' + dateStr + ' ' + hh + ':' + mm : ''}</div>
+        </div>
+        <div class="muh-arrow">›</div>
+      </div>`;
+  }
+  // 2) 店面管理角标：当前店面数
+  const stores = loadStoreConfig();
+  const badge = document.getElementById('manageStoreBadge');
+  if (badge) {
+    if (stores.length > 0) { badge.style.display = ''; badge.textContent = stores.length; }
+    else { badge.style.display = 'none'; }
+  }
+}
+
 function renderStoreConfigUI() {
   const cfg = loadStoreConfig();
   const container = document.getElementById('storeList');
@@ -7242,7 +7329,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.52'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.53'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
