@@ -3860,7 +3860,54 @@ function applyEmitVoice() {
 }
 function emitTriggerPhoto() {
   if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
-  showToast('📷 拍照识别即将开放，请先手动填写');
+  // 动态创建全屏可见的 file input 唤起拍照/相册（PWA 需 input 在可视区）
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:2px;height:2px;opacity:0;z-index:99999;';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    document.body.removeChild(input);
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      emitDoOcr(String(ev.target.result));
+    };
+    reader.readAsDataURL(file);
+  };
+  input.oncancel = () => { document.body.removeChild(input); };
+  document.body.appendChild(input);
+  input.click();
+}
+
+// 发出页拍照识别：识别图片中的数字序列，按店序填入确认框
+async function emitDoOcr(imageDataUrl) {
+  showLoading('🔍 正在识别路单…');
+  try {
+    const compressed = await compressImage(imageDataUrl, 1600);
+    const b64 = compressed.replace(/^data:image\/\w+;base64,/, '');
+    const resp = await fetch(API_BASE + '/tcloud', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: b64 })
+    });
+    const data = await resp.json();
+    hideLoading();
+    if (data.ok && data.words && data.words.length > 0) {
+      const text = data.words.join(' ');
+      const nums = (text.match(/\d+/g) || []).map(n => parseInt(n));
+      if (nums.length === 0) { showToast('未识别到数字，请重试'); return; }
+      emitPendingNums = nums;
+      renderEmitVoiceConfirm(nums);
+      document.getElementById('emitVoiceConfirmModal').classList.add('show');
+      showToast('✅ 已识别 ' + nums.length + ' 个数字，请确认');
+    } else {
+      showToast('识别失败: ' + (data.error || ''));
+    }
+  } catch (e) {
+    hideLoading();
+    showToast('识别失败，请检查网络');
+  }
 }
 
 function manualEntry(type) {
@@ -6912,7 +6959,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.36'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.37'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
