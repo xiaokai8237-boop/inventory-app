@@ -7033,34 +7033,46 @@ function getAvatarSrc() {
   try { return localStorage.getItem('kuanwei_avatar__' + phone) || ''; } catch(e) { return ''; }
 }
 function renderManage() {
-  // 1) 用户头部卡片：圆形头像 + 昵称/手机号 + 时间，点击弹出账号功能气泡
-  const phone = (localStorage.getItem('kuanwei_phone') || '').slice(-4) || '----';
-  const phoneFull = localStorage.getItem('kuanwei_phone') || '未登录';
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2, '0');
-  const mm = String(now.getMinutes()).padStart(2, '0');
-  const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  // 1) 用户头部卡片：头像 + 登录状态 + 云备份状态，点击弹出账号功能气泡
+  const phoneFull = localStorage.getItem('kuanwei_phone') || '';
+  const logged = isLoggedIn();
   const av = getAvatarSrc();
   const avatarHtml = av
     ? `<div class="muh-avatar"><img src="${av}" alt="头像"></div>`
     : `<div class="muh-avatar muh-avatar-empty"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M9 2L7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg></div>`;
+  let nameHtml, subHtml, extraBtn;
+  if (logged && phoneFull) {
+    const last = localStorage.getItem('kuanwei_last_backup');
+    let timeText = '从未备份';
+    if (last) {
+      try {
+        const d = new Date(last);
+        timeText = `${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      } catch(e) {}
+    }
+    nameHtml = `已登录·${maskPhone(phoneFull)}`;
+    subHtml = `☁️ 云备份已开启·最近 ${timeText}`;
+    extraBtn = `<button class="manage-avatar-btn" onclick="event.stopPropagation();openAvatarModal();">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M9 2L7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
+          设置头像
+        </button>`;
+  } else {
+    nameHtml = `<span style="color:#ffd7d7;font-weight:700;">未登录，请先登录！</span>`;
+    subHtml = '';
+    extraBtn = '';
+  }
   const userCard = document.getElementById('manageUserCard');
   if (userCard) {
     userCard.innerHTML = `
       <div class="manage-user-head" onclick="toggleManageAccountMenu(event)">
         ${avatarHtml}
         <div class="muh-info">
-          <div class="muh-name">店长，你好！</div>
-          <div class="muh-sub">${escapeHtml(phoneFull)}${phoneFull !== '未登录' ? ' · ' + dateStr + ' ' + hh + ':' + mm : ''}</div>
+          <div class="muh-name">${nameHtml}</div>
+          ${subHtml ? `<div class="muh-sub">${subHtml}</div>` : ''}
         </div>
         <div class="muh-arrow">›</div>
       </div>
-      <div class="manage-user-extra">
-        <button class="manage-avatar-btn" onclick="event.stopPropagation();openAvatarModal();">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M9 2L7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
-          设置头像
-        </button>
-      </div>`;
+      ${extraBtn ? `<div class="manage-user-extra">${extraBtn}</div>` : ''}`;
   }
   // 2) 店面管理角标：当前店面数
   const stores = loadStoreConfig();
@@ -7594,7 +7606,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.55'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.56'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
