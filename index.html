@@ -3553,7 +3553,7 @@ function saveEmitOrder(order) {
 // 筐类型 → 专属图标（5种筐各不相同）
 function goodsIcon(name) {
   const n = name || '';
-  if (n.indexOf('鲜') !== -1 || n.indexOf('冷鲜') !== -1) return '🥬';
+  if (n.indexOf('鲜') !== -1 || n.indexOf('冷鲜') !== -1) return '🍱';
   if (n.indexOf('面包') !== -1 || n.indexOf('面') !== -1) return '🍞';
   if (n.indexOf('低温') !== -1) return '🧊';
   if (n.indexOf('冷冻') !== -1) return '❄️';
@@ -4180,10 +4180,7 @@ function importStoresFromDailyPref() {
 function openStorePanel() {
   document.getElementById('homeWizard').style.display = 'none';
   document.getElementById('storeManagePanel').style.display = 'block';
-  // 店面管理为空时，自动从日报偏好导入店面（用户可能只在日报选过店、未添加为店面）
-  if (loadStoreConfig().length === 0) {
-    importStoresFromDailyPref();
-  }
+  // 不再自动导入/恢复：店面数据完全由用户在店面管理手动维护（用户要求去掉自动恢复备份）
   renderStorePanelUI();
 }
 function backFromStorePanel() {
@@ -6995,7 +6992,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.38'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.39'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
