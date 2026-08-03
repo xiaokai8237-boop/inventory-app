@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>应用图标设计 v4 · 抽象符号</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #14161a; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; padding: 36px 24px; }
+  .head { text-align: center; color: #e8e6e1; margin-bottom: 30px; }
+  .head h1 { font-size: 24px; font-weight: 800; letter-spacing: 2px; }
+  .head p { color: #8f8d88; font-size: 13px; margin-top: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 300px); gap: 38px; justify-content: center; }
+  .item { text-align: center; }
+  .item .tag { color: #e8e6e1; font-size: 14px; font-weight: 700; margin-bottom: 12px; letter-spacing: 1px; }
+  .item .tag small { color: #8f8d88; font-weight: 400; font-size: 11px; margin-left: 6px; display: block; margin-top: 3px; }
+  .icon-wrap { width: 210px; height: 210px; margin: 0 auto; border-radius: 48px; overflow: hidden; box-shadow: 0 0 0 2px rgba(255,255,255,.07), 0 22px 55px rgba(0,0,0,.55); }
+  .icon-wrap svg { display: block; width: 100%; height: 100%; }
+  .note { color: #8f8d88; font-size: 12px; margin-top: 10px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>🚚 应用图标设计 v4 · 抽象符号</h1>
+    <p>跳出"筐"的造型 · 用流转/精准/记录的核心符号 · 原创 SVG</p>
+  </div>
+  <div class="grid">
+
+    <!-- A K线徽章 -->
+    <div class="item">
+      <div class="tag">A · K 线徽章<small>字母几何 / 识别度高</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <defs>
+            <linearGradient id="wa" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#12352a"/><stop offset=".6" stop-color="#0b241d"/><stop offset="1" stop-color="#061410"/>
+            </linearGradient>
+            <linearGradient id="wag" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f2dc9b"/><stop offset=".5" stop-color="#d4af37"/><stop offset="1" stop-color="#8f6f1c"/>
+            </linearGradient>
+          </defs>
+          <rect width="256" height="256" fill="url(#wa)"/>
+          <circle cx="128" cy="128" r="74" fill="none" stroke="url(#wag)" stroke-width="3"/>
+          <path d="M98 88 v80" stroke="url(#wag)" stroke-width="20" stroke-linecap="round"/>
+          <path d="M110 128 l36 -40 M146 128 l-36 40" stroke="url(#wag)" stroke-width="20" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="note">墨绿底 + 金色几何 K（收发两路汇合）+ 细金环，识别度与质感兼得</div>
+    </div>
+
+    <!-- B 双向流转 -->
+    <div class="item">
+      <div class="tag">B · 双向流转<small>发出⇄回收 / 循环</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <rect width="256" height="256" fill="#ece9e4"/>
+          <rect x="40" y="40" width="176" height="176" rx="12" fill="none" stroke="#262b31" stroke-width="3"/>
+          <path d="M128 88 a40 40 0 0 1 40 40 l-20 0 12 20 22 -10 -2 -26 -12 6 a52 52 0 0 0 -52 -52 v22z" fill="#262b31"/>
+          <path d="M128 168 a40 40 0 0 1 -40 -40 l20 0 -12 -20 -22 10 2 26 12 -6 a52 52 0 0 0 52 52 v-22z" fill="#d97a3d"/>
+          <circle cx="128" cy="128" r="14" fill="#262b31"/>
+        </svg>
+      </div>
+      <div class="note">暖白底 + 炭黑/陶土橙双向箭头环（发出回收流转），一暖一冷两极</div>
+    </div>
+
+    <!-- C 勾选圆环 -->
+    <div class="item">
+      <div class="tag">C · 勾选圆环<small>记录精准 / 信任</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <rect width="256" height="256" fill="#f2ede2"/>
+          <circle cx="128" cy="128" r="78" fill="none" stroke="#22262b" stroke-width="11"/>
+          <circle cx="128" cy="128" r="78" fill="none" stroke="#22262b" stroke-width="3" opacity=".3"/>
+          <path d="M94 132 l24 22 44 -52" fill="none" stroke="#2f7d4f" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="196" cy="70" r="8" fill="#c8402e"/>
+        </svg>
+      </div>
+      <div class="note">奶油底 + 炭黑粗圆环 + 深绿大勾（记录无误），左上朱红一点做记忆点</div>
+    </div>
+
+    <!-- D 上升轨迹 -->
+    <div class="item">
+      <div class="tag">D · 上升轨迹<small>配送数据 / 趋势</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <rect width="256" height="256" fill="#e9e6e1"/>
+          <g stroke="#262b31" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+            <path d="M62 172 l38 -36 30 18 38 -52 26 30"/>
+          </g>
+          <circle cx="62" cy="172" r="8" fill="#262b31"/>
+          <circle cx="168" cy="102" r="8" fill="#262b31"/>
+          <circle cx="194" cy="132" r="14" fill="#d97a3d"/>
+          <path d="M62 194 h132" stroke="#262b31" stroke-width="3" opacity=".5"/>
+          <path d="M62 194 v-8" stroke="#262b31" stroke-width="3" opacity=".5"/>
+          <path d="M126 194 v-8" stroke="#262b31" stroke-width="3" opacity=".5"/>
+          <path d="M194 194 v-8" stroke="#262b31" stroke-width="3" opacity=".5"/>
+        </svg>
+      </div>
+      <div class="note">暖灰底 + 炭黑折线上升 + 陶土橙终点（一天配送数据轨迹）</div>
+    </div>
+
+    <!-- E 莫比乌斯环 -->
+    <div class="item">
+      <div class="tag">E · 流转之环<small>莫比乌斯 / 永续</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <defs>
+            <linearGradient id="we" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#6b2334"/><stop offset=".6" stop-color="#4a1626"/><stop offset="1" stop-color="#2c0d17"/>
+            </linearGradient>
+            <linearGradient id="weg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f2dc9b"/><stop offset=".5" stop-color="#d4af37"/><stop offset="1" stop-color="#8f6f1c"/>
+            </linearGradient>
+          </defs>
+          <rect width="256" height="256" fill="url(#we)"/>
+          <path d="M128 60 c40 0 60 20 60 46 c0 24 -16 38 -34 34 c-24 -5 -24 42 0 37 c18 -5 26 -26 26 -43" fill="none" stroke="url(#weg)" stroke-width="11" stroke-linecap="round"/>
+          <path d="M128 196 c-40 0 -60 -20 -60 -46 c0 -24 16 -38 34 -34 c24 5 24 -42 0 -37 c-18 5 -26 26 -26 43" fill="none" stroke="url(#weg)" stroke-width="11" stroke-linecap="round" opacity=".85"/>
+        </svg>
+      </div>
+      <div class="note">酒红底 + 金色双轨莫比乌斯（发出回收永续流转），珠宝工艺感</div>
+    </div>
+
+    <!-- F 菱形信标 -->
+    <div class="item">
+      <div class="tag">F · 菱形信标<small>四向流转 / 信号</small></div>
+      <div class="icon-wrap">
+        <svg viewBox="0 0 256 256">
+          <rect width="256" height="256" fill="#15181d"/>
+          <circle cx="128" cy="128" r="64" fill="none" stroke="#e6e3dd" stroke-width="2" opacity=".5"/>
+          <path d="M128 70 l20 58 -20 58 -20 -58z" fill="#e8b93a"/>
+          <path d="M70 128 l58 -20 58 20 -58 20z" fill="#e6e3dd"/>
+          <circle cx="128" cy="128" r="12" fill="#d84a32"/>
+          <path d="M128 58 v-20 M128 198 v-20 M58 128 h-20 M198 128 h-20" stroke="#e6e3dd" stroke-width="6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="note">炭黑底 + 黄/白/红菱形十字信标（四向收发信号），包豪斯感</div>
+    </div>
+
+  </div>
+</body>
+</html>
