@@ -5181,6 +5181,13 @@ function refreshRecordViews() {
   } catch(e) {}
 }
 function switchPage(pageName) {
+  // 切换页面时：关闭所有覆盖面板（备份/店面/框名/发出），并恢复首页向导显示（防止"主页消失"）
+  ['emitPanel','storeManagePanel','goodsManagePanel','backupPanel'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const hw = document.getElementById('homeWizard');
+  if (hw) hw.style.display = '';
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   const pageEl = document.getElementById('page-' + pageName);
