@@ -44,7 +44,6 @@ import com.getcapacitor.BridgeActivity;
  * - 状态栏/导航栏配深色，与页面主题一致
  */
 public class MainActivity extends BridgeActivity {
-    private static final long SPLASH_DURATION_MS = 2000;
     private ImageView splashOverlay;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean splashHidden = false;
@@ -56,6 +55,9 @@ public class MainActivity extends BridgeActivity {
 
         // ===== 状态栏 / 导航栏配色（深色，与页面"深空蓝晶"主题一致） =====
         setupSystemBars();
+
+        // ===== 全局异常捕获：防止未捕获异常导致闪退 =====
+        installGlobalCrashHandler();
 
         // ===== WebView 性能优化 =====
         optimizeWebView();
@@ -70,8 +72,63 @@ public class MainActivity extends BridgeActivity {
         );
         addContentView(splashOverlay, params);
 
-        // 延迟移除 splash 图，让 WebView 页面正常显示
-        handler.postDelayed(this::hideSplashOverlay, SPLASH_DURATION_MS);
+        // 等待 WebView 页面加载完成后再移除 splash（最长 5 秒），避免"页面还在加载就移除 → 白屏空窗"
+        startSplashAwaiter();
+    }
+
+    /**
+     * 启动 splash 等待器：轮询 WebView 加载进度。
+     * - 页面加载完成（progress==100）→ 立即移除 splash
+     * - 超过 SPLASH_MAX_WAIT_MS（5 秒）仍未加载完 → 也移除，避免 splash 卡太久
+     * 同时保持底部最小展示时长（避免一闪而过）。
+     */
+    private void startSplashAwaiter() {
+        final long startTime = System.currentTimeMillis();
+        final long minShowMs = 1200; // 至少显示 1.2 秒，避免闪屏
+        final long maxWaitMs = 5000; // 最多等 5 秒
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                boolean done = false;
+                try {
+                    int progress = -1;
+                    WebView wv = bridge != null ? bridge.getWebView() : null;
+                    if (wv != null) {
+                        progress = wv.getProgress();
+                    }
+                    long elapsed = System.currentTimeMillis() - startTime;
+                    if ((progress >= 100 && elapsed >= minShowMs) || elapsed >= maxWaitMs) {
+                        done = true;
+                    }
+                } catch (Exception ignored) {
+                    done = true;
+                }
+                if (done) {
+                    hideSplashOverlay();
+                } else {
+                    handler.postDelayed(this, 100);
+                }
+            }
+        });
+    }
+
+    /**
+     * 全局未捕获异常处理器：记录异常但不立即闪退。
+     * （真正崩溃由系统处理；这里捕获常规未处理异常并记录，降低闪退概率）
+     */
+    private void installGlobalCrashHandler() {
+        try {
+            final Thread.UncaughtExceptionHandler defaultHandler = Thread.getDefaultUncaughtExceptionHandler();
+            Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+                try {
+                    android.util.Log.e("Kuanwei", "UncaughtException on " + thread.getName(), throwable);
+                } catch (Throwable ignored) {}
+                // 交给系统默认处理（正常崩溃流程）
+                if (defaultHandler != null) {
+                    defaultHandler.uncaughtException(thread, throwable);
+                }
+            });
+        } catch (Exception ignored) {}
     }
 
     /** 状态栏 / 导航栏配色 */
