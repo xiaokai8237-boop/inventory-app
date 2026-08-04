@@ -1398,6 +1398,46 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 /* 导出按钮：两个都金色实心 */
 #page-reconcile .btn-export { background: linear-gradient(160deg,#F8E3A6,#C89B4E); color: #0B2E38; border: none; font-weight: 700; font-size: 15px; padding: 12px; border-radius: 12px; box-shadow: 0 4px 14px rgba(200,155,78,.25); }
 #page-reconcile .btn-export:active { transform: scale(.97); }
+
+/* ======== 发出页语音录音浮层 ======== */
+.emit-voice-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 21000;
+  background: rgba(8, 30, 38, .93);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.emit-voice-mic {
+  width: 96px; height: 96px; border-radius: 50%;
+  background: linear-gradient(160deg, #F8E3A6, #C89B4E);
+  display: flex; align-items: center; justify-content: center; font-size: 44px;
+  animation: ev-pulse 1.5s ease-in-out infinite;
+}
+@keyframes ev-pulse {
+  0%, 100% { box-shadow: 0 0 18px rgba(245,220,146,.35); transform: scale(1); }
+  50% { box-shadow: 0 0 55px rgba(245,220,146,.85); transform: scale(1.06); }
+}
+.emit-voice-bars { display: flex; align-items: flex-end; gap: 10px; height: 90px; margin: 34px 0 8px; }
+.emit-vbar {
+  width: 14px; border-radius: 7px; height: 12%;
+  background: linear-gradient(180deg, #7CE8E0, #2A7D8A);
+  transition: height .08s ease-out;
+}
+.emit-vbar:nth-child(2n) { background: linear-gradient(180deg, #F8E3A6, #B89248); }
+.emit-voice-text { color: #FFFFFF; font-size: 18px; letter-spacing: 2px; text-align: center; animation: ev-blink 1.5s ease-in-out infinite; margin-top: 10px; }
+@keyframes ev-blink { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+.emit-voice-stop {
+  margin-top: 42px; width: 118px; height: 118px; border-radius: 50%;
+  background: linear-gradient(160deg, #ff8a5c, #e0533c);
+  border: 4px solid rgba(255,255,255,.45); color: #fff; font-size: 17px; font-weight: 700;
+  box-shadow: 0 8px 30px rgba(224,83,60,.5); cursor: pointer;
+}
+.emit-voice-stop:active { transform: scale(.94); }
+.ev-spinner {
+  width: 72px; height: 72px; border-radius: 50%;
+  border: 6px solid rgba(124,232,224,.18); border-top-color: #7CE8E0;
+  animation: ev-spin .85s linear infinite;
+}
+@keyframes ev-spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -2333,6 +2373,22 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <!-- 设置头像弹窗（body 顶层，任意页面可弹） -->
+<!-- 发出页语音录音浮层（录音中：波形动画；识别中：转圈） -->
+<div class="emit-voice-overlay" id="emitVoiceOverlay" style="display:none;">
+  <div class="ev-mic-wrap" id="evMicWrap">
+    <div class="emit-voice-mic" id="evMicIcon">🎤</div>
+  </div>
+  <div class="ev-spinner-wrap" id="evSpinnerWrap" style="display:none;">
+    <div class="ev-spinner"></div>
+  </div>
+  <div class="emit-voice-bars" id="emitVoiceBars">
+    <div class="emit-vbar"></div><div class="emit-vbar"></div><div class="emit-vbar"></div>
+    <div class="emit-vbar"></div><div class="emit-vbar"></div><div class="emit-vbar"></div><div class="emit-vbar"></div>
+  </div>
+  <div class="emit-voice-text" id="evStateText">正在录音… 说完数字后点「结束」</div>
+  <button class="emit-voice-stop" id="evStopBtn" onclick="emitStopVoice()">⏹ 结束</button>
+</div>
+
 <div class="store-ocr-modal" id="avatarModal">
   <div class="store-ocr-content" style="max-width:340px;" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -4678,7 +4734,7 @@ function emitStartVoice() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
     showToast('当前浏览器不支持录音'); return;
   }
-  showToast('🔴 正在录音，说完数字后点「结束」…');
+  showEmitVoiceOverlay('record');
   try {
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
       emitVoiceStream = stream;
@@ -4692,51 +4748,103 @@ function emitStartVoice() {
       emitVoiceRec.ondataavailable = e => { if (e.data && e.data.size > 0) emitVoiceChunks.push(e.data); };
       emitVoiceRec.onstop = emitHandleVoiceBlob;
       emitVoiceRec.start();
-      emitShowVoiceStopBtn();
+      startEmitVoiceWave(stream); // 音量波形动画
     }).catch(err => {
+      hideEmitVoiceOverlay();
       let tip = '无法录音，请检查麦克风权限';
       if (err && err.name === 'NotAllowedError') tip = '麦克风权限被拒绝，请在设置中允许后重试';
       showToast('🔒 ' + tip);
     });
-  } catch (e) { showToast('🔒 ' + e.message); }
+  } catch (e) {
+    hideEmitVoiceOverlay();
+    showToast('🔒 ' + e.message);
+  }
 }
 function emitStopVoice() {
   if (emitVoiceRec && emitVoiceRec.state !== 'inactive') emitVoiceRec.stop();
-  emitHideVoiceStopBtn();
 }
-function emitShowVoiceStopBtn() {
-  // 复用顶部快捷区，显示一个"结束录音"按钮（用 toast 提示，或临时按钮）
-  const container = document.getElementById('emitPanel');
-  if (!container) return;
-  let btn = document.getElementById('emitVoiceStopBtn');
-  if (!btn) {
-    btn = document.createElement('button');
-    btn.id = 'emitVoiceStopBtn';
-    btn.className = 'btn btn-primary';
-    btn.style.cssText = 'position:fixed;top:60%;left:50%;transform:translate(-50%,-50%);z-index:20000;font-size:16px;padding:16px 32px;box-shadow:0 4px 20px rgba(0,0,0,0.3);';
-    btn.textContent = '⏹ 结束录音';
-    btn.onclick = () => emitStopVoice();
-    document.body.appendChild(btn);
-  } else { btn.style.display = 'block'; }
+// 录音浮层控制：record=录音中（波形）/ recognizing=识别中（转圈）
+function showEmitVoiceOverlay(mode) {
+  const ov = document.getElementById('emitVoiceOverlay');
+  if (!ov) return;
+  const mic = document.getElementById('evMicWrap');
+  const spin = document.getElementById('evSpinnerWrap');
+  const bars = document.getElementById('emitVoiceBars');
+  const txt = document.getElementById('evStateText');
+  const stopBtn = document.getElementById('evStopBtn');
+  if (mode === 'record') {
+    if (mic) mic.style.display = '';
+    if (spin) spin.style.display = 'none';
+    if (bars) bars.style.display = '';
+    if (txt) txt.textContent = '正在录音… 说完数字后点「结束」';
+    if (stopBtn) stopBtn.style.display = '';
+  } else {
+    if (mic) mic.style.display = 'none';
+    if (spin) spin.style.display = '';
+    if (bars) bars.style.display = 'none';
+    if (txt) txt.textContent = '🤖 AI 正在识别语音…';
+    if (stopBtn) stopBtn.style.display = 'none';
+  }
+  ov.style.display = 'flex';
 }
-function emitHideVoiceStopBtn() {
-  const btn = document.getElementById('emitVoiceStopBtn');
-  if (btn) btn.style.display = 'none';
+function hideEmitVoiceOverlay() {
+  const ov = document.getElementById('emitVoiceOverlay');
+  if (ov) ov.style.display = 'none';
+}
+// 音量波形：AnalyserNode 实时采集音量驱动 7 根柱（60fps）
+let emitVoiceWave = null;
+function startEmitVoiceWave(stream) {
+  stopEmitVoiceWave();
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const src = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.72;
+    src.connect(analyser);
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    const bars = Array.from(document.querySelectorAll('.emit-vbar'));
+    emitVoiceWave = { ctx, src, raf: 0 };
+    const tick = () => {
+      if (!emitVoiceWave) return;
+      analyser.getByteFrequencyData(data);
+      bars.forEach((b, i) => {
+        const idx = Math.min(data.length - 1, Math.floor(i * data.length / 12));
+        const v = data[idx] || 0;
+        const h = Math.max(10, Math.min(100, (v / 255) * 100));
+        b.style.height = h + '%';
+      });
+      emitVoiceWave.raf = requestAnimationFrame(tick);
+    };
+    tick();
+  } catch (e) { /* 波形失败不影响录音 */ }
+}
+function stopEmitVoiceWave() {
+  if (emitVoiceWave) {
+    cancelAnimationFrame(emitVoiceWave.raf);
+    try { emitVoiceWave.src.disconnect(); } catch (e) {}
+    try { emitVoiceWave.ctx.close(); } catch (e) {}
+    emitVoiceWave = null;
+  }
+  document.querySelectorAll('.emit-vbar').forEach(b => { b.style.height = '12%'; });
 }
 async function emitHandleVoiceBlob() {
-  emitHideVoiceStopBtn();
+  stopEmitVoiceWave();
+  showEmitVoiceOverlay('recognizing'); // 录音结束 → 切换"AI 正在识别"转圈
   const mime = emitVoiceRec ? emitVoiceRec.mimeType : '';
   const blob = new Blob(emitVoiceChunks, { type: mime });
   const reader = new FileReader();
   reader.onload = async function() {
     const b64 = String(reader.result).split(',')[1] || '';
-    showToast('🔍 正在识别语音…');
     try {
       const resp = await fetch(API_BASE + '/tcloud-asr', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ audioBase64: b64, mime: mime, len: blob.size })
       });
       const data = await resp.json();
+      hideEmitVoiceOverlay();
       if (data.ok && data.text) {
         emitVoiceText = data.text; // 暂存 ASR 原文（范例积累用）
         emitVoiceSource = 'voice';
@@ -4746,7 +4854,10 @@ async function emitHandleVoiceBlob() {
       } else {
         showToast('语音识别失败: ' + (data.error || ''));
       }
-    } catch (e) { showToast('语音识别失败，请检查网络'); }
+    } catch (e) {
+      hideEmitVoiceOverlay();
+      showToast('语音识别失败，请检查网络');
+    }
     finally {
       if (emitVoiceStream) { try { emitVoiceStream.getTracks().forEach(t => t.stop()); } catch(e){} emitVoiceStream = null; }
     }
