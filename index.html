@@ -4770,7 +4770,6 @@ function switchEmitCol(newColName) {
   const container = document.getElementById('emitVoiceConfirmList');
   const old = container.querySelectorAll('div[data-emit-row]');
   old.forEach(el => el.remove());
-  const cfg = loadStoreConfig();
   matchedNums.forEach((n, i) => {
     const storeName = order[i] || ('第' + (i + 1) + '家店');
     const store = cfg.find(s => s.name === storeName);
