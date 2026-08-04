@@ -7954,6 +7954,26 @@ if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 
 const footerVerNumEl = document.getElementById('footerVerNum');
 if (footerVerNumEl) footerVerNumEl.textContent = 'v' + APP_VERSION;
+// ======== 更新完成提醒 ========
+// 每次发布更新 build-marker.txt（内容=推送标记）。打开软件时对比服务器标记与本地已加载标记：
+// 不同 → 说明有新版本推送到位 → 弹一次"已更新完成"（下次打开不再重复）；相同 → 静默。
+function checkUpdateMarker() {
+  try {
+    fetch('build-marker.txt?t=' + Date.now(), { cache: 'no-store' })
+      .then(r => r.text())
+      .then(marker => {
+        marker = (marker || '').trim();
+        if (!marker) return;
+        const last = localStorage.getItem('kuanwei_loaded_marker') || '';
+        if (marker !== last) {
+          localStorage.setItem('kuanwei_loaded_marker', marker);
+          setTimeout(() => showToast('✅ 软件已更新完成'), 900);
+        }
+      })
+      .catch(() => {});
+  } catch(e) {}
+}
+checkUpdateMarker();
 initOffline();
 renderAccountBadge();
 renderTodayStatus();
