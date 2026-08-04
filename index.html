@@ -2897,12 +2897,14 @@ async function callBaiduOcr(imageBase64, endpoint) {
 
 // 调用后端腾讯混元视觉大模型（/hunyuan，密钥在后端 TENCENT_SECRET_ID/KEY）
 // goodsName：当前单据筐类型（冷冻/常温→物流箱列、冷藏→物流篮列、面包→面包筐列），传空则 AI 按表头找
+// 自动携带当前筐类型的成功范例（最多 5 张文字化范例，越用越准）
 async function callHunyuanVision(imageBase64, goodsName) {
   try {
+    const examples = getOcrExamplesForType(goodsName || '', 5);
     const resp = await fetch(API_BASE + '/hunyuan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64, goodsName: goodsName || '' })
+      body: JSON.stringify({ imageBase64, goodsName: goodsName || '', examples })
     });
     return await resp.json();
   } catch (e) { return null; }
@@ -4748,14 +4750,20 @@ function switchEmitCol(newColName) {
     return;
   }
   const order = getEmitOrder();
+  const cfg = loadStoreConfig();
   const matchedNums = order.map(() => 0);
   const orderByName = {};
   order.forEach((n, i) => { orderByName[n] = i; });
   pendingEmitRows.forEach(r => {
     const nm = (r.name || '').trim();
     if (!nm) return;
-    const q = r.cols && r.cols[newColName] !== undefined ? (parseInt(r.cols[newColName], 10) || 0) : 0;
-    if (orderByName[nm] !== undefined) matchedNums[orderByName[nm]] = q;
+    const si = matchStoreIdxByNameOrAlias(nm, r.code, cfg);
+    if (si >= 0) {
+      const oi = orderByName[cfg[si].name];
+      if (oi === undefined) return;
+      const q = r.cols && r.cols[newColName] !== undefined ? (parseInt(r.cols[newColName], 10) || 0) : 0;
+      matchedNums[oi] = q;
+    }
   });
   emitPendingNums = matchedNums;
   // 局部刷新：保留 colTag，更新行列表
@@ -4794,6 +4802,8 @@ function applyEmitVoice() {
     }
   });
   closeEmitVoiceConfirm();
+  // 用户验收通过 → 自动存为成功范例（越用越准）
+  saveExampleFromEmitConfirm();
   showToast('✅ 已按店面顺序填入');
   // 聚焦第一个已填的输入框，方便继续
   const first = emitInputs.find(inp => inp.value !== '');
@@ -4825,6 +4835,80 @@ function emitTriggerPhoto() {
 // 发出页拍照识别：调用混元 AI 智能识图（专取对应列），按店序填入确认框；识别类型与用户所选不一致时弹提示
 let pendingEmitImage = null; // 暂存原图（供"按新类型重新识别"）
 let pendingEmitRows = null;  // 暂存识别结果（供"仍按原类型继续"）
+
+// ======== OCR 成功范例积累（按筐类型分组，越用越准） ========
+// 判定标准：用户在识别结果确认弹窗点「确认填入」= 用户验收通过 → 自动存为范例
+// 每类型上限 10 张，滚动覆盖；识别时只拼当前类型最近 5 张（省 token 提速）
+const OCR_EXAMPLES_KEY = 'kuanwei_ocr_examples';
+const OCR_EXAMPLES_MAX = 10;
+function loadOcrExamples() {
+  try { return JSON.parse(localStorage.getItem(OCR_EXAMPLES_KEY)) || { v: 1, examples: {} }; }
+  catch(e) { return { v: 1, examples: {} }; }
+}
+function saveOcrExample(goodsType, example) {
+  if (!goodsType || !example) return;
+  const store = loadOcrExamples();
+  if (!store.examples) store.examples = {};
+  if (!Array.isArray(store.examples[goodsType])) store.examples[goodsType] = [];
+  const list = store.examples[goodsType];
+  list.push(example);
+  if (list.length > OCR_EXAMPLES_MAX) list.shift(); // 滚动：只留最新 10 张
+  try { localStorage.setItem(OCR_EXAMPLES_KEY, JSON.stringify(store)); } catch(e) {}
+}
+function getOcrExamplesForType(goodsType, max) {
+  const store = loadOcrExamples();
+  const list = (store.examples && store.examples[goodsType]) || [];
+  return list.slice(-(max || 5)); // 最近 max 张
+}
+// 从「确认填入」里保存成功范例（用户最终确认的数字 + AI 识别的列结构）
+function saveExampleFromEmitConfirm() {
+  try {
+    if (!pendingEmitRows || !emitCurrentCol) return;
+    const goodsName = currentEmitGoodsName() || '';
+    if (!goodsName) return;
+    const order = getEmitOrder();
+    const inputs = Array.from(document.querySelectorAll('#emitVoiceConfirmList input[data-emit-confirm-idx]'));
+    const finalQtys = inputs.map(inp => parseInt(inp.value) || 0);
+    const orderByName = {};
+    order.forEach((n, i) => { orderByName[n] = i; });
+    const sample = pendingEmitRows[0] || {};
+    const example = {
+      t: Date.now(),
+      header: _hunyuanDetectedType || goodsName,
+      cols: Object.keys(sample.cols || {}),
+      targetCol: emitCurrentCol,
+      rows: pendingEmitRows.map(r => {
+        const nm = (r.name || '').trim();
+        const idx = orderByName[nm] !== undefined ? orderByName[nm] : -1;
+        return { code: r.code, name: nm, qty: idx >= 0 ? finalQtys[idx] : 0 };
+      })
+    };
+    saveOcrExample(goodsName, example);
+  } catch(e) {}
+}
+
+// ======== 店名/别名/路线编号 匹配（店名、别名任一对应即匹配成功） ========
+// 别名约定：路线编号缩写，如图中 HN43-01 → 别名 "43-1" 或 "1店"
+function matchStoreIdxByNameOrAlias(name, code, cfgAll) {
+  const normName = (s) => String(s || '').replace(/[店分总路 ]/g, '');
+  const rNameNorm = normName(name);
+  const rCodeNorm = String(code || '').replace(/^[A-Za-z]+/, '').toLowerCase(); // 43-1
+  for (let si = 0; si < cfgAll.length; si++) {
+    const s = cfgAll[si];
+    if (s.name === name) return si;                                     // 1) 店名完全匹配
+    if (rNameNorm && normName(s.name) === rNameNorm) return si;         // 2) 标准化匹配（容错"店"字）
+    if (rNameNorm && normName(s.name).includes(rNameNorm) && rNameNorm.length >= 4) return si; // 3) 包含关系
+    if (s.aliases && Array.isArray(s.aliases)) {                        // 4) 别名匹配
+      if (s.aliases.includes(name) || s.aliases.includes(code)) return si;
+      for (const al of s.aliases) {
+        if (rNameNorm && normName(al) === rNameNorm) return si;         // 别名名称标准化
+        if (rCodeNorm && String(al).replace(/^[A-Za-z]+/, '').toLowerCase() === rCodeNorm) return si; // 别名=路线编号缩写
+      }
+    }
+  }
+  return -1;
+}
+
 async function emitDoOcr(imageDataUrl) {
   showLoading('🤖 AI 识别路单中…');
   try {
@@ -4864,6 +4948,7 @@ let emitCurrentCols = []; // cols 里所有"筐/箱/篮"候选列（供切换）
 function fillEmitConfirm(rows) {
   pendingEmitRows = rows; // 暂存供 switchEmitCol 使用
   const order = getEmitOrder();
+  const cfg = loadStoreConfig();
   const matchedNums = order.map(() => 0);
   const orderByName = {};
   order.forEach((n, i) => { orderByName[n] = i; });
@@ -4873,8 +4958,12 @@ function fillEmitConfirm(rows) {
   rows.forEach(r => {
     const nm = (r.name || '').trim();
     if (!nm) return;
-    const qty = pickColQty(r.cols, goodsName);
-    if (orderByName[nm] !== undefined) matchedNums[orderByName[nm]] = qty;
+    // 店名/别名/路线编号匹配到店面管理 → 反查 emitOrder 位置（以用户店序为准）
+    const si = matchStoreIdxByNameOrAlias(nm, r.code, cfg);
+    if (si >= 0) {
+      const oi = orderByName[cfg[si].name];
+      if (oi !== undefined) matchedNums[oi] = pickColQty(r.cols, goodsName);
+    }
     listColCandidates(r.cols).forEach(c => allCandidates.add(c));
   });
   // 取一个代表列名（当前 goodsName 对应的）
@@ -6786,18 +6875,17 @@ function closeOcrResultModal() {
 }
 
 // ======== 识别店名未录入提醒 ========
-// 识别结果 rows 里的店名，若未录入「店面管理」，弹提醒让用户先录入
+// 识别结果 rows 里的店名/别名/路线编号，若在「店面管理」里都匹配不到 → 弹提醒让用户先录入
 function checkUnregisteredStores(rows) {
   try {
     const cfg = loadStoreConfig();
-    const registered = new Set(cfg.map(s => (s.name || '').trim()));
     const seen = new Set();
     const missing = [];
     (rows || []).forEach(r => {
       const nm = (r.name || '').trim();
       if (!nm || seen.has(nm)) return;
       seen.add(nm);
-      if (!registered.has(nm)) missing.push(nm);
+      if (matchStoreIdxByNameOrAlias(nm, r.code, cfg) < 0) missing.push(nm);
     });
     return missing;
   } catch(e) { return []; }
