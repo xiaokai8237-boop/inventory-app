@@ -1513,7 +1513,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <button class="manage-item" onclick="switchPage('summary')"><span class="mi-icon">📈</span><span class="mi-title">汇总</span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('reconcile')"><span class="mi-icon">🔄</span><span class="mi-title">对账</span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('settings')"><span class="mi-icon">❓</span><span class="mi-title">使用说明</span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="installApp()"><span class="mi-icon">📱</span><span class="mi-title">添加到桌面</span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="installApp()"><span class="mi-icon" id="installBtnIcon">📱</span><span class="mi-title" id="installBtnLabel">添加到桌面</span><span class="mi-arrow">›</span></button>
   </div>
   <div class="footer" id="footerVer">物流筐收发管理系统 <span id="footerVerNum"></span></div>
 </div>
@@ -2164,27 +2164,48 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
 </div>
 
-<!-- 添加到桌面引导弹窗 -->
+<!-- 安装引导弹窗：安卓→下载APK；苹果→添加到主屏幕 -->
 <div class="store-ocr-modal" id="installModal" onclick="closeInstallModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;">📱 添加到桌面</span>
+      <span style="font-weight:600;font-size:15px;" id="installModalTitle">📱 添加到桌面</span>
       <button onclick="closeInstallModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
     </div>
-    <div style="font-size:13px;line-height:1.9;color:var(--text);">
-      <div id="installWechatTip" style="display:none;background:var(--amber-soft);border:1px solid var(--warning);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12.5px;color:var(--warning);">
-        ⚠️ <b>微信里不能添加到桌面</b>，需要先用浏览器打开：<br>
-        ① 点右上角 <b>「⋯」</b><br>
-        ② 点 <b>「在浏览器打开」</b>（选 Chrome / 自带浏览器）<br>
-        ③ 打开后再点「📱 添加到桌面」
+    <!-- 微信内置浏览器：无法安装/加桌面，先引导用浏览器打开 -->
+    <div id="installWechatTip" style="display:none;background:var(--amber-soft);border:1px solid var(--warning);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12.5px;color:var(--warning);line-height:1.9;">
+      ⚠️ <b>微信里不能安装/添加到桌面</b>，需要先用浏览器打开：<br>
+      ① 点右上角 <b>「⋯」</b><br>
+      ② 点 <b>「在浏览器打开」</b>（选 Chrome / 自带浏览器）<br>
+      ③ 打开后再点「管理 → 下载安卓版 / 添加到桌面」
+    </div>
+    <!-- 安卓浏览器：主推下载 APK -->
+    <div id="installAndroidTip" style="display:none;">
+      <div style="text-align:center;font-size:40px;margin-bottom:8px;">📲</div>
+      <div style="font-weight:700;font-size:15px;text-align:center;margin-bottom:4px;">推荐安装安卓版 App</div>
+      <div style="font-size:12px;color:var(--text-light);text-align:center;margin-bottom:12px;">比网页版打开更快、可离线用、新版本自动更新</div>
+      <div style="font-size:13px;line-height:1.9;color:var(--text);background:var(--soft-bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px;">
+        安装很简单：<br>
+        ① 点下方 <b>「立即下载」</b>，下载安装包<br>
+        ② 下载完成后点安装<br>
+        ③ 若提示「未知来源/允许安装」，点允许即可<br>
+        <span style="color:var(--text-light);font-size:12px;">💡 安装后桌面上会出现「物流筐」图标，直接点开就能用</span>
       </div>
-      <div id="installNormalTip">
-        <div style="margin-bottom:8px;">按下面的步骤操作（苹果手机）：</div>
+      <a id="apkDownloadBtn" href="javascript:void(0)" onclick="downloadApk()" style="display:block;text-align:center;background:var(--primary);color:#fff;font-weight:700;font-size:15px;padding:12px 0;border-radius:10px;text-decoration:none;">📲 立即下载（安卓版）</a>
+      <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--text-light);">
+        不想装？<a href="javascript:void(0)" onclick="showIosSteps()" style="color:var(--primary);text-decoration:underline;">点这里添加到桌面</a>
+      </div>
+    </div>
+    <!-- 苹果浏览器：添加到主屏幕步骤 -->
+    <div id="installIosTip" style="display:none;">
+      <div style="text-align:center;font-size:40px;margin-bottom:8px;">🍎</div>
+      <div style="font-weight:700;font-size:15px;text-align:center;margin-bottom:4px;">添加到主屏幕</div>
+      <div style="font-size:12px;color:var(--text-light);text-align:center;margin-bottom:12px;">苹果手机装不了安卓版，把网页加到桌面，就像 App 一样用</div>
+      <div style="font-size:13px;line-height:1.9;color:var(--text);">
         <div><b>①</b> 点底部 <b>「分享」</b> 按钮 <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">□↑</span></div>
         <div><b>②</b> 向下滑动，找到 <b>「添加到主屏幕」</b></div>
-        <div><b>③</b> 点 <b>「添加」</b> → 桌面出现图标，像 App 一样用</div>
+        <div><b>③</b> 点 <b>「添加」</b> → 桌面出现「物流筐」图标，像 App 一样用</div>
         <div style="background:var(--amber-soft);border:1px solid var(--warning);border-radius:8px;padding:10px;margin-top:12px;font-size:12.5px;color:var(--warning);">
-          💡 安卓手机：浏览器菜单里点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b> 即可。
+          💡 安卓手机：浏览器菜单里点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b> 也可以。
         </div>
       </div>
     </div>
@@ -2199,7 +2220,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div style="font-size:13px;color:var(--text-light);margin-bottom:14px;">帮你把每个筐的去向记得清清楚楚</div>
     <div style="font-size:13px;color:var(--text);line-height:1.8;margin-bottom:16px;text-align:left;background:var(--soft-bg);border:1px solid var(--border);border-radius:8px;padding:10px;">
       <b>第一次用，建议先做 3 件事：</b><br>
-      <span data-app-hide>① 📱 把软件加到手机桌面（像App一样用）<br></span>
+      <span data-app-hide id="welcomeStep1">① 📱 把软件加到手机桌面（像App一样用）<br></span>
       ② 🏪 设置你要记的店面<br>
       ③ 🔑 设置账号密码（数据云端备份）<br>
       <span style="color:var(--text-light);font-size:12px;">详细步骤看「使用说明」，每一步都写得清清楚楚</span>
@@ -4537,8 +4558,19 @@ function backToHomeWizard() {
 // ======== 运行环境检测 ========
 // IS_APP：是否运行在 Capacitor 原生 APP 内（安卓 APK 打包）。APK 用户看不到任何"安装/添加到桌面/苹果操作"内容。
 // IS_IOS：是否苹果设备（保留"添加到主屏幕"引导给苹果网页用户）
+// IS_ANDROID：是否安卓设备（浏览器打开网页版 → 引导下载 APK；APK 内同样为 true 但由 IS_APP 优先）
+// IS_STANDALONE：是否已作为 PWA/主屏幕运行（已添加到桌面，不再重复引导）
 var IS_APP = (typeof window !== 'undefined') && (navigator.userAgent.indexOf('Capacitor') >= 0 || window.Capacitor !== undefined);
 var IS_IOS = (typeof navigator !== 'undefined') && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+var IS_ANDROID = (typeof navigator !== 'undefined') && /Android/i.test(navigator.userAgent);
+var IS_STANDALONE = !!(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+// APK 下载地址：启动时从 app-version.json 读取最新版（网页版引导下载用；App 内走 AppUpdatePlugin 不依赖此值）
+var APK_DOWNLOAD_URL = '';
+try {
+  fetch('/app-version.json').then(function(r){ return r.json(); }).then(function(d){
+    if (d && d.apkUrl) APK_DOWNLOAD_URL = d.apkUrl;
+  }).catch(function(){});
+} catch(e) {}
 
 // 页面加载时：APK 用户隐藏所有「添加到桌面/安装引导」相关元素
 (function hideInstallIfInApp() {
@@ -4567,44 +4599,74 @@ var IS_IOS = (typeof navigator !== 'undefined') && /iPhone|iPad|iPod/i.test(navi
   }
 })();
 
-// ======== 添加到桌面（PWA） ========
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e; // 保存原生安装事件，点按钮时触发
-});
-function installApp() {
-  // APK 用户已是 APP，无需添加到桌面
-  if (IS_APP) { showToast('你已安装 App，无需添加到桌面'); return; }
-  // 微信内置浏览器：无法添加桌面，引导到浏览器打开
-  const isWechat = /MicroMessenger/i.test(navigator.userAgent);
-  if (isWechat) {
-    const modal = document.getElementById('installModal');
-    if (modal) modal.classList.add('show');
-    const wx = document.getElementById('installWechatTip');
-    const normal = document.getElementById('installNormalTip');
-    if (wx) wx.style.display = 'block';
-    if (normal) normal.style.display = 'none';
-    return;
-  }
-  // Android/Chrome：触发原生安装提示
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-    return;
-  }
-  // iOS Safari 等：显示引导教程
+// ======== 安装引导（安卓下载 APK / 苹果添加到桌面） ========
+// 统一显示/隐藏引导弹窗里的三块内容：微信提示 / 安卓下载 / 苹果步骤
+function showInstallTip(which) {
   const modal = document.getElementById('installModal');
   if (modal) modal.classList.add('show');
   const wx = document.getElementById('installWechatTip');
-  const normal = document.getElementById('installNormalTip');
-  if (wx) wx.style.display = 'none';
-  if (normal) normal.style.display = 'block';
+  const and = document.getElementById('installAndroidTip');
+  const ios = document.getElementById('installIosTip');
+  if (wx) wx.style.display = (which === 'wechat') ? 'block' : 'none';
+  if (and) and.style.display = (which === 'android') ? 'block' : 'none';
+  if (ios) ios.style.display = (which === 'ios') ? 'block' : 'none';
+  const title = document.getElementById('installModalTitle');
+  if (title) {
+    if (which === 'android') title.textContent = '📲 下载安卓版';
+    else if (which === 'ios') title.textContent = '🍎 添加到主屏幕';
+    else title.textContent = '⚠️ 请用浏览器打开';
+  }
 }
+function installApp() {
+  // APK 用户已是 APP，无需重复安装/添加
+  if (IS_APP) { showToast('你已安装 App，无需重复安装'); return; }
+  // 已作为 PWA/主屏幕运行：无需再引导
+  if (IS_STANDALONE) { showToast('你已添加到桌面，直接使用即可'); return; }
+  // 微信内置浏览器：无法安装/添加桌面，引导到浏览器打开
+  const isWechat = /MicroMessenger/i.test(navigator.userAgent);
+  if (isWechat) { showInstallTip('wechat'); return; }
+  // 安卓浏览器：主推下载 APK（功能最全：更快/离线/自动更新）
+  if (IS_ANDROID) { showInstallTip('android'); return; }
+  // 苹果/其他：添加到主屏幕步骤
+  showInstallTip('ios');
+}
+// 安卓：下载 APK（地址启动时已从 app-version.json 获取，兜底线上最新版路径）
+function downloadApk() {
+  const url = APK_DOWNLOAD_URL || 'https://inventory-app-9ql.pages.dev/apk/kuanwei-app-v6.0.75.apk';
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch(e) { window.open(url, '_blank'); }
+}
+// 苹果用户在安卓模式下仍想看"添加到桌面"步骤
+function showIosSteps() { showInstallTip('ios'); }
 function closeInstallModal() {
   const modal = document.getElementById('installModal');
   if (modal) modal.classList.remove('show');
 }
+// 按设备动态化：管理页按钮文案 / 欢迎弹窗第①步
+(function adjustInstallLabels() {
+  if (IS_APP) return; // APK 内：按钮已由 hideInstallIfInApp 隐藏
+  const lbl = document.getElementById('installBtnLabel');
+  const icn = document.getElementById('installBtnIcon');
+  if (IS_ANDROID) {
+    if (lbl) lbl.textContent = '下载安卓版';
+    if (icn) icn.textContent = '📲';
+  } else if (IS_IOS) {
+    if (lbl) lbl.textContent = '添加到桌面';
+    if (icn) icn.textContent = '🍎';
+  }
+  // 欢迎弹窗第①步：安卓浏览器 → "下载安卓版"；苹果 → "加到桌面"
+  const ws1 = document.getElementById('welcomeStep1');
+  if (ws1) {
+    if (IS_ANDROID) ws1.innerHTML = '① <b>📲 下载安卓版 App</b>（点「管理 → 下载安卓版」，更快更省心）<br>';
+    else ws1.innerHTML = '① <b>🍎 把软件加到手机桌面</b>（点「管理 → 添加到桌面」，像App一样用）<br>';
+  }
+})();
 
 // ======== 面板切换（首页 6 大按钮控制） ========
 // 显示"恢复云端数据"结果弹窗：展示恢复了哪些数据
@@ -7606,7 +7668,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.79'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.80'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
