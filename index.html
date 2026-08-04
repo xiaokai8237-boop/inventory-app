@@ -1518,16 +1518,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <button class="btn btn-primary" style="margin-top:8px;" onclick="saveManualRecord()">保存当日记录</button>
     </div>
 
-    <div class="card" style="text-align:center;padding:16px 14px;">
-      <div class="form-label" style="margin-bottom:12px;">📲 快捷录入（自动填到当前「<span id="entryModeLabel">发出</span>」列）</div>
-      <div class="home-grid-row">
-        <button class="home-btn" onclick="openVoiceInputModal()"><div class="hb-icon">🎤</div>语音录入</button>
-        <button class="home-btn" onclick="openPhotoInputModal()"><div class="hb-icon">📸</div>拍照识别</button>
-      </div>
-      <div class="home-grid-row" style="margin-top:10px;">
-      </div>
-    </div>
-
     <!-- 额外发收登记弹窗（针对所有门店） -->
     <div class="store-ocr-modal" id="extraModal" onclick="closeExtraModal()">
       <div class="store-ocr-content" onclick="event.stopPropagation()">
@@ -3394,7 +3384,7 @@ function updateLoginLock() {
     if (el) el.classList.toggle('locked-input', !logged);
   });
   // 锁定手动录入/快捷录入相关按钮（用 onclick 属性包含匹配，规避引号嵌套问题）
-  const lockOnclick = ['saveManualRecord()', 'openExtraModal()', 'openVoiceInputModal()', 'openPhotoInputModal()', 'manualEntry('];
+  const lockOnclick = ['saveManualRecord()', 'openExtraModal()', 'manualEntry('];
   document.querySelectorAll('[onclick]').forEach(btn => {
     const oc = btn.getAttribute('onclick') || '';
     if (lockOnclick.some(k => oc.indexOf(k) >= 0)) btn.classList.toggle('locked-input', !logged);
@@ -5184,7 +5174,8 @@ function manualEntry(type) {
   currentActionType = type;
   const label = type === 'in' ? '发出' : '回收';
   document.getElementById('manualHeaderLabel').textContent = label + ' - 手动录入';
-  document.getElementById('entryModeLabel').textContent = label;
+  const entryEl = document.getElementById('entryModeLabel');
+  if (entryEl) entryEl.textContent = label;
   document.getElementById('homeWizard').style.display = 'none';
   document.getElementById('manualForm').style.display = 'block';
   // 回收模式才显示"调整店序"按钮（回收页独立店序）
