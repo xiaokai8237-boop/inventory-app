@@ -100,7 +100,18 @@ async function callHunyuanVision(imageBase64, json, API_KEY, goodsName, examples
   const data = await resp.json();
   if (data.error) throw new Error(data.error.message || data.error.message_zh || 'TokenHub 错误');
   const choices = data.choices || [];
-  const text = (choices[0] && choices[0].message && choices[0].message.content) || '';
+  let text = (choices[0] && choices[0].message && choices[0].message.content) || '';
   if (!text) throw new Error('混元未返回内容');
+  // 服务端兜底：AI 常把"物流箱(修正)"列简化成"物流箱"导致 JSON 内重复键（后键覆盖前键丢真值）。
+  // 对每个 cols 块内重复出现的列名，从第二次起加"(修正N)"后缀，保住第一次的真实值（图里真实物流箱列在前）。
+  text = text.replace(/"cols"\s*:\s*\{([^{}]*)\}/g, (whole, inner) => {
+    const seen = {};
+    const fixed = inner.replace(/"([^"]+)":/g, (m, k) => {
+      const n = (seen[k] || 0) + 1;
+      seen[k] = n;
+      return n > 1 ? '"' + k + '(修正' + (n - 1) + ')":' : m;
+    });
+    return whole.replace(inner, fixed);
+  });
   return json({ ok: true, text });
 }
