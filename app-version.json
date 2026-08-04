@@ -1,7 +1,7 @@
 {
-  "versionCode": 76,
-  "versionName": "6.0.76",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.76-apkfix.apk",
-  "note": "【v6.0.76 更新内容】\n1. 修复更新下载完成后不弹安装器：改为静态广播接收（APP 被切走/杀掉也能收到下载完成，自动弹出安装）\n2. 更新升级体验：点「立即更新」后弹窗内直接显示下载进度条（百分比实时刷新），下载完成自动弹出安装，全程不跳转浏览器\n3. 启动页体验优化：金色边框完整显示在屏幕内\n4. 主页新增测试版提示条，点击可进入「设置-功能建议」反馈问题",
+  "versionCode": 77,
+  "versionName": "6.0.77",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.77-icon-splash.apk",
+  "note": "【v6.0.77 更新内容】\n1. 启动页修复：金色边框完整显示在屏幕内，不再超出屏幕\n2. 图标更新：只保留「筐」一个字居中，更简洁醒目\n3. 更新体验：下载进度条 + 下载完成自动弹出安装（APP 被切走也能收到）",
   "force": false
 }
