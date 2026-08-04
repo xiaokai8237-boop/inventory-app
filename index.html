@@ -4689,35 +4689,41 @@ function emitTriggerPhoto() {
   input.click();
 }
 
-// 发出页拍照识别：识别图片中的数字序列，按店序填入确认框
+// 发出页拍照识别：调用混元 AI 智能识图（专取「物流筐/整箱数量」列），按店序填入确认框
 async function emitDoOcr(imageDataUrl) {
-  showLoading('🔍 正在识别路单…');
+  showLoading('🤖 AI 识别路单中…');
   try {
     const compressed = await compressImage(imageDataUrl, 1600);
     const b64 = compressed.replace(/^data:image\/\w+;base64,/, '');
-    const resp = await fetch(API_BASE + '/tcloud', {
+    const resp = await fetch(API_BASE + '/hunyuan', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageBase64: b64 })
     });
     const data = await resp.json();
     hideLoading();
-    if (data.ok && data.words && data.words.length > 0) {
-      const text = data.words.join(' ');
-      const nums = (text.match(/\d+/g) || []).map(n => parseInt(n));
-      if (nums.length === 0) { showToast('未识别到数字，请重试'); return; }
-      // 过滤明显非筐数量的数字：筐数量通常 < 200，电话/地址/条码/路线编号等都会 > 200
-      let filteredNums = nums.filter(n => n > 0 && n < 200);
-      // 截断到店序数量（用户只有 N 家店就只需要 N 个数字，剩下的都是噪音）
+    if (data.ok && data.text) {
+      // 解析 hunyuan 返回的 [{code, name, qty}]
+      let rows = [];
+      try {
+        const m = data.text.match(/\[[\s\S]*?\]/);
+        if (m) rows = JSON.parse(m[0]);
+      } catch(e) {}
+      if (!Array.isArray(rows) || rows.length === 0) { showToast('未识别到数据，请重试'); return; }
+      // 按 emitOrder 顺序填入：用识别出的店名匹配 emitOrder 中的位置
       const order = getEmitOrder();
-      if (filteredNums.length > order.length) {
-        filteredNums = filteredNums.slice(0, order.length);
-        showToast('⚠️ 图片识别出 ' + nums.length + ' 个数字，已按店序截取前 ' + order.length + ' 个');
-      }
-      if (filteredNums.length === 0) { showToast('未识别到筐数量，请重试'); return; }
-      emitPendingNums = filteredNums;
-      renderEmitVoiceConfirm(filteredNums);
+      const matchedNums = order.map(() => 0);
+      const orderByName = {};
+      order.forEach((n, i) => { orderByName[n] = i; });
+      rows.forEach(r => {
+        const nm = (r.name || '').trim();
+        if (nm && orderByName[nm] !== undefined) {
+          matchedNums[orderByName[nm]] = r.qty || 0;
+        }
+      });
+      emitPendingNums = matchedNums;
+      renderEmitVoiceConfirm(matchedNums);
       document.getElementById('emitVoiceConfirmModal').classList.add('show');
-      showToast('✅ 已识别 ' + filteredNums.length + ' 个数字，请确认');
+      showToast('✅ AI 识别完成，请确认（识别 ' + rows.length + ' 家店）');
     } else {
       showToast('识别失败: ' + (data.error || ''));
     }
