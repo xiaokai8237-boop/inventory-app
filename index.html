@@ -1350,6 +1350,33 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 #page-history .record-item .del-btn:active { background: rgba(239,74,74,.2); color: #FF6B6B; }
 #page-history .empty { color: #8FB8BE; }
 #page-history #dailyPhotoInfo { color: #CFECEF; }
+/* ========== 汇总页（设计稿深青蓝） ========== */
+#page-summary { background: linear-gradient(160deg,#2A7D8A 0%,#15555F 45%,#082E38 100%); }
+#page-summary .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.09); box-shadow: none; }
+#page-summary .form-label { color: #FFFFFF; font-size: 17px; font-weight: 700; }
+#page-summary .form-input, #page-summary .form-select {
+  background: rgba(255,255,255,.08); border: 1.5px solid rgba(245,220,146,.5); color: #FFFFFF; border-radius: 10px; font-size: 15px !important;
+}
+#page-summary .form-input::-webkit-calendar-picker-indicator { filter: invert(1); }
+#page-summary .form-input::placeholder, #page-summary .form-select { color: #EAF9FB; }
+#page-summary .form-group div[style*="color"] { color: #CFECEF !important; }
+/* 快捷按钮：近3天=暖金实心 / 近30天=青绿实心 / 全部=橙色实心 */
+#page-summary .btn-sum3 { background: linear-gradient(160deg,#F8E3A6,#C89B4E); color: #0B2E38; border: none; font-weight: 700; }
+#page-summary .btn-sum30 { background: linear-gradient(160deg,#7CE8E0,#2BB8A8); color: #062B30; border: none; font-weight: 700; }
+#page-summary .btn-sumall { background: linear-gradient(160deg,#FFB76B,#E8892F); color: #FFFFFF; border: none; font-weight: 700; }
+/* 汇总表格 */
+#page-summary .summary-table th {
+  color: #CFECEF; border-bottom: 2px solid rgba(245,220,146,.25); background: rgba(255,255,255,.06);
+}
+#page-summary .summary-table td { color: #EAF9FB; border-bottom: 1px solid rgba(255,255,255,.07); background: transparent; }
+#page-summary .summary-table td span { color: #F5DC92 !important; }
+#page-summary .summary-table td span[style*="var(--success)"] { color: #7CE8E0 !important; }
+#page-summary .summary-table td.in { color: #7CE8E0 !important; }
+#page-summary .summary-table td.out { color: #FF8A8A !important; }
+#page-summary .summary-table td[style*="var(--success)"] { color: #7CE8E0 !important; }
+#page-summary .summary-table td[style*="var(--danger)"] { color: #FF8A8A !important; }
+#page-summary div[style*="var(--primary)"] { color: #F5DC92 !important; border-bottom-color: rgba(245,220,146,.4) !important; }
+#page-summary .empty { color: #8FB8BE; }
 </style>
 </head>
 <body>
@@ -1718,9 +1745,9 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       </div>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
-      <button class="btn btn-outline" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(3)">近3天</button>
-      <button class="btn btn-outline" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(30)">近30天</button>
-      <button class="btn btn-outline" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(0)">全部</button>
+      <button class="btn btn-sum3" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(3)">近3天</button>
+      <button class="btn btn-sum30" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(30)">近30天</button>
+      <button class="btn btn-sumall" style="flex:1;min-width:60px;padding:8px;font-size:11px;" onclick="setSummaryRange(0)">全部</button>
     </div>
   </div>
   <div class="card" id="summaryCard" style="overflow-x:auto;">
