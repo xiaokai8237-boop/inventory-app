@@ -1438,6 +1438,22 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   animation: ev-spin .85s linear infinite;
 }
 @keyframes ev-spin { to { transform: rotate(360deg); } }
+
+/* 主页测试版横条（点击跳设置页功能建议） */
+.beta-banner {
+  background: rgba(245,220,146,.12);
+  border: 1px solid rgba(245,220,146,.35);
+  color: #F5DC92;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  padding: 6px 10px;
+  margin: 0 12px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.beta-banner:active { background: rgba(245,220,146,.22); }
 </style>
 </head>
 <body>
@@ -1464,6 +1480,8 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   <h1>📦 物流筐收发管理系统</h1>
   <div class="date-today" id="todayLabel"></div>
 </div>
+
+<div class="beta-banner" onclick="switchPage('settings')">🧪 当前为测试版，数据不会丢失；遇到问题或有想法，欢迎到「设置-功能建议」提交</div>
 
 <div class="offline-banner" id="offlineBanner">📡 当前离线，已切换为离线模式，数据保存在本机，联网后自动同步</div>
 
@@ -1974,6 +1992,15 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <b><span id="adminTapZone" onclick="adminTap()" style="cursor:default;user-select:none;">❓</span> 每天要录很多店怎么办？</b><br>
       保存后<b>自动跳到下一家店</b>，一路填完不用选店；配合语音或拍照更快。
     </div>
+  </div>
+
+  <div class="card" style="border-left:4px solid #B89248;background:linear-gradient(160deg,rgba(245,220,146,.07),rgba(255,255,255,.03));">
+    <div style="font-size:15px;font-weight:700;color:var(--primary-dark);">💡 功能建议</div>
+    <div style="font-size:12px;margin-top:4px;color:var(--text-light);">你的每一条建议，所有用户都能看到；好建议会做成新功能</div>
+    <div id="suggestionList" style="margin-top:10px;max-height:240px;overflow-y:auto;"></div>
+    <textarea id="suggestionText" placeholder="写下你的建议，例如：希望支持按日期导出更多格式…" style="width:100%;box-sizing:border-box;min-height:70px;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;background:var(--bg);color:var(--text);"></textarea>
+    <button class="btn btn-primary" style="margin-top:8px;width:100%;padding:10px;font-size:14px;" onclick="submitSuggestion()">📨 提交建议</button>
+    <div id="suggestionTip" style="font-size:11px;color:var(--text-light);margin-top:6px;text-align:center;"></div>
   </div>
 </div>
 
@@ -4133,6 +4160,70 @@ async function autoSyncFromCloud(phone) {
   } catch(e) { return false; }
 }
 
+// ======== 功能建议（公共建议墙） ========
+function loadSuggestions() {
+  const list = document.getElementById('suggestionList');
+  if (!list) return;
+  list.innerHTML = '<div style="font-size:12px;color:var(--text-light);text-align:center;padding:14px;">加载中…</div>';
+  fetch(API_BASE + '/suggestions')
+    .then(r => r.json())
+    .then(data => {
+      const arr = (data && Array.isArray(data.suggestions)) ? data.suggestions : [];
+      if (arr.length === 0) {
+        list.innerHTML = '<div style="font-size:12px;color:var(--text-light);text-align:center;padding:14px;">还没有建议，来抢第一条~</div>';
+        return;
+      }
+      list.innerHTML = arr.map(s => {
+        const t = s.time ? fmtSugTime(s.time) : '';
+        return '<div style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--card-bg);">' +
+          '<div style="font-size:13px;color:var(--text);line-height:1.6;word-break:break-all;">' + escapeHtml(s.text || '') + '</div>' +
+          '<div style="font-size:11px;color:var(--text-light);margin-top:4px;">📱 ' + escapeHtml(s.phone || '') + (t ? ' · ' + t : '') + '</div>' +
+          '</div>';
+      }).join('');
+    })
+    .catch(() => {
+      list.innerHTML = '<div style="font-size:12px;color:var(--text-light);text-align:center;padding:14px;">建议加载失败，检查网络后重试</div>';
+    });
+}
+function fmtSugTime(iso) {
+  try {
+    const d = new Date(iso);
+    const p = n => String(n).padStart(2, '0');
+    return (d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  } catch (e) { return ''; }
+}
+function submitSuggestion() {
+  const ta = document.getElementById('suggestionText');
+  const tip = document.getElementById('suggestionTip');
+  const text = ta ? ta.value.trim() : '';
+  if (text.length < 2) { showToast('请先写下你的建议'); return; }
+  if (text.length > 500) { showToast('建议最多500字'); return; }
+  const phone = localStorage.getItem('kuanwei_phone') || '';
+  if (!phone) { showToast('请先登录再提交建议'); return; }
+  if (tip) tip.textContent = '提交中…';
+  fetch(API_BASE + '/suggestions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone: phone, text: text })
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.ok) {
+        if (ta) ta.value = '';
+        if (tip) tip.textContent = '✅ 建议已提交，所有人都能看到';
+        loadSuggestions();
+        showToast('✅ 建议已提交');
+      } else {
+        if (tip) tip.textContent = '';
+        showToast('❌ ' + (data.error || '提交失败'));
+      }
+    })
+    .catch(() => {
+      if (tip) tip.textContent = '';
+      showToast('❌ 提交失败，请检查网络');
+    });
+}
+
 function renderCloudBackupStatus() {
   const el = document.getElementById('cloudBackupStatus');
   if (!el) return;
@@ -5883,7 +5974,7 @@ function switchPage(pageName) {
   if (pageName === 'record') refreshRecordViews();
   if (pageName === 'history') { renderHistory(); updateDailyPhotoInfo(); initGoodsFilter(); }
   if (pageName === 'summary') renderSummary();
-  if (pageName === 'settings') renderSettings();
+  if (pageName === 'settings') { renderSettings(); loadSuggestions(); }
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
   if (pageName === 'manage') renderManage();
 }
