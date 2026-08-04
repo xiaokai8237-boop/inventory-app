@@ -4774,19 +4774,21 @@ function fillEmitConfirm(rows) {
   document.getElementById('emitVoiceConfirmModal').classList.add('show');
   showToast('✅ AI 识别完成，请确认（识别 ' + rows.length + ' 家店）');
 }
-// 用户所选类型 与 识别类型 是否不一致
+// 用户所选类型 与 识别类型 是否不一致（冷冻/常温是两种单据，绝不互通）
 function typeMismatchCheck(userType, detectedType) {
   const u = userType || '';
   if (detectedType === '冷藏') return !(u.includes('冷藏') || u.includes('低温'));
   if (detectedType === '面包') return !u.includes('面包');
-  if (detectedType === '冷冻或常温') return !(u.includes('冷冻') || u.includes('常温') || u.includes('物流'));
+  if (detectedType === '冷冻') return !u.includes('冷冻');
+  if (detectedType === '常温') return !u.includes('常温');
   return false;
 }
 // 识别类型 → 展示名
 function typeDisplayName(detectedType) {
   if (detectedType === '冷藏') return '冷藏';
   if (detectedType === '面包') return '面包';
-  if (detectedType === '冷冻或常温') return '冷冻或常温';
+  if (detectedType === '冷冻') return '冷冻';
+  if (detectedType === '常温') return '常温';
   return detectedType || '';
 }
 function showTypeMismatchModal(userType, detectedType) {
@@ -4816,7 +4818,8 @@ function typeMismatchSwitch() {
     if (newIdx >= 0) return;
     if (detectedType === '冷藏' && (n.includes('冷藏') || n.includes('低温'))) newIdx = i;
     else if (detectedType === '面包' && n.includes('面包')) newIdx = i;
-    else if (detectedType === '冷冻或常温' && (n.includes('冷冻') || n.includes('常温'))) newIdx = i;
+    else if (detectedType === '冷冻' && n.includes('冷冻')) newIdx = i;
+    else if (detectedType === '常温' && n.includes('常温')) newIdx = i;
   });
   if (newIdx >= 0) selectEmitGoods(newIdx); // 切换筐类型（含店序刷新）
   emitDoOcr(pendingEmitImage); // 用新类型重新识别
