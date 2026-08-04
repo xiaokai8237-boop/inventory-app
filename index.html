@@ -2986,6 +2986,7 @@ function parseHunyuanRows(text) {
   const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fence) t = fence[1].trim();
   let arr = null;
+  let headers = null;
   const objStart = t.indexOf('{');
   const objEnd = t.lastIndexOf('}');
   if (objStart >= 0 && objEnd > objStart) {
@@ -2994,6 +2995,7 @@ function parseHunyuanRows(text) {
       if (obj && typeof obj === 'object' && Array.isArray(obj.rows)) {
         _hunyuanDetectedType = String(obj.detectedType || '');
         arr = obj.rows;
+        headers = Array.isArray(obj.headers) ? obj.headers : null;
       }
     } catch (e) { arr = null; }
   }
@@ -3011,9 +3013,22 @@ function parseHunyuanRows(text) {
     const m = rawCode.match(/(\d{1,3})\s*[-–−_]\s*(\d{1,3})/);
     if (!m) continue;
     const code = parseInt(m[1], 10) + '-' + parseInt(m[2], 10);
-    // 优先用 cols 对象（AI 返回的所有列数字），回退到 qty 单字段（旧版兼容）
-    let cols = (it.cols && typeof it.cols === 'object' && Object.keys(it.cols).length > 0) ? it.cols : null;
-    if (!cols) {
+    let cols = null;
+    // 新格式：headers（表头列名）+ vals（每行数量，按列顺序）→ 转成 cols 键值对
+    if (headers && Array.isArray(it.vals)) {
+      cols = {};
+      let vIdx = 0;
+      for (let hi = 0; hi < headers.length; hi++) {
+        if (vIdx >= it.vals.length) break;
+        const hn = String(headers[hi] || '').trim();
+        // 非数量列（路线编号/到店时间/门店名称等）跳过，不消费 vals
+        if (/路线编号|到店时间|门店名称|门店|编号|时间|备注|门店名/.test(hn)) continue;
+        cols[hn || ('列' + (hi + 1))] = parseInt(it.vals[vIdx], 10) || 0;
+        vIdx++;
+      }
+    } else if (it.cols && typeof it.cols === 'object' && Object.keys(it.cols).length > 0) {
+      cols = it.cols; // 旧版：cols 键值对
+    } else {
       const qty = parseInt(it.qty, 10);
       if (!isNaN(qty) && qty >= 0) cols = { '数量': qty };
     }
@@ -4713,16 +4728,11 @@ function renderEmitVoiceConfirm(nums) {
   const cfg = loadStoreConfig();
   const container = document.getElementById('emitVoiceConfirmList');
   if (!container) return;
-  // 顶部列来源条：让用户一眼看到 AI 取的是哪一列，错了能一键换
+  // 顶部列来源条：只展示 AI 取的列（不提供下拉切换）
   const colTag = document.createElement('div');
   colTag.style.cssText = 'font-size:12px;color:#F5DC92;background:rgba(245,220,146,.10);border:1px solid rgba(245,220,146,.35);border-radius:8px;padding:8px 10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;';
   const colLabel = emitCurrentCol || '?';
-  let switchHtml = '<span style="color:#9FD0D6;">没有可换列</span>';
-  if (emitCurrentCols.length > 1) {
-    const opts = emitCurrentCols.map(c => `<option value="${escapeHtml(c)}" ${c === emitCurrentCol ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
-    switchHtml = `<select onchange="switchEmitCol(this.value)" style="background:rgba(255,255,255,.1);border:1px solid rgba(245,220,146,.5);color:#F5DC92;padding:4px 8px;border-radius:6px;font-size:12px;">${opts}</select>`;
-  }
-  colTag.innerHTML = '<span>📌 AI 取的列：<b>' + escapeHtml(colLabel) + '</b></span>' + switchHtml;
+  colTag.innerHTML = '<span>📌 AI 取的列：<b>' + escapeHtml(colLabel) + '</b></span><span style="color:#9FD0D6;font-size:11px;">数字可点开直接改</span>';
   container.innerHTML = '';
   container.appendChild(colTag);
   // 行列表
