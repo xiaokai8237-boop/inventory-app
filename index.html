@@ -2381,6 +2381,21 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
 </div>
 
+<!-- 单据类型不一致提醒弹窗（body 顶层） -->
+<div class="store-ocr-modal" id="typeMismatchModal">
+  <div class="store-ocr-content" style="max-width:360px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:700;font-size:16px;color:var(--text);">⚠️ 单据类型不一致</span>
+      <button onclick="closeTypeMismatchModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:14px;line-height:1.9;color:var(--text);" id="typeMismatchDesc"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="typeMismatchKeep()">仍按原类型继续</button>
+      <button class="btn btn-primary" style="flex:1;" id="typeMismatchSwitchBtn" onclick="typeMismatchSwitch()">按新类型重新识别</button>
+    </div>
+  </div>
+</div>
+
 <!-- 管理员密码验证弹窗 -->
 <div class="store-ocr-modal" id="adminAuthModal" onclick="closeAdminAuthModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
@@ -2961,18 +2976,34 @@ function cropImageToTable(dataUrl) {
 }
 
 // 解析混元返回的 JSON 文本（可能带 markdown 代码块或前后噪音）→ rows 数组
+let _hunyuanDetectedType = ''; // 最近一次混元识别出的单据类型（供类型比对）
 function parseHunyuanRows(text) {
   if (!text) return null;
+  _hunyuanDetectedType = '';
   let t = String(text).trim();
   // 去掉 ```json ... ``` 包裹
   const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fence) t = fence[1].trim();
-  // 提取第一个 [ 到最后一个 ]
-  const start = t.indexOf('[');
-  const end = t.lastIndexOf(']');
-  if (start < 0 || end <= start) return null;
-  let arr;
-  try { arr = JSON.parse(t.slice(start, end + 1)); } catch (e) { return null; }
+  let arr = null;
+  // 新版：JSON 对象 {"detectedType":"冷藏","rows":[{...}]}
+  const objStart = t.indexOf('{');
+  const objEnd = t.lastIndexOf('}');
+  if (objStart >= 0 && objEnd > objStart) {
+    try {
+      const obj = JSON.parse(t.slice(objStart, objEnd + 1));
+      if (obj && typeof obj === 'object' && Array.isArray(obj.rows)) {
+        _hunyuanDetectedType = String(obj.detectedType || '');
+        arr = obj.rows;
+      }
+    } catch (e) { arr = null; }
+  }
+  // 兼容旧版：纯数组 [...]
+  if (!arr) {
+    const start = t.indexOf('[');
+    const end = t.lastIndexOf(']');
+    if (start < 0 || end <= start) return null;
+    try { arr = JSON.parse(t.slice(start, end + 1)); } catch (e) { return null; }
+  }
   if (!Array.isArray(arr) || arr.length === 0) return null;
   const rows = [];
   for (const it of arr) {
@@ -4690,7 +4721,9 @@ function emitTriggerPhoto() {
   input.click();
 }
 
-// 发出页拍照识别：调用混元 AI 智能识图（专取「物流筐/整箱数量」列），按店序填入确认框
+// 发出页拍照识别：调用混元 AI 智能识图（专取对应列），按店序填入确认框；识别类型与用户所选不一致时弹提示
+let pendingEmitImage = null; // 暂存原图（供"按新类型重新识别"）
+let pendingEmitRows = null;  // 暂存识别结果（供"仍按原类型继续"）
 async function emitDoOcr(imageDataUrl) {
   showLoading('🤖 AI 识别路单中…');
   try {
@@ -4703,28 +4736,19 @@ async function emitDoOcr(imageDataUrl) {
     const data = await resp.json();
     hideLoading();
     if (data.ok && data.text) {
-      // 解析 hunyuan 返回的 [{code, name, qty}]
-      let rows = [];
-      try {
-        const m = data.text.match(/\[[\s\S]*?\]/);
-        if (m) rows = JSON.parse(m[0]);
-      } catch(e) {}
-      if (!Array.isArray(rows) || rows.length === 0) { showToast('未识别到数据，请重试'); return; }
-      // 按 emitOrder 顺序填入：用识别出的店名匹配 emitOrder 中的位置
-      const order = getEmitOrder();
-      const matchedNums = order.map(() => 0);
-      const orderByName = {};
-      order.forEach((n, i) => { orderByName[n] = i; });
-      rows.forEach(r => {
-        const nm = (r.name || '').trim();
-        if (nm && orderByName[nm] !== undefined) {
-          matchedNums[orderByName[nm]] = r.qty || 0;
-        }
-      });
-      emitPendingNums = matchedNums;
-      renderEmitVoiceConfirm(matchedNums);
-      document.getElementById('emitVoiceConfirmModal').classList.add('show');
-      showToast('✅ AI 识别完成，请确认（识别 ' + rows.length + ' 家店）');
+      // 解析 hunyuan 返回（对象 {detectedType, rows} 或兼容旧数组）
+      const rows = parseHunyuanRows(data.text);
+      if (!rows) { showToast('未识别到数据，请重试'); return; }
+      const detectedType = _hunyuanDetectedType || '';
+      const userType = currentEmitGoodsName() || '';
+      // 类型不一致 → 弹提示，等用户决定
+      if (detectedType && typeMismatchCheck(userType, detectedType)) {
+        pendingEmitImage = imageDataUrl;
+        pendingEmitRows = rows;
+        showTypeMismatchModal(userType, detectedType);
+        return;
+      }
+      fillEmitConfirm(rows);
     } else {
       showToast('识别失败: ' + (data.error || ''));
     }
@@ -4732,6 +4756,70 @@ async function emitDoOcr(imageDataUrl) {
     hideLoading();
     showToast('识别失败，请检查网络');
   }
+}
+// 按 emitOrder 顺序填入识别结果
+function fillEmitConfirm(rows) {
+  const order = getEmitOrder();
+  const matchedNums = order.map(() => 0);
+  const orderByName = {};
+  order.forEach((n, i) => { orderByName[n] = i; });
+  rows.forEach(r => {
+    const nm = (r.name || '').trim();
+    if (nm && orderByName[nm] !== undefined) {
+      matchedNums[orderByName[nm]] = r.nums[0] || 0;
+    }
+  });
+  emitPendingNums = matchedNums;
+  renderEmitVoiceConfirm(matchedNums);
+  document.getElementById('emitVoiceConfirmModal').classList.add('show');
+  showToast('✅ AI 识别完成，请确认（识别 ' + rows.length + ' 家店）');
+}
+// 用户所选类型 与 识别类型 是否不一致
+function typeMismatchCheck(userType, detectedType) {
+  const u = userType || '';
+  if (detectedType === '冷藏') return !(u.includes('冷藏') || u.includes('低温'));
+  if (detectedType === '面包') return !u.includes('面包');
+  if (detectedType === '冷冻或常温') return !(u.includes('冷冻') || u.includes('常温') || u.includes('物流'));
+  return false;
+}
+// 识别类型 → 展示名
+function typeDisplayName(detectedType) {
+  if (detectedType === '冷藏') return '冷藏';
+  if (detectedType === '面包') return '面包';
+  if (detectedType === '冷冻或常温') return '冷冻或常温';
+  return detectedType || '';
+}
+function showTypeMismatchModal(userType, detectedType) {
+  const desc = document.getElementById('typeMismatchDesc');
+  if (desc) desc.innerHTML = '你选的是<b>【' + escapeHtml(userType) + '】</b>，但图片看起来是<b>【' + escapeHtml(typeDisplayName(detectedType)) + '】</b>单';
+  const btn = document.getElementById('typeMismatchSwitchBtn');
+  if (btn) btn.textContent = '按' + typeDisplayName(detectedType) + '重新识别';
+  document.getElementById('typeMismatchModal').classList.add('show');
+}
+function closeTypeMismatchModal() {
+  document.getElementById('typeMismatchModal').classList.remove('show');
+}
+// 仍按原类型继续：用已识别结果填入
+function typeMismatchKeep() {
+  closeTypeMismatchModal();
+  if (!pendingEmitRows) { showToast('未识别到数据，请重试'); return; }
+  fillEmitConfirm(pendingEmitRows);
+}
+// 按新类型重新识别：切换筐类型 + 重新识别
+function typeMismatchSwitch() {
+  closeTypeMismatchModal();
+  if (!pendingEmitImage) { showToast('重新识别失败，请重拍'); return; }
+  const detectedType = _hunyuanDetectedType || '';
+  const names = loadGoodsNames();
+  let newIdx = -1;
+  names.forEach((n, i) => {
+    if (newIdx >= 0) return;
+    if (detectedType === '冷藏' && (n.includes('冷藏') || n.includes('低温'))) newIdx = i;
+    else if (detectedType === '面包' && n.includes('面包')) newIdx = i;
+    else if (detectedType === '冷冻或常温' && (n.includes('冷冻') || n.includes('常温'))) newIdx = i;
+  });
+  if (newIdx >= 0) selectEmitGoods(newIdx); // 切换筐类型（含店序刷新）
+  emitDoOcr(pendingEmitImage); // 用新类型重新识别
 }
 
 function manualEntry(type) {
