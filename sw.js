@@ -1,7 +1,7 @@
 // 物流筐收发管理系统 - Service Worker（离线完整可用）
-const CACHE = 'kuanwei-v165';
+const CACHE = 'kuanwei-v166';
 const ASSETS = [
-  '/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png',
+  '/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png', '/splash-v10-vision.png',
   // 预缓存 xlsx 库，保证离线时对账/导出可用
   'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
 ];

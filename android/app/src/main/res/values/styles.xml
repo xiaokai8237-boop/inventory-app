@@ -17,8 +17,10 @@
 
 
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="android:windowSplashScreenBackground">#0A6A96</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash</item>
+        <item name="android:windowSplashScreenBackground">#082E38</item>
+        <!-- 系统 splash 图标设为透明，避免 Android 12+ 强制居中缩略图。
+             splash 图本身由 MainActivity 全屏 ImageView 显示（CENTER_CROP 填满全屏）。 -->
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
         <item name="android:windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
     </style>
 </resources>
