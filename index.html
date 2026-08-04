@@ -2625,16 +2625,18 @@ function migrateDataToScope() {
   const scope = getDataScope();
   if (!scope) return;
   // 每次登录都尝试把「全局旧数据」迁入账号作用域，但仅当该账号作用域为空且全局有数据时才迁入。
-  // 不再依赖 migrated 标记跳过（修复：标记已设但数据仍卡在全局时，店面/记录永远传不到云端的问题）。
   // 账号作用域已有数据时不会覆盖；全局为空时无操作，保证安全幂等。
   for (const base of DATA_KEYS) {
     const scoped = scopeKey(base);
     if (localStorage.getItem(scoped) === null) {
       const globalVal = localStorage.getItem(base);
-      if (globalVal !== null) localStorage.setItem(scoped, globalVal);
+      if (globalVal !== null) {
+        localStorage.setItem(scoped, globalVal);
+        // 仅当【成功迁移】到账号作用域后才删除全局（移动语义）
+        // 账号作用域已有数据时保留全局，防止"保存时未登录、登录后账号作用域已存在旧数据"导致数据丢失
+        localStorage.removeItem(base);
+      }
     }
-    // 迁移完成后清空全局 key（移动语义），保证退出登录/未登录时读到的是空而非旧数据，杜绝账号间串号
-    localStorage.removeItem(base);
   }
   localStorage.setItem('kuanwei_migrated__' + scope, '1');
 }
