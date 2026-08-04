@@ -24,15 +24,29 @@ export async function onRequest(context) {
   try { body = await request.json(); } catch (e) { return json({ error: 'invalid json' }, 400); }
   const imageBase64 = body.imageBase64 || '';
   if (!imageBase64) return json({ error: 'missing imageBase64' }, 400);
+  const goodsName = (body.goodsName || '').toString().trim();
 
   try {
-    return await callHunyuanVision(imageBase64, json, API_KEY);
+    return await callHunyuanVision(imageBase64, json, API_KEY, goodsName);
   } catch (e) {
     return json({ error: 'hunyuan error: ' + e.message }, 500);
   }
 }
 
-async function callHunyuanVision(imageBase64, json, API_KEY) {
+async function callHunyuanVision(imageBase64, json, API_KEY, goodsName) {
+  // 按单据类型定制"取哪一列"：用户业务规则——冷冻/常温=物流箱、冷藏=物流篮、面包=面包筐，没有单据要"整箱数量"列
+  goodsName = goodsName || '';
+  let qtyColRule;
+  if (goodsName.includes('冷藏') || goodsName.includes('低温')) {
+    qtyColRule = 'qty 取表格中【物流篮】列的数量（不要取物流箱/整箱数量/其他列）';
+  } else if (goodsName.includes('面包')) {
+    qtyColRule = 'qty 取表格中【面包筐】列的数量（不要取物流箱/整箱数量/其他列）';
+  } else if (goodsName.includes('冷冻') || goodsName.includes('常温') || goodsName.includes('物流')) {
+    qtyColRule = 'qty 取表格中【物流箱】列的数量（不要取整箱数量/低箱/筐车/保温袋/其他列）';
+  } else {
+    // 未指定类型：按表头找筐相关列，优先物流箱→物流篮→面包筐；【严禁】取"整箱数量/低箱/筐车/保温袋"这类列
+    qtyColRule = 'qty 取表格中与【筐/箱/篮】相关的列：优先"物流箱"列，其次"物流篮"列，其次"面包筐"列；【严禁】取"整箱数量/低箱/筐车/保温袋/备注"等列';
+  }
   const prompt = [
     '你是物流路单表格识别专家。请识别图片中的配送路单表格。',
     '表格每一行包含：路线编号（形如 HR42-1 / 42-1）、门店名称、各数量列。',
@@ -40,7 +54,7 @@ async function callHunyuanVision(imageBase64, json, API_KEY) {
     '格式：[{"code":"42-1","name":"门店名","qty":2}]',
     '【铁律】',
     '1. code 只取编号数字部分（如 42-1，去掉 HR/HN 等字母前缀，去掉前导0）',
-    '2. qty 取"物流筐"列的数量；若单据没有"物流筐"列，则取数量列中与筐/箱/篮/袋相关的第一列',
+    '2. ' + qtyColRule,
     '3. 【严禁编造】只输出图中【肉眼可见的】数据行！图上有几行就输出几行，绝不能凭空补漏/续号/猜测多出来的行',
     '4. 如果编号有缺（如 42-1 后直接 42-3），照实输出 42-1 和 42-3，中间缺的不要补，qty 不要写 0',
     '5. 不要包含"合计/总计"行',

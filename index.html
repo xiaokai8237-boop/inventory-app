@@ -2881,12 +2881,13 @@ async function callBaiduOcr(imageBase64, endpoint) {
 }
 
 // 调用后端腾讯混元视觉大模型（/hunyuan，密钥在后端 TENCENT_SECRET_ID/KEY）
-async function callHunyuanVision(imageBase64) {
+// goodsName：当前单据筐类型（冷冻/常温→物流箱列、冷藏→物流篮列、面包→面包筐列），传空则 AI 按表头找
+async function callHunyuanVision(imageBase64, goodsName) {
   try {
     const resp = await fetch(API_BASE + '/hunyuan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64 })
+      body: JSON.stringify({ imageBase64, goodsName: goodsName || '' })
     });
     return await resp.json();
   } catch (e) { return null; }
@@ -4697,7 +4698,7 @@ async function emitDoOcr(imageDataUrl) {
     const b64 = compressed.replace(/^data:image\/\w+;base64,/, '');
     const resp = await fetch(API_BASE + '/hunyuan', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64: b64 })
+      body: JSON.stringify({ imageBase64: b64, goodsName: currentEmitGoodsName() || '' })
     });
     const data = await resp.json();
     hideLoading();
