@@ -42,6 +42,17 @@
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
             </intent-filter>
         </receiver>
+
+        <!-- 安装完成自动启动接收器：安装/替换完成后自动打开软件（PACKAGE_REPLACED/ADDED 官方豁免隐式广播） -->
+        <receiver
+            android:name=".InstallCompleteReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <!-- Permissions -->

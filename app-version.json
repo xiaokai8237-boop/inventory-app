@@ -1,7 +1,7 @@
 {
-  "versionCode": 79,
-  "versionName": "6.0.79",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.79.apk",
-  "note": "【v6.0.79 更新内容】\n1. 修复更新安装问题：下载完成后自动弹出安装（三种机制兜底，APP 被切走也能装上）\n2. 启动页：去掉金色边框线，画面更干净\n3. 功能建议：升级为独立页面，管理页新增入口\n4. 主页测试版提示：纯文字显示，数据不丢失",
+  "versionCode": 80,
+  "versionName": "6.0.80",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.80.apk",
+  "note": "【v6.0.80 更新内容】\n1. 安装完成后自动打开软件，不用手动找图标\n2. 修复更新安装问题：下载完成后自动弹出安装\n3. 启动页：去掉金色边框线\n4. 功能建议：独立页面，管理页入口",
   "force": false
 }
