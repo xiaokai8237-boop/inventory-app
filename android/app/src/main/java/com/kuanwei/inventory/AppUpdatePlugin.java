@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -44,6 +45,50 @@ public class AppUpdatePlugin extends Plugin {
             call.resolve(ret);
         } catch (Exception e) {
             call.reject("version_error");
+        }
+    }
+
+    /**
+     * 查询当前下载任务的进度（供前端轮询刷新进度条）。
+     * 返回 { progress: 0-100, status: 1待下载/2下载中/4暂停/8完成/16失败, done, total }
+     * 没有进行中的下载任务时 progress = -1
+     */
+    @PluginMethod
+    public void getDownloadProgress(PluginCall call) {
+        try {
+            if (lastDownloadId < 0) {
+                call.resolve(new JSObject().put("progress", -1));
+                return;
+            }
+            DownloadManager dm = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+            if (dm == null) {
+                call.reject("download_manager_unavailable");
+                return;
+            }
+            DownloadManager.Query q = new DownloadManager.Query();
+            q.setFilterById(lastDownloadId);
+            Cursor c = dm.query(q);
+            try {
+                if (c != null && c.moveToFirst()) {
+                    long total = c.getLong(c.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+                    long done = c.getLong(c.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                    int status = c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                    JSObject ret = new JSObject();
+                    ret.put("total", total);
+                    ret.put("done", done);
+                    ret.put("status", status);
+                    ret.put("progress", total > 0 ? (int) Math.round(done * 100.0 / total) : 0);
+                    call.resolve(ret);
+                } else {
+                    call.resolve(new JSObject().put("progress", -1));
+                }
+            } catch (Exception e) {
+                call.reject("query_error");
+            } finally {
+                if (c != null) c.close();
+            }
+        } catch (Exception e) {
+            call.reject("progress_error");
         }
     }
 
