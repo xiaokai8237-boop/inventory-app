@@ -14,6 +14,8 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import androidx.core.content.FileProvider;
+
 import java.io.File;
 
 /**
@@ -126,10 +128,48 @@ public class AppUpdatePlugin extends Plugin {
         req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         lastDownloadId = dm.enqueue(req);
 
-        // 下载完成 → 由静态广播接收器 DownloadCompleteReceiver 拉起安装器（进程被杀也能收到）
+        // 下载完成 → 三条保险拉起安装器：
+        // ① 进程存活时：前端轮询到 100% 主动调 installDownloaded()（不依赖广播）
+        // ② 进程被杀：静态广播 DownloadCompleteReceiver 拉起（标准 Android 有效）
+        // ③ 都失败：下次启动 APP 时前端 hasDownloadedApk() 检查 → 弹安装提示 → installDownloaded()
 
         JSObject ret = new JSObject();
         ret.put("downloading", true);
         call.resolve(ret);
+    }
+
+    /** 主动拉起系统安装器（进程存活时由前端在下载完成后调用，不依赖广播） */
+    @PluginMethod
+    public void installDownloaded(PluginCall call) {
+        try {
+            File file = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), APK_FILE);
+            if (!file.exists() || file.length() == 0) {
+                call.reject("no_apk");
+                return;
+            }
+            Uri apkUri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
+            Intent install = new Intent(Intent.ACTION_VIEW);
+            install.setDataAndType(apkUri, "application/vnd.android.package-archive");
+            install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(install);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("install_error:" + e.getMessage());
+        }
+    }
+
+    /** 检查是否已有下载完成的 APK（供启动兜底：上次下载完成但没装上，下次打开自动提示安装） */
+    @PluginMethod
+    public void hasDownloadedApk(PluginCall call) {
+        try {
+            File file = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), APK_FILE);
+            JSObject ret = new JSObject();
+            ret.put("exists", file.exists() && file.length() > 0);
+            ret.put("size", file.exists() ? file.length() : 0);
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("check_error");
+        }
     }
 }
