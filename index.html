@@ -2743,7 +2743,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
     <div id="apkUpdateBtnRow" style="display:flex;gap:8px;">
       <button class="btn btn-outline" style="flex:1;" onclick="dismissApkUpdate()">⏰ 稍后</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="doApkUpdate()">📲 立即更新</button>
+      <button class="btn btn-primary" style="flex:1;" id="apkUpdateBtn" onclick="doApkUpdate()">📲 立即更新</button>
     </div>
   </div>
 </div>
@@ -8837,8 +8837,23 @@ function checkAppVersion() {
               var localCode = (local && local.versionCode) ? parseInt(local.versionCode, 10) : 0;
               // 本地有版本号 且 云端更新 → 提示（首装本地=云端不弹）
               if (localCode && j.versionCode > localCode) {
-                // 延迟弹出，避免与隐私/欢迎弹窗同时抢屏
-                setTimeout(function() { showApkUpdate(j); }, 1200);
+                // 启动兜底：上次可能下载完成但安装器没弹出（广播被厂商限制）→ 这次直接提示安装
+                try {
+                  window.Capacitor.Plugins.AppUpdate.hasDownloadedApk()
+                    .then(function(r) {
+                      var already = !!(r && r.exists);
+                      apkDownloadedCache = already;
+                      // 延迟弹出，避免与隐私/欢迎弹窗同时抢屏
+                      setTimeout(function() { showApkUpdate(j); }, already ? 900 : 1200);
+                    })
+                    .catch(function() {
+                      apkDownloadedCache = false;
+                      setTimeout(function() { showApkUpdate(j); }, 1200);
+                    });
+                } catch (e) {
+                  apkDownloadedCache = false;
+                  setTimeout(function() { showApkUpdate(j); }, 1200);
+                }
               }
             })
             .catch(function() {});
@@ -8849,12 +8864,18 @@ function checkAppVersion() {
 }
 // ======== APK 自动更新弹窗 ========
 var apkUpdateInfo = null;
+var apkDownloadedCache = false; // 是否已有下载完成的更新包（启动兜底检测结果）
 function showApkUpdate(info) {
   apkUpdateInfo = info;
   var elv = document.getElementById('apkUpdateVer');
   var eln = document.getElementById('apkUpdateNote');
   if (elv) elv.textContent = 'v' + (info.versionName || '');
   if (eln) eln.textContent = info.note || '修复问题、提升体验';
+  // 已有下载完成的包 → 按钮变「立即安装」（不重新下载）
+  var btn = document.getElementById('apkUpdateBtn');
+  if (btn && apkDownloadedCache) {
+    btn.textContent = '📦 立即安装';
+  }
   var m = document.getElementById('apkUpdateModal');
   if (m) m.classList.add('show');
 }
@@ -8891,9 +8912,13 @@ function startApkProgressPolling() {
           return;
         }
         if (p < 0) { return; } // 无进度信息，继续轮询
-        if (p >= 100) { // 下载完成 → 原生广播会自动拉起安装器
+        if (p >= 100) { // 下载完成 → 主动拉起安装器（不依赖广播，进程存活时最可靠）
           stopApkProgressPolling();
           setApkProgress(100, '✅ 下载完成，正在安装…');
+          try {
+            window.Capacitor.Plugins.AppUpdate.installDownloaded()
+              .catch(function(e) { /* 安装器拉起失败也没关系，启动兜底会再弹 */ });
+          } catch (e) {}
           return;
         }
         setApkProgress(p, '正在下载 v' + verName + ' 更新包… ' + p + '%');
@@ -8907,6 +8932,19 @@ function stopApkProgressPolling() {
 function doApkUpdate() {
   if (!apkUpdateInfo || !apkUpdateInfo.apkUrl) { showToast('下载地址缺失'); return; }
   if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppUpdate) {
+    // 已有下载完成的更新包 → 直接安装（不重新下载，启动兜底场景）
+    if (apkDownloadedCache) {
+      setApkProgress(100, '✅ 更新包已下载，正在安装…');
+      window.Capacitor.Plugins.AppUpdate.installDownloaded()
+        .catch(function(e) {
+          apkDownloadedCache = false;
+          showToast('安装拉起失败，请重新下载');
+          var btn = document.getElementById('apkUpdateBtn');
+          if (btn) btn.textContent = '📲 立即更新';
+          setApkProgress(0, '');
+        });
+      return;
+    }
     // 切换为进度条视图（弹窗不关闭，全程在 APP 内完成，不跳浏览器）
     var row = document.getElementById('apkUpdateBtnRow');
     var prog = document.getElementById('apkUpdateProgressWrap');
