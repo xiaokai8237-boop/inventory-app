@@ -1293,7 +1293,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 <div class="header">
   <h1>📦 物流筐收发管理系统</h1>
   <div class="date-today" id="todayLabel"></div>
-  <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="切换深浅色">🌙</button>
 </div>
 
 <div class="offline-banner" id="offlineBanner">📡 当前离线，已切换为离线模式，数据保存在本机，联网后自动同步</div>
@@ -2942,35 +2941,8 @@ const UI_KEYS = [
   'kuanwei_seen_backup_tutorial', // 备份教程已看
   'kuanwei_del_confirm_until', // 删除确认免提示
   'kuanwei_ocr_keys',          // OCR 自定义密钥
-  'kuanwei_theme',             // 深色模式偏好
 ];
 
-// ======== 深色模式 ========
-function applyTheme(theme) {
-  const html = document.documentElement;
-  const btn = document.getElementById('themeToggle');
-  if (theme === 'dark') {
-    html.setAttribute('data-theme', 'dark');
-    if (btn) btn.textContent = '☀️';
-  } else {
-    html.removeAttribute('data-theme');
-    if (btn) btn.textContent = '🌙';
-  }
-}
-function loadTheme() {
-  const saved = localStorage.getItem('kuanwei_theme');
-  if (saved === 'dark') return 'dark';
-  // 未设置时跟随系统
-  if (saved === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
-  return 'light';
-}
-function toggleTheme() {
-  const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('kuanwei_theme', cur);
-  applyTheme(cur);
-  showToast(cur === 'dark' ? '🌙 已切换为深色模式' : '☀️ 已切换为浅色模式');
-}
-function initTheme() { applyTheme(loadTheme()); }
 
 // ======== 离线检测 ========
 // 离线时显示提示条，联网后自动隐藏；离线不阻断本地录入（数据自动存本机，联网后台备份）
@@ -7823,7 +7795,6 @@ if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
 
 const footerVerNumEl = document.getElementById('footerVerNum');
 if (footerVerNumEl) footerVerNumEl.textContent = 'v' + APP_VERSION;
-initTheme();
 initOffline();
 renderAccountBadge();
 renderTodayStatus();
