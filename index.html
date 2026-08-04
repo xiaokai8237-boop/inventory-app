@@ -1151,6 +1151,123 @@ html[data-theme="dark"] .import-zone { background: var(--soft-bg) !important; }
 html[data-theme="dark"] .alias-chip { color: var(--primary) !important; }
 html[data-theme="dark"] .table-striped tbody tr:nth-child(odd) { background: var(--soft-bg) !important; }
 html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-striped th { border-color: var(--border) !important; color: var(--text) !important; }
+
+/* ========== 设计稿风格：深青蓝主题（header/tabs/首页） ========== */
+/* 顶部导航：深青蓝渐变 */
+.header {
+  background: linear-gradient(180deg, #1E6A76, #12434E);
+  color: #FFFFFF;
+  border-bottom: 1px solid rgba(245,220,146,.28);
+  box-shadow: 0 2px 10px rgba(0,0,0,.25);
+}
+.header h1 {
+  background: none; -webkit-text-fill-color: #FFFFFF; color: #FFFFFF;
+  font-size: 22px; font-weight: 700; letter-spacing: 2px;
+  text-shadow: 0 1px 4px rgba(0,0,0,.3);
+}
+.header .date-today { color: #D6F2F4; font-size: 13px; }
+.header .theme-toggle { color: #F5DC92; }
+/* 底部 tab：深色 + 简笔画 + 金色选中圈 */
+.tabs { background: #0A2530; border-top: 1px solid rgba(245,220,146,.2); }
+.tab { color: #8FB8BE; font-size: 12px; }
+.tab .tab-icon {
+  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; transition: all .2s;
+}
+.tab .tab-icon svg { color: #8FB8BE; opacity: .75; }
+.tab.active { color: #F5DC92; font-weight: 600; }
+.tab.active .tab-icon { border: 2px solid #F5DC92; background: rgba(245,220,146,.08); }
+.tab.active .tab-icon svg { color: #F5DC92; opacity: 1; }
+.tab.active::after { background: #F5DC92; }
+/* 首页：深青蓝全屏渐变 */
+#page-record {
+  background: linear-gradient(180deg, #2A7D8A 0%, #15555F 55%, #082E38 100%);
+  min-height: 100vh; color: #EAF9FB;
+}
+#page-record .card {
+  background: rgba(19,52,62,.88);
+  border: 1px solid rgba(245,220,146,.16);
+  box-shadow: 0 6px 22px rgba(0,0,0,.35);
+  border-radius: 18px;
+}
+#page-record .card .form-label, #page-record .card label.form-label { color: #FFFFFF; }
+#page-record .app-version-row { color: rgba(255,255,255,.6); }
+/* 登录徽标：金色胶囊 */
+#page-record .login-pill {
+  background: rgba(245,220,146,.14);
+  border: 1.5px solid rgba(245,220,146,.55);
+  color: #F5DC92; font-size: 14px; font-weight: 700;
+  border-radius: 22px; padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+#page-record .login-pill.logged-in { color: #7CE8E0; border-color: rgba(124,232,224,.55); background: rgba(124,232,224,.12); }
+/* 发出/回收主按钮：暖金 + 青绿 渐变大字 */
+#page-record .home-btn-main {
+  border-radius: 22px; font-size: 26px; font-weight: 800; letter-spacing: 6px;
+  padding: 20px 0; line-height: 1.4;
+}
+#page-record .home-btn-main .hb-icon { font-size: 42px; margin-bottom: 6px; display: block; }
+#page-record .home-btn-main .hb-sub { display: block; font-size: 13px; font-weight: 500; letter-spacing: 0; color: rgba(11,46,56,.75); margin-top: 4px; }
+#page-record .home-btn-main .hb-sub2 { display: block; font-size: 12px; font-weight: 500; letter-spacing: 0; color: rgba(11,46,56,.65); margin-top: 2px; }
+#page-record .home-btn-main .hb-icon svg { display: block; margin: 0 auto; }
+#page-record .home-btn-issue {
+  background: linear-gradient(160deg, #F8E3A6 0%, #E3BE68 55%, #C89B4E 100%);
+  color: #0B2E38;
+  box-shadow: 0 8px 26px rgba(245,220,146,.4);
+}
+#page-record .home-btn-recover {
+  background: linear-gradient(160deg, #7CE8E0 0%, #45C4B8 55%, #2BB8A8 100%);
+  color: #062B30;
+  box-shadow: 0 8px 26px rgba(124,232,224,.35);
+}
+/* 今日状态：深色卡片内对齐设计稿配色 */
+#page-record .today-status-title { color: #FFFFFF; font-size: 16px; }
+#page-record .today-status-date { color: #CFECEF; }
+#page-record .today-status-box { background: rgba(255,255,255,.06); border: 1px solid rgba(245,220,146,.2); }
+#page-record .today-status-box .tsb-num { color: #F5DC92; }
+#page-record .today-status-box .tsb-lbl { color: #CFECEF; }
+#page-record .today-emit-list { background: rgba(255,255,255,.06); border: 1px solid rgba(245,220,146,.2); }
+#page-record .today-emit-list .ter-head { color: #CFECEF; border-bottom-color: rgba(245,220,146,.2); }
+#page-record .today-emit-list .ter-head .ter-head-cells span:nth-child(1) { color: #F5DC92; }
+#page-record .today-emit-list .ter-head .ter-head-cells span:nth-child(2) { color: #7CE8E0; }
+#page-record .today-emit-row .ter-name { color: #FFFFFF; }
+#page-record .today-emit-row .ter-cell.ter-emit { color: #F5DC92; }
+#page-record .today-emit-row .ter-cell.ter-recover { color: #7CE8E0; }
+#page-record .today-status-progress .tsp-top { color: #CFECEF; }
+#page-record .today-status-bar { background: rgba(255,255,255,.12); border-color: rgba(245,220,146,.2); }
+#page-record .today-status-bar > div { background: linear-gradient(90deg, #F8E3A6, #C89B4E); }
+#page-record .today-store-chip { color: #EAF9FB; border-color: rgba(255,255,255,.25); background: rgba(255,255,255,.05); }
+#page-record .today-store-chip.done { color: #7CE8E0; border-color: rgba(124,232,224,.5); background: rgba(124,232,224,.08); }
+#page-record .today-store-chip.pending { color: #8FB8BE; }
+#page-record .today-store-detail { color: #EAF9FB; }
+/* 首页今日各店明细行 */
+#page-record .store-row { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); }
+#page-record .store-row .sr-name { color: #FFFFFF; }
+#page-record .store-row .sr-stat { color: #F5DC92; }
+/* 今日各店明细表格（深色） */
+#page-record .summary-table th {
+  color: #CFECEF; border-bottom: 2px solid rgba(245,220,146,.25); background: rgba(255,255,255,.06);
+}
+#page-record .summary-table td { color: #EAF9FB; border-bottom: 1px solid rgba(255,255,255,.07); background: transparent; }
+#page-record .summary-table td span { color: #F5DC92 !important; }
+#page-record .summary-table td span[style*="var(--success)"] { color: #7CE8E0 !important; }
+#page-record #appVersion { color: rgba(255,255,255,.55); }
+#page-record .empty { color: #8FB8BE; }
+/* 未登录提示/离线条：深色风格 */
+.login-notice { background: rgba(245,220,146,.12); color: #F5DC92; border-bottom: 1px solid rgba(245,220,146,.4); }
+.offline-banner { background: rgba(245,220,146,.12); color: #F5DC92; border-bottom: 1px solid rgba(245,220,146,.4); }
+/* 手动录入表单（深色下可读） */
+#page-record .goods-input-list .goods-input-item { border-bottom-color: rgba(255,255,255,.08); color: #EAF9FB; }
+#page-record .goods-input-item .gi-name { color: #FFFFFF; }
+#page-record .form-select, #page-record .form-input, #page-record .goods-input-item input {
+  background: rgba(255,255,255,.08); color: #FFFFFF; border-color: rgba(245,220,146,.3);
+}
+#page-record .form-select option { color: #0B2E38; }
+#page-record .store-chip-list .store-chip { background: rgba(255,255,255,.06); border-color: rgba(245,220,146,.3); color: #EAF9FB; }
+#page-record .store-chip-list .store-chip.active { background: rgba(124,232,224,.18); border-color: #7CE8E0; color: #7CE8E0; }
+#page-record .home-grid-row .home-btn { background: rgba(255,255,255,.07); border-color: rgba(245,220,146,.25); color: #EAF9FB; }
+#page-record .btn-outline { border-color: rgba(245,220,146,.4); color: #F5DC92; }
+#page-record .btn-primary { background: linear-gradient(160deg,#F8E3A6,#C89B4E); color: #0B2E38; border: none; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -1182,9 +1299,9 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 <div class="offline-banner" id="offlineBanner">📡 当前离线，已切换为离线模式，数据保存在本机，联网后自动同步</div>
 
 <div class="tabs">
-  <div class="tab active" data-page="record"><span class="tab-icon">🏠</span>首页</div>
-  <div class="tab" data-page="history"><span class="tab-icon">📋</span>记录</div>
-  <div class="tab" data-page="manage"><span class="tab-icon">⚙️</span>管理</div>
+  <div class="tab active" data-page="record"><span class="tab-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 L12 3 L21 11"/><path d="M5 9.5 V20 H19 V9.5"/><path d="M10 20 V14 H14 V20"/></svg></span>首页</div>
+  <div class="tab" data-page="history"><span class="tab-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg></span>记录</div>
+  <div class="tab" data-page="manage"><span class="tab-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></span>管理</div>
 </div>
 
 <!-- 未登录提醒横条（登录后隐藏） -->
@@ -1203,8 +1320,8 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div class="card" style="text-align:center;padding:16px 14px;">
       <!-- 第一行：发出/回收（主操作，突出） -->
       <div class="home-grid-row" style="margin-bottom:0;">
-        <button class="home-btn-main home-btn-issue" onclick="openEmitFlow()"><span class="hb-icon">📤</span>发出</button>
-        <button class="home-btn-main home-btn-recover" onclick="manualEntry('out')"><span class="hb-icon">📥</span>回收</button>
+        <button class="home-btn-main home-btn-issue" onclick="openEmitFlow()"><span class="hb-icon"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></span>发 出<span class="hb-sub">扫码 · 语音 · 拍照录入</span><span class="hb-sub2">发出去多少筐</span></button>
+        <button class="home-btn-main home-btn-recover" onclick="manualEntry('out')"><span class="hb-icon"><svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg></span>回 收<span class="hb-sub">语音 · 拍照 · 手动录入</span><span class="hb-sub2">回收回来多少筐</span></button>
       </div>
     </div>
 
