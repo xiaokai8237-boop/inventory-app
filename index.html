@@ -1562,7 +1562,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div class="card" style="padding:10px 12px;">
       <div style="display:flex;gap:10px;margin-bottom:10px;">
         <button class="btn btn-primary" style="flex:1;" onclick="emitStartVoice()">🎤 语音录入</button>
-        <button class="btn btn-primary" style="flex:1;" onclick="emitTriggerPhoto()">📷 拍照识别</button>
+        <button class="btn btn-primary" style="flex:1;" id="emitPhotoBtn" onclick="emitTriggerPhoto()">📷 拍照识别</button>
       </div>
       <div style="font-size:11px;color:var(--text-light);">语音：间隔说数字（如 3 6 2…），按店面从上到下自动填入</div>
     </div>
@@ -1620,7 +1620,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   <div class="store-ocr-modal" id="emitVoiceConfirmModal">
     <div class="store-ocr-content" style="max-width:330px;" onclick="event.stopPropagation()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <span style="font-weight:700;font-size:16px;color:var(--text);">📸 拍照识别结果确认</span>
+        <span style="font-weight:700;font-size:16px;color:var(--text);">🤖 AI 识别结果确认</span>
         <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitVoiceConfirm()">×</span>
       </div>
       <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">识别出的数字按顺序对应各店面，可修改后确认</div>
@@ -2535,8 +2535,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;text-align:center;">
       说"鲜食1面包2常温3低温5冷冻6"自动填入
     </div>
-    <input type="text" id="manualVoiceInput" placeholder="或手动输入，如：鲜食1面包2" style="width:100%;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;box-sizing:border-box;">
-    <button class="btn btn-primary" style="margin-top:8px;padding:10px;font-size:14px;" onclick="parseManualVoiceInput()">识别并填入</button>
   </div>
 </div>
 
@@ -3058,7 +3056,7 @@ function parseHunyuanRows(text) {
       if (!isNaN(qty) && qty >= 0) cols = { '数量': qty };
     }
     if (!cols) continue;
-    rows.push({ code, name: String(it.name || '').trim(), cols, _highConf: true, _ai: true });
+    rows.push({ code, name: String(it.name || '').trim(), cols, nums: [], _highConf: true, _ai: true });
   }
   return rows.length > 0 ? rows : null;
 }
@@ -3075,14 +3073,21 @@ function pickColQty(cols, goodsName) {
   } else if (goodsName.includes('冷冻') || goodsName.includes('常温')) {
     targets.push('物流箱');
   }
-  // 优先精确匹配（"物流箱"）
+  const keys = Object.keys(cols);
+  // 1) 精确匹配（"物流箱"）
   for (const t of targets) {
     if (cols[t] !== undefined && cols[t] !== null) return parseInt(cols[t], 10) || 0;
   }
-  // 次选：模糊匹配（列名包含"物流箱"/"物流篮"/"面包筐"）
+  // 2) 去空格/全角后等于（"物流箱 " / "物流箱　"）
   for (const t of targets) {
-    for (const k of Object.keys(cols)) {
-      if (k.includes(t)) return parseInt(cols[k], 10) || 0;
+    for (const k of keys) {
+      if (k.replace(/[\s　]/g, '') === t) return parseInt(cols[k], 10) || 0;
+    }
+  }
+  // 3) 包含匹配但【排除修正列】（"物流箱(修正)"不算真物流箱）
+  for (const t of targets) {
+    for (const k of keys) {
+      if (k.includes(t) && !k.includes('修正')) return parseInt(cols[k], 10) || 0;
     }
   }
   return 0;
@@ -4472,6 +4477,9 @@ function selectEmitGoods(idx) {
   document.getElementById('emitGoodsIcon').textContent = goodsIcon(emitGoodsName);
   closeEmitGoodsSelect();
   renderEmitStoreList();
+  // 鲜食筐（index 0）无路单 → 隐藏拍照识别按钮
+  const photoBtn = document.getElementById('emitPhotoBtn');
+  if (photoBtn) photoBtn.style.display = (idx === 0) ? 'none' : '';
   // 如果发出面板还没开，则打开
   if (document.getElementById('emitPanel').style.display !== 'block') {
     document.getElementById('homeWizard').style.display = 'none';
@@ -4729,7 +4737,11 @@ async function emitHandleVoiceBlob() {
       });
       const data = await resp.json();
       if (data.ok && data.text) {
-        emitParseVoiceNums(data.text);
+        emitVoiceText = data.text; // 暂存 ASR 原文（范例积累用）
+        emitVoiceSource = 'voice';
+        // AI 理解优先（中文数字词/同音字纠错），失败回退本地解析
+        const usedAI = await parseEmitVoiceWithAI(data.text);
+        if (!usedAI) emitParseVoiceNums(data.text);
       } else {
         showToast('语音识别失败: ' + (data.error || ''));
       }
@@ -4740,31 +4752,118 @@ async function emitHandleVoiceBlob() {
   };
   reader.readAsDataURL(blob);
 }
-// 从语音文本中提取数字序列（按出现顺序）
-function emitParseVoiceNums(text) {
-  const nums = (text.match(/\d+/g) || []).map(n => parseInt(n));
-  if (nums.length === 0) { showToast('未识别到数字，请重试'); return; }
-  emitPendingNums = nums;
-  renderEmitVoiceConfirm(nums);
+// 中文数字词 → 阿拉伯数字（支持 零~九十九：三=3、十二=12、二十三=23）
+function zhNumToInt(str) {
+  const d = {零:0,一:1,二:2,三:3,四:4,五:5,六:6,七:7,八:8,九:9,两:2};
+  const s = String(str).trim();
+  if (!s) return NaN;
+  if (s.length === 1) { const v = d[s]; return v === undefined ? NaN : v; }
+  if (s.indexOf('十') >= 0) {
+    const p = s.split('十');
+    let tens = 1, ones = 0;
+    if (p[0]) { const t = d[p[0]]; if (t === undefined) return NaN; tens = t; }
+    if (p[1]) { const o = d[p[1]]; if (o === undefined) return NaN; ones = o; }
+    return tens * 10 + ones;
+  }
+  return NaN;
+}
+// 从语音文本提取数字序列：阿拉伯数字 + 中文数字词混合，按出现顺序
+// 复合词优先（十二=12、二十三=23），单字逐个（三八四五六七 → 3,8,4,5,6,7）
+function extractNumsFromText(text) {
+  const nums = [];
+  const re = /[0-9]+|[零一二三四五六七八九两]十[零一二三四五六七八九两]?|[零一二三四五六七八九两]/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    const tk = m[0];
+    if (/^[0-9]+$/.test(tk)) { nums.push(parseInt(tk, 10)); }
+    else {
+      const v = zhNumToInt(tk);
+      if (!isNaN(v)) nums.push(v);
+    }
+  }
+  return nums;
+}
+// 统一的数字展示入口：多/少自动处理 + toast 提示 + 弹确认框
+function emitShowVoiceNums(nums) {
+  const order = getEmitOrder();
+  let list = nums.slice();
+  if (list.length > order.length) {
+    const extra = list.length - order.length;
+    list = list.slice(0, order.length);
+    showToast('⚠️ 输入的数字比店面多 ' + extra + ' 个，多余的已忽略');
+  } else if (list.length < order.length) {
+    const lack = order.length - list.length;
+    showToast('⚠️ 输入的数字比店面少 ' + lack + ' 个，后面的已留空');
+  }
+  emitPendingNums = list;
+  renderEmitVoiceConfirm(list);
   document.getElementById('emitVoiceConfirmModal').classList.add('show');
+}
+// 语音文本 → 本地解析（中文数字词转换，AI 失败时回退）
+function emitParseVoiceNums(text) {
+  const nums = extractNumsFromText(text);
+  if (nums.length === 0) { showToast('未识别到数字，请重试'); return; }
+  emitShowVoiceNums(nums);
+}
+// 语音数字 AI 理解：ASR 文本 → 混元 AI（中文数字词/同音字纠错）→ 数字序列；失败回退本地解析
+let emitVoiceText = '';      // 最近一次语音 ASR 原文（范例积累用）
+let emitVoiceSource = 'photo'; // photo=拍照识别 / voice=语音录入（决定确认弹窗来源标签）
+async function parseEmitVoiceWithAI(text) {
+  try {
+    const examples = getVoiceExamplesForType(currentEmitGoodsName() || '默认', 5);
+    const resp = await fetch(API_BASE + '/ai-voice', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, scene: 'emit-nums', storeCount: getEmitOrder().length, examples })
+    });
+    const data = await resp.json();
+    if (data.ok && Array.isArray(data.nums) && data.nums.length > 0) {
+      emitShowVoiceNums(data.nums);
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+// ======== 语音成功范例积累（按筐类型分组，越用越准） ========
+const VOICE_EXAMPLES_KEY = 'kuanwei_voice_examples';
+const VOICE_EXAMPLES_MAX = 10;
+function loadVoiceExamples() {
+  try { return JSON.parse(localStorage.getItem(VOICE_EXAMPLES_KEY)) || { v: 1, examples: {} }; }
+  catch(e) { return { v: 1, examples: {} }; }
+}
+function saveVoiceExample(goodsType, example) {
+  if (!goodsType || !example) return;
+  const store = loadVoiceExamples();
+  if (!store.examples) store.examples = {};
+  if (!Array.isArray(store.examples[goodsType])) store.examples[goodsType] = [];
+  store.examples[goodsType].push(example);
+  if (store.examples[goodsType].length > VOICE_EXAMPLES_MAX) store.examples[goodsType].shift();
+  try { localStorage.setItem(VOICE_EXAMPLES_KEY, JSON.stringify(store)); } catch(e) {}
+}
+function getVoiceExamplesForType(goodsType, max) {
+  const store = loadVoiceExamples();
+  const list = (store.examples && store.examples[goodsType]) || [];
+  return list.slice(-(max || 5));
 }
 function renderEmitVoiceConfirm(nums) {
   const order = getEmitOrder();
   const cfg = loadStoreConfig();
   const container = document.getElementById('emitVoiceConfirmList');
   if (!container) return;
-  // 顶部列来源条：只展示 AI 取的列（不提供下拉切换）
+  container.innerHTML = '';
+  // 顶部来源条：拍照=AI 取的列；语音=语音识别
   const colTag = document.createElement('div');
   colTag.style.cssText = 'font-size:12px;color:#F5DC92;background:rgba(245,220,146,.10);border:1px solid rgba(245,220,146,.35);border-radius:8px;padding:8px 10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;';
-  const colLabel = emitCurrentCol || '?';
-  colTag.innerHTML = '<span>📌 AI 取的列：<b>' + escapeHtml(colLabel) + '</b></span><span style="color:#9FD0D6;font-size:11px;">数字可点开直接改</span>';
-  container.innerHTML = '';
+  const srcLabel = emitVoiceSource === 'voice'
+    ? '🎤 语音识别'
+    : '📌 AI 取的列：<b>' + escapeHtml(emitCurrentCol || '?') + '</b>';
+  colTag.innerHTML = '<span>' + srcLabel + '</span><span style="color:#9FD0D6;font-size:11px;">数字可点开直接改</span>';
   container.appendChild(colTag);
-  // 行列表
-  nums.forEach((n, i) => {
+  // 行列表：按店序渲染 order.length 行，数字不足的留空
+  for (let i = 0; i < order.length; i++) {
     const storeName = order[i] || ('第' + (i + 1) + '家店');
     const store = cfg.find(s => s.name === storeName);
     const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
+    const n = i < nums.length ? nums[i] : '';
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);';
     row.innerHTML = `
@@ -4773,7 +4872,7 @@ function renderEmitVoiceConfirm(nums) {
         style="width:90px;text-align:center;font-size:16px;font-weight:700;padding:6px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);"
         data-emit-confirm-idx="${i}">`;
     container.appendChild(row);
-  });
+  }
 }
 // 手动切换 AI 取的列：用 cols 里新列名重算数字
 function switchEmitCol(newColName) {
@@ -4838,6 +4937,13 @@ function applyEmitVoice() {
   closeEmitVoiceConfirm();
   // 用户验收通过 → 自动存为成功范例（越用越准）
   saveExampleFromEmitConfirm();
+  // 语音来源：把 ASR 原文 + 用户确认的数字存为语音范例
+  if (emitVoiceSource === 'voice' && emitVoiceText) {
+    const inputs = Array.from(document.querySelectorAll('#emitVoiceConfirmList input[data-emit-confirm-idx]'));
+    const nums = inputs.map(inp => parseInt(inp.value) || 0);
+    saveVoiceExample(currentEmitGoodsName() || '默认', { t: Date.now(), text: emitVoiceText, nums });
+    emitVoiceText = '';
+  }
   showToast('✅ 已按店面顺序填入');
   // 聚焦第一个已填的输入框，方便继续
   const first = emitInputs.find(inp => inp.value !== '');
@@ -4845,6 +4951,7 @@ function applyEmitVoice() {
 }
 function emitTriggerPhoto() {
   if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
+  if (emitGoodsIdx === 0) { showToast('鲜食筐无需拍照识别，请直接录入'); return; }
   // 动态创建全屏可见的 file input 唤起拍照/相册（PWA 需 input 在可视区）
   // 注意：不加 capture 强制相机——让系统选择器显示「拍照/相册/文件」全部选项
   const input = document.createElement('input');
@@ -4981,6 +5088,7 @@ let emitCurrentCol = ''; // 当前 AI 取的列名（弹窗显示 + 手动切换
 let emitCurrentCols = []; // cols 里所有"筐/箱/篮"候选列（供切换）
 function fillEmitConfirm(rows) {
   pendingEmitRows = rows; // 暂存供 switchEmitCol 使用
+  emitVoiceSource = 'photo'; // 拍照识别来源
   const order = getEmitOrder();
   const cfg = loadStoreConfig();
   const matchedNums = order.map(() => 0);
@@ -6109,16 +6217,6 @@ function stopVoice() {
   document.getElementById('voiceOverlay').classList.remove('show');
 }
 
-function parseManualVoiceInput() {
-  const text = document.getElementById('manualVoiceInput').value.trim();
-  if (!text) { showToast('请输入内容'); return; }
-  parseVoiceWithAI(text, currentActionType).then(usedAI => {
-    if (!usedAI) parseVoiceText(text, currentActionType);
-  });
-  document.getElementById('manualVoiceInput').value = '';
-  showToast('✅ 已填入');
-}
-
 function parseVoiceText(text, mode) {
   const names = loadGoodsNames();
   const results = matchGoodsFromText(text); // {idx: qty}，基于筐名+别名模糊匹配（兜底）
@@ -6399,7 +6497,12 @@ async function doOCR(imageDataUrl, file) {
       }
       ocrCurrentResult = {
         goodsIdx,
-        rows: hunyuanRows.map(r => ({ ...r, nums: r.nums.slice() })),
+        rows: hunyuanRows.map(r => {
+          // 按识别出的筐类型（goodsIdx）从 cols 里取业务目标列（物流箱/物流篮/面包筐）
+          const gName = goodsIdx >= 0 ? (names[goodsIdx] || '') : '';
+          const qty = pickColQty(r.cols, gName);
+          return { ...r, cols: r.cols || {}, nums: [qty], _rawNums: [qty] };
+        }),
         _rawTotalNums: [],
         totalNums: [0],
         logisticsColIdx: 0,

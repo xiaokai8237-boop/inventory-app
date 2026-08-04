@@ -27,12 +27,74 @@ export async function onRequest(context) {
   if (!text) return json({ error: 'missing text' }, 400);
   const goodsConfig = Array.isArray(body.goodsConfig) ? body.goodsConfig : [];
   const mode = body.mode === 'out' ? 'out' : 'in';
+  const scene = body.scene || 'goods';
+  const storeCount = parseInt(body.storeCount, 10) || 0;
+  const examples = Array.isArray(body.examples) ? body.examples : [];
 
   try {
+    if (scene === 'emit-nums') {
+      return await callAiEmitNums(text, storeCount, examples, json, API_KEY);
+    }
     return await callAiVoice(text, goodsConfig, mode, json, API_KEY);
   } catch (e) {
     return json({ error: 'ai-voice error: ' + e.message }, 500);
   }
+}
+
+// 场景：发出页语音录入——用户说一串数字按店序填（中文数字词转阿拉伯）
+async function callAiEmitNums(text, storeCount, examples, json, API_KEY) {
+  let exampleText = '';
+  if (examples.length > 0) {
+    exampleText = '以下是用户之前确认正确的语音范例（用户说的话 → 正确数字序列）：\n' +
+      examples.map((ex, i) => `${i + 1}. 用户说「${ex.text || ''}」→ [${(ex.nums || []).join(', ')}]`).join('\n') + '\n';
+  }
+  const prompt = [
+    '你是物流筐收发管理系统的智能语音助手。',
+    '用户说出一串数字，表示要按顺序填入多家店的数量。',
+    '请把用户说的话转换成阿拉伯数字序列。',
+    '规则：',
+    '1. 中文数字词转阿拉伯数字：三=3、十二=12、二十三=23、三十=30',
+    '2. 用户单个读的数字逐个转换：读"三八四五六七"→[3,8,4,5,6,7]',
+    '3. 用户读复合数时整体转换：读"三 十二 五 十一 六 十二"→[3,12,5,11,6,12]',
+    '4. 纠正语音转写同音/口语错误（"十二"绝不会拆成"1、2"）',
+    '5. 忽略无关文字（"第一个店"里的"一"不是数字；"发出去"不算数字）',
+    '6. 只输出一个 JSON 对象：{"nums":[数字序列]}，无法理解时输出 {"nums":[]}，不要输出任何其他文字',
+    exampleText,
+    '用户语音转写内容：' + text
+  ].join('\n');
+
+  const payload = JSON.stringify({
+    model: 'HY-Vision-2.0-Instruct',
+    messages: [{ role: 'user', content: prompt }],
+    temperature: 0.1,
+    top_p: 0.5,
+    max_tokens: 200
+  });
+
+  const resp = await fetch('https://tokenhub.tencentmaas.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY },
+    body: payload
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message || data.error.message_zh || 'TokenHub 错误');
+  const choices = data.choices || [];
+  const content = (choices[0] && choices[0].message && choices[0].message.content) || '';
+  if (!content) throw new Error('AI 未返回内容');
+
+  let t = String(content).trim();
+  const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fence) t = fence[1].trim();
+  const s = t.indexOf('{');
+  const e = t.lastIndexOf('}');
+  let parsed = null;
+  if (s >= 0 && e > s) { try { parsed = JSON.parse(t.slice(s, e + 1)); } catch (err) {} }
+  if (!parsed || !Array.isArray(parsed.nums)) return json({ ok: true, nums: [] });
+  const nums = parsed.nums
+    .map(n => parseInt(n, 10))
+    .filter(n => !isNaN(n) && n >= 0 && n <= 999)
+    .slice(0, storeCount || 999);
+  return json({ ok: true, nums });
 }
 
 async function callAiVoice(text, goodsConfig, mode, json, API_KEY) {
