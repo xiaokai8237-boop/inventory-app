@@ -4690,10 +4690,19 @@ async function emitDoOcr(imageDataUrl) {
       const text = data.words.join(' ');
       const nums = (text.match(/\d+/g) || []).map(n => parseInt(n));
       if (nums.length === 0) { showToast('未识别到数字，请重试'); return; }
-      emitPendingNums = nums;
-      renderEmitVoiceConfirm(nums);
+      // 过滤明显非筐数量的数字：筐数量通常 < 200，电话/地址/条码/路线编号等都会 > 200
+      let filteredNums = nums.filter(n => n > 0 && n < 200);
+      // 截断到店序数量（用户只有 N 家店就只需要 N 个数字，剩下的都是噪音）
+      const order = getEmitOrder();
+      if (filteredNums.length > order.length) {
+        filteredNums = filteredNums.slice(0, order.length);
+        showToast('⚠️ 图片识别出 ' + nums.length + ' 个数字，已按店序截取前 ' + order.length + ' 个');
+      }
+      if (filteredNums.length === 0) { showToast('未识别到筐数量，请重试'); return; }
+      emitPendingNums = filteredNums;
+      renderEmitVoiceConfirm(filteredNums);
       document.getElementById('emitVoiceConfirmModal').classList.add('show');
-      showToast('✅ 已识别 ' + nums.length + ' 个数字，请确认');
+      showToast('✅ 已识别 ' + filteredNums.length + ' 个数字，请确认');
     } else {
       showToast('识别失败: ' + (data.error || ''));
     }
