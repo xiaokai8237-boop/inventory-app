@@ -995,6 +995,46 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 }
 #ocrResultModal .ocr-table tbody td { border-bottom: 1px solid rgba(255,255,255,.07); }
 #ocrResultModal .ocr-table .total-row td { background: rgba(245,220,146,.08); color: #F5DC92; font-weight: 700; }
+/* ===== 账号表单弹窗：深空蓝晶定稿风格（设置密码/登录/恢复/找回密码/改密/注销共用） ===== */
+.ocr-form-modal.store-ocr-modal { background: rgba(4,24,32,.78); }
+.ocr-form-modal .store-ocr-content {
+  background: #0E3340;
+  border: 1.5px solid rgba(245,220,146,.55);
+  border-radius: 22px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.55);
+  color: #FFFFFF;
+}
+.ocr-form-modal .store-ocr-content::-webkit-scrollbar { width: 5px; }
+.ocr-form-modal .store-ocr-content::-webkit-scrollbar-thumb { background: rgba(245,220,146,.35); border-radius: 3px; }
+.ocr-form-modal .ocr-form-title { color: #FFFFFF; font-size: 17px; font-weight: 800; letter-spacing: .5px; }
+.ocr-form-modal .ocr-form-sub { color: #CFECEF; font-size: 12.5px; }
+.ocr-form-modal .form-label { color: #F5DC92 !important; font-weight: 700; font-size: 13px; }
+.ocr-form-modal .form-input, .ocr-form-modal .form-select {
+  background: rgba(255,255,255,.07);
+  border: 1.5px solid rgba(245,220,146,.4);
+  color: #FFFFFF;
+  border-radius: 12px;
+}
+.ocr-form-modal .form-input::placeholder { color: rgba(223,243,245,.5); }
+.ocr-form-modal .form-input:focus, .ocr-form-modal .form-select:focus {
+  border-color: #F5DC92; background: rgba(255,255,255,.1);
+  box-shadow: 0 0 0 3px rgba(245,220,146,.15);
+}
+.ocr-form-modal .form-select option { background: #0E3340; color: #FFFFFF; }
+.ocr-form-modal .pwd-toggle { background: rgba(245,220,146,.14); border: 1px solid rgba(245,220,146,.4); color: #F5DC92; border-radius: 8px; }
+.ocr-form-modal .btn-cancel-form {
+  background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.95); font-weight: 600;
+  border-radius: 26px; padding: 11px 0; font-size: 14px;
+}
+.ocr-form-modal .btn-primary-form {
+  background: linear-gradient(160deg, #F8E3A6 0%, #E3BE68 55%, #C89B4E 100%);
+  color: #0B2E38; font-weight: 800; border: none;
+  box-shadow: 0 6px 20px rgba(245,220,146,.4);
+  border-radius: 26px; padding: 12px 0; font-size: 15px;
+}
+.ocr-form-modal .ocr-form-link { color: #7CE8E0; font-weight: 600; cursor: pointer; }
+.ocr-form-modal .ocr-form-note { color: #CFECEF; font-size: 11.5px; }
 /* 子弹窗置顶：从父弹窗内打开、或随时弹出的强制更新框，保证不被任何父弹窗/浮层盖住 */
 #voiceConfirmModal.store-ocr-modal.show,
 #dailyPreviewModal.store-ocr-modal.show,
@@ -2225,13 +2265,13 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <!-- 设置密码弹窗 -->
-<div class="store-ocr-modal" id="setupModal" onclick="closeSetupModal()">
+<div class="store-ocr-modal ocr-form-modal" id="setupModal" onclick="closeSetupModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;">🔑 设置账号密码</span>
-      <button onclick="closeSetupModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <span class="ocr-form-title">🔑 设置账号密码</span>
+      <button class="ocr-modal-close" onclick="closeSetupModal()">×</button>
     </div>
-    <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">设置后，换手机/清缓存输入手机号+密码即可恢复数据</div>
+    <div class="ocr-form-sub" style="margin-bottom:12px;">设置后，换手机/清缓存输入手机号+密码即可恢复数据</div>
     <div class="form-group">
       <label class="form-label">手机号</label>
       <input type="tel" class="form-input" id="setupPhone" maxlength="11" placeholder="11位手机号" inputmode="numeric">
@@ -2266,8 +2306,8 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <input type="text" class="form-input" id="setupSecA" placeholder="输入答案（忘记密码时验证用）">
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closeSetupModal()">取消</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="doSetupAccount()">✅ 设置密码</button>
+      <button class="btn btn-cancel-form" style="flex:1;" onclick="closeSetupModal()">取 消</button>
+      <button class="btn btn-primary-form" style="flex:1;" onclick="doSetupAccount()">✅ 设置密码</button>
     </div>
   </div>
 </div>
@@ -2421,25 +2461,25 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <!-- 隐私政策同意弹窗 -->
-<div class="store-ocr-modal" id="privacyModal">
-  <div class="store-ocr-content" style="max-width:360px;" onclick="event.stopPropagation()">
+<div class="store-ocr-modal ocr-form-modal" id="privacyModal">
+  <div class="store-ocr-content" style="max-width:420px;" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <span style="font-weight:700;font-size:16px;color:var(--text);">🔒 隐私政策与用户协议</span>
+      <span class="ocr-form-title">🔒 隐私政策与用户协议</span>
     </div>
-    <div style="font-size:12px;color:var(--text);line-height:1.8;max-height:45vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:12px;margin-bottom:10px;">
-      欢迎使用本系统。为向您提供服务，我们会收集和使用以下信息：<br>
-      1. <b>账号信息</b>：手机号码（用于登录、账号隔离与云端备份）。<br>
-      2. <b>业务数据</b>：店面名称、每日收发记录、各筐库存数据。<br>
-      3. <b>识别内容</b>：您上传的照片/路单图片（由 AI 大模型识别，仅用于本次文字识别，识别后即处理，不保存）。<br>
-      4. <b>语音内容</b>：语音录入的音频（由 AI 转文字并理解，仅用于本次录入，不长期保存）。<br><br>
-      <b>信息用途</b>：仅用于本系统的数据录入、汇总统计与多设备云端同步。<br>
-      <b>信息存储</b>：数据存储于腾讯云/Cloudflare 服务端，仅供您的账号访问。<br>
-      <b>信息保护</b>：我们不会向第三方出售您的任何数据。<br><br>
-      继续使用即表示您已阅读并同意本隐私政策。您可以随时在「管理 → 使用说明」中查看。
+    <div style="font-size:12.5px;color:#EAF9FB;line-height:1.8;max-height:45vh;overflow-y:auto;background:rgba(255,255,255,.05);border:1px solid rgba(245,220,146,.18);border-radius:12px;padding:12px;margin-bottom:10px;">
+      <b style="color:#F5DC92;">欢迎使用本系统。</b>为向您提供服务，我们会收集和使用以下信息：<br>
+      1. <b style="color:#7CE8E0;">账号信息</b>：手机号码（用于登录、账号隔离与云端备份）。<br>
+      2. <b style="color:#7CE8E0;">业务数据</b>：店面名称、每日收发记录、各筐库存数据。<br>
+      3. <b style="color:#7CE8E0;">识别内容</b>：您上传的照片/路单图片（由 AI 大模型识别，仅用于本次文字识别，识别后即处理，不保存）。<br>
+      4. <b style="color:#7CE8E0;">语音内容</b>：语音录入的音频（由 AI 转文字并理解，仅用于本次录入，不长期保存）。<br><br>
+      <b style="color:#F5DC92;">信息用途</b>：仅用于本系统的数据录入、汇总统计与多设备云端同步。<br>
+      <b style="color:#F5DC92;">信息存储</b>：数据存储于腾讯云/Cloudflare 服务端，仅供您的账号访问。<br>
+      <b style="color:#F5DC92;">信息保护</b>：我们不会向第三方出售您的任何数据。<br><br>
+      <span style="color:#7CE8E0;font-weight:700;">继续使用即表示您已阅读并同意本隐私政策。</span>您可以随时在「管理 → 使用说明」中查看。
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="rejectPrivacy()">不同意</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="acceptPrivacy()">同意并继续</button>
+      <button class="btn btn-cancel-form" style="flex:1;" onclick="rejectPrivacy()">不同意</button>
+      <button class="btn btn-primary-form" style="flex:1;" onclick="acceptPrivacy()">同意并继续</button>
     </div>
   </div>
 </div>
@@ -2569,14 +2609,14 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <!-- 安装引导弹窗：安卓→下载APK；苹果→添加到主屏幕 -->
-<div class="store-ocr-modal" id="installModal" onclick="closeInstallModal()">
+<div class="store-ocr-modal ocr-form-modal" id="installModal" onclick="closeInstallModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;" id="installModalTitle">📱 添加到桌面</span>
-      <button onclick="closeInstallModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+      <span class="ocr-form-title" id="installModalTitle">📱 添加到桌面</span>
+      <button class="ocr-modal-close" onclick="closeInstallModal()">×</button>
     </div>
     <!-- 微信内置浏览器：无法安装/加桌面，先引导用浏览器打开 -->
-    <div id="installWechatTip" style="display:none;background:var(--amber-soft);border:1px solid var(--warning);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12.5px;color:var(--warning);line-height:1.9;">
+    <div id="installWechatTip" style="display:none;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.5);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12.5px;color:#F5A623;line-height:1.9;">
       ⚠️ <b>微信里不能安装/添加到桌面</b>，需要先用浏览器打开：<br>
       ① 点右上角 <b>「⋯」</b><br>
       ② 点 <b>「在浏览器打开」</b>（选 Chrome / 自带浏览器）<br>
@@ -2585,30 +2625,30 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <!-- 安卓浏览器：主推下载 APK -->
     <div id="installAndroidTip" style="display:none;">
       <div style="text-align:center;font-size:40px;margin-bottom:8px;">📲</div>
-      <div style="font-weight:700;font-size:15px;text-align:center;margin-bottom:4px;">推荐安装安卓版 App</div>
-      <div style="font-size:12px;color:var(--text-light);text-align:center;margin-bottom:12px;">比网页版打开更快、可离线用、新版本自动更新</div>
-      <div style="font-size:13px;line-height:1.9;color:var(--text);background:var(--soft-bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:12px;">
+      <div style="font-weight:700;font-size:15px;text-align:center;margin-bottom:4px;color:#FFFFFF;">推荐安装安卓版 App</div>
+      <div style="font-size:12px;color:#CFECEF;text-align:center;margin-bottom:12px;">比网页版打开更快、可离线用、新版本自动更新</div>
+      <div style="font-size:13px;line-height:1.9;color:#EAF9FB;background:rgba(255,255,255,.05);border:1px solid rgba(245,220,146,.2);border-radius:8px;padding:10px;margin-bottom:12px;">
         安装很简单：<br>
-        ① 点下方 <b>「立即下载」</b>，下载安装包<br>
+        ① 点下方 <b style="color:#F5DC92;">「立即下载」</b>，下载安装包<br>
         ② 下载完成后点安装<br>
         ③ 若提示「未知来源/允许安装」，点允许即可<br>
-        <span style="color:var(--text-light);font-size:12px;">💡 安装后桌面上会出现「物流筐」图标，直接点开就能用</span>
+        <span style="color:#CFECEF;font-size:12px;">💡 安装后桌面上会出现「物流筐」图标，直接点开就能用</span>
       </div>
-      <a id="apkDownloadBtn" href="javascript:void(0)" onclick="downloadApk()" style="display:block;text-align:center;background:var(--primary);color:#fff;font-weight:700;font-size:15px;padding:12px 0;border-radius:10px;text-decoration:none;">📲 立即下载（安卓版）</a>
-      <div style="text-align:center;margin-top:10px;font-size:12px;color:var(--text-light);">
-        不想装？<a href="javascript:void(0)" onclick="showIosSteps()" style="color:var(--primary);text-decoration:underline;">点这里添加到桌面</a>
+      <a id="apkDownloadBtn" href="javascript:void(0)" onclick="downloadApk()" style="display:block;text-align:center;background:linear-gradient(160deg,#F8E3A6 0%,#E3BE68 55%,#C89B4E 100%);color:#0B2E38;font-weight:800;font-size:15px;padding:13px 0;border-radius:26px;text-decoration:none;box-shadow:0 6px 20px rgba(245,220,146,.4);">📲 立即下载（安卓版）</a>
+      <div style="text-align:center;margin-top:10px;font-size:12px;color:#CFECEF;">
+        不想装？<a href="javascript:void(0)" onclick="showIosSteps()" style="color:#7CE8E0;text-decoration:underline;">点这里添加到桌面</a>
       </div>
     </div>
     <!-- 苹果浏览器：添加到主屏幕步骤 -->
     <div id="installIosTip" style="display:none;">
       <div style="text-align:center;font-size:40px;margin-bottom:8px;">🍎</div>
-      <div style="font-weight:700;font-size:15px;text-align:center;margin-bottom:4px;">添加到主屏幕</div>
-      <div style="font-size:12px;color:var(--text-light);text-align:center;margin-bottom:12px;">苹果手机装不了安卓版，把网页加到桌面，就像 App 一样用</div>
-      <div style="font-size:13px;line-height:1.9;color:var(--text);">
-        <div><b>①</b> 点底部 <b>「分享」</b> 按钮 <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">□↑</span></div>
-        <div><b>②</b> 向下滑动，找到 <b>「添加到主屏幕」</b></div>
-        <div><b>③</b> 点 <b>「添加」</b> → 桌面出现「物流筐」图标，像 App 一样用</div>
-        <div style="background:var(--amber-soft);border:1px solid var(--warning);border-radius:8px;padding:10px;margin-top:12px;font-size:12.5px;color:var(--warning);">
+      <div style="font-weight:700;font-size:15px;text-align:center;margin-bottom:4px;color:#FFFFFF;">添加到主屏幕</div>
+      <div style="font-size:12px;color:#CFECEF;text-align:center;margin-bottom:12px;">苹果手机装不了安卓版，把网页加到桌面，就像 App 一样用</div>
+      <div style="font-size:13px;line-height:1.9;color:#EAF9FB;">
+        <div><b style="color:#F5DC92;">①</b> 点底部 <b>「分享」</b> 按钮 <span style="background:rgba(124,232,224,.12);padding:2px 8px;border-radius:6px;font-size:12px;color:#7CE8E0;">□↑</span></div>
+        <div><b style="color:#F5DC92;">②</b> 向下滑动，找到 <b>「添加到主屏幕」</b></div>
+        <div><b style="color:#F5DC92;">③</b> 点 <b>「添加」</b> → 桌面出现「物流筐」图标，像 App 一样用</div>
+        <div style="background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.5);border-radius:8px;padding:10px;margin-top:12px;font-size:12.5px;color:#F5A623;">
           💡 安卓手机：浏览器菜单里点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b> 也可以。
         </div>
       </div>
@@ -2617,21 +2657,21 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <!-- 新用户欢迎引导弹窗（首次打开自动弹出） -->
-<div class="store-ocr-modal" id="welcomeModal">
-  <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:340px;text-align:center;">
-    <div style="font-size:40px;margin-bottom:8px;">👋</div>
-    <div style="font-weight:700;font-size:18px;margin-bottom:6px;">欢迎使用 物流筐收发管理系统</div>
-    <div style="font-size:13px;color:var(--text-light);margin-bottom:14px;">帮你把每个筐的去向记得清清楚楚</div>
-    <div style="font-size:13px;color:var(--text);line-height:1.8;margin-bottom:16px;text-align:left;background:var(--soft-bg);border:1px solid var(--border);border-radius:8px;padding:10px;">
-      <b>第一次用，建议先做 3 件事：</b><br>
+<div class="store-ocr-modal ocr-form-modal" id="welcomeModal">
+  <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:360px;text-align:center;">
+    <div style="font-size:44px;margin-bottom:8px;">👋</div>
+    <div class="ocr-form-title" style="font-size:18px;margin-bottom:6px;">欢迎使用 物流筐收发管理系统</div>
+    <div class="ocr-form-sub" style="margin-bottom:14px;">帮你把每个筐的去向记得清清楚楚</div>
+    <div style="font-size:13px;color:#EAF9FB;line-height:1.8;margin-bottom:16px;text-align:left;background:rgba(255,255,255,.05);border:1px solid rgba(245,220,146,.2);border-radius:10px;padding:10px;">
+      <b style="color:#F5DC92;">第一次用，建议先做 3 件事：</b><br>
       <span data-app-hide id="welcomeStep1">① 📱 把软件加到手机桌面（像App一样用）<br></span>
       ② 🏪 设置你要记的店面<br>
       ③ 🔑 设置账号密码（数据云端备份）<br>
-      <span style="color:var(--text-light);font-size:12px;">详细步骤看「使用说明」，每一步都写得清清楚楚</span>
+      <span style="color:#CFECEF;font-size:12px;">详细步骤看「使用说明」，每一步都写得清清楚楚</span>
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="btn btn-primary" style="flex:1;" onclick="closeWelcome(true)">📖 查看使用说明</button>
-      <button class="btn btn-outline" style="flex:1;" onclick="closeWelcome(false)">🚀 开始使用</button>
+      <button class="btn btn-primary-form" style="flex:1;" onclick="closeWelcome(true)">📖 查看使用说明</button>
+      <button class="btn btn-cancel-form" style="flex:1;" onclick="closeWelcome(false)">🚀 开始使用</button>
     </div>
   </div>
 </div>
@@ -2810,32 +2850,38 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <!-- 恢复结果弹窗：展示本次从云端恢复了哪些数据 -->
-<div class="store-ocr-modal" id="restoreResultModal">
-  <div class="store-ocr-content" style="max-width:330px;" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:700;font-size:16px;color:var(--text);">✅ 已恢复云端数据</span>
-      <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeRestoreResult()">×</span>
+<div class="store-ocr-modal ocr-form-modal" id="restoreResultModal">
+  <div class="store-ocr-content" style="max-width:360px;" onclick="event.stopPropagation()">
+    <div style="text-align:center;margin-bottom:6px;">
+      <div style="width:64px;height:64px;border-radius:50%;background:rgba(245,220,146,.15);border:2.5px solid #F5DC92;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+        <span style="color:#F5DC92;font-size:30px;font-weight:800;">✓</span>
+      </div>
+      <div class="ocr-form-title" style="font-size:19px;">恢复完成</div>
+      <div class="ocr-form-sub" style="margin-top:4px;">已从云端恢复到本地，以下内容已更新</div>
     </div>
-    <div style="background:var(--soft-bg);border-radius:10px;padding:12px;font-size:13px;color:var(--text);line-height:1.9;">
-      <div>🏪 店面：<b id="restoreStoreCount">0</b> 家</div>
-      <div>📦 筐类：<b id="restoreGoodsCount">0</b> 类</div>
-      <div>📋 记录：<b id="restoreRecordCount">0</b> 条</div>
-      <div style="color:var(--text-light);font-size:12px;">备份时间：<span id="restoreBackupTime">-</span></div>
+    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(245,220,146,.18);border-radius:12px;padding:12px 14px;font-size:13px;color:#EAF9FB;line-height:2;">
+      <div>🏪 店面：<b id="restoreStoreCount" style="color:#F5DC92;">0</b> 家</div>
+      <div>📦 筐类：<b id="restoreGoodsCount" style="color:#F5DC92;">0</b> 类</div>
+      <div>📋 记录：<b id="restoreRecordCount" style="color:#F5DC92;">0</b> 条</div>
+      <div style="color:#CFECEF;font-size:12px;">备份时间：<span id="restoreBackupTime" style="color:#F5DC92;">-</span></div>
     </div>
-    <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="closeRestoreResult()">知道了</button>
+    <button class="btn btn-primary-form" style="width:100%;margin-top:14px;" onclick="closeRestoreResult()">完 成</button>
   </div>
 </div>
 
 <!-- 备份结果弹窗：展示本次备份到云端的完整内容（店面顺序/别称/记录数等） -->
-<div class="store-ocr-modal" id="backupResultModal">
-  <div class="store-ocr-content" style="max-width:340px;max-height:80vh;display:flex;flex-direction:column;" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:700;font-size:16px;color:var(--text);">✅ 已备份到云端</span>
-      <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeBackupResult()">×</span>
+<div class="store-ocr-modal ocr-form-modal" id="backupResultModal">
+  <div class="store-ocr-content" style="max-width:360px;max-height:80vh;display:flex;flex-direction:column;" onclick="event.stopPropagation()">
+    <div style="text-align:center;margin-bottom:6px;">
+      <div style="width:64px;height:64px;border-radius:50%;background:rgba(124,232,224,.15);border:2.5px solid #7CE8E0;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+        <span style="color:#7CE8E0;font-size:30px;font-weight:800;">✓</span>
+      </div>
+      <div class="ocr-form-title" style="font-size:19px;">备份成功</div>
+      <div class="ocr-form-sub" style="margin-top:4px;">数据已安全上传至云端，可放心更换设备</div>
     </div>
-    <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">共 <b id="backupStoreCount">0</b> 家店 · <b id="backupGoodsCount">0</b> 类筐 · <b id="backupRecordCount">0</b> 条记录</div>
-    <div id="backupStoreList" style="flex:1;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--text);line-height:1.9;"></div>
-    <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="closeBackupResult()">知道了</button>
+    <div style="font-size:12.5px;color:#CFECEF;margin-bottom:8px;text-align:center;">共 <b id="backupStoreCount" style="color:#F5DC92;">0</b> 家店 · <b id="backupGoodsCount" style="color:#F5DC92;">0</b> 类筐 · <b id="backupRecordCount" style="color:#F5DC92;">0</b> 条记录</div>
+    <div id="backupStoreList" style="flex:1;overflow-y:auto;background:rgba(255,255,255,.05);border:1px solid rgba(245,220,146,.18);border-radius:12px;padding:10px 12px;font-size:13px;color:#EAF9FB;line-height:1.9;"></div>
+    <button class="btn btn-primary-form" style="width:100%;margin-top:14px;" onclick="closeBackupResult()">完 成</button>
   </div>
 </div>
 
@@ -5672,9 +5718,9 @@ function showBackupResult(stores, goodsCount, recordCount) {
     // 按 sort 排序显示店面 + 别称
     const sorted = stores.slice().sort((a, b) => (a.sort === undefined ? 0 : a.sort) - (b.sort === undefined ? 0 : b.sort));
     listEl.innerHTML = sorted.map((s, i) => {
-      const alias = (Array.isArray(s.aliases) && s.aliases.length) ? ' · <span style="color:var(--secondary,#e67e22);">' + s.aliases.join('、') + '</span>' : '';
-      return '<div>🔸 <b>' + (i + 1) + '.</b> ' + s.name + alias + '</div>';
-    }).join('') || '<div style="color:var(--text-light);">未备份店面</div>';
+      const alias = (Array.isArray(s.aliases) && s.aliases.length) ? ' · <span style="color:#F5DC92;">' + s.aliases.join('、') + '</span>' : '';
+      return '<div style="color:#EAF9FB;">🔸 <b style="color:#FFFFFF;">' + (i + 1) + '.</b> ' + s.name + alias + '</div>';
+    }).join('') || '<div style="color:rgba(255,255,255,.7);">未备份店面</div>';
   }
   m.classList.add('show');
 }
