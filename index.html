@@ -1470,7 +1470,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   <div class="date-today" id="todayLabel"></div>
 </div>
 
-<div class="beta-banner" onclick="switchPage('settings')">🧪 当前为测试版，数据不会丢失；遇到问题或有想法，欢迎到「设置-功能建议」提交</div>
+<div class="beta-banner" onclick="switchPage('manage')">🧪 当前为测试版，数据不会丢失，请放心使用</div>
 
 <div class="offline-banner" id="offlineBanner">📡 当前离线，已切换为离线模式，数据保存在本机，联网后自动同步</div>
 
@@ -1784,6 +1784,14 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <button class="manage-item" onclick="switchPage('settings')"><span class="mi-icon">❓</span><span class="mi-title">使用说明<span class="mi-sub">新手教程</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="installApp()"><span class="mi-icon" id="installBtnIcon">📱</span><span class="mi-title" id="installBtnLabel">添加到桌面<span class="mi-sub">安装 APP</span></span><span class="mi-arrow">›</span></button>
   </div>
+  <div class="card" style="border-left:4px solid #B89248;background:linear-gradient(160deg,rgba(245,220,146,.07),rgba(255,255,255,.03));">
+    <div style="font-size:16px;font-weight:700;color:#F5DC92;">💡 功能建议</div>
+    <div style="font-size:13px;margin-top:4px;color:rgba(255,255,255,.7);">你的每一条建议，所有用户都能看到；好建议会做成新功能</div>
+    <div id="suggestionList" style="margin-top:10px;max-height:240px;overflow-y:auto;"></div>
+    <textarea id="suggestionText" placeholder="写下你的建议，例如：希望支持按日期导出更多格式…" style="width:100%;box-sizing:border-box;min-height:70px;padding:10px;border:1.5px solid rgba(124,232,224,.3);border-radius:8px;font-size:14px;resize:vertical;background:rgba(255,255,255,.07);color:#fff;"></textarea>
+    <button class="btn" style="margin-top:8px;width:100%;padding:11px;font-size:15px;background:linear-gradient(160deg,#F8E3A6,#C89B4E);color:#0B2E38;font-weight:700;border:none;border-radius:10px;" onclick="submitSuggestion()">📨 提交建议</button>
+    <div id="suggestionTip" style="font-size:12px;color:rgba(255,255,255,.7);margin-top:6px;text-align:center;"></div>
+  </div>
   <div class="footer" id="footerVer">物流筐收发管理系统 <span id="footerVerNum"></span></div>
 </div>
 
@@ -1981,15 +1989,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <b><span id="adminTapZone" onclick="adminTap()" style="cursor:default;user-select:none;">❓</span> 每天要录很多店怎么办？</b><br>
       保存后<b>自动跳到下一家店</b>，一路填完不用选店；配合语音或拍照更快。
     </div>
-  </div>
-
-  <div class="card" style="border-left:4px solid #B89248;background:linear-gradient(160deg,rgba(245,220,146,.07),rgba(255,255,255,.03));">
-    <div style="font-size:15px;font-weight:700;color:var(--primary-dark);">💡 功能建议</div>
-    <div style="font-size:12px;margin-top:4px;color:var(--text-light);">你的每一条建议，所有用户都能看到；好建议会做成新功能</div>
-    <div id="suggestionList" style="margin-top:10px;max-height:240px;overflow-y:auto;"></div>
-    <textarea id="suggestionText" placeholder="写下你的建议，例如：希望支持按日期导出更多格式…" style="width:100%;box-sizing:border-box;min-height:70px;padding:10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;resize:vertical;background:var(--bg);color:var(--text);"></textarea>
-    <button class="btn btn-primary" style="margin-top:8px;width:100%;padding:10px;font-size:14px;" onclick="submitSuggestion()">📨 提交建议</button>
-    <div id="suggestionTip" style="font-size:11px;color:var(--text-light);margin-top:6px;text-align:center;"></div>
   </div>
 </div>
 
@@ -4160,25 +4159,25 @@ async function autoSyncFromCloud(phone) {
 function loadSuggestions() {
   const list = document.getElementById('suggestionList');
   if (!list) return;
-  list.innerHTML = '<div style="font-size:12px;color:var(--text-light);text-align:center;padding:14px;">加载中…</div>';
+  list.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,.6);text-align:center;padding:14px;">加载中…</div>';
   fetch(API_BASE + '/suggestions')
     .then(r => r.json())
     .then(data => {
       const arr = (data && Array.isArray(data.suggestions)) ? data.suggestions : [];
       if (arr.length === 0) {
-        list.innerHTML = '<div style="font-size:12px;color:var(--text-light);text-align:center;padding:14px;">还没有建议，来抢第一条~</div>';
+        list.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,.6);text-align:center;padding:14px;">还没有建议，来抢第一条~</div>';
         return;
       }
       list.innerHTML = arr.map(s => {
         const t = s.time ? fmtSugTime(s.time) : '';
-        return '<div style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--card-bg);">' +
-          '<div style="font-size:13px;color:var(--text);line-height:1.6;word-break:break-all;">' + escapeHtml(s.text || '') + '</div>' +
-          '<div style="font-size:11px;color:var(--text-light);margin-top:4px;">📱 ' + escapeHtml(s.phone || '') + (t ? ' · ' + t : '') + '</div>' +
+        return '<div style="padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:8px;margin-bottom:6px;background:rgba(255,255,255,.05);">' +
+          '<div style="font-size:13px;color:#fff;line-height:1.6;word-break:break-all;">' + escapeHtml(s.text || '') + '</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:4px;">📱 ' + escapeHtml(s.phone || '') + (t ? ' · ' + t : '') + '</div>' +
           '</div>';
       }).join('');
     })
     .catch(() => {
-      list.innerHTML = '<div style="font-size:12px;color:var(--text-light);text-align:center;padding:14px;">建议加载失败，检查网络后重试</div>';
+      list.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,.6);text-align:center;padding:14px;">建议加载失败，检查网络后重试</div>';
     });
 }
 function fmtSugTime(iso) {
@@ -5970,9 +5969,9 @@ function switchPage(pageName) {
   if (pageName === 'record') refreshRecordViews();
   if (pageName === 'history') { renderHistory(); updateDailyPhotoInfo(); initGoodsFilter(); }
   if (pageName === 'summary') renderSummary();
-  if (pageName === 'settings') { renderSettings(); loadSuggestions(); }
+  if (pageName === 'settings') { renderSettings(); }
+  if (pageName === 'manage') { renderManage(); loadSuggestions(); }
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
-  if (pageName === 'manage') renderManage();
 }
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => switchPage(tab.dataset.page));
