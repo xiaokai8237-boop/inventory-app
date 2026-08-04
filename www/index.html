@@ -3,22 +3,112 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#1a73e8">
+  <meta name="theme-color" content="#0A6A96">
   <title>物流筐</title>
   <style>
     html, body { margin:0; padding:0; height:100%; background:#f5f7fa; }
     #loading { position:fixed; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f5f7fa; z-index:9999; }
-    .spinner { width:40px; height:40px; border:4px solid #e0e0e0; border-top-color:#1a73e8; border-radius:50%; animation:spin .8s linear infinite; }
+    .spinner { width:40px; height:40px; border:4px solid #e0e0e0; border-top-color:#0A6A96; border-radius:50%; animation:spin .8s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
     #loading p { margin-top:16px; color:#666; font-size:14px; }
+    #errorBox { display:none; position:fixed; top:0; left:0; right:0; bottom:0; flex-direction:column; align-items:center; justify-content:center; background:#f5f7fa; z-index:9998; text-align:center; padding:24px; box-sizing:border-box; }
+    #errorBox .icon { font-size:48px; margin-bottom:16px; }
+    #errorBox h3 { color:#333; margin:0 0 8px; font-size:18px; }
+    #errorBox p { color:#888; font-size:14px; line-height:1.6; margin:0 0 24px; }
+    .btn { background:#0A6A96; color:#fff; border:none; border-radius:24px; padding:12px 32px; font-size:15px; cursor:pointer; min-width:120px; }
+    .btn:active { opacity:.85; }
+    .btn-secondary { background:#e0e0e0; color:#333; margin-top:12px; }
     #content { width:100%; height:100%; border:none; display:block; }
+    /* 离线横幅 */
+    #offlineBar { display:none; position:fixed; top:0; left:0; right:0; background:#f44336; color:#fff; text-align:center; padding:8px; font-size:13px; z-index:10000; }
   </style>
 </head>
 <body>
+  <div id="offlineBar">网络已断开，请检查网络连接</div>
   <div id="loading">
     <div class="spinner"></div>
     <p>正在加载物流筐系统…</p>
   </div>
-  <iframe id="content" src="https://inventory-app-9ql.pages.dev/" onload="document.getElementById('loading').style.display='none'"></iframe>
+  <div id="errorBox">
+    <div class="icon">⚠️</div>
+    <h3>加载失败</h3>
+    <p id="errorMsg">无法连接到服务器，请检查网络后重试。</p>
+    <button class="btn" onclick="retryLoad()">重新加载</button>
+    <button class="btn btn-secondary" onclick="openExternal()">用浏览器打开</button>
+  </div>
+  <iframe id="content" src="https://inventory-app-9ql.pages.dev/"></iframe>
+  <script>
+    (function () {
+      var APP_URL = 'https://inventory-app-9ql.pages.dev/';
+      var MAX_WAIT_MS = 20000; // 20 秒超时
+      var iframe = document.getElementById('content');
+      var loading = document.getElementById('loading');
+      var errorBox = document.getElementById('errorBox');
+      var errorMsg = document.getElementById('errorMsg');
+      var loaded = false;
+      var loadTimer = null;
+
+      // iframe 加载成功（onload 事件；注意：onload 只对首次导航可靠）
+      iframe.addEventListener('load', function () {
+        loaded = true;
+        clearTimeout(loadTimer);
+        hideLoading();
+      });
+
+      // 超时检测：20 秒仍未加载完成 → 显示错误/重试
+      loadTimer = setTimeout(function () {
+        if (!loaded) {
+          clearTimeout(loadTimer);
+          showError('页面加载超时，请检查网络后重试。');
+        }
+      }, MAX_WAIT_MS);
+
+      // 网络状态监听：断网显示横幅，恢复自动重试一次
+      window.addEventListener('online', function () {
+        document.getElementById('offlineBar').style.display = 'none';
+        if (!loaded) { location.reload(); }
+      });
+      window.addEventListener('offline', function () {
+        document.getElementById('offlineBar').style.display = 'block';
+      });
+      // 启动时检查网络
+      if (!navigator.onLine) {
+        document.getElementById('offlineBar').style.display = 'block';
+      }
+
+      function hideLoading() { loading.style.display = 'none'; }
+      function showError(msg) {
+        if (loaded) return;
+        errorMsg.textContent = msg || '无法连接到服务器，请检查网络后重试。';
+        loading.style.display = 'none';
+        errorBox.style.display = 'flex';
+      }
+      function hideError() {
+        errorBox.style.display = 'none';
+        loading.style.display = 'flex';
+      }
+      window.retryLoad = function () {
+        hideError();
+        loaded = false;
+        loadTimer = setTimeout(function () {
+          if (!loaded) { showError('页面加载超时，请检查网络后重试。'); }
+        }, MAX_WAIT_MS);
+        iframe.src = APP_URL;
+      };
+      // 用系统浏览器打开（Android 默认浏览器 / 微信）
+      window.openExternal = function () {
+        if (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) {
+          // 壳内：用 Capacitor Browser 或系统 intent
+          try {
+            if (window.Bridge && Bridge.open) {
+              // 简单跳系统浏览器
+              window.location = 'intent://inventory-app-9ql.pages.dev/#Intent;scheme=https;end';
+            }
+          } catch (e) {}
+        }
+        window.open(APP_URL, '_blank');
+      };
+    })();
+  </script>
 </body>
 </html>

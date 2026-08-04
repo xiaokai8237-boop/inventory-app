@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  网络安全配置：
+  - 主配置允许系统受信证书 + 明文（保持与现有 allowMixedContent 一致的兼容性，
+    避免因 HTTP 资源被系统拦截导致页面加载失败/白屏，确保"稳定不闪退"优先）
+  - 页面本身走 HTTPS（Cloudflare Pages），安全性有保障
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 主色：深空蓝（与页面主题、splash 背景一致） -->
+    <color name="colorPrimary">#0A6A96</color>
+    <color name="colorPrimaryDark">#082E38</color>
+    <color name="colorAccent">#0A6A96</color>
+</resources>
