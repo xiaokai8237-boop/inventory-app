@@ -2932,6 +2932,7 @@ async function backupToCloud(manual) {
     const payload = {
       deviceId: deviceId,
       userDeleted: !!localStorage.getItem('kuanwei_last_delete'), // 用户主动删除过 → 服务器端允许空覆盖
+      deleteTime: localStorage.getItem('kuanwei_last_delete') || undefined, // 删除时间：服务器判断云端是否有删除后新数据
       data: {
         version: 2,
         backupTime: new Date().toISOString(),
@@ -2950,6 +2951,8 @@ async function backupToCloud(manual) {
     const result = await resp.json();
     if (result && result.ok) {
       localStorage.setItem('kuanwei_last_backup', new Date().toISOString());
+      // 删除状态已同步到云端 → 清除删除标记，防止后续空备份（带 userDeleted）误清其他设备录入的新数据
+      try { localStorage.removeItem('kuanwei_last_delete'); } catch(e) {}
       if (manual) {
         // 弹窗展示备份详情（店面顺序/别称/筐/记录数）
         const goodsCount = (payload.data.goodsConfig && Array.isArray(payload.data.goodsConfig)) ? payload.data.goodsConfig.length : 0;

@@ -65,7 +65,19 @@ async function handleBackupPost(body, env, json) {
     await env.BACKUP_KV.put(key, JSON.stringify(data));
   }
   if (account && userDeleted) {
-    await env.BACKUP_KV.put('data_' + account, JSON.stringify(data));
+    const key = 'data_' + account;
+    const raw = await env.BACKUP_KV.get(key);
+    let allowClear = true;
+    if (raw) {
+      try {
+        const cloud = JSON.parse(raw);
+        const delTime = body.deleteTime;
+        // 关键保护：云端备份时间【晚于】用户删除时间 → 云端是删除后录入的新数据（可能来自其他设备）
+        // → 不允许本设备用空数据覆盖，避免"删一条把别人新数据全清掉"
+        if (delTime && cloud.backupTime && cloud.backupTime > delTime) allowClear = false;
+      } catch (e) {}
+    }
+    if (allowClear) await env.BACKUP_KV.put(key, JSON.stringify(data));
   }
   if (deviceId) await env.BACKUP_KV.put('device_' + deviceId, JSON.stringify(data));
   return json({ ok: true });
