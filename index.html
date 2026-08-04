@@ -1680,6 +1680,21 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
   </div>
 
+  <!-- === 功能建议面板 === -->
+  <div class="manage-panel" id="suggestionPanel">
+    <div class="card panel-header" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);">
+      <button class="back-btn" onclick="backFromSuggestionPanel()" style="color:#7CE8E0;">← 返回</button>
+      <span class="panel-title" style="color:#fff;">💡 功能建议</span>
+    </div>
+    <div class="card" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-left:4px solid #B89248;">
+      <div style="font-size:14px;line-height:1.8;color:rgba(255,255,255,.75);margin-bottom:10px;">你的每一条建议，所有用户都能看到；好建议会做成新功能</div>
+      <div id="suggestionList" style="margin-top:6px;max-height:42vh;overflow-y:auto;"></div>
+      <textarea id="suggestionText" placeholder="写下你的建议，例如：希望支持按日期导出更多格式…" style="width:100%;box-sizing:border-box;min-height:76px;padding:10px;border:1.5px solid rgba(124,232,224,.3);border-radius:8px;font-size:14px;resize:vertical;background:rgba(255,255,255,.07);color:#fff;margin-top:10px;"></textarea>
+      <button class="btn" style="margin-top:10px;width:100%;padding:12px;font-size:16px;background:linear-gradient(160deg,#F8E3A6,#C89B4E);color:#0B2E38;font-weight:700;border:none;border-radius:10px;" onclick="submitSuggestion()">📨 提交建议</button>
+      <div id="suggestionTip" style="font-size:12px;color:rgba(255,255,255,.7);margin-top:8px;text-align:center;"></div>
+    </div>
+  </div>
+
   <!-- === 店面管理面板 === -->
   <div class="manage-panel" id="storeManagePanel">
     <div class="card panel-header">
@@ -1780,17 +1795,10 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <button class="manage-item" onclick="openBackupPanel()"><span class="mi-icon">💾</span><span class="mi-title">备份与恢复<span class="mi-sub">云端同步 · 换机不丢</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('summary')"><span class="mi-icon">📈</span><span class="mi-title">汇总<span class="mi-sub">统计报表</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('reconcile')"><span class="mi-icon">🔄</span><span class="mi-title">对账<span class="mi-sub">导出数据</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openSuggestionPanel()"><span class="mi-icon">💡</span><span class="mi-title">功能建议<span class="mi-sub">公共建议墙 · 好建议做成新功能</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="showToast('🎁 邀请好友功能开发中，敬请期待')"><span class="mi-icon">🎁</span><span class="mi-title">邀请好友<span class="mi-sub">双方各得 7 天会员</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('settings')"><span class="mi-icon">❓</span><span class="mi-title">使用说明<span class="mi-sub">新手教程</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="installApp()"><span class="mi-icon" id="installBtnIcon">📱</span><span class="mi-title" id="installBtnLabel">添加到桌面<span class="mi-sub">安装 APP</span></span><span class="mi-arrow">›</span></button>
-  </div>
-  <div class="card" style="border-left:4px solid #B89248;background:linear-gradient(160deg,rgba(245,220,146,.07),rgba(255,255,255,.03));">
-    <div style="font-size:16px;font-weight:700;color:#F5DC92;">💡 功能建议</div>
-    <div style="font-size:13px;margin-top:4px;color:rgba(255,255,255,.7);">你的每一条建议，所有用户都能看到；好建议会做成新功能</div>
-    <div id="suggestionList" style="margin-top:10px;max-height:240px;overflow-y:auto;"></div>
-    <textarea id="suggestionText" placeholder="写下你的建议，例如：希望支持按日期导出更多格式…" style="width:100%;box-sizing:border-box;min-height:70px;padding:10px;border:1.5px solid rgba(124,232,224,.3);border-radius:8px;font-size:14px;resize:vertical;background:rgba(255,255,255,.07);color:#fff;"></textarea>
-    <button class="btn" style="margin-top:8px;width:100%;padding:11px;font-size:15px;background:linear-gradient(160deg,#F8E3A6,#C89B4E);color:#0B2E38;font-weight:700;border:none;border-radius:10px;" onclick="submitSuggestion()">📨 提交建议</button>
-    <div id="suggestionTip" style="font-size:12px;color:rgba(255,255,255,.7);margin-top:6px;text-align:center;"></div>
   </div>
   <div class="footer" id="footerVer">物流筐收发管理系统 <span id="footerVerNum"></span></div>
 </div>
@@ -4156,6 +4164,16 @@ async function autoSyncFromCloud(phone) {
 }
 
 // ======== 功能建议（公共建议墙） ========
+function openSuggestionPanel() {
+  switchPage('record');
+  document.getElementById('homeWizard').style.display = 'none';
+  document.getElementById('suggestionPanel').style.display = 'block';
+  loadSuggestions();
+}
+function backFromSuggestionPanel() {
+  document.getElementById('suggestionPanel').style.display = 'none';
+  switchPage('manage');
+}
 function loadSuggestions() {
   const list = document.getElementById('suggestionList');
   if (!list) return;
@@ -5970,7 +5988,7 @@ function switchPage(pageName) {
   if (pageName === 'history') { renderHistory(); updateDailyPhotoInfo(); initGoodsFilter(); }
   if (pageName === 'summary') renderSummary();
   if (pageName === 'settings') { renderSettings(); }
-  if (pageName === 'manage') { renderManage(); loadSuggestions(); }
+  if (pageName === 'manage') renderManage();
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
 }
 document.querySelectorAll('.tab').forEach(tab => {
