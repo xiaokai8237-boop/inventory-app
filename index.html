@@ -7587,11 +7587,33 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.77'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.78'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
+// 核弹级 sw 缓存清理：检测 sw 缓存版本，过期则强制清空+注销+刷新（解决旧 sw 缓存导致页面异常问题）
+(function nukeOldSw() {
+  const EXPECTED_VER = (typeof CACHE !== 'undefined' ? CACHE : 'kuanwei-v200');
+  try {
+    if (!navigator.serviceWorker) return;
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      if (regs.length === 0) return;
+      const stampKey = 'kuanwei_nuke_sw';
+      const old = localStorage.getItem(stampKey);
+      if (old === EXPECTED_VER) return; // 当前缓存已是最新版本，无需清理
+      // 检测到旧 sw 缓存：清空 cacheStorage + 注销所有 sw + 刷新页面
+      Promise.all([
+        caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))),
+        Promise.all(regs.map(r => r.unregister()))
+      ]).then(() => {
+        localStorage.setItem(stampKey, EXPECTED_VER);
+        location.reload();
+      }).catch(() => {});
+    });
+  } catch(e) {}
+})();
+
 const footerVerNumEl = document.getElementById('footerVerNum');
 if (footerVerNumEl) footerVerNumEl.textContent = 'v' + APP_VERSION;
 initTheme();

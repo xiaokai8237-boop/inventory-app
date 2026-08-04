@@ -1,21 +1,21 @@
  INFO  Accepting connections at http://localhost:5000
- HTTP  2026/8/3 18:00:39 127.0.0.1 GET /
- HTTP  2026/8/3 18:00:39 127.0.0.1 Returned 200 in 16 ms
- HTTP  2026/8/3 18:00:39 127.0.0.1 GET /icon-512.png
- HTTP  2026/8/3 18:00:39 127.0.0.1 Returned 200 in 2 ms
- HTTP  2026/8/3 18:00:42 127.0.0.1 GET /sw.js
- HTTP  2026/8/3 18:00:42 127.0.0.1 Returned 200 in 2 ms
- HTTP  2026/8/3 18:00:42 127.0.0.1 GET /
- HTTP  2026/8/3 18:00:42 127.0.0.1 GET /index.html
- HTTP  2026/8/3 18:00:42 127.0.0.1 Returned 301 in 0 ms
- HTTP  2026/8/3 18:00:42 127.0.0.1 GET /manifest.json
- HTTP  2026/8/3 18:00:42 127.0.0.1 Returned 304 in 2 ms
- HTTP  2026/8/3 18:00:42 127.0.0.1 GET /index
- HTTP  2026/8/3 18:00:42 127.0.0.1 Returned 301 in 0 ms
- HTTP  2026/8/3 18:00:42 127.0.0.1 Returned 200 in 2 ms
- HTTP  2026/8/3 18:00:42 127.0.0.1 GET /
- HTTP  2026/8/3 18:00:42 127.0.0.1 GET /icon-192.png
- HTTP  2026/8/3 18:00:42 127.0.0.1 Returned 304 in 2 ms
- HTTP  2026/8/3 18:00:42 127.0.0.1 GET /icon-512.png
- HTTP  2026/8/3 18:00:42 127.0.0.1 Returned 304 in 1 ms
- HTTP  2026/8/3 18:00:42 127.0.0.1 Returned 200 in 2 ms
+ HTTP  2026/8/4 08:32:19 127.0.0.1 GET /
+ HTTP  2026/8/4 08:32:19 127.0.0.1 Returned 200 in 14 ms
+ HTTP  2026/8/4 08:32:19 127.0.0.1 GET /icon-512.png
+ HTTP  2026/8/4 08:32:19 127.0.0.1 Returned 200 in 1 ms
+ HTTP  2026/8/4 08:32:21 127.0.0.1 GET /sw.js
+ HTTP  2026/8/4 08:32:21 127.0.0.1 Returned 200 in 2 ms
+ HTTP  2026/8/4 08:32:21 127.0.0.1 GET /
+ HTTP  2026/8/4 08:32:21 127.0.0.1 GET /index.html
+ HTTP  2026/8/4 08:32:21 127.0.0.1 Returned 301 in 1 ms
+ HTTP  2026/8/4 08:32:21 127.0.0.1 Returned 304 in 3 ms
+ HTTP  2026/8/4 08:32:21 127.0.0.1 GET /manifest.json
+ HTTP  2026/8/4 08:32:21 127.0.0.1 GET /index
+ HTTP  2026/8/4 08:32:21 127.0.0.1 Returned 301 in 1 ms
+ HTTP  2026/8/4 08:32:21 127.0.0.1 GET /
+ HTTP  2026/8/4 08:32:21 127.0.0.1 GET /icon-192.png
+ HTTP  2026/8/4 08:32:21 127.0.0.1 Returned 304 in 1 ms
+ HTTP  2026/8/4 08:32:21 127.0.0.1 Returned 200 in 1 ms
+ HTTP  2026/8/4 08:32:21 127.0.0.1 GET /icon-512.png
+ HTTP  2026/8/4 08:32:21 127.0.0.1 Returned 304 in 1 ms
+ HTTP  2026/8/4 08:32:21 127.0.0.1 Returned 200 in 10 ms
