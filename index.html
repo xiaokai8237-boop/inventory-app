@@ -944,6 +944,57 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 .store-ocr-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.5); z-index: 9998; align-items: center; justify-content: center; }
 .store-ocr-modal.show { display: flex; }
 .store-ocr-content { background: var(--glass-bg); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%); border: 1px solid var(--glass-border); border-radius: 16px; padding: 14px; max-width: 95%; width: 500px; max-height: 88vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,.3); }
+/* ===== 识别结果弹窗：深空蓝晶定稿风格（固定深色，不跟随主题） ===== */
+#ocrResultModal.store-ocr-modal { background: rgba(4,24,32,.78); }
+#ocrResultModal .store-ocr-content {
+  background: #0E3340;
+  border: 1.5px solid rgba(245,220,146,.55);
+  border-radius: 22px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.55);
+  color: #FFFFFF;
+  max-width: 540px;
+}
+#ocrResultModal .store-ocr-content::-webkit-scrollbar { width: 5px; }
+#ocrResultModal .store-ocr-content::-webkit-scrollbar-thumb { background: rgba(245,220,146,.35); border-radius: 3px; }
+#ocrResultModal .ocr-title { color: #FFFFFF; font-size: 18px; font-weight: 800; letter-spacing: .5px; }
+#ocrResultModal .ocr-sub { color: #EAF9FB; font-size: 12px; }
+#ocrResultModal .ocr-gold { color: #F5DC92; }
+#ocrResultModal .ocr-cyan { color: #7CE8E0; }
+#ocrResultModal .ocr-modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: rgba(255,255,255,.75); padding: 0 4px; line-height: 1; }
+#ocrResultModal .ocr-modal-close:hover { color: #FFFFFF; }
+#ocrResultModal .ocr-mode-chip { color: #F5DC92; font-weight: 700; }
+#ocrResultModal .ocr-goods-chip {
+  color: #FFFFFF; font-weight: 700; font-size: 15px;
+  background: rgba(245,220,146,.16);
+  border: 1px solid rgba(245,220,146,.45);
+  padding: 4px 14px; border-radius: 12px; margin-left: 4px;
+  display: inline-block;
+}
+#ocrResultModal .ocr-legend-item { font-size: 11.5px; color: #CFECEF; display: inline-flex; align-items: center; gap: 4px; }
+#ocrResultModal .ocr-legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+#ocrResultModal .ocr-warn-box {
+  background: rgba(245,166,35,.14); border: 1.5px solid rgba(245,166,35,.55);
+  border-radius: 10px; padding: 8px 12px; margin-top: 10px;
+  font-size: 12.5px; color: #F5A623; font-weight: 700; text-align: center;
+}
+#ocrResultModal .btn-confirm-ocr {
+  background: linear-gradient(160deg, #F8E3A6 0%, #E3BE68 55%, #C89B4E 100%);
+  color: #0B2E38; font-weight: 800; border: none;
+  box-shadow: 0 6px 20px rgba(245,220,146,.4);
+  border-radius: 26px; padding: 12px 0; font-size: 15px;
+}
+#ocrResultModal .btn-cancel-ocr {
+  background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.18);
+  color: rgba(255,255,255,.95); font-weight: 600;
+  border-radius: 26px; padding: 11px 0; font-size: 14px;
+}
+#ocrResultModal .ocr-table { background: transparent; color: #FFFFFF; }
+#ocrResultModal .ocr-table thead th {
+  background: rgba(245,220,146,.12); color: #F5DC92; font-size: 12.5px;
+  border-bottom: 1px solid rgba(245,220,146,.25); padding: 8px 4px;
+}
+#ocrResultModal .ocr-table tbody td { border-bottom: 1px solid rgba(255,255,255,.07); }
+#ocrResultModal .ocr-table .total-row td { background: rgba(245,220,146,.08); color: #F5DC92; font-weight: 700; }
 /* 子弹窗置顶：从父弹窗内打开、或随时弹出的强制更新框，保证不被任何父弹窗/浮层盖住 */
 #voiceConfirmModal.store-ocr-modal.show,
 #dailyPreviewModal.store-ocr-modal.show,
@@ -2123,27 +2174,25 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
 <!-- OCR 识别结果弹窗 -->
 <div class="store-ocr-modal" id="ocrResultModal" onclick="closeOcrResultModal()">
-  <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:520px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <span style="font-weight:600;font-size:15px;">📸 识别结果（可直接修改）</span>
-      <button onclick="closeOcrResultModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+  <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:540px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <span class="ocr-title">📸 AI 识别结果 · 请核对</span>
+      <button class="ocr-modal-close" onclick="closeOcrResultModal()">×</button>
     </div>
-    <div style="font-size:13px;color:var(--text-light);margin-bottom:10px;">
-      当前模式：<span id="ocrModeLabel" style="color:var(--primary);font-weight:600;font-size:14px;">发出</span>
-      · 筐类型：<span id="ocrGoodsLabel" style="color:#fff;font-weight:700;font-size:24px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));padding:4px 16px;border-radius:10px;margin-left:4px;box-shadow:0 2px 8px var(--primary-glow);display:inline-block;">常温筐</span>
+    <div class="ocr-sub" style="margin-bottom:10px;">
+      <span class="ocr-gold">绿色=AI 高置信</span> · <span class="ocr-cyan">黄色=建议核对</span> · <span style="color:#F5A623;">黄色列=物流箱</span>
     </div>
-    <div style="font-size:11.5px;color:var(--text-light);margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap;">
-      <span><span style="display:inline-block;width:10px;height:10px;background:var(--success);border-radius:2px;margin-right:3px;"></span>绿色=高置信</span>
-      <span><span style="display:inline-block;width:10px;height:10px;background:var(--warning);border-radius:2px;margin-right:3px;"></span>黄色=建议核对</span>
-      <span style="color:var(--warning);">黄色列=物流箱（自动录入该列）</span>
+    <div style="font-size:13px;margin-bottom:10px;">
+      当前模式：<span id="ocrModeLabel" class="ocr-mode-chip">发出</span>
+      · 筐类型：<span id="ocrGoodsLabel" class="ocr-goods-chip">常温筐</span>
     </div>
     <div id="ocrEditFields"></div>
-    <div style="background:var(--amber-soft);border:1.5px solid var(--warning);border-radius:8px;padding:8px 12px;margin-top:10px;font-size:13px;color:var(--warning);font-weight:600;text-align:center;">
+    <div class="ocr-warn-box">
       ⚠️ 请核对好每行数据后再点「确认录入」
     </div>
     <div style="display:flex;gap:8px;margin-top:10px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closeOcrResultModal()">取消</button>
-      <button class="btn btn-success" style="flex:1;" onclick="confirmOcrResult()">✅ 确认录入</button>
+      <button class="btn btn-cancel-ocr" style="flex:1;" onclick="closeOcrResultModal()">取 消</button>
+      <button class="btn btn-confirm-ocr" style="flex:1;" onclick="confirmOcrResult()">✅ 确认录入</button>
     </div>
   </div>
 </div>
@@ -7133,8 +7182,8 @@ function refreshOcrQtyCol() {
   const rows = ocrCurrentResult.rows;
   const maxNumCols = 1;
 
-  let html = '<div style="overflow-x:auto;"><table class="summary-table" style="margin-top:6px;min-width:100%;">';
-  html += '<thead><tr><th style="min-width:58px;">编号</th><th style="min-width:120px;text-align:left;padding-left:6px;">门店</th><th style="min-width:66px;background:var(--warning);color:#fff;">物流箱</th><th style="min-width:28px;"></th></tr></thead><tbody>';
+  let html = '<div style="overflow-x:auto;"><table class="summary-table ocr-table" style="margin-top:6px;min-width:100%;">';
+  html += '<thead><tr><th style="min-width:58px;">编号</th><th style="min-width:120px;text-align:left;padding-left:6px;">店名</th><th style="min-width:66px;background:rgba(245,166,35,.28);color:#F5A623;">物流箱</th><th style="min-width:28px;"></th></tr></thead><tbody>';
   rows.forEach((r, i) => {
     // 自动补的行：黄色警示背景提示用户核对
     const isMissing = r._missing;
@@ -7142,19 +7191,19 @@ function refreshOcrQtyCol() {
     const isHighConf = r._highConf;
     // 双引擎不一致：标黄待核对（优先于绿色）
     const isConflict = r._conflict;
-    const rowBg = isMissing || isConflict ? ' style="background:var(--amber-soft);"' : '';
-    const hint = isMissing ? ' <span style="color:var(--warning);font-size:11px;">⚠️可能漏识别</span>' : (isConflict ? ' <span style="color:var(--warning);font-size:11px;">⚠️两引擎结果不同</span>' : '');
+    const rowBg = isMissing || isConflict ? ' style="background:rgba(245,166,35,.10);"' : '';
+    const hint = isMissing ? ' <span style="color:#F5A623;font-size:11px;">⚠️可能漏识别</span>' : (isConflict ? ' <span style="color:#F5A623;font-size:11px;">⚠️两引擎结果不同</span>' : '');
     html += '<tr' + rowBg + '>';
-    html += '<td><input type="text" id="ocrCode_' + i + '" value="' + escapeHtml(r.code || '') + '" maxlength="10" style="width:60px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;text-align:center;"></td>';
-    html += '<td style="text-align:left;padding-left:6px;"><input type="text" id="ocrName_' + i + '" value="' + escapeHtml(r.name || '') + '" style="width:100%;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:14px;">' + hint + '</td>';
+    html += '<td><input type="text" id="ocrCode_' + i + '" value="' + escapeHtml(r.code || '') + '" maxlength="10" style="width:60px;padding:5px;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:14px;text-align:center;background:rgba(255,255,255,.06);color:#FFFFFF;"></td>';
+    html += '<td style="text-align:left;padding-left:6px;"><input type="text" id="ocrName_' + i + '" value="' + escapeHtml(r.name || '') + '" style="width:100%;padding:5px;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:14px;background:rgba(255,255,255,.06);color:#FFFFFF;">' + hint + '</td>';
     const v = r.nums[0] !== undefined ? r.nums[0] : 0;
     const qtyStyle = (isHighConf && !isConflict)
-      ? 'width:64px;padding:5px;border:1.5px solid var(--success);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:var(--success);background:var(--green-soft);'
+      ? 'width:64px;padding:5px;border:1.5px solid #7CE8E0;border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#7CE8E0;background:rgba(124,232,224,.10);'
       : (isConflict
-        ? 'width:64px;padding:5px;border:2px solid var(--warning);border-radius:6px;font-size:14px;text-align:center;font-weight:700;color:var(--warning);background:var(--amber-soft);'
-        : 'width:64px;padding:5px;border:1.5px solid var(--warning);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:var(--warning);');
-    html += '<td style="background:' + (isHighConf && !isConflict ? 'var(--green-soft);' : (isConflict ? 'var(--amber-soft);' : 'var(--amber-soft);')) + '"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="' + qtyStyle + '"></td>';
-    html += '<td><button onclick="removeOcrRow(' + i + ')" style="background:none;border:none;color:var(--danger);font-size:20px;cursor:pointer;padding:0 6px;line-height:1;">×</button></td>';
+        ? 'width:64px;padding:5px;border:2px solid #F5A623;border-radius:6px;font-size:14px;text-align:center;font-weight:700;color:#F5A623;background:rgba(245,166,35,.12);'
+        : 'width:64px;padding:5px;border:1.5px solid #F5A623;border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#F5A623;');
+    html += '<td style="background:' + (isHighConf && !isConflict ? 'rgba(124,232,224,.07);' : (isConflict ? 'rgba(245,166,35,.12);' : 'rgba(245,166,35,.12);')) + '"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="' + qtyStyle + '"></td>';
+    html += '<td><button onclick="removeOcrRow(' + i + ')" style="background:none;border:none;color:#FF6B6B;font-size:20px;cursor:pointer;padding:0 6px;line-height:1;">×</button></td>';
     html += '</tr>';
   });
   if (rows.length > 0) {
@@ -7163,10 +7212,10 @@ function refreshOcrQtyCol() {
       const inp = document.getElementById('ocrQty_' + i);
       if (inp) sum += parseInt(inp.value) || 0;
     });
-    html += '<tr class="total-row"><td>合计</td><td></td><td style="background:var(--amber-soft);font-weight:700;color:var(--warning);" id="ocrTotalCell_0">' + sum + '</td><td></td></tr>';
+    html += '<tr class="total-row"><td>合计</td><td></td><td style="background:rgba(245,220,146,.14);font-weight:800;color:#F5DC92;" id="ocrTotalCell_0">' + sum + '</td><td></td></tr>';
   }
   html += '</tbody></table></div>';
-  html += '<button onclick="addOcrRow()" style="margin-top:10px;padding:9px 14px;border:1.5px dashed var(--primary);border-radius:8px;background:var(--blue-soft);color:var(--primary);font-size:13px;font-weight:600;cursor:pointer;width:100%;">➕ 新增一行（识别漏了时手动添加）</button>';
+  html += '<button onclick="addOcrRow()" style="margin-top:10px;padding:9px 14px;border:1.5px dashed rgba(245,220,146,.6);border-radius:10px;background:rgba(245,220,146,.08);color:#F5DC92;font-size:13px;font-weight:700;cursor:pointer;width:100%;">➕ 新增一行（识别漏了时手动添加）</button>';
   document.getElementById('ocrEditFields').innerHTML = html;
   // 绑定 input 事件：编号/门店 改 r.code/r.name；物流箱 改 r.nums[0] 并重算合计
   rows.forEach((r, i) => {
