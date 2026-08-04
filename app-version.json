@@ -1,7 +1,7 @@
 {
-  "versionCode": 80,
-  "versionName": "6.0.80",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.80.apk",
-  "note": "【v6.0.80 更新内容】\n1. 安装完成后自动打开软件，不用手动找图标\n2. 修复更新安装问题：下载完成后自动弹出安装\n3. 启动页：去掉金色边框线\n4. 功能建议：独立页面，管理页入口",
+  "versionCode": 84,
+  "versionName": "6.0.84",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.84-final.apk",
+  "note": "【v6.0.84 更新内容】\n1. 安卓壳全面优化：启动更快不卡顿、返回键退一页、内存回收防闪退\n2. 启动页：等页面加载完成再隐藏，杜绝白屏空窗\n3. 全局异常捕获：出错不闪退\n4. 断网提示横幅 + 加载失败重试\n5. 修复额外发收登记按钮点不动的问题",
   "force": false
 }
