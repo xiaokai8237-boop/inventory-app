@@ -2366,6 +2366,21 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
 </div>
 
+<!-- 门店未录入提醒弹窗（body 顶层） -->
+<div class="store-ocr-modal" id="unregStoreModal">
+  <div class="store-ocr-content" style="max-width:360px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-weight:700;font-size:16px;color:var(--text);">⚠️ 门店未录入</span>
+      <button onclick="closeUnregStoreModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+    </div>
+    <div style="font-size:13px;line-height:1.9;color:var(--text);" id="unregStoreDesc"></div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="unregStoreIgnore()">忽略继续</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="unregStoreGotoManage()">📝 去录入</button>
+    </div>
+  </div>
+</div>
+
 <!-- 管理员密码验证弹窗 -->
 <div class="store-ocr-modal" id="adminAuthModal" onclick="closeAdminAuthModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
@@ -6067,7 +6082,13 @@ async function doOCR(imageDataUrl, file) {
       const rawEl = document.getElementById('ocrRawText');
       if (rawEl) rawEl.textContent = ocrCurrentResult.rawText;
       refreshOcrQtyCol();
-      document.getElementById('ocrResultModal').classList.add('show');
+      // 识别出的店名检查：有未录入「店面管理」的 → 先弹提醒去录入
+      const unreg = checkUnregisteredStores(ocrCurrentResult.rows);
+      if (unreg.length > 0) {
+        showUnregisteredStoresConfirm(unreg);
+      } else {
+        document.getElementById('ocrResultModal').classList.add('show');
+      }
     } else {
       parseOcrResult(ocrData);
       // 7. 交叉验证：腾讯云结果与百度结果对比，不一致标黄
@@ -6444,7 +6465,13 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
   const rawEl = document.getElementById('ocrRawText');
   if (rawEl) rawEl.textContent = ocrCurrentResult.rawText;
   refreshOcrQtyCol();
-  document.getElementById('ocrResultModal').classList.add('show');
+  // 识别出的店名检查：有未录入「店面管理」的 → 先弹提醒去录入（百度兜底路径同样检查）
+  const unregBaidu = checkUnregisteredStores(ocrCurrentResult.rows);
+  if (unregBaidu.length > 0) {
+    showUnregisteredStoresConfirm(unregBaidu);
+  } else {
+    document.getElementById('ocrResultModal').classList.add('show');
+  }
 }
 
 // 渲染 OCR 表格（只显示物流箱一列；编号/门店/数字均可编辑）
@@ -6546,6 +6573,47 @@ function closeOcrResultModal() {
   document.getElementById('ocrResultModal').classList.remove('show');
   ocrCurrentResult = null;
   ocrCurrentImage = null;
+}
+
+// ======== 识别店名未录入提醒 ========
+// 识别结果 rows 里的店名，若未录入「店面管理」，弹提醒让用户先录入
+function checkUnregisteredStores(rows) {
+  try {
+    const cfg = loadStoreConfig();
+    const registered = new Set(cfg.map(s => (s.name || '').trim()));
+    const seen = new Set();
+    const missing = [];
+    (rows || []).forEach(r => {
+      const nm = (r.name || '').trim();
+      if (!nm || seen.has(nm)) return;
+      seen.add(nm);
+      if (!registered.has(nm)) missing.push(nm);
+    });
+    return missing;
+  } catch(e) { return []; }
+}
+function showUnregisteredStoresConfirm(names) {
+  const desc = document.getElementById('unregStoreDesc');
+  if (desc) desc.innerHTML = '识别到以下门店<b style="color:var(--danger);">还没录入</b>「店面管理」：<br><b>' + names.map(n => escapeHtml(n)).join('、') + '</b><br><br>请先去「店面管理」把门店加进去，再重新识别，识别结果才会准确对应到你的店。';
+  document.getElementById('unregStoreModal').classList.add('show');
+}
+function closeUnregStoreModal() {
+  document.getElementById('unregStoreModal').classList.remove('show');
+}
+// 忽略继续：直接显示识别结果
+function unregStoreIgnore() {
+  closeUnregStoreModal();
+  document.getElementById('ocrResultModal').classList.add('show');
+}
+// 去录入：关闭结果弹窗 → 切到管理页 → 打开店面管理
+function unregStoreGotoManage() {
+  closeUnregStoreModal();
+  document.getElementById('ocrResultModal').classList.remove('show');
+  ocrCurrentResult = null;
+  ocrCurrentImage = null;
+  switchPage('manage');
+  openStorePanel();
+  showToast('📝 请先录入这些门店，再回来识别');
 }
 
 function confirmOcrResult() {
