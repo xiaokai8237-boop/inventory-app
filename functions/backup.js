@@ -72,9 +72,12 @@ async function handleBackupPost(body, env, json) {
       try {
         const cloud = JSON.parse(raw);
         const delTime = body.deleteTime;
-        // 关键保护：云端备份时间【晚于】用户删除时间 → 云端是删除后录入的新数据（可能来自其他设备）
-        // → 不允许本设备用空数据覆盖，避免"删一条把别人新数据全清掉"
-        if (delTime && cloud.backupTime && cloud.backupTime > delTime) allowClear = false;
+        // 关键保护：仅当【本次上传是空数据】且云端存在删除后录入的新数据时，才阻止覆盖（保留其他设备新数据）
+        // 有数据的备份（records 非空 = 用户正常录入/保存）必须正常保存，不能被删除标记拦截
+        const isEmptyData = !Array.isArray(data.records) || data.records.length === 0;
+        if (isEmptyData && delTime && cloud.backupTime && cloud.backupTime > delTime) {
+          allowClear = false;
+        }
       } catch (e) {}
     }
     if (allowClear) await env.BACKUP_KV.put(key, JSON.stringify(data));
