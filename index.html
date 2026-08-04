@@ -3303,7 +3303,21 @@ async function restoreLoggedIn(phone) {
     hideLoading();
     if (result.data) {
       const cloud = result.data;
-      saveDataArr(cloud.records || []);
+      // 尊重删除意图：用户曾清空全部记录 → 云端 records 是删除前的旧数据则不再恢复，
+      // 避免"删了又复活"（此时保留本地空状态 + 只恢复店面/筐配置等非记录数据）
+      const userDeleted = !!localStorage.getItem('kuanwei_last_delete');
+      const cloudRecs = Array.isArray(cloud.records) ? cloud.records : [];
+      if (userDeleted) {
+        // 用户删除过 → 恢复时不覆盖本地 records（保持已删除状态），但仍恢复店面/筐/偏好
+        // 仅当云端 backupTime 晚于用户删除时间才恢复（云端是删除后的新数据或别处录入）
+        const delTime = localStorage.getItem('kuanwei_last_delete');
+        if (cloud.backupTime && delTime && cloud.backupTime > delTime) {
+          saveDataArr(cloudRecs);
+        }
+        // 否则保持本地空 records，不覆盖
+      } else {
+        saveDataArr(cloudRecs);
+      }
       if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
       // 仅当云端店面非空时才覆盖本地，避免云端空 storeConfig 误清用户本地已配置的店面
       if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0) saveStoreConfig(cloud.storeConfig);
@@ -6812,8 +6826,13 @@ function doDeleteRecord(id) {
   let data = loadData();
   data = data.filter(r => String(r.id) !== String(id));
   saveDataArr(data);
-  // 标记用户主动删除过数据：云端"防丢失保护"需允许空覆盖，否则删掉的数据会被云端旧数据拉回（复活）
-  try { localStorage.setItem('kuanwei_last_delete', new Date().toISOString()); } catch(e) {}
+  // 删除标记：若还有剩余记录 → 非"清空全部"，清除标记（避免永久阻止后续云端恢复）；
+  // 若删光（records 空）→ 保留标记，让云端"防丢失保护"允许空覆盖，实现真正删除
+  if (data.length === 0) {
+    try { localStorage.setItem('kuanwei_last_delete', new Date().toISOString()); } catch(e) {}
+  } else {
+    try { localStorage.removeItem('kuanwei_last_delete'); } catch(e) {}
+  }
   // 删除后立即同步云端（不等 3 秒防抖），避免刷新页面时云端还是删除前的旧数据
   try { backupToCloud(false); } catch(e) {}
   renderHistory();
@@ -7587,7 +7606,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.78'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.79'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
