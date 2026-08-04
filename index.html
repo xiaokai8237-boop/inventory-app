@@ -1268,6 +1268,37 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 #page-record .home-grid-row .home-btn { background: rgba(255,255,255,.07); border-color: rgba(245,220,146,.25); color: #EAF9FB; }
 #page-record .btn-outline { border-color: rgba(245,220,146,.4); color: #F5DC92; }
 #page-record .btn-primary { background: linear-gradient(160deg,#F8E3A6,#C89B4E); color: #0B2E38; border: none; font-weight: 700; }
+/* ========== 设计稿风格：记录页 ========== */
+#page-history {
+  background: linear-gradient(180deg, #2A7D8A 0%, #15555F 55%, #082E38 100%);
+  min-height: 100vh; color: #EAF9FB;
+}
+#page-history .card {
+  background: rgba(19,52,62,.88);
+  border: 1px solid rgba(245,220,146,.16);
+  box-shadow: 0 6px 22px rgba(0,0,0,.35);
+  border-radius: 18px;
+}
+#page-history .form-input, #page-history .form-select {
+  background: rgba(255,255,255,.08); color: #FFFFFF; border-color: rgba(245,220,146,.3);
+}
+#page-history .form-select option { color: #0B2E38; }
+#page-history .btn-primary { background: linear-gradient(160deg,#F8E3A6,#C89B4E); color: #0B2E38; border: none; font-weight: 700; }
+/* 全部/仅今天：实心渐变 */
+#page-history .btn-filter-all { background: linear-gradient(160deg,#F8E3A6,#C89B4E); color: #0B2E38; font-weight: 700; }
+#page-history .btn-filter-today { background: linear-gradient(160deg,#7CE8E0,#2BB8A8); color: #062B30; font-weight: 700; }
+/* 额外发收登记：橙色卡 */
+#page-history .btn-extra { background: linear-gradient(160deg,#FFB76B,#E8892F); color: #3A1E00; font-weight: 700; }
+/* 记录列表 */
+#page-history .record-item { background: rgba(255,255,255,.06); border: 1px solid rgba(245,220,146,.15); box-shadow: none; }
+#page-history .record-item .record-goods { color: #FFFFFF; }
+#page-history .record-item .qty-tag .qname { color: #CFECEF; }
+#page-history .record-item .qty-tag .qin { color: #F5DC92; }
+#page-history .record-item .qty-tag .qout { color: #7CE8E0; }
+#page-history .record-item .del-btn { color: rgba(255,255,255,.75); }
+#page-history .record-item .del-btn:active { background: rgba(239,74,74,.2); color: #FF6B6B; }
+#page-history .empty { color: #8FB8BE; }
+#page-history #dailyPhotoInfo { color: #CFECEF; }
 </style>
 </head>
 <body>
@@ -1616,13 +1647,13 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <select class="form-select" id="filterGoods" style="width:100px;padding:8px;font-size:13px;" onchange="renderHistory()"><option value="">全部筐</option><option value="0">鲜食筐</option><option value="1">面包筐</option><option value="2">低温筐</option><option value="3">冷冻筐</option><option value="4">常温筐</option></select>
     </div>
     <div style="display:flex;gap:6px;margin-top:6px;">
-      <button class="btn btn-outline" style="flex:1;padding:8px;font-size:12px;" onclick="clearFilter()">全部</button>
-      <button class="btn btn-outline" style="flex:1;padding:8px;font-size:12px;" onclick="setFilterToday()">仅今天</button>
+      <button class="btn btn-filter-all" style="flex:1;padding:9px;font-size:13px;border:none;border-radius:10px;" onclick="clearFilter()">全部</button>
+      <button class="btn btn-filter-today" style="flex:1;padding:9px;font-size:13px;border:none;border-radius:10px;" onclick="setFilterToday()">仅今天</button>
     </div>
   </div>
   <div class="card" style="padding:10px;">
-    <button class="btn btn-primary" style="width:100%;padding:10px;font-size:13px;" onclick="openDailyReport()">📋 生成日报</button>
-    <button class="btn btn-outline" style="width:100%;padding:10px;font-size:13px;margin-top:6px;background:var(--amber-soft);border-color:var(--warning);color:var(--warning);" onclick="openExtraModal()">➕ 额外发收登记</button>
+    <button class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;border:none;border-radius:12px;" onclick="openDailyReport()">📋 生成日报</button>
+    <button class="btn btn-extra" style="width:100%;padding:11px;font-size:14px;margin-top:6px;border:none;border-radius:12px;" onclick="openExtraModal()">➕ 额外发收登记</button>
     <div id="dailyPhotoInfo" style="font-size:11px;color:var(--text-light);margin-top:6px;"></div>
   </div>
   <div id="historyList"></div>
