@@ -2726,7 +2726,14 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div style="font-size:34px;margin-bottom:8px;text-align:center;">📲</div>
     <div style="font-weight:700;font-size:16px;color:var(--text);margin-bottom:8px;text-align:center;">发现新版本 <span id="apkUpdateVer" style="color:var(--primary);"></span></div>
     <div id="apkUpdateNote" style="font-size:12px;color:var(--text);line-height:1.8;background:var(--soft-bg);border-radius:8px;padding:10px;margin-bottom:12px;max-height:32vh;overflow-y:auto;white-space:pre-line;"></div>
-    <div style="display:flex;gap:8px;">
+    <!-- 下载进度条（点立即更新后显示） -->
+    <div id="apkUpdateProgressWrap" style="display:none;margin-bottom:12px;">
+      <div id="apkUpdateProgressText" style="font-size:12px;color:var(--text);margin-bottom:6px;text-align:center;">正在下载更新包… 0%</div>
+      <div style="height:10px;background:var(--soft-bg);border-radius:5px;overflow:hidden;">
+        <div id="apkUpdateProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#F8E3A6,#C89B4E);border-radius:5px;transition:width .3s;"></div>
+      </div>
+    </div>
+    <div id="apkUpdateBtnRow" style="display:flex;gap:8px;">
       <button class="btn btn-outline" style="flex:1;" onclick="dismissApkUpdate()">⏰ 稍后</button>
       <button class="btn btn-primary" style="flex:1;" onclick="doApkUpdate()">📲 立即更新</button>
     </div>
@@ -8834,18 +8841,70 @@ function showApkUpdate(info) {
   if (m) m.classList.add('show');
 }
 function dismissApkUpdate() {
+  stopApkProgressPolling();
   var m = document.getElementById('apkUpdateModal');
   if (m) m.classList.remove('show');
 }
+// ======== APK 下载进度条（轮询原生 DownloadManager 进度） ========
+var apkPollTimer = null;
+function setApkProgress(p, text) {
+  var bar = document.getElementById('apkUpdateProgressBar');
+  var txt = document.getElementById('apkUpdateProgressText');
+  if (bar) bar.style.width = (p < 0 ? 0 : p) + '%';
+  if (txt) txt.textContent = text;
+}
+function startApkProgressPolling() {
+  stopApkProgressPolling();
+  apkPollTimer = setInterval(function() {
+    if (!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppUpdate)) {
+      stopApkProgressPolling(); return;
+    }
+    window.Capacitor.Plugins.AppUpdate.getDownloadProgress()
+      .then(function(r) {
+        var p = (r && typeof r.progress === 'number') ? r.progress : -1;
+        var st = (r && typeof r.status === 'number') ? r.status : -1;
+        var verName = (apkUpdateInfo && apkUpdateInfo.versionName) ? apkUpdateInfo.versionName : '';
+        // DownloadManager: 1待下载 2下载中 4暂停 8完成 16失败
+        if (st === 16) { // 下载失败 → 提示并恢复按钮
+          stopApkProgressPolling();
+          setApkProgress(0, '❌ 下载失败，请检查网络后重试');
+          var row = document.getElementById('apkUpdateBtnRow');
+          if (row) { row.style.display = 'flex'; row.innerHTML = '<button class="btn btn-primary" style="flex:1;" onclick="doApkUpdate()">🔄 重新下载</button>'; }
+          return;
+        }
+        if (p < 0) { return; } // 无进度信息，继续轮询
+        if (p >= 100) { // 下载完成 → 原生广播会自动拉起安装器
+          stopApkProgressPolling();
+          setApkProgress(100, '✅ 下载完成，正在安装…');
+          return;
+        }
+        setApkProgress(p, '正在下载 v' + verName + ' 更新包… ' + p + '%');
+      })
+      .catch(function() {});
+  }, 500);
+}
+function stopApkProgressPolling() {
+  if (apkPollTimer) { clearInterval(apkPollTimer); apkPollTimer = null; }
+}
 function doApkUpdate() {
   if (!apkUpdateInfo || !apkUpdateInfo.apkUrl) { showToast('下载地址缺失'); return; }
-  dismissApkUpdate();
-  showToast('📲 正在下载更新包…');
   if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppUpdate) {
+    // 切换为进度条视图（弹窗不关闭，全程在 APP 内完成，不跳浏览器）
+    var row = document.getElementById('apkUpdateBtnRow');
+    var prog = document.getElementById('apkUpdateProgressWrap');
+    if (row) row.style.display = 'none';
+    if (prog) prog.style.display = 'block';
+    setApkProgress(0, '正在下载 v' + (apkUpdateInfo.versionName || '') + ' 更新包… 0%');
     window.Capacitor.Plugins.AppUpdate.downloadAndInstall({ url: apkUpdateInfo.apkUrl })
-      .then(function() { showToast('下载完成，正在安装…'); })
-      .catch(function(e) { showToast('更新失败：' + ((e && e.message) || '未知')); });
+      .then(function() { startApkProgressPolling(); })
+      .catch(function(e) {
+        stopApkProgressPolling();
+        setApkProgress(0, '更新失败：' + ((e && e.message) || '未知'));
+        if (row) { row.style.display = 'flex'; row.innerHTML = '<button class="btn btn-primary" style="flex:1;" onclick="doApkUpdate()">🔄 重试</button>'; }
+      });
   } else {
+    // 非 APK 环境（浏览器/PWA）：跳转下载
+    dismissApkUpdate();
     window.open(apkUpdateInfo.apkUrl, '_blank');
   }
 }
