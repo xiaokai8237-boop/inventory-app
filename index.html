@@ -1441,9 +1441,9 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
 /* 主页测试版横条（点击跳设置页功能建议） */
 .beta-banner {
-  background: rgba(245,220,146,.12);
-  border: 1px solid rgba(245,220,146,.35);
-  color: #F5DC92;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.85);
   font-size: 12px;
   line-height: 1.5;
   text-align: center;
@@ -1453,13 +1453,13 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   cursor: pointer;
   transition: background .2s;
 }
-.beta-banner:active { background: rgba(245,220,146,.22); }
+.beta-banner:active { background: rgba(255,255,255,.12); }
 </style>
 </head>
 <body>
 
 <!-- 启动加载遮罩：与 APP 原生启动页无缝衔接，避免网页加载期间闪白 -->
-<div id="bootOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background-color:#082E38;background-image:url('splash-v10-vision.png');background-size:cover;background-position:center;background-repeat:no-repeat;z-index:2147483647;">
+<div id="bootOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background-color:#082E38;background-image:url('splash-v10-vision.png');background-size:contain;background-position:center;background-repeat:no-repeat;z-index:2147483647;">
   <div id="bootVer" style="position:absolute;bottom:26px;left:0;right:0;text-align:center;color:rgba(255,255,255,.5);font-size:11px;letter-spacing:2px;">v6.0.55</div>
 </div>
 <style>@keyframes bootspin{to{transform:rotate(360deg)}}</style>
