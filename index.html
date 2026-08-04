@@ -2976,16 +2976,14 @@ function cropImageToTable(dataUrl) {
 }
 
 // 解析混元返回的 JSON 文本（可能带 markdown 代码块或前后噪音）→ rows 数组
-let _hunyuanDetectedType = ''; // 最近一次混元识别出的单据类型（供类型比对）
+let _hunyuanDetectedType = ''; // 最近一次混元识别出的单据类型
 function parseHunyuanRows(text) {
   if (!text) return null;
   _hunyuanDetectedType = '';
   let t = String(text).trim();
-  // 去掉 ```json ... ``` 包裹
   const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
   if (fence) t = fence[1].trim();
   let arr = null;
-  // 新版：JSON 对象 {"detectedType":"冷藏","rows":[{...}]}
   const objStart = t.indexOf('{');
   const objEnd = t.lastIndexOf('}');
   if (objStart >= 0 && objEnd > objStart) {
@@ -2997,7 +2995,6 @@ function parseHunyuanRows(text) {
       }
     } catch (e) { arr = null; }
   }
-  // 兼容旧版：纯数组 [...]
   if (!arr) {
     const start = t.indexOf('[');
     const end = t.lastIndexOf(']');
@@ -3012,11 +3009,59 @@ function parseHunyuanRows(text) {
     const m = rawCode.match(/(\d{1,3})\s*[-–−_]\s*(\d{1,3})/);
     if (!m) continue;
     const code = parseInt(m[1], 10) + '-' + parseInt(m[2], 10);
-    let qty = parseInt(it.qty, 10);
-    if (isNaN(qty) || qty < 0) qty = 0;
-    rows.push({ code, name: String(it.name || '').trim(), nums: [qty], _rawNums: [qty], _highConf: true, _ai: true });
+    // 优先用 cols 对象（AI 返回的所有列数字），回退到 qty 单字段（旧版兼容）
+    let cols = (it.cols && typeof it.cols === 'object' && Object.keys(it.cols).length > 0) ? it.cols : null;
+    if (!cols) {
+      const qty = parseInt(it.qty, 10);
+      if (!isNaN(qty) && qty >= 0) cols = { '数量': qty };
+    }
+    if (!cols) continue;
+    rows.push({ code, name: String(it.name || '').trim(), cols, _highConf: true, _ai: true });
   }
   return rows.length > 0 ? rows : null;
+}
+
+// 按用户所选筐类型（goodsName）+ cols 列名映射，取出对应的数字
+// 业务铁律：冷冻/常温→物流箱、冷藏→物流篮、面包→面包筐；绝不取"整箱数量"
+function pickColQty(cols, goodsName) {
+  if (!cols) return 0;
+  const targets = [];
+  if (goodsName.includes('冷藏') || goodsName.includes('低温')) {
+    targets.push('物流篮');
+  } else if (goodsName.includes('面包')) {
+    targets.push('面包筐');
+  } else if (goodsName.includes('冷冻') || goodsName.includes('常温')) {
+    targets.push('物流箱');
+  }
+  // 优先精确匹配（"物流箱"）
+  for (const t of targets) {
+    if (cols[t] !== undefined && cols[t] !== null) return parseInt(cols[t], 10) || 0;
+  }
+  // 次选：模糊匹配（列名包含"物流箱"/"物流篮"/"面包筐"）
+  for (const t of targets) {
+    for (const k of Object.keys(cols)) {
+      if (k.includes(t)) return parseInt(cols[k], 10) || 0;
+    }
+  }
+  return 0;
+}
+// 取一行的"取的是哪一列"标签（cols 里第一个含目标关键字的列名）
+function pickColLabel(cols, goodsName) {
+  if (!cols) return '?';
+  const targets = [];
+  if (goodsName.includes('冷藏') || goodsName.includes('低温')) targets.push('物流篮');
+  else if (goodsName.includes('面包')) targets.push('面包筐');
+  else if (goodsName.includes('冷冻') || goodsName.includes('常温')) targets.push('物流箱');
+  for (const t of targets) {
+    if (cols[t] !== undefined) return t;
+    for (const k of Object.keys(cols)) if (k.includes(t)) return k;
+  }
+  return '?';
+}
+// 列出 cols 里所有"筐/箱/篮"候选列（供弹窗手动切换）
+function listColCandidates(cols) {
+  if (!cols) return [];
+  return Object.keys(cols).filter(k => /筐|箱|篮/.test(k));
 }
 
 // ======== 云备份（Cloudflare KV） ========
@@ -4666,17 +4711,73 @@ function renderEmitVoiceConfirm(nums) {
   const cfg = loadStoreConfig();
   const container = document.getElementById('emitVoiceConfirmList');
   if (!container) return;
-  container.innerHTML = nums.map((n, i) => {
+  // 顶部列来源条：让用户一眼看到 AI 取的是哪一列，错了能一键换
+  const colTag = document.createElement('div');
+  colTag.style.cssText = 'font-size:12px;color:#F5DC92;background:rgba(245,220,146,.10);border:1px solid rgba(245,220,146,.35);border-radius:8px;padding:8px 10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;';
+  const colLabel = emitCurrentCol || '?';
+  let switchHtml = '<span style="color:#9FD0D6;">没有可换列</span>';
+  if (emitCurrentCols.length > 1) {
+    const opts = emitCurrentCols.map(c => `<option value="${escapeHtml(c)}" ${c === emitCurrentCol ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
+    switchHtml = `<select onchange="switchEmitCol(this.value)" style="background:rgba(255,255,255,.1);border:1px solid rgba(245,220,146,.5);color:#F5DC92;padding:4px 8px;border-radius:6px;font-size:12px;">${opts}</select>`;
+  }
+  colTag.innerHTML = '<span>📌 AI 取的列：<b>' + escapeHtml(colLabel) + '</b></span>' + switchHtml;
+  container.innerHTML = '';
+  container.appendChild(colTag);
+  // 行列表
+  nums.forEach((n, i) => {
     const storeName = order[i] || ('第' + (i + 1) + '家店');
     const store = cfg.find(s => s.name === storeName);
     const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
-    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);">
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);';
+    row.innerHTML = `
       <span style="flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:var(--secondary,#e67e22);font-size:11px;">${alias}</span></span>
       <input type="number" inputmode="numeric" min="0" value="${n}"
         style="width:90px;text-align:center;font-size:16px;font-weight:700;padding:6px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);"
-        data-emit-confirm-idx="${i}">
-    </div>`;
-  }).join('');
+        data-emit-confirm-idx="${i}">`;
+    container.appendChild(row);
+  });
+}
+// 手动切换 AI 取的列：用 cols 里新列名重算数字
+function switchEmitCol(newColName) {
+  emitCurrentCol = newColName;
+  // 用暂存的识别结果 + 新的列名重新计算（从 pendingEmitRows 或最近一次 fillEmitConfirm 重算）
+  // 简化：直接重新调用 fillEmitConfirm 的核心逻辑，把 cols 和 newColName 配合
+  if (!pendingEmitRows || pendingEmitRows.length === 0) {
+    showToast('请重新拍照识别');
+    return;
+  }
+  const order = getEmitOrder();
+  const matchedNums = order.map(() => 0);
+  const orderByName = {};
+  order.forEach((n, i) => { orderByName[n] = i; });
+  pendingEmitRows.forEach(r => {
+    const nm = (r.name || '').trim();
+    if (!nm) return;
+    const q = r.cols && r.cols[newColName] !== undefined ? (parseInt(r.cols[newColName], 10) || 0) : 0;
+    if (orderByName[nm] !== undefined) matchedNums[orderByName[nm]] = q;
+  });
+  emitPendingNums = matchedNums;
+  // 局部刷新：保留 colTag，更新行列表
+  const container = document.getElementById('emitVoiceConfirmList');
+  const old = container.querySelectorAll('div[data-emit-row]');
+  old.forEach(el => el.remove());
+  const cfg = loadStoreConfig();
+  matchedNums.forEach((n, i) => {
+    const storeName = order[i] || ('第' + (i + 1) + '家店');
+    const store = cfg.find(s => s.name === storeName);
+    const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
+    const row = document.createElement('div');
+    row.setAttribute('data-emit-row', '1');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);';
+    row.innerHTML = `
+      <span style="flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:var(--secondary,#e67e22);font-size:11px;">${alias}</span></span>
+      <input type="number" inputmode="numeric" min="0" value="${n}"
+        style="width:90px;text-align:center;font-size:16px;font-weight:700;padding:6px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);"
+        data-emit-confirm-idx="${i}">`;
+    container.appendChild(row);
+  });
+  showToast('已切换到列：' + newColName);
 }
 function closeEmitVoiceConfirm() {
   document.getElementById('emitVoiceConfirmModal').classList.remove('show');
@@ -4757,22 +4858,33 @@ async function emitDoOcr(imageDataUrl) {
     showToast('识别失败，请检查网络');
   }
 }
-// 按 emitOrder 顺序填入识别结果
+// 按 emitOrder 顺序填入识别结果；按用户所选筐类型从 cols 里挑对应列的数字
+let emitCurrentCol = ''; // 当前 AI 取的列名（弹窗显示 + 手动切换）
+let emitCurrentCols = []; // cols 里所有"筐/箱/篮"候选列（供切换）
 function fillEmitConfirm(rows) {
+  pendingEmitRows = rows; // 暂存供 switchEmitCol 使用
   const order = getEmitOrder();
   const matchedNums = order.map(() => 0);
   const orderByName = {};
   order.forEach((n, i) => { orderByName[n] = i; });
+  const goodsName = currentEmitGoodsName() || '';
+  // 收集所有行的 cols 候选列（供弹窗切换）
+  const allCandidates = new Set();
   rows.forEach(r => {
     const nm = (r.name || '').trim();
-    if (nm && orderByName[nm] !== undefined) {
-      matchedNums[orderByName[nm]] = r.nums[0] || 0;
-    }
+    if (!nm) return;
+    const qty = pickColQty(r.cols, goodsName);
+    if (orderByName[nm] !== undefined) matchedNums[orderByName[nm]] = qty;
+    listColCandidates(r.cols).forEach(c => allCandidates.add(c));
   });
+  // 取一个代表列名（当前 goodsName 对应的）
+  const sampleRow = rows.find(r => r.name && orderByName[r.name.trim()] !== undefined);
+  emitCurrentCol = sampleRow ? pickColLabel(sampleRow.cols, goodsName) : '?';
+  emitCurrentCols = Array.from(allCandidates);
   emitPendingNums = matchedNums;
   renderEmitVoiceConfirm(matchedNums);
   document.getElementById('emitVoiceConfirmModal').classList.add('show');
-  showToast('✅ AI 识别完成，请确认（识别 ' + rows.length + ' 家店）');
+  showToast('✅ AI 识别完成，请确认（识别 ' + rows.length + ' 家店，取列：' + emitCurrentCol + '）');
 }
 // 用户所选类型 与 识别类型 是否不一致（冷冻/常温是两种单据，绝不互通）
 function typeMismatchCheck(userType, detectedType) {
