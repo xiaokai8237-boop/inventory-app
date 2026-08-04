@@ -3483,6 +3483,9 @@ async function restoreLoggedIn(phone) {
       let recCnt = (Array.isArray(cloud.records) ? cloud.records.length : 0);
       if (storeCnt === 0) storeCnt = loadStoreConfig().length; // 云端店面空但本地已导入则按本地算
       showRestoreResult(storeCnt, goodsCnt, recCnt, (cloud.backupTime ? new Date(cloud.backupTime).toLocaleString('zh-CN') : '') || '');
+      // 恢复完成后：关闭"备份与恢复"面板，回到主页（避免停留在备份面板）
+      try { document.getElementById('backupPanel').style.display = 'none'; } catch(e) {}
+      try { switchPage('record'); } catch(e) {}
     } else {
       showToast('云端暂无数据或恢复失败');
     }
@@ -3528,6 +3531,9 @@ async function doVerifyAccount() {
       renderAccountBadge();
       refreshRecordViews();
       showToast('✅ 已恢复 ' + (cloud.records || []).length + ' 条记录');
+      // 恢复完成后：关闭"备份与恢复"面板，回到主页
+      try { document.getElementById('backupPanel').style.display = 'none'; } catch(e) {}
+      try { switchPage('record'); } catch(e) {}
     } else {
       recordFail(phone);
       showToast(result.error || '验证失败');
