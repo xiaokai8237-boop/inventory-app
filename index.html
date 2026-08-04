@@ -1384,6 +1384,20 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 #page-summary .summary-table .total-row td[style*="var(--danger)"] { color: #FF8A8A !important; }
 /* 单店汇总说明标题（提亮+加大+留白） */
 #page-summary .form-group div[style*="font-weight:600"] { font-size: 15px !important; line-height: 1.8; margin-bottom: 8px !important; }
+/* ========== 对账页（设计稿深青蓝） ========== */
+#page-reconcile { background: linear-gradient(160deg,#2A7D8A 0%,#15555F 45%,#082E38 100%); }
+#page-reconcile .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.09); box-shadow: none; }
+#page-reconcile .form-label { color: #FFFFFF; font-weight: 700; }
+#page-reconcile .form-label[style*="margin-bottom"] { font-size: 20px; }
+#page-reconcile .form-input, #page-reconcile .form-select {
+  background: rgba(255,255,255,.08); border: 1.5px solid rgba(245,220,146,.5); color: #FFFFFF; border-radius: 10px; font-size: 15px !important;
+}
+#page-reconcile .form-input::-webkit-calendar-picker-indicator { filter: invert(1); }
+#page-reconcile .form-input::placeholder, #page-reconcile .form-select { color: #EAF9FB; }
+#page-reconcile .form-group span { color: #CFECEF !important; }
+/* 导出按钮：两个都金色实心 */
+#page-reconcile .btn-export { background: linear-gradient(160deg,#F8E3A6,#C89B4E); color: #0B2E38; border: none; font-weight: 700; font-size: 15px; padding: 12px; border-radius: 12px; box-shadow: 0 4px 14px rgba(200,155,78,.25); }
+#page-reconcile .btn-export:active { transform: scale(.97); }
 </style>
 </head>
 <body>
@@ -1778,8 +1792,8 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
-      <button class="btn btn-primary" style="flex:1;" onclick="exportMyExcel()">📋 导出明细</button>
-      <button class="btn btn-outline" style="flex:1;" onclick="exportSummaryExcel()">📊 导出汇总</button>
+      <button class="btn btn-export" style="flex:1;" onclick="exportMyExcel()">📋 导出明细</button>
+      <button class="btn btn-export" style="flex:1;" onclick="exportSummaryExcel()">📊 导出汇总</button>
     </div>
   </div>
 </div>
