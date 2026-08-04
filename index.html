@@ -995,6 +995,55 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 }
 #ocrResultModal .ocr-table tbody td { border-bottom: 1px solid rgba(255,255,255,.07); }
 #ocrResultModal .ocr-table .total-row td { background: rgba(245,220,146,.08); color: #F5DC92; font-weight: 700; }
+/* ===== 额外发收登记弹窗：深空蓝晶定稿风格 ===== */
+#extraModal.store-ocr-modal { background: rgba(4,24,32,.78); }
+#extraModal .store-ocr-content {
+  background: #0E3340;
+  border: 1.5px solid rgba(245,220,146,.55);
+  border-radius: 22px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.55);
+  color: #FFFFFF;
+  max-width: 520px;
+}
+#extraModal .store-ocr-content::-webkit-scrollbar { width: 5px; }
+#extraModal .store-ocr-content::-webkit-scrollbar-thumb { background: rgba(245,220,146,.35); border-radius: 3px; }
+#extraModal .extra-title { color: #FFFFFF; font-size: 17px; font-weight: 800; letter-spacing: .5px; }
+#extraModal .extra-sub { color: #CFECEF; font-size: 12.5px; }
+#extraModal .extra-modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: rgba(255,255,255,.75); padding: 0 4px; line-height: 1; }
+#extraModal .extra-modal-close:hover { color: #FFFFFF; }
+#extraModal .extra-icon { font-size: 26px; line-height: 1; display: inline-block; }
+#extraModal .extra-table { background: transparent; color: #FFFFFF; border-collapse: collapse; width: 100%; }
+#extraModal .extra-table thead th {
+  background: rgba(245,220,146,.12); color: #F5DC92; font-size: 12.5px;
+  border-bottom: 1px solid rgba(245,220,146,.25); padding: 8px 4px;
+}
+#extraModal .extra-table thead th.extra-out-col { color: #7CE8E0; }
+#extraModal .extra-table thead th.extra-in-col { color: #F5A623; }
+#extraModal .extra-table tbody td { border-bottom: 1px solid rgba(255,255,255,.07); padding: 8px 4px; }
+#extraModal .extra-in-input, #extraModal .extra-out-input {
+  width: 100%; padding: 10px 8px; border-radius: 10px;
+  font-size: 16px; text-align: center; outline: none;
+  background: rgba(255,255,255,.07); color: #FFFFFF;
+  box-sizing: border-box;
+}
+#extraModal .extra-in-input { border: 1.5px solid rgba(124,232,224,.5); }
+#extraModal .extra-out-input { border: 1.5px solid rgba(245,166,35,.5); }
+#extraModal .extra-in-input:focus { border-color: #7CE8E0; }
+#extraModal .extra-out-input:focus { border-color: #F5A623; }
+#extraModal .extra-in-input::placeholder, #extraModal .extra-out-input::placeholder { color: rgba(223,243,245,.4); }
+#extraModal .btn-save-extra {
+  background: linear-gradient(160deg, #F8E3A6 0%, #E3BE68 55%, #C89B4E 100%);
+  color: #0B2E38; font-weight: 800; border: none;
+  box-shadow: 0 6px 20px rgba(245,220,146,.4);
+  border-radius: 26px; padding: 12px 0; font-size: 15px;
+  width: 100%; cursor: pointer;
+}
+#extraModal .btn-cancel-extra {
+  background: rgba(255,255,255,.06); border: 1.5px solid rgba(255,255,255,.18);
+  color: rgba(255,255,255,.95); font-weight: 600;
+  border-radius: 26px; padding: 11px 0; font-size: 14px;
+  width: 100%; margin-top: 8px; cursor: pointer;
+}
 /* ===== 账号表单弹窗：深空蓝晶定稿风格（设置密码/登录/恢复/找回密码/改密/注销共用） ===== */
 .ocr-form-modal.store-ocr-modal { background: rgba(4,24,32,.78); }
 .ocr-form-modal .store-ocr-content {
@@ -1658,15 +1707,25 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
     <!-- 额外发收登记弹窗（针对所有门店） -->
     <div class="store-ocr-modal" id="extraModal" onclick="closeExtraModal()">
+      <!-- emoji 染色滤镜：把图标本体染成对应筐深色（鲜食=深青绿/面包=深金/低温=深冰蓝/冷冻=深蓝紫/常温=深橙） -->
+      <svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;" aria-hidden="true">
+        <defs>
+          <filter id="tintExtraLeaf"><feColorMatrix type="matrix" values="0 0 0 0 0.09 0 0 0 0 0.65 0 0 0 0 0.54 0 0 0 1 0"/></filter>
+          <filter id="tintExtraBread"><feColorMatrix type="matrix" values="0 0 0 0 0.83 0 0 0 0 0.63 0 0 0 0 0.09 0 0 0 1 0"/></filter>
+          <filter id="tintExtraIce"><feColorMatrix type="matrix" values="0 0 0 0 0.23 0 0 0 0 0.61 0 0 0 0 0.85 0 0 0 1 0"/></filter>
+          <filter id="tintExtraSnow"><feColorMatrix type="matrix" values="0 0 0 0 0.36 0 0 0 0 0.42 0 0 0 0 0.84 0 0 0 1 0"/></filter>
+          <filter id="tintExtraBox"><feColorMatrix type="matrix" values="0 0 0 0 0.88 0 0 0 0 0.48 0 0 0 0 0.14 0 0 0 1 0"/></filter>
+        </defs>
+      </svg>
       <div class="store-ocr-content" onclick="event.stopPropagation()">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-          <span style="font-weight:600;font-size:15px;">➕ 额外发收登记</span>
-          <button onclick="closeExtraModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <span class="extra-title">➕ 额外发收登记</span>
+          <button class="extra-modal-close" onclick="closeExtraModal()">×</button>
         </div>
-        <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">针对所有门店的额外发出/回收，填对应筐的数量后点保存</div>
-        <div class="goods-input-list" id="extraGoodsList" style="margin-bottom:10px;"></div>
-        <button class="btn btn-primary" style="width:100%;" onclick="saveExtraRecord()">💾 保存登记</button>
-        <button class="btn btn-outline" style="width:100%;margin-top:8px;" onclick="closeExtraModal()">取消</button>
+        <div class="extra-sub" style="margin-bottom:12px;">针对所有门店的额外发出/回收，填对应筐的数量后点保存</div>
+        <div class="goods-input-list" id="extraGoodsList" style="margin-bottom:12px;"></div>
+        <button class="btn-save-extra" onclick="saveExtraRecord()">💾 保存登记</button>
+        <button class="btn-cancel-extra" onclick="closeExtraModal()">取消</button>
       </div>
     </div>
   </div>
@@ -6221,23 +6280,33 @@ function saveManualRecord() {
 }
 
 // ======== 额外发收登记（针对所有门店，storeIdx=-1） ========
+// 筐名 → 加深色图标映射（图标本体染成对应筐深色，无底标）
+const EXTRA_ICON_MAP = [
+  { k: '鲜食', e: '🥬', f: 'tintExtraLeaf' },
+  { k: '面包', e: '🍞', f: 'tintExtraBread' },
+  { k: '低温', e: '🧊', f: 'tintExtraIce' },
+  { k: '冷冻', e: '❄️', f: 'tintExtraSnow' },
+  { k: '常温', e: '📦', f: 'tintExtraBox' }
+];
+function extraIconFor(name) {
+  for (let i = 0; i < EXTRA_ICON_MAP.length; i++) {
+    if (name.indexOf(EXTRA_ICON_MAP[i].k) >= 0) return EXTRA_ICON_MAP[i];
+  }
+  return { e: '📦', f: 'tintExtraBox' };
+}
 function openExtraModal() {
   const names = loadGoodsNames();
   const container = document.getElementById('extraGoodsList');
-  let html = '';
-  // 表头
-  html += '<div class="goods-input-item" style="font-size:11px;color:var(--text-light);border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:6px;">';
-  html += '<div class="gi-name">筐名</div>';
-  html += '<div style="flex:1;text-align:center;">额外发出</div>';
-  html += '<div style="flex:1;text-align:center;">额外回收</div>';
-  html += '</div>';
+  let html = '<table class="extra-table"><thead><tr><th style="text-align:left;">筐名</th><th class="extra-out-col" style="text-align:center;">额外发出</th><th class="extra-in-col" style="text-align:center;">额外回收</th></tr></thead><tbody>';
   names.forEach((n, i) => {
-    html += `<div class="goods-input-item">
-      <div class="gi-name" data-idx="${i}">${escapeHtml(n)}</div>
-      <div class="gi-in"><input type="number" id="exIn${i}" placeholder="0" min="0" inputmode="numeric" data-idx="${i}"></div>
-      <div class="gi-out"><input type="number" id="exOut${i}" placeholder="0" min="0" inputmode="numeric" data-idx="${i}"></div>
-    </div>`;
+    const ic = extraIconFor(n);
+    html += '<tr>';
+    html += '<td style="text-align:left;"><span style="display:inline-flex;align-items:center;gap:7px;font-weight:600;color:#FFFFFF;"><span class="extra-icon" style="filter:url(#' + ic.f + ');">' + ic.e + '</span><span>' + escapeHtml(n) + '</span></span></td>';
+    html += '<td style="text-align:center;"><input type="number" id="exIn' + i + '" placeholder="0" min="0" inputmode="numeric" data-idx="' + i + '" class="extra-in-input"></td>';
+    html += '<td style="text-align:center;"><input type="number" id="exOut' + i + '" placeholder="0" min="0" inputmode="numeric" data-idx="' + i + '" class="extra-out-input"></td>';
+    html += '</tr>';
   });
+  html += '</tbody></table>';
   container.innerHTML = html;
   document.getElementById('extraModal').classList.add('show');
 }
