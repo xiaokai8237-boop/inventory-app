@@ -4811,10 +4811,10 @@ function applyEmitVoice() {
 function emitTriggerPhoto() {
   if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
   // 动态创建全屏可见的 file input 唤起拍照/相册（PWA 需 input 在可视区）
+  // 注意：不加 capture 强制相机——让系统选择器显示「拍照/相册/文件」全部选项
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.capture = 'environment';
   input.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:2px;height:2px;opacity:0;z-index:99999;';
   input.onchange = e => {
     const file = e.target.files[0];
