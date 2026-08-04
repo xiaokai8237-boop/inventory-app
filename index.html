@@ -1266,7 +1266,10 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   background: rgba(255,255,255,.22); border: 2px solid rgba(255,255,255,.4);
   font-size: 26px; font-weight: 700; color: #fff;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  cursor: pointer; transition: transform .15s, background .15s;
 }
+#page-manage .manage-user-head .muh-avatar:hover { background: rgba(255,255,255,.32); transform: scale(1.05); }
+#page-manage .manage-user-head .muh-avatar:active { transform: scale(.95); }
 #page-manage .manage-user-head .muh-name { font-size: 19px; font-weight: 700; color: #fff; }
 #page-manage .manage-user-head .muh-sub { font-size: 14px; color: rgba(255,255,255,.92); margin-top: 4px; }
 #page-manage .manage-user-head .muh-arrow { color: rgba(255,255,255,.9); font-size: 26px; }
@@ -1562,30 +1565,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响回收页顺序）</div>
       <div id="recoverStoreOrderList" style="max-height:50vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:6px;"></div>
       <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="saveRecoverStoreOrder()">💾 保存店序</button>
-    </div>
-  </div>
-
-  <!-- 设置头像弹窗 -->
-  <div class="store-ocr-modal" id="avatarModal">
-    <div class="store-ocr-content" style="max-width:340px;" onclick="event.stopPropagation()">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <span style="font-weight:700;font-size:16px;color:var(--text);">🖼️ 设置头像</span>
-        <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeAvatarModal()">×</span>
-      </div>
-      <div class="avatar-crop-wrap" id="avatarCropWrap">
-        <img id="avatarCropImg" alt="" style="display:none;">
-      </div>
-      <div class="avatar-crop-hint" id="avatarCropHint">点击「更换头像」选择图片，拖动调整位置、滑块缩放</div>
-      <div class="avatar-slider-row" id="avatarSliderRow" style="display:none;">
-        <span class="avatar-slider-icon">🔍</span>
-        <input type="range" id="avatarZoom" min="1" max="4" step="0.01" value="1" oninput="avatarSetZoom(this.value)">
-        <span class="avatar-slider-icon">＋</span>
-      </div>
-      <div class="avatar-btn-row">
-        <button class="btn btn-outline" style="flex:1;" onclick="triggerAvatarFile()">🖼️ 更换头像</button>
-        <button class="btn btn-primary" style="flex:1;" id="avatarSaveBtn" onclick="saveAvatar()">💾 保存</button>
-      </div>
-      <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="onAvatarFileChange(event)">
     </div>
   </div>
 
@@ -2312,6 +2291,30 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <button class="btn btn-outline" style="flex:1;" onclick="rejectPrivacy()">不同意</button>
       <button class="btn btn-primary" style="flex:1;" onclick="acceptPrivacy()">同意并继续</button>
     </div>
+  </div>
+</div>
+
+<!-- 设置头像弹窗（body 顶层，任意页面可弹） -->
+<div class="store-ocr-modal" id="avatarModal">
+  <div class="store-ocr-content" style="max-width:340px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <span style="font-weight:700;font-size:16px;color:var(--text);">🖼️ 设置头像</span>
+      <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeAvatarModal()">×</span>
+    </div>
+    <div class="avatar-crop-wrap" id="avatarCropWrap">
+      <img id="avatarCropImg" alt="" style="display:none;">
+    </div>
+    <div class="avatar-crop-hint" id="avatarCropHint">点击「更换头像」选择图片，拖动调整位置、滑块缩放</div>
+    <div class="avatar-slider-row" id="avatarSliderRow" style="display:none;">
+      <span class="avatar-slider-icon">🔍</span>
+      <input type="range" id="avatarZoom" min="1" max="4" step="0.01" value="1" oninput="avatarSetZoom(this.value)">
+      <span class="avatar-slider-icon">＋</span>
+    </div>
+    <div class="avatar-btn-row">
+      <button class="btn btn-outline" style="flex:1;" onclick="triggerAvatarFile()">🖼️ 更换头像</button>
+      <button class="btn btn-primary" style="flex:1;" id="avatarSaveBtn" onclick="saveAvatar()">💾 保存</button>
+    </div>
+    <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="onAvatarFileChange(event)">
   </div>
 </div>
 
@@ -7328,8 +7331,8 @@ function renderManage() {
   const logged = isLoggedIn();
   const av = getAvatarSrc();
   const avatarHtml = av
-    ? `<div class="muh-avatar"><img src="${av}" alt="头像"></div>`
-    : `<div class="muh-avatar muh-avatar-empty"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M9 2L7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg></div>`;
+    ? `<div class="muh-avatar" onclick="event.stopPropagation();openAvatarModal();"><img src="${av}" alt="头像"></div>`
+    : `<div class="muh-avatar muh-avatar-empty" onclick="event.stopPropagation();openAvatarModal();"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M9 2L7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg></div>`;
   let nameHtml, subHtml, extraBtn;
   if (logged && phoneFull) {
     const last = localStorage.getItem('kuanwei_last_backup');
@@ -7343,10 +7346,6 @@ function renderManage() {
     nameHtml = `${maskPhone(phoneFull)}`;
     subHtml = `<span style="color:#FFE9A8;font-weight:700;">未开通会员</span> · 云备份 ${timeText}`;
     extraBtn = `
-      <button class="manage-avatar-btn" onclick="event.stopPropagation();openAvatarModal();">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M9 2L7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
-        设置头像
-      </button>
       <button class="manage-vip-btn" onclick="event.stopPropagation();showToast('👑 会员功能开发中，敬请期待');">👑 续费会员</button>`;
   } else {
     nameHtml = `<span style="color:#ffd7d7;font-weight:700;">未登录，请先登录！</span>`;
@@ -7407,8 +7406,7 @@ let avatarState = { img: null, baseW: 0, baseH: 0, scale: 1, tx: 0, ty: 0, drag:
 const AVATAR_WRAP = 240;
 const AVATAR_OUT = 512;
 function openAvatarModal() {
-  // modal 在 page-record 内，若当前是 manage page 会被 display:none 父元素隐藏，需先切到 record
-  switchPage('record');
+  // 弹窗已移到 body 顶层，任意页面可直接弹出，无需切页
   const modal = document.getElementById('avatarModal');
   const img = document.getElementById('avatarCropImg');
   const hint = document.getElementById('avatarCropHint');
