@@ -1377,6 +1377,13 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 #page-summary .summary-table td[style*="var(--danger)"] { color: #FF8A8A !important; }
 #page-summary div[style*="var(--primary)"] { color: #F5DC92 !important; border-bottom-color: rgba(245,220,146,.4) !important; }
 #page-summary .empty { color: #8FB8BE; }
+/* 合计行（深色适配：浅色白底改为深色高亮） */
+#page-summary .summary-table .total-row { background: rgba(255,255,255,.12); }
+#page-summary .summary-table .total-row td { color: #FFFFFF; border-top: 2px solid rgba(245,220,146,.45); }
+#page-summary .summary-table .total-row td[style*="var(--success)"] { color: #7CE8E0 !important; }
+#page-summary .summary-table .total-row td[style*="var(--danger)"] { color: #FF8A8A !important; }
+/* 单店汇总说明标题（提亮+加大+留白） */
+#page-summary .form-group div[style*="font-weight:600"] { font-size: 15px !important; line-height: 1.8; margin-bottom: 8px !important; }
 </style>
 </head>
 <body>
