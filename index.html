@@ -2902,6 +2902,7 @@ function startPeriodicBackup() {
 }
 
 async function backupToCloud(manual) {
+  if (manual) showLoading('正在备份…');
   try {
     const deviceId = getDeviceId();
     const account = localStorage.getItem('kuanwei_phone') || '';
@@ -2956,6 +2957,7 @@ async function backupToCloud(manual) {
       // 删除状态已同步到云端 → 清除删除标记，防止后续空备份（带 userDeleted）误清其他设备录入的新数据
       try { localStorage.removeItem('kuanwei_last_delete'); } catch(e) {}
       if (manual) {
+        hideLoading();
         // 弹窗展示备份详情（店面顺序/别称/筐/记录数）
         const goodsCount = (payload.data.goodsConfig && Array.isArray(payload.data.goodsConfig)) ? payload.data.goodsConfig.length : 0;
         const recCount = (Array.isArray(payload.data.records) ? payload.data.records.length : 0);
@@ -2963,10 +2965,11 @@ async function backupToCloud(manual) {
         renderCloudBackupStatus();
       }
     } else if (manual) {
+      hideLoading();
       showToast('❌ 备份失败，请检查网络');
     }
   } catch (e) {
-    if (manual) showToast('❌ 备份失败，请检查网络');
+    if (manual) { hideLoading(); showToast('❌ 备份失败，请检查网络'); }
   }
 }
 
