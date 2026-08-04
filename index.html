@@ -2717,6 +2717,31 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <script>
+// ======== 启动页强兜底（必须在所有代码最前面；无论后续 JS 出任何错，都保证启动页不会卡住） ========
+(function forceHideBootOverlay() {
+  // 5 秒后强制隐藏（无论 load 事件是否触发、JS 是否报错）
+  setTimeout(function() {
+    try {
+      var ov = document.getElementById('bootOverlay');
+      if (ov && ov.parentNode) {
+        ov.style.cssText = 'display:none !important;visibility:hidden !important;';
+        try { ov.parentNode.removeChild(ov); } catch(e) {}
+      }
+    } catch(e) {}
+  }, 5000);
+  // DOMContentLoaded 时也立即尝试关闭（更快）
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        var ov = document.getElementById('bootOverlay');
+        if (ov && ov.parentNode) {
+          ov.style.opacity = '0';
+          setTimeout(function() { try { if (ov.parentNode) ov.parentNode.removeChild(ov); } catch(e) {} }, 200);
+        }
+      } catch(e) {}
+    });
+  }
+})();
 // ======== 配置 ========
 const STORAGE_KEY = 'kuanwei_inventory_data';
 const GOODS_KEY = 'kuanwei_goods_names';
