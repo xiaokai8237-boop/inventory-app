@@ -6143,6 +6143,50 @@ var IS_APP = (typeof window !== 'undefined') && (navigator.userAgent.indexOf('Ca
 var IS_IOS = (typeof navigator !== 'undefined') && /iPhone|iPad|iPod/i.test(navigator.userAgent);
 var IS_ANDROID = (typeof navigator !== 'undefined') && /Android/i.test(navigator.userAgent);
 var IS_STANDALONE = !!(typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+
+// ======== Capacitor iframe 桥接 ========
+// 壳页面（www/index.html）用 iframe 加载本页。Capacitor 插件只注入主 frame（壳页面），
+// iframe 内 window.Capacitor 为 undefined → APK 更新检查（AppUpdate.getVersion 等）永不执行。
+// 此处检测到"在 iframe 内且无 Capacitor"时，创建 postMessage 代理：调壳页面转发到真实插件。
+(function () {
+  try {
+    var isInIframe = (typeof window !== 'undefined') && (window.self !== window.top);
+    var noCapacitor = (typeof window === 'undefined' || !window.Capacitor);
+    if (!isInIframe || !noCapacitor) return;
+    // 与壳页面约定：壳监听 __capBridgeReq，回复 __capBridgeResp
+    var capSeq = 0;
+    var capPending = {};
+    window.addEventListener('message', function (ev) {
+      var d = ev.data;
+      if (!d || d.__capBridgeResp !== true) return;
+      var p = capPending[d.id];
+      if (!p) return;
+      delete capPending[d.id];
+      if (d.ok) p.resolve(d.data);
+      else p.reject(new Error(d.error || 'Capacitor bridge error'));
+    });
+    function capCall(method, args) {
+      return new Promise(function (resolve, reject) {
+        var id = ++capSeq;
+        capPending[id] = { resolve: resolve, reject: reject };
+        try {
+          window.parent.postMessage({ __capBridgeReq: true, method: method, args: args || [], id: id }, '*');
+        } catch (e) { delete capPending[id]; reject(e); }
+      });
+    }
+    var AppUpdateProxy = {};
+    ['getVersion', 'hasDownloadedApk', 'installDownloaded', 'getDownloadProgress', 'downloadAndInstall'].forEach(function (m) {
+      AppUpdateProxy[m] = function () {
+        var args = Array.prototype.slice.call(arguments);
+        return capCall(m, args);
+      };
+    });
+    window.Capacitor = {
+      isNativePlatform: function () { return true; },
+      Plugins: { AppUpdate: AppUpdateProxy }
+    };
+  } catch (e) {}
+})();
 // APK 下载地址：启动时从 app-version.json 读取最新版（网页版引导下载用；App 内走 AppUpdatePlugin 不依赖此值）
 var APK_DOWNLOAD_URL = '';
 try {
@@ -9319,7 +9363,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.93'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.94'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
