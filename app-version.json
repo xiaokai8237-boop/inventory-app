@@ -1,7 +1,7 @@
 {
-  "versionCode": 84,
-  "versionName": "6.0.84",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.84-final.apk",
-  "note": "【v6.0.84 更新内容】\n1. 安卓壳全面优化：启动更快不卡顿、返回键退一页、内存回收防闪退\n2. 启动页：等页面加载完成再隐藏，杜绝白屏空窗\n3. 全局异常捕获：出错不闪退\n4. 断网提示横幅 + 加载失败重试\n5. 修复额外发收登记按钮点不动的问题",
+  "versionCode": 85,
+  "versionName": "6.0.85",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.85-micfix.apk",
+  "note": "【v6.0.85 更新内容】\n1. 修复语音录入麦克风权限问题：选择「仅在使用中允许」后再次使用被拒的问题（壳层已授权直接放行，不再二次弹窗拒绝）\n2. 相机权限同步放行：拍照识别更稳定",
   "force": false
 }

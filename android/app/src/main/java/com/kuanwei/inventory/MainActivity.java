@@ -1,8 +1,10 @@
 package com.kuanwei.inventory;
 
+import android.Manifest;
 import android.app.DownloadManager;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +16,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.DownloadListener;
+import android.webkit.PermissionRequest;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
@@ -22,6 +26,7 @@ import android.widget.Toast;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.BridgeWebChromeClient;
 
 /**
  * 主界面（含启动页 + WebView 全面优化）：
@@ -173,6 +178,34 @@ public class MainActivity extends BridgeActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 settings.setSafeBrowsingEnabled(false);
             }
+
+            // ===== 麦克风/相机权限：已授权则直接放行，避免"仅在使用中允许"二次请求被系统拒绝 =====
+            // 场景：用户第一次授权时选"仅在使用中允许"，系统视为一次性授权；
+            // 第二次 getUserMedia 时若未在这里放行，系统直接返回 NotAllowedError（麦克风权限被拒绝）。
+            webView.setWebChromeClient(new BridgeWebChromeClient(bridge) {
+                @Override
+                public void onPermissionRequest(final PermissionRequest request) {
+                    try {
+                        boolean hasAudio = false, hasVideo = false;
+                        for (String res : request.getResources()) {
+                            if ("android.webkit.resource.AUDIO_CAPTURE".equals(res)) hasAudio = true;
+                            if ("android.webkit.resource.VIDEO_CAPTURE".equals(res)) hasVideo = true;
+                        }
+                        boolean audioOk = !hasAudio ||
+                            (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED);
+                        boolean videoOk = !hasVideo ||
+                            (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED);
+                        if (audioOk && videoOk) {
+                            request.grant(request.getResources());
+                        } else {
+                            super.onPermissionRequest(request);
+                        }
+                    } catch (Exception e) {
+                        // 兜底：异常时走默认流程，避免卡死
+                        super.onPermissionRequest(request);
+                    }
+                }
+            });
 
             // ===== 下载功能（导出 Excel/JSON/APK）=====
             // Android WebView 默认不响应 <a download> 触发的下载（SheetJS exportData/exportMyExcel 用 Blob URL 下载），
