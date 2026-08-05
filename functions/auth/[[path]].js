@@ -1,7 +1,9 @@
 // Cloudflare Pages Function — /auth/* 账号接口
-// POST /auth/setup   {phone, passwordHash, securityQ, securityA}  设置/更新账号
-// POST /auth/verify  {phone, passwordHash}                        校验密码，返回数据
-// POST /auth/reset   {phone, securityA, newPasswordHash}          忘记密码：密保+新密码
+// POST /auth/setup   {phone, password, securityQ, securityA, deviceId}  设置/更新账号（密码哈希存储）
+// POST /auth/verify  {phone, password, deviceId, skipPwd}               校验密码，返回数据+token
+// POST /auth/reset   {phone, securityA, password}                       忘记密码：密保+新密码（哈希存储）
+// POST /auth/delete  {phone, password, deviceId}                        注销（软删除，临时代码 30 天 TTL）
+// 安全说明：密码不再明文存储——存储 SHA-256(phone + ':' + password) 哈希；旧明文账号首次登录成功后自动迁移
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -9,7 +11,7 @@ export async function onRequest(context) {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   };
   const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: cors });
 
@@ -27,7 +29,33 @@ export async function onRequest(context) {
   return json({ error: 'not found' }, 404);
 }
 
-// 账号注销（软删除）：校验密码 → 释放手机号 → 数据冻结为临时代码（供管理员恢复）
+// ===== 密码哈希（SHA-256 + 账号盐，避免明文存储） =====
+async function hashPassword(phone, password) {
+  try {
+    const data = new TextEncoder().encode(phone + ':' + password);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (e) { return ''; }
+}
+
+// ===== 鉴权 token 签发/校验 =====
+// token 存 KV tok_<token> = phone（TTL 30 天），用于 /backup 接口鉴权
+async function issueToken(env, phone) {
+  try {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    const token = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    await env.BACKUP_KV.put('tok_' + token, phone, { expirationTtl: 30 * 24 * 3600 }); // 30 天
+    return token;
+  } catch (e) { return ''; }
+}
+async function verifyToken(env, token, phone) {
+  if (!token) return false;
+  const raw = await env.BACKUP_KV.get('tok_' + token).catch(() => null);
+  return !!raw && raw === phone;
+}
+
+// 账号注销（软删除）：校验密码 → 释放手机号 → 数据冻结为临时代码（供管理员恢复，30 天 TTL）
 async function handleDelete(body, env, json) {
   const phone = (body.phone || '').toString().trim();
   const password = (body.password || '').toString();
@@ -37,7 +65,11 @@ async function handleDelete(body, env, json) {
   if (!raw) return json({ error: '该手机号未设置过密码' }, 404);
   let acct;
   try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
-  if (acct.password !== password) return json({ error: '密码错误' }, 401);
+  // 密码校验：哈希优先（新账号），明文兼容（旧账号迁移期）
+  const inputHash = await hashPassword(phone, password);
+  const pwdOk = (acct.passwordHash && acct.passwordHash === inputHash) ||
+                (!acct.passwordHash && acct.password === password);
+  if (!pwdOk) return json({ error: '密码错误' }, 401);
   // 业务数据从 data_<phone> 读取（记录/筐/店面配置/uiState）；data_ 缺失时回退 account_ 内残留业务，避免注销丢数据
   let biz = { records: acct.records || [], goodsConfig: acct.goodsConfig || null, storeConfig: acct.storeConfig || null, uiState: acct.uiState || null };
   const bizRaw = await env.BACKUP_KV.get('data_' + phone);
@@ -52,15 +84,14 @@ async function handleDelete(body, env, json) {
       };
     } catch (e) {}
   }
-  // 生成临时代码，冻结账号数据（保留原手机号便于管理员识别）
-  const code = 'T' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6).toUpperCase();
+  // 生成临时代码（16 位大写字母+数字，空间 36^16 不可枚举），冻结账号数据 30 天
+  const code = 'T' + Array.from(crypto.getRandomValues(new Uint8Array(15))).map(b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
   const tmpKey = 'tmp_' + code;
   await env.BACKUP_KV.put(tmpKey, JSON.stringify({
     originalPhone: phone,
     deletedAt: new Date().toISOString(),
     data: {
       passwordHash: acct.passwordHash || '',
-      password: acct.password || '',
       securityQ: acct.securityQ || '',
       securityA: acct.securityA || '',
       records: biz.records || [],
@@ -68,21 +99,23 @@ async function handleDelete(body, env, json) {
       storeConfig: biz.storeConfig || null,
       uiState: biz.uiState || null
     }
-  }));
+  }), { expirationTtl: 30 * 24 * 3600 }); // 30 天过期
   // 释放手机号（删除账号记录，手机号可重新注册）
   await env.BACKUP_KV.delete('account_' + phone);
   // 删除该账号业务数据（已冻结到临时代码）
   await env.BACKUP_KV.delete('data_' + phone);
+  // 清理该账号的鉴权 token
+  const token = (body.token || '').toString().trim();
+  if (token) await env.BACKUP_KV.delete('tok_' + token).catch(() => {});
   // 清理该账号的设备级备份（避免残留）
   if (acct.lastDeviceId) await env.BACKUP_KV.delete('device_' + acct.lastDeviceId);
   return json({ ok: true, tempCode: code });
 }
 
-// 设置/更新账号（保留已有记录数据）
+// 设置/更新账号（密码哈希存储；保留已有记录数据）
 async function handleSetup(body, env, json) {
   const phone = (body.phone || '').toString().trim();
   const password = (body.password || body.pwd || '').toString();
-  const passwordHash = (body.passwordHash || '').toString().trim();
   const securityQ = (body.securityQ || '').toString().trim();
   const securityA = (body.securityA || '').toString().trim().toLowerCase();
   const deviceId = (body.deviceId || '').toString().trim();
@@ -92,9 +125,9 @@ async function handleSetup(body, env, json) {
   const existingRaw = await env.BACKUP_KV.get('account_' + phone);
   let existing = {};
   if (existingRaw) { try { existing = JSON.parse(existingRaw); } catch (e) {} }
+  const passwordHash = await hashPassword(phone, password);
   const accountData = {
-    passwordHash: passwordHash || '', // 明文唯一：未传新哈希则清空旧哈希，避免旧密码哈希残留
-    password,
+    passwordHash, // 只存哈希，不存明文
     securityQ,
     securityA,
     lastDeviceId: deviceId || existing.lastDeviceId || '',
@@ -104,14 +137,16 @@ async function handleSetup(body, env, json) {
     storeConfig: existing.storeConfig || null
   };
   await env.BACKUP_KV.put('account_' + phone, JSON.stringify(accountData));
-  return json({ ok: true });
+  // 签发鉴权 token（备份接口用）
+  const token = await issueToken(env, phone);
+  return json({ ok: true, token });
 }
 
-// 校验密码，返回该账号数据（含密保信息供改密用）
+// 校验密码，返回该账号数据（含密保信息供改密用）+ 鉴权 token
+// 旧明文账号：登录成功后自动把明文迁移为哈希存储（渐进安全升级）
 async function handleVerify(body, env, json) {
   const phone = (body.phone || '').toString().trim();
   const password = (body.password || '').toString();
-  const passwordHash = (body.passwordHash || '').toString().trim();
   const deviceId = (body.deviceId || '').toString().trim();
   const skipPwd = !!body.skipPwd;
   if (!/^1\d{10}$/.test(phone)) return json({ error: '手机号格式不正确' }, 400);
@@ -119,39 +154,55 @@ async function handleVerify(body, env, json) {
   if (!raw) return json({ error: '该手机号未设置过密码' }, 404);
   let acct;
   try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
-  // 免密恢复：仅当该设备是最近登录设备（lastDeviceId 匹配）才放行
+  let verified = false;
   if (skipPwd) {
-    if (!deviceId || acct.lastDeviceId !== deviceId) return json({ error: '密码错误' }, 401);
+    // 免密恢复：仅当该设备是最近登录设备（lastDeviceId 匹配）才放行
+    if (deviceId && acct.lastDeviceId === deviceId) verified = true;
   } else {
-    // 明文优先：账号存了明文密码则用明文比对；旧账号只有哈希则用哈希比对
-    const plainOk = acct.password !== undefined && acct.password !== '' && password === acct.password;
-    const hashOk = !plainOk && acct.passwordHash && passwordHash === acct.passwordHash;
-    if (!plainOk && !hashOk) return json({ error: '密码错误' }, 401);
+    const inputHash = await hashPassword(phone, password);
+    if (acct.passwordHash) {
+      // 新账号：哈希比对
+      verified = acct.passwordHash === inputHash;
+    } else if (acct.password !== undefined && acct.password !== '') {
+      // 旧账号明文：明文比对，成功后自动迁移为哈希存储（一次登录永久升级）
+      if (acct.password === password) {
+        verified = true;
+        acct.passwordHash = inputHash;
+        delete acct.password; // 清掉明文
+        acct.updatedAt = new Date().toISOString();
+        await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
+      }
+    }
   }
+  if (!verified) return json({ error: '密码错误' }, 401);
   // 登录成功，记录该设备为最近登录设备（便于已登录设备免密恢复）
   if (deviceId && acct.lastDeviceId !== deviceId) {
     acct.lastDeviceId = deviceId;
     acct.updatedAt = new Date().toISOString();
     await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
   }
+  // 签发鉴权 token（每次成功验证刷新，30 天有效）
+  const token = await issueToken(env, phone);
   // 业务数据从 data_<phone> 读取（避免覆盖账号认证数据）；旧账号无 data_ 则用 account_ 内残留
   let bizData = {};
   const bizRaw = await env.BACKUP_KV.get('data_' + phone);
   if (bizRaw) { try { bizData = JSON.parse(bizRaw); } catch (e) {} }
   return json({
     ok: true,
+    token,
     data: {
       records: bizData.records || acct.records || [],
       goodsConfig: bizData.goodsConfig || acct.goodsConfig || null,
       storeConfig: bizData.storeConfig || acct.storeConfig || null,
       securityQ: acct.securityQ || '',
       securityA: acct.securityA || '',
-      backupTime: bizData.updatedAt || acct.updatedAt
+      // 修复：返回真实备份时间（data_ 里是 backupTime，不是 updatedAt）
+      backupTime: bizData.backupTime || bizData.updatedAt || acct.updatedAt || ''
     }
   });
 }
 
-// 忘记密码：密保答案 + 新密码
+// 忘记密码：密保答案 + 新密码（哈希存储）
 async function handleReset(body, env, json) {
   const phone = (body.phone || '').toString().trim();
   const securityA = (body.securityA || '').toString().trim().toLowerCase();
@@ -163,9 +214,9 @@ async function handleReset(body, env, json) {
   let acct;
   try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
   if (acct.securityA !== securityA) return json({ error: '密保答案错误' }, 401);
-  acct.password = newPassword;
-  // 清空旧哈希，强制只用明文比对，避免旧密码哈希残留仍能登录（安全一致）
-  acct.passwordHash = '';
+  const newHash = await hashPassword(phone, newPassword);
+  acct.passwordHash = newHash; // 只存哈希
+  delete acct.password;         // 清掉可能残留的明文
   acct.updatedAt = new Date().toISOString();
   await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
   return json({ ok: true });

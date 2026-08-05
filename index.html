@@ -3164,6 +3164,23 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <!-- 恢复结果弹窗：展示本次从云端恢复了哪些数据 -->
+<!-- 恢复确认弹窗：防误操作覆盖本地数据 -->
+<div class="store-ocr-modal ocr-form-modal" id="restoreConfirmModal">
+  <div class="store-ocr-content" style="max-width:340px;" onclick="event.stopPropagation()">
+    <div style="text-align:center;margin-bottom:6px;">
+      <div style="width:60px;height:60px;border-radius:50%;background:rgba(245,166,35,.16);border:2.5px solid rgba(245,166,35,.7);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+        <span style="color:#F5A623;font-size:28px;font-weight:800;">!</span>
+      </div>
+      <div class="ocr-form-title" style="font-size:19px;">确认恢复云端数据？</div>
+      <div class="ocr-form-sub" style="margin-top:4px;color:#CFECEF;line-height:1.8;">恢复会用云端数据<b style="color:#F5DC92;">覆盖</b>当前本地数据<br>（恢复前已自动备份本地副本，可找回）</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-cancel-form" style="flex:1;" onclick="closeRestoreConfirm()">取 消</button>
+      <button class="btn btn-primary-form" style="flex:1;" onclick="doRestoreConfirmed()">确认恢复</button>
+    </div>
+  </div>
+</div>
+
 <div class="store-ocr-modal ocr-form-modal" id="restoreResultModal">
   <div class="store-ocr-content" style="max-width:360px;" onclick="event.stopPropagation()">
     <div style="text-align:center;margin-bottom:6px;">
@@ -3608,6 +3625,34 @@ function listColCandidates(cols) {
 }
 
 // ======== 云备份（Cloudflare KV） ========
+// fetch 统一超时（防网络挂起 loading 无限转圈）；默认 15s
+async function fetchWithTimeout(url, options, timeoutMs) {
+  const ms = timeoutMs || 15000;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  try {
+    return await fetch(url, Object.assign({}, options, { signal: ctrl.signal }));
+  } catch (e) {
+    if (e && e.name === 'AbortError') throw new Error('timeout');
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+// 鉴权 token：登录/设置账号成功后由 /auth 签发，存本地；/backup 的 account 读写必须携带
+function getAuthToken() { return localStorage.getItem('kuanwei_token') || ''; }
+function setAuthToken(t) { if (t) localStorage.setItem('kuanwei_token', t); else localStorage.removeItem('kuanwei_token'); }
+// 带鉴权的备份请求头（Authorization: Bearer <token>）
+function backupAuthHeaders(extra) {
+  const h = Object.assign({ 'Content-Type': 'application/json' }, extra || {});
+  const t = getAuthToken();
+  if (t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+// 恢复流程中的自动备份抑制（防止"恢复旧数据 → 3s 自动反向备份污染云端"）
+let suppressAutoBackup = false;
+function setSuppressAutoBackup(v) { suppressAutoBackup = !!v; }
+
 function getDeviceId() {
   let id = localStorage.getItem('kuanwei_device_id');
   if (!id) {
@@ -3619,6 +3664,7 @@ function getDeviceId() {
 
 let backupTimer = null;
 function scheduleCloudBackup() {
+  if (suppressAutoBackup) return; // 恢复流程中抑制自动备份
   if (backupTimer) clearTimeout(backupTimer);
   backupTimer = setTimeout(backupToCloud, 3000); // 保存后3秒自动备份（防抖）；每次上传成功后云端为最新一次数据（整包覆盖）
 }
@@ -3634,6 +3680,12 @@ function startPeriodicBackup() {
       backupToCloud(false);
     }
   }, 30 * 60 * 1000); // 30分钟
+}
+// 待重试备份：存在 kuanwei_pending_backup 标记时立即重试一次（联网/启动/登录后调用）
+function retryPendingBackup() {
+  if (localStorage.getItem('kuanwei_pending_backup') && localStorage.getItem('kuanwei_phone')) {
+    backupToCloud(false);
+  }
 }
 
 async function backupToCloud(manual) {
@@ -3653,7 +3705,7 @@ async function backupToCloud(manual) {
     const userDeleted = !!localStorage.getItem('kuanwei_last_delete');
     if (account && !userDeleted && (storeConfig.length === 0 || records.length === 0)) {
       try {
-        const r = await fetch(API_BASE + '/backup?account=' + encodeURIComponent(account));
+        const r = await fetchWithTimeout(API_BASE + '/backup?account=' + encodeURIComponent(account), { headers: backupAuthHeaders() });
         const j = await r.json();
         if (j && j.data) {
           if (storeConfig.length === 0 && Array.isArray(j.data.storeConfig) && j.data.storeConfig.length > 0) {
@@ -3681,9 +3733,9 @@ async function backupToCloud(manual) {
       }
     };
     if (account) payload.account = account;
-    const resp = await fetch(API_BASE + '/backup', {
+    const resp = await fetchWithTimeout(API_BASE + '/backup', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: backupAuthHeaders(),
       body: JSON.stringify(payload)
     });
     const result = await resp.json();
@@ -3691,6 +3743,8 @@ async function backupToCloud(manual) {
       localStorage.setItem('kuanwei_last_backup', new Date().toISOString());
       // 删除状态已同步到云端 → 清除删除标记，防止后续空备份（带 userDeleted）误清其他设备录入的新数据
       try { localStorage.removeItem('kuanwei_last_delete'); } catch(e) {}
+      // 备份成功 → 清除待重试标记
+      try { localStorage.removeItem('kuanwei_pending_backup'); } catch(e) {}
       if (manual) {
         hideLoading();
         // 弹窗展示备份详情（店面顺序/别称/筐/记录数）
@@ -3701,10 +3755,18 @@ async function backupToCloud(manual) {
       }
     } else if (manual) {
       hideLoading();
+      // 401 = 鉴权失败：提示重新登录（token 过期），不误报"网络问题"
+      if (resp.status === 401) {
+        showToast('🔒 登录已过期，请重新登录后再备份');
+        setAuthToken('');
+        return;
+      }
       showToast('❌ 备份失败，请检查网络');
     }
   } catch (e) {
     if (manual) { hideLoading(); showToast('❌ 备份失败，请检查网络'); }
+    // 自动备份失败 → 标记待重试（下次启动/联网/定时周期自动重试）
+    if (!manual) { try { localStorage.setItem('kuanwei_pending_backup', '1'); } catch(err) {} }
   }
 }
 
@@ -3761,14 +3823,14 @@ function collectUiState() {
       try { const v = localStorage.getItem(k); if (v !== null && v !== undefined) ui[k] = v; } catch(e) {}
     }
   } catch(e) {}
-  // 每日相册照片（当天+昨天），便于换设备后照片不丢
+  // 每日相册照片（当天+昨天），便于换设备后照片不丢；单张超过 1.5MB 跳过（防 KV 25MB 上限被撑爆）
   try {
     const photos = {};
     for (let i = 0; i < 2; i++) {
       const d = new Date(Date.now() - i * 86400000);
       const key = 'kuanwei_photos_' + d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
       const v = localStorage.getItem(key);
-      if (v) photos[key] = v;
+      if (v && v.length < 1.5 * 1024 * 1024) photos[key] = v;
     }
     ui._photos = photos;
   } catch(e) {}
@@ -4016,7 +4078,7 @@ async function doLogin() {
   const sentBody = { phone, password: pwd, deviceId: getDeviceId() };
   pwdDebug('登录', sentBody, null, '前端即将发送'); // 调试：打印实际发送的手机号/密码
   try {
-    const resp = await fetch(API_BASE + '/auth/verify', {
+    const resp = await fetchWithTimeout(API_BASE + '/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(sentBody)
@@ -4030,6 +4092,7 @@ async function doLogin() {
     }
     if (result.ok && result.data) {
       clearLock(phone);
+      if (result.token) setAuthToken(result.token); // 保存鉴权 token（备份接口用）
       setCloudPhone(phone);
       migrateDataToScope(); // 首次登录：旧全局数据迁入该账号作用域
       setLoggedIn(true);
@@ -4054,11 +4117,27 @@ function logout() {
   setLoggedIn(false);
   // 清除账号作用域，避免退出后数据仍写入旧账号隔离空间
   setCloudPhone('');
+  setAuthToken(''); // 清除鉴权 token（换账号登录时重新签发）
   renderAccountStatus();
   renderAccountBadge();
   renderCloudBackupStatus();
   refreshRecordViews(); // 刷新数据视图，避免退出后界面残留旧账号数据
   showToast('已退出登录，数据已隔离');
+}
+
+// 静默补 token：已登录但本地无鉴权 token（旧版本升级）→ 免密验证补发（lastDeviceId 匹配）
+async function refreshTokenSilent() {
+  try {
+    const phone = getCloudPhone();
+    if (!phone || getAuthToken()) return;
+    const resp = await fetchWithTimeout(API_BASE + '/auth/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, skipPwd: true, deviceId: getDeviceId() })
+    });
+    const result = await resp.json();
+    if (result && result.ok && result.token) setAuthToken(result.token);
+  } catch(e) { /* 静默失败：下次登录/启动再补 */ }
 }
 
 // ======== 账号注销（两步确认 + 后悔药 + 软删除可恢复） ========
@@ -4150,7 +4229,7 @@ async function doSetupAccount() {
   const setupBody = { phone, password: pwd, securityQ: secQ, securityA: secA, deviceId: getDeviceId() };
   pwdDebug('设置账号', setupBody, null, '前端即将发送');
   try {
-    const resp = await fetch(API_BASE + '/auth/setup', {
+    const resp = await fetchWithTimeout(API_BASE + '/auth/setup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(setupBody)
@@ -4159,6 +4238,7 @@ async function doSetupAccount() {
     pwdDebug('设置账号', setupBody, result, '后端返回');
     hideLoading();
     if (result.ok) {
+      if (result.token) setAuthToken(result.token); // 保存鉴权 token
       setCloudPhone(phone);
       migrateDataToScope(); // 旧全局数据迁入该账号作用域
       closeSetupModal();
@@ -4178,22 +4258,52 @@ async function doSetupAccount() {
 
 // 恢复数据
 function openVerifyModal() {
-  // 已登录用户：恢复数据免验证（直接拉当前账号云端数据，不需再输密码）
+  // 已登录用户：恢复数据前先弹确认（防误操作覆盖本地新数据）→ 确认后免密直接恢复
   if (isLoggedIn()) {
     const p = getCloudPhone();
-    if (p) { restoreLoggedIn(p); return; }
+    if (p) { openRestoreConfirm(); return; }
   }
   // 未登录：走密码验证恢复
   document.getElementById('verifyModal').classList.add('show');
 }
 function closeVerifyModal() { document.getElementById('verifyModal').classList.remove('show'); }
+// ===== 恢复确认弹窗（防误操作覆盖本地数据） =====
+function openRestoreConfirm() {
+  const el = document.getElementById('restoreConfirmModal');
+  if (el) el.classList.add('show');
+}
+function closeRestoreConfirm() {
+  const el = document.getElementById('restoreConfirmModal');
+  if (el) el.classList.remove('show');
+}
+function doRestoreConfirmed() {
+  closeRestoreConfirm();
+  const p = getCloudPhone();
+  if (p) restoreLoggedIn(p);
+}
 // 已登录用户免密恢复：直接拉取该账号云端数据（含用户界面偏好，换设备无陌生感）
 async function restoreLoggedIn(phone) {
+  // 恢复前本地快照（防误操作：云端旧/坏数据覆盖本地后仍可找回）
+  try {
+    localStorage.setItem('kuanwei_restore_snapshot', JSON.stringify({
+      t: new Date().toISOString(),
+      records: loadData(),
+      goodsConfig: loadGoodsConfig(),
+      storeConfig: loadStoreConfig()
+    }));
+  } catch(e) {}
+  // 抑制恢复后 3s 自动反向备份（避免"恢复旧数据 → 自动备份污染云端"）
+  setSuppressAutoBackup(true);
   showLoading('正在恢复…');
   try {
-    const resp = await fetch(API_BASE + '/backup?account=' + encodeURIComponent(phone));
+    const resp = await fetchWithTimeout(API_BASE + '/backup?account=' + encodeURIComponent(phone), { headers: backupAuthHeaders() });
     const result = await resp.json();
     hideLoading();
+    if (resp.status === 401) {
+      showToast('🔒 登录已过期，请重新登录后再恢复');
+      setAuthToken('');
+      return;
+    }
     if (result.data) {
       const cloud = result.data;
       // 尊重删除意图：用户曾清空全部记录 → 云端 records 是删除前的旧数据则不再恢复，
@@ -4204,7 +4314,7 @@ async function restoreLoggedIn(phone) {
         // 用户删除过 → 恢复时不覆盖本地 records（保持已删除状态），但仍恢复店面/筐/偏好
         // 仅当云端 backupTime 晚于用户删除时间才恢复（云端是删除后的新数据或别处录入）
         const delTime = localStorage.getItem('kuanwei_last_delete');
-        if (cloud.backupTime && delTime && cloud.backupTime > delTime) {
+        if (cloud.backupTime && delTime && new Date(cloud.backupTime) > new Date(delTime)) {
           saveDataArr(cloudRecs);
         }
         // 否则保持本地空 records，不覆盖
@@ -4235,6 +4345,9 @@ async function restoreLoggedIn(phone) {
   } catch (e) {
     hideLoading();
     showToast('❌ 恢复失败，请检查网络');
+  } finally {
+    // 恢复流程结束 → 解除自动备份抑制（延迟释放，避免恢复写盘触发的 3s 定时仍命中）
+    setTimeout(() => setSuppressAutoBackup(false), 6000);
   }
 }
 async function doVerifyAccount() {
@@ -4247,7 +4360,7 @@ async function doVerifyAccount() {
   const vfBody = { phone, password: pwd, deviceId: getDeviceId() };
   pwdDebug('恢复数据-验证', vfBody, null, '前端即将发送');
   try {
-    const resp = await fetch(API_BASE + '/auth/verify', {
+    const resp = await fetchWithTimeout(API_BASE + '/auth/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(vfBody)
@@ -4258,6 +4371,9 @@ async function doVerifyAccount() {
     if (!(result.ok && result.data)) { pwdCompareCloud(phone, pwd); }
     if (result.ok && result.data) {
       clearLock(phone);
+      if (result.token) setAuthToken(result.token); // 保存鉴权 token
+      // 恢复过程抑制自动备份（避免恢复旧数据后被反向传回云端）
+      setSuppressAutoBackup(true);
       const cloud = result.data;
       setCloudPhone(phone);      // 先切换账号作用域，再写入该账号数据
       migrateDataToScope();
@@ -4277,6 +4393,7 @@ async function doVerifyAccount() {
       // 恢复完成后：关闭"备份与恢复"面板，回到主页
       try { document.getElementById('backupPanel').style.display = 'none'; } catch(e) {}
       try { switchPage('record'); } catch(e) {}
+      setTimeout(() => setSuppressAutoBackup(false), 6000); // 延迟解除抑制
     } else {
       recordFail(phone);
       showToast(result.error || '验证失败');
@@ -9166,7 +9283,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.90'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.91'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -9247,6 +9364,10 @@ try { if (localStorage.getItem('kuanwei_privacy_consent')) initWelcome(); } catc
 try { restoreFromCloud(); } catch(e) { console.error('restoreFromCloud fail', e); }
 // 定时兜底备份：无操作时每30分钟自动备份一次（后台静默）
 try { startPeriodicBackup(); } catch(e) { console.error('startPeriodicBackup fail', e); }
+// 静默补鉴权 token（旧版本升级后已登录无 token → 免密补发）
+try { refreshTokenSilent(); } catch(e) { console.error('refreshTokenSilent fail', e); }
+// 上次备份失败 → 联网/启动后重试一次
+try { retryPendingBackup(); } catch(e) { console.error('retryPendingBackup fail', e); }
 // 原自动同步逻辑已移除：if (isLoggedIn()) { const p = getCloudPhone(); if (p) { autoSyncFromCloud(p); } }
 // 启动页显示规则：只在页面加载完成之前显示。
 // 页面完全加载完成（含图片/字体等所有资源，window load 事件）后才淡出移除；
