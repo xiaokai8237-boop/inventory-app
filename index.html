@@ -1724,6 +1724,12 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <button class="back-btn" onclick="openEmitStoreOrderModal()">调整店序</button>
     </div>
 
+    <div class="card" style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:13px;color:var(--text-light);">📅 记录日期</span>
+      <input type="date" id="emitRecordDate" class="form-input" style="flex:1;max-width:190px;margin-left:10px;padding:6px 10px;font-size:14px;" onchange="renderEmitStoreList()">
+      <span style="font-size:11px;color:var(--text-light);margin-left:8px;">默认今天，可改历史日期补录</span>
+    </div>
+
     <div class="card" style="padding:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <span style="display:flex;align-items:center;gap:8px;font-size:22px;font-weight:800;color:var(--primary);"><span id="emitGoodsIcon">🗳️</span><span id="emitGoodsLabel">请选择筐</span></span>
@@ -1747,7 +1753,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
 
     <div class="card" style="text-align:center;">
-      <button class="btn btn-primary" style="width:100%;font-size:15px;padding:12px;" onclick="saveEmitRecords()">💾 保存当日发出</button>
+      <button class="btn btn-primary" style="width:100%;font-size:15px;padding:12px;" onclick="saveEmitRecords()">💾 保存发出</button>
       <div style="font-size:11px;color:var(--text-light);margin-top:6px;">保存后自动返回主页</div>
     </div>
   </div>
@@ -4781,8 +4787,10 @@ function selectEmitGoods(idx) {
   // 鲜食筐（index 0）无路单 → 隐藏拍照识别按钮
   const photoBtn = document.getElementById('emitPhotoBtn');
   if (photoBtn) photoBtn.style.display = (idx === 0) ? 'none' : '';
-  // 如果发出面板还没开，则打开
+  // 如果发出面板还没开，则打开（首次进入/重新进入：记录日期默认今天）
   if (document.getElementById('emitPanel').style.display !== 'block') {
+    const de = document.getElementById('emitRecordDate');
+    if (de) de.value = todayStr();
     document.getElementById('homeWizard').style.display = 'none';
     document.getElementById('manualForm').style.display = 'none';
     document.getElementById('emitPanel').style.display = 'block';
@@ -4811,7 +4819,7 @@ function renderEmitStoreList() {
   if (emitGoodsIdx < 0) { container.innerHTML = '<div style="font-size:12px;color:var(--text-light);padding:8px 0;">请先选择筐类型</div>'; return; }
   const order = getEmitOrder();
   const cfg = loadStoreConfig();
-  const date = todayStr();
+  const date = document.getElementById('emitRecordDate')?.value || todayStr();
   const data = loadData();
   const names = loadGoodsNames();
   const goodsName = names[emitGoodsIdx] || '';
@@ -4863,7 +4871,7 @@ function emitNextOnDone(input) {
 // 保存发出记录
 function saveEmitRecords() {
   if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
-  const date = todayStr();
+  const date = document.getElementById('emitRecordDate')?.value || todayStr();
   const data = loadData();
   const names = loadGoodsNames();
   const goodsName = names[emitGoodsIdx] || '';
@@ -8805,7 +8813,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.82'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.83'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
