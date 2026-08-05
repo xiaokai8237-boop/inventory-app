@@ -67,6 +67,11 @@ public class MainActivity extends BridgeActivity {
         // ===== WebView 性能优化 =====
         optimizeWebView();
 
+        // ===== 麦克风/相机系统权限预申请（彻底修复"仅在使用中允许"二次被拒）=====
+        // 在应用层一次性申请系统权限（首次启动弹系统授权框，用户选"仅在使用中允许"即永久生效于前台），
+        // 之后 WebView 的 getUserMedia 由 onPermissionRequest 无条件放行，不再经过 Capacitor 二次请求流程。
+        requestRuntimePermissions();
+
         // ===== 添加全屏 splash ImageView（splash.png CENTER_CROP 填满）=====
         splashOverlay = new ImageView(this);
         splashOverlay.setImageResource(R.drawable.splash);
@@ -179,27 +184,16 @@ public class MainActivity extends BridgeActivity {
                 settings.setSafeBrowsingEnabled(false);
             }
 
-            // ===== 麦克风/相机权限：已授权则直接放行，避免"仅在使用中允许"二次请求被系统拒绝 =====
-            // 场景：用户第一次授权时选"仅在使用中允许"，系统视为一次性授权；
-            // 第二次 getUserMedia 时若未在这里放行，系统直接返回 NotAllowedError（麦克风权限被拒绝）。
+            // ===== 麦克风/相机权限：WebView 层无条件放行（彻底修复"仅在使用中允许"二次被拒）=====
+            // 系统权限已由 requestRuntimePermissions() 在应用层预申请（首次启动弹一次系统授权框）；
+            // 这里 WebView 层直接 grant，不再走 Capacitor 默认的"每次重新弹系统权限请求"流程——
+            // 否则"仅在使用中允许"会被系统当成一次性授权，二次请求直接 NotAllowedError。
             webView.setWebChromeClient(new BridgeWebChromeClient(bridge) {
                 @Override
                 public void onPermissionRequest(final PermissionRequest request) {
                     try {
-                        boolean hasAudio = false, hasVideo = false;
-                        for (String res : request.getResources()) {
-                            if ("android.webkit.resource.AUDIO_CAPTURE".equals(res)) hasAudio = true;
-                            if ("android.webkit.resource.VIDEO_CAPTURE".equals(res)) hasVideo = true;
-                        }
-                        boolean audioOk = !hasAudio ||
-                            (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED);
-                        boolean videoOk = !hasVideo ||
-                            (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED);
-                        if (audioOk && videoOk) {
-                            request.grant(request.getResources());
-                        } else {
-                            super.onPermissionRequest(request);
-                        }
+                        // 无条件放行 WebView 层（录音/相机）。系统权限由应用层预申请保证。
+                        request.grant(request.getResources());
                     } catch (Exception e) {
                         // 兜底：异常时走默认流程，避免卡死
                         super.onPermissionRequest(request);
@@ -259,6 +253,35 @@ public class MainActivity extends BridgeActivity {
 
     private void showToast(final String msg) {
         runOnUiThread(() -> Toast.makeText(this, msg, Toast.LENGTH_SHORT).show());
+    }
+
+    /**
+     * 麦克风/相机系统权限预申请：
+     * 首次启动主动请求（弹系统授权框），用户选"仅在使用中允许"后系统权限在前台持续有效；
+     * 之后 WebView getUserMedia 由 onPermissionRequest 无条件放行，彻底绕开 Capacitor
+     * "每次重新弹系统权限 → 一次性授权被系统拒绝"的坑。
+     */
+    private void requestRuntimePermissions() {
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
+            String[] perms = new String[]{
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.CAMERA
+            };
+            boolean need = false;
+            for (String p : perms) {
+                if (checkSelfPermission(p) != PackageManager.PERMISSION_GRANTED) { need = true; break; }
+            }
+            if (need) {
+                requestPermissions(perms, 1001);
+            }
+        } catch (Exception ignored) {}
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // 权限结果无需额外处理：已授权即可用；拒绝则语音/拍照不可用（前端有对应提示）
     }
 
     /**
