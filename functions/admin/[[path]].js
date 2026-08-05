@@ -1,6 +1,6 @@
 // Cloudflare Pages Function — /admin/* 管理员接口
 // POST /admin/reset  {adminKey, phone, newPasswordHash}  管理员重置用户密码
-// POST /admin/stats  {adminKey}                          统计注册人数
+// POST /admin/stats  {adminKey}                          统计注册人数 + 用户列表（解密显示密码）
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -8,7 +8,7 @@ export async function onRequest(context) {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   };
   const json = (obj, status = 200) => new Response(JSON.stringify(obj), { status, headers: cors });
 
@@ -21,6 +21,24 @@ export async function onRequest(context) {
   // 管理员密钥从环境变量读取（不写死在代码/前端），未配置则拒绝
   const ADMIN_KEY = env.ADMIN_KEY || '';
   const adminKey = (body.adminKey || '').toString();
+
+  // 密码解密（与 /auth 的加密对称：AES-256-GCM，密钥从 ADMIN_KEY 派生）
+  async function deriveKey() {
+    const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('kuanwei:' + ADMIN_KEY));
+    return await crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  }
+  async function decryptPassword(env, enc) {
+    try {
+      if (!enc) return '';
+      const o = JSON.parse(enc);
+      if (!o || !o.iv || !o.ct) return '';
+      const key = await deriveKey();
+      const iv = new Uint8Array(o.iv.match(/.{2}/g).map(h => parseInt(h, 16)));
+      const ct = new Uint8Array(o.ct.match(/.{2}/g).map(h => parseInt(h, 16)));
+      const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+      return new TextDecoder().decode(pt);
+    } catch (e) { return ''; }
+  }
 
   // POST /admin/verify  {adminKey}  验证管理员密钥（前端不保存/不写死密钥，仅本接口校验）
   if (url.pathname.endsWith('/admin/verify')) {
@@ -45,7 +63,13 @@ export async function onRequest(context) {
         const phone = k.name.replace('account_', '');
         const raw = await env.BACKUP_KV.get(k.name);
         let password = '';
-        if (raw) { try { const acct = JSON.parse(raw); password = acct.password || ''; } catch (e) {} }
+        if (raw) {
+          try {
+            const acct = JSON.parse(raw);
+            // 可逆密文优先解密显示；旧明文账号兜底（迁移期）
+            password = (await decryptPassword(env, acct.passwordEnc)) || acct.password || '';
+          } catch (e) {}
+        }
         users.push({ phone, password });
       }
       // 列出已注销待恢复的临时代码（tmp_ 前缀）
@@ -85,9 +109,10 @@ export async function onRequest(context) {
     if (!tmpRaw) return json({ error: '临时代码不存在或已处理' }, 404);
     let tmp;
     try { tmp = JSON.parse(tmpRaw); } catch (e) { return json({ error: '临时代码数据异常' }, 500); }
-    // 把冻结数据绑定到新手机号（保留原密码哈希/密保，用户可直接用原密码登录）
+    // 把冻结数据绑定到新手机号（保留原密码哈希/加密密文/密保，用户可直接用原密码登录）
     const acct = {
       passwordHash: tmp.data.passwordHash || '',
+      passwordEnc: tmp.data.passwordEnc || '',
       password: tmp.data.password || '',
       securityQ: tmp.data.securityQ || '',
       securityA: tmp.data.securityA || '',
@@ -146,9 +171,27 @@ export async function onRequest(context) {
   if (!raw) return json({ error: '该手机号未设置过密码' }, 404);
   let acct;
   try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
-  // 明文唯一：若传了新哈希则更新，否则清空旧哈希，避免旧密码哈希残留仍能登录（安全一致）
-  acct.passwordHash = newPasswordHash || '';
-  acct.password = newPassword;
+  // 管理员重置：优先用前端传来的新哈希（如有）；否则用明文算哈希 + 加密密文，绝不存明文
+  async function hashPwd(phone, pwd) {
+    try {
+      const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(phone + ':' + pwd));
+      return Array.from(new Uint8Array(d)).map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) { return ''; }
+  }
+  async function encryptPwd(env, pwd) {
+    try {
+      const key = await deriveKey();
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(pwd));
+      return JSON.stringify({
+        iv: Array.from(iv).map(b => b.toString(16).padStart(2, '0')).join(''),
+        ct: Array.from(new Uint8Array(ct)).map(b => b.toString(16).padStart(2, '0')).join('')
+      });
+    } catch (e) { return ''; }
+  }
+  acct.passwordHash = newPasswordHash || (await hashPwd(phone, newPassword));
+  acct.passwordEnc = await encryptPwd(env, newPassword);
+  delete acct.password; // 清掉明文
   acct.updatedAt = new Date().toISOString();
   await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
   return json({ ok: true, message: '密码已重置' });

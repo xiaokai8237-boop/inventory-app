@@ -29,12 +29,43 @@ export async function onRequest(context) {
   return json({ error: 'not found' }, 404);
 }
 
-// ===== 密码哈希（SHA-256 + 账号盐，避免明文存储） =====
+// ===== 密码哈希（SHA-256 + 账号盐，登录校验用） =====
 async function hashPassword(phone, password) {
   try {
     const data = new TextEncoder().encode(phone + ':' + password);
     const digest = await crypto.subtle.digest('SHA-256', data);
     return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (e) { return ''; }
+}
+
+// ===== 密码可逆加密（AES-256-GCM，管理员可解密查看；存储非明文） =====
+// 密钥从管理员密钥（env.ADMIN_KEY）派生，不新增环境变量；管理员接口用同一派生密钥解密
+async function deriveKey(env) {
+  const adminKey = env.ADMIN_KEY || 'kuanwei_default';
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('kuanwei:' + adminKey));
+  return await crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+async function encryptPassword(env, password) {
+  try {
+    const key = await deriveKey(env);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(password));
+    return JSON.stringify({
+      iv: Array.from(iv).map(b => b.toString(16).padStart(2, '0')).join(''),
+      ct: Array.from(new Uint8Array(ct)).map(b => b.toString(16).padStart(2, '0')).join('')
+    });
+  } catch (e) { return ''; }
+}
+async function decryptPassword(env, enc) {
+  try {
+    if (!enc) return '';
+    const o = JSON.parse(enc);
+    if (!o || !o.iv || !o.ct) return '';
+    const key = await deriveKey(env);
+    const iv = new Uint8Array(o.iv.match(/.{2}/g).map(h => parseInt(h, 16)));
+    const ct = new Uint8Array(o.ct.match(/.{2}/g).map(h => parseInt(h, 16)));
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+    return new TextDecoder().decode(pt);
   } catch (e) { return ''; }
 }
 
@@ -92,6 +123,7 @@ async function handleDelete(body, env, json) {
     deletedAt: new Date().toISOString(),
     data: {
       passwordHash: acct.passwordHash || '',
+      passwordEnc: acct.passwordEnc || '',
       securityQ: acct.securityQ || '',
       securityA: acct.securityA || '',
       records: biz.records || [],
@@ -126,8 +158,10 @@ async function handleSetup(body, env, json) {
   let existing = {};
   if (existingRaw) { try { existing = JSON.parse(existingRaw); } catch (e) {} }
   const passwordHash = await hashPassword(phone, password);
+  const passwordEnc = await encryptPassword(env, password); // 可逆加密（管理员解密查看用），非明文
   const accountData = {
-    passwordHash, // 只存哈希，不存明文
+    passwordHash, // 登录校验哈希
+    passwordEnc,  // 可逆加密密文（管理员可解密查看）
     securityQ,
     securityA,
     lastDeviceId: deviceId || existing.lastDeviceId || '',
@@ -161,13 +195,22 @@ async function handleVerify(body, env, json) {
   } else {
     const inputHash = await hashPassword(phone, password);
     if (acct.passwordHash) {
-      // 新账号：哈希比对
-      verified = acct.passwordHash === inputHash;
+      // 新账号：哈希比对；成功后刷新可逆密文（保证活跃账号可被管理员查看）
+      if (acct.passwordHash === inputHash) {
+        verified = true;
+        const enc = await encryptPassword(env, password);
+        if (enc && enc !== acct.passwordEnc) {
+          acct.passwordEnc = enc;
+          acct.updatedAt = new Date().toISOString();
+          await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
+        }
+      }
     } else if (acct.password !== undefined && acct.password !== '') {
-      // 旧账号明文：明文比对，成功后自动迁移为哈希存储（一次登录永久升级）
+      // 旧账号明文：明文比对，成功后自动迁移为哈希 + 加密存储（一次登录永久升级）
       if (acct.password === password) {
         verified = true;
         acct.passwordHash = inputHash;
+        acct.passwordEnc = await encryptPassword(env, password);
         delete acct.password; // 清掉明文
         acct.updatedAt = new Date().toISOString();
         await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
@@ -216,6 +259,7 @@ async function handleReset(body, env, json) {
   if (acct.securityA !== securityA) return json({ error: '密保答案错误' }, 401);
   const newHash = await hashPassword(phone, newPassword);
   acct.passwordHash = newHash; // 只存哈希
+  acct.passwordEnc = await encryptPassword(env, newPassword); // 可逆密文（管理员可解密查看）
   delete acct.password;         // 清掉可能残留的明文
   acct.updatedAt = new Date().toISOString();
   await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
