@@ -1741,7 +1741,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div class="card panel-header">
       <button class="back-btn" onclick="closeEmitPanel()">← 返回</button>
       <span style="flex:1;text-align:center;font-weight:700;color:var(--text);">📤 发出</span>
-      <button class="back-btn" onclick="openEmitStoreOrderModal()">调整店序</button>
     </div>
 
     <div class="card" style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">
@@ -1750,31 +1749,57 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <span style="font-size:11px;color:var(--text-light);margin-left:8px;">默认今天，可改历史日期补录</span>
     </div>
 
-    <div class="card" style="padding:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <span style="display:flex;align-items:center;gap:8px;font-size:22px;font-weight:800;color:var(--primary);"><span id="emitGoodsIcon">🗳️</span><span id="emitGoodsLabel">请选择筐</span></span>
-        <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;width:auto;min-width:0;" onclick="openEmitGoodsSelect()">切换</button>
+    <!-- 入口态：智能识别 + 手动录入（v6 设计稿） -->
+    <div id="emitEntryArea">
+      <div class="card" style="padding:12px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:22px;">📸</span>
+          <span style="font-size:16px;font-weight:800;color:var(--primary);">智能识别 · 自动判断筐类型</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">拍路单自动识别筐类型和数量，识别结果可修改</div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" style="flex:1;font-size:15px;padding:12px;" onclick="emitTriggerPhoto()">📷 拍照识别</button>
+          <button class="btn btn-primary" style="flex:1;font-size:15px;padding:12px;background:linear-gradient(135deg,#7CE8E0,#2BB8A8);border-color:transparent;color:#04242C;" onclick="emitTriggerPhoto()">🖼️ 从相册选</button>
+        </div>
       </div>
-      <div style="font-size:11px;color:var(--text-light);">在各店面后填写「<span id="emitModeLabel">发出</span>」数量，输完点键盘"确定"自动跳下一家</div>
+
+      <div class="card" style="padding:12px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:22px;">✍️</span>
+          <span style="font-size:16px;font-weight:800;color:var(--primary);">手动录入</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">点某个筐进入填写页（每页顶部有📅记录日期）</div>
+        <div id="emitGoodsButtons" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
     </div>
 
-    <div class="card" style="padding:10px 12px;">
-      <div style="display:flex;gap:10px;margin-bottom:10px;">
-        <button class="btn btn-primary" style="flex:1;" onclick="emitStartVoice()">🎤 语音录入</button>
-        <button class="btn btn-primary" style="flex:1;" id="emitPhotoBtn" onclick="emitTriggerPhoto()">📷 拍照识别</button>
+    <!-- 填写态：选筐后的店列表 + 语音 + 保存 -->
+    <div id="emitFillArea" style="display:none;">
+      <div class="card" style="padding:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span style="display:flex;align-items:center;gap:8px;font-size:22px;font-weight:800;color:var(--primary);"><span id="emitGoodsIcon">🗳️</span><span id="emitGoodsLabel">请选择筐</span></span>
+          <button class="btn btn-outline" style="padding:4px 8px;font-size:12px;width:auto;min-width:0;" onclick="openEmitGoodsSelect()">切换</button>
+        </div>
+        <div style="font-size:11px;color:var(--text-light);">在各店面后填写「<span id="emitModeLabel">发出</span>」数量，输完点键盘"确定"自动跳下一家</div>
       </div>
-      <div style="font-size:11px;color:var(--text-light);">语音：间隔说数字（如 3 6 2…），按店面从上到下自动填入</div>
-    </div>
 
-    <div class="card">
-      <div id="emitStoreList" style="font-size:13px;color:var(--text);">
-        <div style="font-size:12px;color:var(--text-light);padding:8px 0;">请先选择筐类型</div>
+      <div class="card" style="padding:10px 12px;">
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" style="flex:1;" onclick="emitStartVoice()">🎤 语音录入</button>
+        </div>
+        <div style="font-size:11px;color:var(--text-light);">语音：间隔说数字（如 3 6 2…），按店面从上到下自动填入</div>
       </div>
-    </div>
 
-    <div class="card" style="text-align:center;">
-      <button class="btn btn-primary" style="width:100%;font-size:15px;padding:12px;" onclick="saveEmitRecords()">💾 保存发出</button>
-      <div style="font-size:11px;color:var(--text-light);margin-top:6px;">保存后自动返回主页</div>
+      <div class="card">
+        <div id="emitStoreList" style="font-size:13px;color:var(--text);">
+          <div style="font-size:12px;color:var(--text-light);padding:8px 0;">请先选择筐类型</div>
+        </div>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <button class="btn btn-primary" style="width:100%;font-size:15px;padding:12px;" onclick="saveEmitRecords()">💾 保存发出</button>
+        <div style="font-size:11px;color:var(--text-light);margin-top:6px;">保存后自动返回主页</div>
+      </div>
     </div>
   </div>
 
@@ -1785,7 +1810,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
         <span style="font-weight:700;font-size:16px;color:var(--text);">📦 选择发出的筐类型</span>
         <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitGoodsSelect()">×</span>
       </div>
-      <div id="emitGoodsButtons" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div id="emitGoodsSelectButtons" style="display:flex;flex-direction:column;gap:8px;"></div>
     </div>
   </div>
 
@@ -4779,10 +4804,10 @@ function goodsIcon(name) {
   return '🗳️';
 }
 
-// 打开筐类型选择弹窗
+// 打开筐类型选择弹窗（填写态"切换"用）
 function openEmitGoodsSelect() {
   const names = loadGoodsNames();
-  const container = document.getElementById('emitGoodsButtons');
+  const container = document.getElementById('emitGoodsSelectButtons');
   if (!container) return;
   container.innerHTML = names.map((n, i) =>
     `<button class="btn btn-outline" style="width:100%;padding:12px;font-size:15px;display:flex;align-items:center;gap:10px;" onclick="selectEmitGoods(${i})"><span style="font-size:22px;">${goodsIcon(n)}</span><span style="flex:1;text-align:left;">${escapeHtml(n)}</span></button>`
@@ -4800,10 +4825,12 @@ function selectEmitGoods(idx) {
   document.getElementById('emitGoodsLabel').textContent = emitGoodsName;
   document.getElementById('emitGoodsIcon').textContent = goodsIcon(emitGoodsName);
   closeEmitGoodsSelect();
+  // 切到填写态（隐藏入口态：智能识别 + 手动录入）
+  const ea = document.getElementById('emitEntryArea');
+  const fa = document.getElementById('emitFillArea');
+  if (ea) ea.style.display = 'none';
+  if (fa) fa.style.display = '';
   renderEmitStoreList();
-  // 鲜食筐（index 0）无路单 → 隐藏拍照识别按钮
-  const photoBtn = document.getElementById('emitPhotoBtn');
-  if (photoBtn) photoBtn.style.display = (idx === 0) ? 'none' : '';
   // 如果发出面板还没开，则打开（首次进入/重新进入：记录日期默认今天）
   if (document.getElementById('emitPanel').style.display !== 'block') {
     const de = document.getElementById('emitRecordDate');
@@ -4814,17 +4841,39 @@ function selectEmitGoods(idx) {
   }
 }
 
-// 首页「发出」入口：先弹筐类型选择
+// 首页「发出」入口：直接进入口态（智能识别 + 手动录入），不再强制先选筐
 function openEmitFlow() {
   if (!isLoggedIn()) { showToast('🔒 请先登录后再录入'); openLoginModal(); return; }
   const storeNames = loadStoreNames();
   if (!storeNames || storeNames.length === 0) { showToast('请先到「店面管理」添加店面'); return; }
-  openEmitGoodsSelect();
+  // 渲染手动录入 5 筐按钮到入口卡
+  const names = loadGoodsNames();
+  const container = document.getElementById('emitGoodsButtons');
+  if (container) {
+    container.innerHTML = names.map((n, i) =>
+      `<button class="btn btn-outline" style="width:100%;padding:12px;font-size:15px;display:flex;align-items:center;gap:10px;" onclick="selectEmitGoods(${i})"><span style="font-size:22px;">${goodsIcon(n)}</span><span style="flex:1;text-align:left;">${escapeHtml(n)}</span></button>`
+    ).join('');
+  }
+  // 显示入口态
+  const ea = document.getElementById('emitEntryArea');
+  const fa = document.getElementById('emitFillArea');
+  if (ea) ea.style.display = '';
+  if (fa) fa.style.display = 'none';
+  const de = document.getElementById('emitRecordDate');
+  if (de) de.value = todayStr();
+  document.getElementById('homeWizard').style.display = 'none';
+  document.getElementById('manualForm').style.display = 'none';
+  document.getElementById('emitPanel').style.display = 'block';
 }
 
 function closeEmitPanel() {
   document.getElementById('emitPanel').style.display = 'none';
   document.getElementById('homeWizard').style.display = 'block';
+  // 下次打开默认显示入口态（智能识别 + 手动录入）
+  const ea = document.getElementById('emitEntryArea');
+  const fa = document.getElementById('emitFillArea');
+  if (ea) ea.style.display = '';
+  if (fa) fa.style.display = 'none';
   emitGoodsIdx = -1;
   emitGoodsName = '';
 }
@@ -5331,7 +5380,7 @@ function applyEmitVoice() {
   if (first) first.focus();
 }
 function emitTriggerPhoto() {
-  if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
+  // 整合版：无需先选筐，AI 自动判断筐类型（鲜食筐除外）
   if (emitGoodsIdx === 0) { showToast('鲜食筐无需拍照识别，请直接录入'); return; }
   // 动态创建全屏可见的 file input 唤起拍照/相册（PWA 需 input 在可视区）
   // 注意：不加 capture 强制相机——让系统选择器显示「拍照/相册/文件」全部选项
@@ -5448,7 +5497,24 @@ async function emitDoOcr(imageDataUrl) {
       if (!rows) { showToast('未识别到数据，请重试'); return; }
       const detectedType = _hunyuanDetectedType || '';
       const userType = currentEmitGoodsName() || '';
-      // 类型不一致 → 弹提示，等用户决定
+      // 整合版：未选筐 + AI 识别出类型 → 自动切到对应筐，直接进确认框（识别结果可更改）
+      if (emitGoodsIdx < 0 && detectedType) {
+        const names = loadGoodsNames();
+        let newIdx = -1;
+        names.forEach((n, i) => {
+          if (newIdx >= 0) return;
+          if (detectedType === '冷藏' && (n.includes('冷藏') || n.includes('低温'))) newIdx = i;
+          else if (detectedType === '面包' && n.includes('面包')) newIdx = i;
+          else if (detectedType === '冷冻' && n.includes('冷冻')) newIdx = i;
+          else if (detectedType === '常温' && n.includes('常温')) newIdx = i;
+        });
+        if (newIdx >= 0) {
+          selectEmitGoods(newIdx);
+          fillEmitConfirm(rows);
+          return;
+        }
+      }
+      // 已选筐 + 类型不一致 → 弹提示，等用户决定
       if (detectedType && typeMismatchCheck(userType, detectedType)) {
         pendingEmitImage = imageDataUrl;
         pendingEmitRows = rows;
@@ -8830,7 +8896,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.84'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.85'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
