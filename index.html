@@ -5469,7 +5469,11 @@ function emitStartVoice() {
       hideEmitVoiceOverlay();
       let tip = '无法录音，请检查麦克风权限';
       if (err && err.name === 'NotAllowedError') tip = '麦克风权限被拒绝，请在设置中允许后重试';
+      else if (err && err.name === 'NotFoundError') tip = '未找到麦克风设备，请检查耳机/麦克风连接';
+      else if (err && err.name === 'SecurityError') tip = '浏览器安全策略拦截了麦克风，请关闭隐私模式后重试';
+      else if (err && err.name === 'AbortError') tip = '麦克风被其他应用占用，请关闭其他录音应用后重试';
       showToast('🔒 ' + tip);
+      try { console.log('[MIC_ERROR]', err && err.name, err && err.message, JSON.stringify(err)); } catch (e2) {}
     });
   } catch (e) {
     hideEmitVoiceOverlay();
