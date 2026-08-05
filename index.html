@@ -5445,6 +5445,30 @@ let emitVoiceChunks = [];
 let emitVoiceStream = null;
 let emitPendingNums = [];
 
+// ===== 麦克风错误统一细分提示（所有语音入口共用）=====
+// 覆盖全部常见错误类型 + 兜底显示真实错误名（err.name/err.message），
+// 避免"无法录音，请检查麦克风权限"一刀切导致无法定位（旧版 startVoice 只细分了 NotAllowedError）。
+function micErrorTip(err) {
+  if (!err) return '无法录音，请检查麦克风权限';
+  const name = err.name || '';
+  const msg = err.message || '';
+  let tip = '';
+  if (name === 'NotAllowedError') tip = '麦克风权限被拒绝，请在设置中允许后重试';
+  else if (name === 'NotFoundError') tip = '未找到麦克风设备，请检查耳机/麦克风连接';
+  else if (name === 'SecurityError') tip = '浏览器安全策略拦截了麦克风，请关闭隐私模式后重试';
+  else if (name === 'AbortError') tip = '麦克风被其他应用占用，请关闭其他录音应用后重试';
+  else if (name === 'NotReadableError') tip = '麦克风设备被占用或不可用，请关闭其他录音应用后重试';
+  else if (name === 'OverconstrainedError') tip = '麦克风不满足录音要求，请更换设备后重试';
+  else if (name === 'TypeError' || name === 'InvalidStateError') tip = '录音初始化失败，请重试';
+  else {
+    // 兜底：显示真实错误名 + 信息，方便用户反馈时定位
+    tip = '无法录音（' + (name || '未知错误') + '）';
+    if (msg && msg !== name) tip += '：' + msg;
+  }
+  try { console.log('[MIC_ERROR]', name, msg); } catch (e2) {}
+  return tip;
+}
+
 function emitStartVoice() {
   if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
@@ -5467,13 +5491,7 @@ function emitStartVoice() {
       startEmitVoiceWave(stream); // 音量波形动画
     }).catch(err => {
       hideEmitVoiceOverlay();
-      let tip = '无法录音，请检查麦克风权限';
-      if (err && err.name === 'NotAllowedError') tip = '麦克风权限被拒绝，请在设置中允许后重试';
-      else if (err && err.name === 'NotFoundError') tip = '未找到麦克风设备，请检查耳机/麦克风连接';
-      else if (err && err.name === 'SecurityError') tip = '浏览器安全策略拦截了麦克风，请关闭隐私模式后重试';
-      else if (err && err.name === 'AbortError') tip = '麦克风被其他应用占用，请关闭其他录音应用后重试';
-      showToast('🔒 ' + tip);
-      try { console.log('[MIC_ERROR]', err && err.name, err && err.message, JSON.stringify(err)); } catch (e2) {}
+      showToast('🔒 ' + micErrorTip(err));
     });
   } catch (e) {
     hideEmitVoiceOverlay();
@@ -7097,9 +7115,7 @@ function startVoice(mode) {
       overlay.classList.remove('show');
       document.getElementById('voiceInBtn').classList.remove('recording');
       document.getElementById('voiceOutBtn').classList.remove('recording');
-      let tip = '无法录音，请检查麦克风权限';
-      if (err && err.name === 'NotAllowedError') tip = '麦克风权限被拒绝，请在设置中允许后重试';
-      showToast('🔒 ' + tip);
+      showToast('🔒 ' + micErrorTip(err));
     });
   } catch (e) {
     overlay.classList.remove('show');
@@ -9367,7 +9383,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.96'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.97'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
