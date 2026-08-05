@@ -995,6 +995,67 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 }
 #ocrResultModal .ocr-table tbody td { border-bottom: 1px solid rgba(255,255,255,.07); }
 #ocrResultModal .ocr-table .total-row td { background: rgba(245,220,146,.08); color: #F5DC92; font-weight: 700; }
+/* ===== AI 识图结果确认弹窗：深空蓝晶定稿风格（#98） ===== */
+#emitVoiceConfirmModal.store-ocr-modal { background: rgba(4,24,32,.78); width: 100%; height: 100%; }
+#emitVoiceConfirmModal .store-ocr-content {
+  background: #0E3340;
+  border: 1.5px solid rgba(245,220,146,.55);
+  border-radius: 22px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.55);
+  color: #FFFFFF;
+  max-width: 520px;
+}
+#emitVoiceConfirmModal .store-ocr-content::-webkit-scrollbar { width: 5px; }
+#emitVoiceConfirmModal .store-ocr-content::-webkit-scrollbar-thumb { background: rgba(245,220,146,.4); border-radius: 3px; }
+#emitVoiceConfirmModal .ecv-title { color: #F5DC92; font-weight: 700; font-size: 17px; }
+#emitVoiceConfirmModal .ecv-date-row {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(124,232,224,.5);
+  border-radius: 12px; padding: 8px 12px; margin-bottom: 8px;
+}
+#emitVoiceConfirmModal .ecv-date-row input[type="date"] {
+  flex: 1; background: rgba(255,255,255,.08); border: none; border-radius: 8px;
+  color: #7CE8E0; font-weight: 700; font-size: 14px; padding: 5px 8px; min-width: 0;
+}
+#emitVoiceConfirmModal .ecv-date-row input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.8); }
+#emitVoiceConfirmModal .ecv-goods-row {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(124,232,224,.55);
+  border-radius: 12px; padding: 10px 12px; margin-bottom: 8px;
+}
+#emitVoiceConfirmModal .ecv-goods-name { font-size: 18px; font-weight: 800; color: #FFFFFF; }
+#emitVoiceConfirmModal .ecv-goods-auto { font-size: 12px; color: rgba(124,232,224,.85); flex: 1; }
+#emitVoiceConfirmModal .ecv-goods-change {
+  background: rgba(245,220,146,.12); border: 1.5px solid rgba(245,220,146,.5);
+  border-radius: 16px; color: #F5DC92; font-weight: 700; font-size: 13px;
+  padding: 4px 14px; cursor: pointer;
+}
+#emitVoiceConfirmModal .ecv-legend { font-size: 12px; color: rgba(255,255,255,.7); margin: 6px 2px 8px; }
+#emitVoiceConfirmModal .ecv-list {
+  max-height: 46vh; overflow-y: auto;
+  background: rgba(4,24,32,.35); border-radius: 12px; padding: 6px 10px;
+}
+#emitVoiceConfirmModal .ecv-list::-webkit-scrollbar { width: 5px; }
+#emitVoiceConfirmModal .ecv-list::-webkit-scrollbar-thumb { background: rgba(245,220,146,.4); border-radius: 3px; }
+#emitVoiceConfirmModal .ecv-total {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(245,220,146,.12); border: 1.5px solid rgba(245,220,146,.5);
+  border-radius: 12px; padding: 9px 14px; margin-top: 8px; font-weight: 800; color: #F5DC92; font-size: 15px;
+}
+#emitVoiceConfirmModal .ecv-warn {
+  background: rgba(245,166,35,.12); border: 1.5px solid rgba(245,166,35,.5);
+  border-radius: 10px; padding: 8px 12px; margin-top: 10px;
+  font-size: 13px; font-weight: 700; color: #F5A623; text-align: center;
+}
+#emitVoiceConfirmModal .btn-save-emit {
+  flex: 1; border: none; border-radius: 12px; padding: 12px;
+  background: linear-gradient(160deg,#F8E3A6,#C89B4E); color: #0B2E38;
+  font-weight: 700; font-size: 15px; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(200,155,78,.3);
+}
+#emitVoiceConfirmModal .btn-save-emit:active { transform: scale(.97); }
 /* ===== 额外发收登记弹窗：深空蓝晶定稿风格 ===== */
 #extraModal.store-ocr-modal { background: rgba(4,24,32,.78); width: 100%; height: 100%; }
 #extraModal .store-ocr-content {
@@ -1842,16 +1903,32 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
   <!-- 语音识别结果确认弹窗 -->
   <div class="store-ocr-modal" id="emitVoiceConfirmModal">
-    <div class="store-ocr-content" style="max-width:330px;" onclick="event.stopPropagation()">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <span style="font-weight:700;font-size:16px;color:var(--text);">🤖 AI 识别结果确认</span>
-        <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitVoiceConfirm()">×</span>
+    <div class="store-ocr-content" style="max-width:520px;max-height:88vh;overflow-y:auto;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span class="ecv-title">🤖 AI 识图结果 · 请核对</span>
+        <span style="cursor:pointer;font-size:22px;color:rgba(255,255,255,.9);" onclick="closeEmitVoiceConfirm()">×</span>
       </div>
-      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">识别出的数字按顺序对应各店面，可修改后确认</div>
-      <div id="emitVoiceConfirmList" style="max-height:50vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:6px;"></div>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button class="btn btn-outline" style="flex:1;" onclick="closeEmitVoiceConfirm()">✕ 取消</button>
-        <button class="btn btn-primary" style="flex:1;" onclick="applyEmitVoice()">✅ 确认填入</button>
+      <!-- 记录日期 -->
+      <div class="ecv-date-row">
+        <span style="font-size:15px;">📅</span>
+        <span style="font-size:13px;color:rgba(255,255,255,.85);white-space:nowrap;">记录日期</span>
+        <input type="date" id="emitConfirmDate" onchange="syncEmitConfirmDate(this.value)">
+        <span style="font-size:11px;color:rgba(255,255,255,.6);white-space:nowrap;">可改历史日期补录</span>
+      </div>
+      <!-- 录入筐类型（AI 自动识别 + 可更改） -->
+      <div class="ecv-goods-row">
+        <span id="emitConfirmGoodsIcon" style="font-size:26px;">🗳️</span>
+        <span class="ecv-goods-name" id="emitConfirmGoodsName">未选择</span>
+        <span class="ecv-goods-auto">已自动识别</span>
+        <span class="ecv-goods-change" onclick="openEmitGoodsSelect()">更改 ▾</span>
+      </div>
+      <div class="ecv-legend"><span style="color:#4ADE80;">■ 绿色 = 高置信</span>　<span style="color:#F5A623;">■ 黄色 = 建议核对</span>　<span style="color:rgba(255,255,255,.5);">数字可点开直接改</span></div>
+      <div id="emitVoiceConfirmList" class="ecv-list"></div>
+      <div class="ecv-total"><span>合计</span><span id="emitConfirmTotal">0</span></div>
+      <div class="ecv-warn">⚠️ 请核对好每行数据后再点「确定保存」，保存后直接入账</div>
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <button class="btn btn-outline" style="flex:1;padding:12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.95);font-size:15px;font-weight:700;" onclick="closeEmitVoiceConfirm()">✕ 取消</button>
+        <button class="btn-save-emit" onclick="applyEmitVoice()">✅ 确定保存</button>
       </div>
     </div>
   </div>
@@ -5295,14 +5372,37 @@ function renderEmitVoiceConfirm(nums) {
     const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
     const n = i < nums.length ? nums[i] : '';
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);';
+    row.setAttribute('data-emit-row', '1');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.08);';
     row.innerHTML = `
-      <span style="flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:var(--secondary,#e67e22);font-size:11px;">${alias}</span></span>
+      <span style="flex:1;font-size:13px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:#E67E22;font-size:11px;">${alias}</span></span>
       <input type="number" inputmode="numeric" min="0" value="${n}"
-        style="width:90px;text-align:center;font-size:16px;font-weight:700;padding:6px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);"
-        data-emit-confirm-idx="${i}">`;
+        style="width:96px;text-align:center;font-size:17px;font-weight:700;padding:6px;border:1.5px solid rgba(124,232,224,.4);border-radius:10px;background:rgba(255,255,255,.07);color:#fff;"
+        data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()">`;
     container.appendChild(row);
   }
+  updateEmitConfirmTotal();
+  // 同步弹窗内日期/筐类型展示
+  const de = document.getElementById('emitConfirmDate');
+  const panelDate = document.getElementById('emitRecordDate');
+  if (de) { if (!de.value) de.value = (panelDate && panelDate.value) ? panelDate.value : todayStr(); }
+  const gName = currentEmitGoodsName() || '';
+  const gIcon = document.getElementById('emitConfirmGoodsIcon');
+  const gLabel = document.getElementById('emitConfirmGoodsName');
+  if (gIcon) gIcon.textContent = gName ? goodsIcon(gName) : '🗳️';
+  if (gLabel) gLabel.textContent = gName || '未选择';
+}
+// 合计行：汇总确认列表所有数字
+function updateEmitConfirmTotal() {
+  const inputs = Array.from(document.querySelectorAll('#emitVoiceConfirmList input[data-emit-confirm-idx]'));
+  const total = inputs.reduce((s, inp) => s + (parseInt(inp.value) || 0), 0);
+  const el = document.getElementById('emitConfirmTotal');
+  if (el) el.textContent = String(total);
+}
+// 弹窗日期同步回面板（保存入账用）
+function syncEmitConfirmDate(v) {
+  const panelDate = document.getElementById('emitRecordDate');
+  if (panelDate && v) panelDate.value = v;
 }
 // 手动切换 AI 取的列：用 cols 里新列名重算数字
 function switchEmitCol(newColName) {
@@ -5340,14 +5440,15 @@ function switchEmitCol(newColName) {
     const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
     const row = document.createElement('div');
     row.setAttribute('data-emit-row', '1');
-    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid var(--border);';
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.08);';
     row.innerHTML = `
-      <span style="flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:var(--secondary,#e67e22);font-size:11px;">${alias}</span></span>
+      <span style="flex:1;font-size:13px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:#E67E22;font-size:11px;">${alias}</span></span>
       <input type="number" inputmode="numeric" min="0" value="${n}"
-        style="width:90px;text-align:center;font-size:16px;font-weight:700;padding:6px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);"
-        data-emit-confirm-idx="${i}">`;
+        style="width:96px;text-align:center;font-size:17px;font-weight:700;padding:6px;border:1.5px solid rgba(124,232,224,.4);border-radius:10px;background:rgba(255,255,255,.07);color:#fff;"
+        data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()">`;
     container.appendChild(row);
   });
+  updateEmitConfirmTotal();
   showToast('已切换到列：' + newColName);
 }
 function closeEmitVoiceConfirm() {
@@ -5358,8 +5459,10 @@ function applyEmitVoice() {
   const confirmInputs = Array.from(document.querySelectorAll('#emitVoiceConfirmList input[data-emit-confirm-idx]'));
   // 把确认后的数字覆盖填入发出页对应店面输入框（按顺序，覆盖已有值）
   const emitInputs = Array.from(document.querySelectorAll('#emitStoreList input[data-emit-idx]'));
+  let hasAny = false;
   confirmInputs.forEach((ci, i) => {
     const qty = parseInt(ci.value) || 0;
+    if (qty > 0) hasAny = true;
     if (i < emitInputs.length) {
       emitInputs[i].value = qty > 0 ? qty : '';
     }
@@ -5374,10 +5477,9 @@ function applyEmitVoice() {
     saveVoiceExample(currentEmitGoodsName() || '默认', { t: Date.now(), text: emitVoiceText, nums });
     emitVoiceText = '';
   }
-  showToast('✅ 已按店面顺序填入');
-  // 聚焦第一个已填的输入框，方便继续
-  const first = emitInputs.find(inp => inp.value !== '');
-  if (first) first.focus();
+  // 一步到位：直接保存入账（不再要求用户二次点「保存发出」）
+  if (!hasAny) { showToast('请至少填一家店的数量'); return; }
+  saveEmitRecords();
 }
 function emitTriggerPhoto() {
   // 整合版：无需先选筐，AI 自动判断筐类型（鲜食筐除外）
@@ -8896,7 +8998,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.85'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.86'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
