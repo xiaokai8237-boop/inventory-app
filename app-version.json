@@ -1,7 +1,7 @@
 {
-  "versionCode": 87,
-  "versionName": "6.0.87",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.87-capbridge.apk",
-  "note": "【v6.0.87 更新内容】\n1. 修复 APK 更新提示收不到的问题（壳页面 iframe 内无法访问更新插件，新增桥接代理，以后新版本能正常弹更新）\n2. 彻底修复语音录入麦克风权限（启动即预申请，选「仅在使用中允许」后长期有效）\n3. 相机权限同步处理，拍照识别更稳定\n4. 本版为手动安装包，安装后自动更新链路恢复正常",
+  "versionCode": 88,
+  "versionName": "6.0.88",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.88-capperm.apk",
+  "note": "【v6.0.88 更新内容】\n1. 彻底修复语音录入麦克风权限：服务端 Permissions-Policy 头允许 iframe 内 self origin 使用麦克风/相机 + 壳 iframe 加 allow 属性（双保险）；用户无需去设置手动开权限\n2. 同时含 v6.0.87 的 Capacitor 桥接修复（更新提示能正常弹出）\n3. 本版为自动更新提示（v6.0.87 桥接修复已让更新链路恢复），无需手动安装",
   "force": false
 }

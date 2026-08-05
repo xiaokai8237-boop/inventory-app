@@ -4,3 +4,9 @@
 
 /app-version.json
   Cache-Control: no-store
+
+/
+  # 允许 iframe 内 self origin 使用麦克风/相机（修复 Android WebView getUserMedia 被拒）
+  Permissions-Policy: camera=(self "https://inventory-app-9ql.pages.dev"), microphone=(self "https://inventory-app-9ql.pages.dev"), autoplay=(self), clipboard-write=(self)
+  # 兼容旧浏览器
+  Feature-Policy: camera 'self' https://inventory-app-9ql.pages.dev; microphone 'self' https://inventory-app-9ql.pages.dev
