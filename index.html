@@ -164,8 +164,8 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
 }
-.header h1 { font-size: 18px; font-weight: 700; padding: 0 116px 0 12px; background: linear-gradient(90deg, var(--primary), var(--success)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
-.header .date-today { font-size: 12px; color: var(--text-light); margin-top: 2px; padding: 0 116px 0 12px; }
+.header h1 { font-size: 18px; font-weight: 700; padding: 0 48px 0 12px; background: linear-gradient(90deg, var(--primary), var(--success)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.header .date-today { font-size: 12px; color: var(--text-light); margin-top: 2px; padding: 0 48px 0 12px; }
 
 /* 首页角落登录状态胶囊 */
 .login-pill {
@@ -246,8 +246,6 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
 }
 .page { display: none; padding: 12px; padding-bottom: 76px; }
 .page.active { display: block; animation: pageFadeIn .25s ease; }
-/* 极简模式：底部导航隐藏，收窄底部留白 */
-#page-simple, #page-simple-history { padding-bottom: 24px; }
 @keyframes pageFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .card {
   background: var(--card-bg);
@@ -1838,7 +1836,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 <div class="header">
   <h1>📦 物流筐收发管理系统</h1>
   <div class="date-today" id="todayLabel"></div>
-  <button id="simpleModeBtn" onclick="enterSimpleMode()" style="position:absolute;right:12px;top:14px;display:none;align-items:center;gap:3px;padding:6px 10px;border-radius:14px;border:1px solid rgba(124,232,224,.5);background:rgba(124,232,224,.12);color:#7CE8E0;font-size:12px;font-weight:600;cursor:pointer;line-height:1;"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;"><path d="M4 6h16M4 12h16M4 18h10"/></svg>极简模式</button>
 </div>
 
 <div class="beta-banner" onclick="switchPage('manage')"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><path d="M10 2v6L4.5 18a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="7" y1="14" x2="17" y2="14"/></svg>当前为测试版，数据不会丢失，请放心使用</div>
@@ -2195,62 +2192,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div id="dailyPhotoInfo" style="font-size:11px;color:var(--text-light);margin-top:6px;"></div>
   </div>
   <div id="historyList"></div>
-</div>
-
-<div class="page" id="page-simple">
-  <!-- 极简模式顶栏：返回 + 标题 -->
-  <div class="card" style="padding:10px 12px;display:flex;align-items:center;gap:8px;">
-    <button onclick="switchPage('record')" style="background:none;border:none;font-size:16px;cursor:pointer;padding:6px 10px;color:var(--primary);font-weight:600;white-space:nowrap;">← 返回</button>
-    <span style="flex:1;text-align:center;font-size:14px;font-weight:600;color:var(--text);">极简模式 · 总数录入</span>
-  </div>
-  <!-- 模式提醒（切换进入时提示一次） -->
-  <div style="margin:8px 12px 0;padding:8px 10px;border-radius:10px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);font-size:12px;color:#d97706;line-height:1.5;" id="simpleModeNotice">
-    当前是<b>极简模式</b>：只记录每天每种筐的发出/回收<b>总数</b>（不按店面分），与详细记录分开保存、互不影响。
-  </div>
-
-  <!-- 录入卡片 -->
-  <div class="card" style="margin:10px 12px 0;padding:12px;">
-    <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text);">📅 录入总数</div>
-    <div class="form-group">
-      <label class="form-label">日期</label>
-      <input type="date" class="form-input" id="simpleDate" style="width:100%;padding:8px;font-size:13px;">
-    </div>
-    <div class="form-group" style="margin-top:8px;">
-      <label class="form-label">各筐发出 / 回收总数（0-9999）</label>
-      <div id="simpleGoodsList"></div>
-    </div>
-    <button class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;margin-top:10px;border:none;border-radius:12px;" onclick="saveSimpleRecord()">保存当日总数</button>
-    <button class="btn" style="width:100%;padding:11px;font-size:14px;margin-top:8px;border:1px solid var(--primary);border-radius:12px;background:transparent;color:var(--primary);" onclick="simpleGoView()">查看记录</button>
-  </div>
-  <div style="height:20px;"></div>
-</div>
-
-<!-- 极简模式 · 记录查看页（与录入页分开，模式互斥：极简页内无默认模式入口） -->
-<div class="page" id="page-simple-history">
-  <!-- 极简模式顶栏：返回录入页 + 标题 -->
-  <div class="card" style="padding:10px 12px;display:flex;align-items:center;gap:8px;">
-    <button onclick="switchPage('simple')" style="background:none;border:none;font-size:16px;cursor:pointer;padding:6px 10px;color:var(--primary);font-weight:600;white-space:nowrap;">← 返回</button>
-    <span style="flex:1;text-align:center;font-size:14px;font-weight:600;color:var(--text);">极简模式 · 记录查看</span>
-  </div>
-  <!-- 模式提醒（切换进入时提示一次） -->
-  <div style="margin:8px 12px 0;padding:8px 10px;border-radius:10px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);font-size:12px;color:#d97706;line-height:1.5;" id="simpleModeNotice">
-    当前是<b>极简模式</b>：只记录每天每种筐的发出/回收<b>总数</b>（不按店面分），与详细记录分开保存、互不影响。
-  </div>
-
-  <!-- 查看卡片 -->
-  <div class="card" style="margin:10px 12px 0;padding:12px;">
-    <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--text);">📊 查看记录</div>
-    <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
-      <input type="date" class="form-input" id="simpleViewDate" style="flex:1;padding:8px;font-size:13px;" onchange="renderSimpleView()">
-      <select class="form-select" id="simpleViewRange" style="width:110px;padding:8px;font-size:12px;" onchange="renderSimpleView()">
-        <option value="1">近1天</option>
-        <option value="30">近30天</option>
-        <option value="60">近60天</option>
-      </select>
-    </div>
-    <div id="simpleViewResult"></div>
-  </div>
-  <div style="height:20px;"></div>
 </div>
 
 <!-- ========== 管理页 ========== -->
@@ -2853,24 +2794,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div style="display:flex;gap:8px;">
       <button class="btn btn-cancel-form" style="flex:1;" onclick="rejectPrivacy()">不同意</button>
       <button class="btn btn-primary-form" style="flex:1;" onclick="acceptPrivacy()">同意并继续</button>
-    </div>
-  </div>
-</div>
-
-<!-- 极简模式切换提醒弹窗 -->
-<div class="store-ocr-modal ocr-form-modal" id="simpleModeTipModal">
-  <div class="store-ocr-content" style="max-width:400px;" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <span class="ocr-form-title">极简模式</span>
-    </div>
-    <div style="font-size:12.5px;color:#EAF9FB;line-height:1.8;background:rgba(255,255,255,.05);border:1px solid rgba(124,232,224,.25);border-radius:12px;padding:12px;margin-bottom:10px;">
-      当前已切换到<b style="color:#7CE8E0;">极简模式</b>：<br>
-      1. 只记录每天每种筐的<b style="color:#7CE8E0;">发出/回收总数</b>，不按店面分开；<br>
-      2. 与详细记录<b style="color:#F5DC92;">分开保存、互不影响</b>；<br>
-      3. 想回到原来的详细录入，点左上角「返回」即可。
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-primary-form" style="flex:1;" onclick="closeSimpleModeTip()">知道了</button>
     </div>
   </div>
 </div>
@@ -3918,13 +3841,6 @@ function collectUiState() {
     const av = localStorage.getItem(avKey);
     if (avPhone && av) { ui._avatar = {}; ui._avatar[avPhone] = av; }
   } catch(e) {}
-  // 极简模式记录（账号作用域 key，需跨设备同步 → 单独打包）
-  try {
-    const smPhone = getCloudPhone();
-    const smKey = scopeKey(SIMPLE_RECORDS_KEY);
-    const sm = localStorage.getItem(smKey);
-    if (smPhone && sm) { ui._simpleRecords = {}; ui._simpleRecords[smPhone] = sm; }
-  } catch(e) {}
   return ui;
 }
 function applyUiState(ui) {
@@ -3952,16 +3868,6 @@ function applyUiState(ui) {
       if (avPhone && ui._avatar[avPhone]) {
         localStorage.setItem('kuanwei_avatar__' + avPhone, ui._avatar[avPhone]);
         if (typeof renderManage === 'function') renderManage();
-      }
-    } catch(e) {}
-  }
-  // 还原极简模式记录（账号匹配时写入，换设备登录同账号即自动同步）
-  if (ui._simpleRecords && typeof ui._simpleRecords === 'object') {
-    try {
-      const smPhone = getCloudPhone();
-      if (smPhone && ui._simpleRecords[smPhone]) {
-        localStorage.setItem(scopeKey(SIMPLE_RECORDS_KEY), ui._simpleRecords[smPhone]);
-        if (typeof renderSimpleView === 'function') renderSimpleView();
       }
     } catch(e) {}
   }
@@ -6906,205 +6812,6 @@ function switchPage(pageName) {
   if (pageName === 'settings') { renderSettings(); }
   if (pageName === 'manage') renderManage();
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
-  if (pageName === 'simple') { renderSimpleMode(); }
-  if (pageName === 'simple-history') { renderSimpleView(); }
-  // 模式互斥：极简模式下隐藏底部导航（极简内部只有录入/查看/返回，不暴露默认模式入口）
-  const tabsEl = document.querySelector('.tabs');
-  if (tabsEl) tabsEl.style.display = (pageName === 'simple' || pageName === 'simple-history') ? 'none' : 'flex';
-  // 首页右上角「极简」按钮：仅首页显示
-  const smBtn = document.getElementById('simpleModeBtn');
-  if (smBtn) smBtn.style.display = (pageName === 'record') ? 'inline-flex' : 'none';
-}
-
-// ======== 极简模式（只记每天发出/回收总数，与明细账完全分开） ========
-// 数据独立 key：kuanwei_simple_records（账号作用域隔离，与明细 STORAGE_KEY 互不影响）
-const SIMPLE_RECORDS_KEY = 'kuanwei_simple_records';
-const SIMPLE_GOODS_KEY = 'kuanwei_simple_goods'; // 极简模式筐类型快照（跟随明细筐设置，跨账号共用全局即可）
-// 极简记录结构：{ 'YYYY-MM-DD': { out: [n,n,n,n,n], in: [n,n,n,n,n] } }（下标=筐序号，与 loadGoodsNames 对齐）
-function loadSimpleRecords() {
-  try {
-    const raw = localStorage.getItem(scopeKey(SIMPLE_RECORDS_KEY));
-    return raw ? JSON.parse(raw) : {};
-  } catch (e) { return {}; }
-}
-function saveSimpleRecords(data) {
-  try { localStorage.setItem(scopeKey(SIMPLE_RECORDS_KEY), JSON.stringify(data)); } catch (e) {}
-}
-// 进入极简模式：弹一次模式提醒（切换提醒）
-function enterSimpleMode() {
-  switchPage('simple');
-  // 切换模式提醒：仅首次提醒，避免每次进入都打扰
-  try {
-    if (!localStorage.getItem('kuanwei_simple_mode_seen')) {
-      localStorage.setItem('kuanwei_simple_mode_seen', '1');
-      showModal('simpleModeTipModal');
-    }
-  } catch (e) {}
-}
-// 极简录入页 → 记录查看页（内部切换，switchPage 统一处理 tab 显隐与互斥）
-function simpleGoView() {
-  switchPage('simple-history');
-}
-function closeSimpleModeTip() {
-  const m = document.getElementById('simpleModeTipModal');
-  if (m) m.classList.remove('show');
-}
-// 渲染极简模式页
-function renderSimpleMode() {
-  const dateInput = document.getElementById('simpleDate');
-  if (dateInput && !dateInput.value) dateInput.value = todayStr();
-  const viewDate = document.getElementById('simpleViewDate');
-  if (viewDate && !viewDate.value) viewDate.value = todayStr();
-  renderSimpleGoodsList();
-  renderSimpleView();
-  // 登录锁定：未登录不能录入
-  updateLoginLock();
-  const list = document.getElementById('simpleGoodsList');
-  if (list) list.classList.toggle('locked-input', !isLoggedIn());
-  const saveBtn = document.querySelector('[onclick="saveSimpleRecord()"]');
-  if (saveBtn) saveBtn.classList.toggle('locked-input', !isLoggedIn());
-}
-// 渲染极简录入行（每筐：发出总数 + 回收总数）
-function renderSimpleGoodsList() {
-  const container = document.getElementById('simpleGoodsList');
-  if (!container) return;
-  const names = loadGoodsNames();
-  // 表头
-  let html = '<div class="goods-input-list">';
-  html += '<div class="goods-input-item" style="font-size:11px;color:var(--text-light);border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:6px;">';
-  html += '<div class="gi-name">筐名</div><div style="flex:1;text-align:center;">发出</div><div style="flex:1;text-align:center;">回收</div>';
-  html += '</div>';
-  names.forEach((name, i) => {
-    html += '<div class="goods-input-item">';
-    html += '<div class="gi-name">' + escapeHtml(name) + '</div>';
-    html += '<div class="gi-in"><input type="number" id="simpleOut' + i + '" placeholder="0" min="0" max="9999" inputmode="numeric" data-idx="' + i + '"></div>';
-    html += '<div class="gi-out"><input type="number" id="simpleIn' + i + '" placeholder="0" min="0" max="9999" inputmode="numeric" data-idx="' + i + '"></div>';
-    html += '</div>';
-  });
-  html += '</div>';
-  container.innerHTML = html;
-  // 载入当天已有记录（改天编辑不丢）
-  const date = document.getElementById('simpleDate').value;
-  const rec = loadSimpleRecords()[date];
-  if (rec) {
-    (rec.out || []).forEach((v, i) => {
-      const el = document.getElementById('simpleOut' + i);
-      if (el && v) el.value = v;
-    });
-    (rec.in || []).forEach((v, i) => {
-      const el = document.getElementById('simpleIn' + i);
-      if (el && v) el.value = v;
-    });
-  }
-}
-// 保存当日总数
-function saveSimpleRecord() {
-  if (!isLoggedIn()) { showToast('请先登录后再保存'); return; }
-  const date = document.getElementById('simpleDate').value;
-  if (!date) { showToast('请选择日期'); return; }
-  const names = loadGoodsNames();
-  const out = [], inArr = [];
-  let hasValue = false;
-  for (let i = 0; i < names.length; i++) {
-    const ov = parseInt(document.getElementById('simpleOut' + i).value, 10);
-    const iv = parseInt(document.getElementById('simpleIn' + i).value, 10);
-    const o = isNaN(ov) ? 0 : Math.max(0, Math.min(9999, ov));
-    const v = isNaN(iv) ? 0 : Math.max(0, Math.min(9999, iv));
-    out.push(o); inArr.push(v);
-    if (o > 0 || v > 0) hasValue = true;
-  }
-  if (!hasValue) { showToast('请至少填写一个数量'); return; }
-  const data = loadSimpleRecords();
-  data[date] = { out: out, in: inArr };
-  saveSimpleRecords(data);
-  showToast('已保存 ' + date + ' 总数');
-  renderSimpleGoodsList();
-  renderSimpleView();
-  // 登录后自动云备份（与明细一致）
-  try { if (getCloudPhone()) backupToCloud(false); } catch (e) {}
-}
-// 删除某天极简记录（长按/编辑辅助：查看区删除按钮）
-function deleteSimpleRecord(date) {
-  if (!isLoggedIn()) { showToast('请先登录'); return; }
-  const data = loadSimpleRecords();
-  if (!data[date]) return;
-  if (!confirm('确定删除 ' + date + ' 的极简记录？')) return;
-  delete data[date];
-  saveSimpleRecords(data);
-  showToast('已删除 ' + date + ' 记录');
-  renderSimpleView();
-}
-// 查看：单日明细 + 范围汇总
-function renderSimpleView() {
-  const result = document.getElementById('simpleViewResult');
-  if (!result) return;
-  const names = loadGoodsNames();
-  const all = loadSimpleRecords();
-  const viewDate = document.getElementById('simpleViewDate').value;
-  const range = parseInt(document.getElementById('simpleViewRange').value, 10) || 1;
-
-  // 1) 单日明细
-  let html = '';
-  const dayRec = viewDate ? all[viewDate] : null;
-  if (viewDate) {
-    html += '<div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">' + viewDate + ' 明细</div>';
-    if (dayRec) {
-      html += '<table style="width:100%;font-size:12px;border-collapse:collapse;">';
-      html += '<tr style="color:var(--text-light);"><td style="padding:4px 2px;">筐名</td><td style="padding:4px 2px;text-align:center;">发出</td><td style="padding:4px 2px;text-align:center;">回收</td></tr>';
-      let tout = 0, tin = 0;
-      names.forEach((name, i) => {
-        const o = (dayRec.out || [])[i] || 0;
-        const v = (dayRec.in || [])[i] || 0;
-        tout += o; tin += v;
-        html += '<tr style="border-top:1px solid var(--border);"><td style="padding:5px 2px;">' + escapeHtml(name) + '</td><td style="padding:5px 2px;text-align:center;color:var(--success);">' + (o || '-') + '</td><td style="padding:5px 2px;text-align:center;color:var(--danger);">' + (v || '-') + '</td></tr>';
-      });
-      html += '<tr style="border-top:1px solid var(--border);font-weight:700;"><td style="padding:5px 2px;">合计</td><td style="padding:5px 2px;text-align:center;color:var(--success);">' + tout + '</td><td style="padding:5px 2px;text-align:center;color:var(--danger);">' + tin + '</td></tr>';
-      html += '</table>';
-      html += '<div style="margin-top:6px;text-align:right;"><button onclick="deleteSimpleRecord(\'' + viewDate + '\')" style="background:none;border:1px solid var(--danger);color:var(--danger);font-size:11px;padding:4px 10px;border-radius:8px;cursor:pointer;">删除当日</button></div>';
-    } else {
-      html += '<div style="font-size:12px;color:var(--text-light);padding:8px 0;">当天无极简记录</div>';
-    }
-  }
-
-  // 2) 范围汇总（近 N 天）
-  html += '<div style="font-size:12px;font-weight:600;color:var(--text);margin:14px 0 6px;">近' + range + '天汇总</div>';
-  const dates = Object.keys(all).filter(d => {
-    if (!viewDate) return true;
-    const diff = (new Date(viewDate) - new Date(d)) / 86400000;
-    return diff >= 0 && diff < range;
-  }).sort();
-  if (dates.length === 0) {
-    html += '<div style="font-size:12px;color:var(--text-light);padding:8px 0;">该范围内无记录</div>';
-  } else {
-    // 汇总表：按天行 × 筐列（发出/回收合并且）
-    html += '<div style="overflow-x:auto;">';
-    html += '<table style="width:100%;font-size:11px;border-collapse:collapse;">';
-    html += '<tr style="color:var(--text-light);"><td style="padding:4px 2px;">日期</td>';
-    names.forEach(n => { html += '<td style="padding:4px 2px;text-align:center;">' + escapeHtml(n).slice(0,2) + '</td>'; });
-    html += '<td style="padding:4px 2px;text-align:center;">合计</td></tr>';
-    let grandOut = 0, grandIn = 0;
-    const colOut = new Array(names.length).fill(0), colIn = new Array(names.length).fill(0);
-    dates.forEach(d => {
-      const rec = all[d];
-      const oArr = rec.out || [], vArr = rec.in || [];
-      let dayOut = 0, dayIn = 0;
-      html += '<tr style="border-top:1px solid var(--border);"><td style="padding:4px 2px;white-space:nowrap;">' + d + '</td>';
-      names.forEach((n, i) => {
-        const o = oArr[i] || 0, v = vArr[i] || 0;
-        colOut[i] += o; colIn[i] += v; dayOut += o; dayIn += v;
-        html += '<td style="padding:4px 2px;text-align:center;">' + (o || v ? (o + '/' + v) : '-') + '</td>';
-      });
-      grandOut += dayOut; grandIn += dayIn;
-      html += '<td style="padding:4px 2px;text-align:center;font-weight:600;">' + dayOut + '/' + dayIn + '</td></tr>';
-    });
-    // 总计行
-    html += '<tr style="border-top:2px solid var(--border);font-weight:700;"><td style="padding:4px 2px;">总计</td>';
-    names.forEach((n, i) => { html += '<td style="padding:4px 2px;text-align:center;">' + (colOut[i] || colIn[i] ? colOut[i] + '/' + colIn[i] : '-') + '</td>'; });
-    html += '<td style="padding:4px 2px;text-align:center;color:var(--primary);">' + grandOut + '/' + grandIn + '</td></tr>';
-    html += '</table></div>';
-    html += '<div style="font-size:11px;color:var(--text-light);margin-top:6px;">显示格式：发出/回收</div>';
-  }
-  result.innerHTML = html;
 }
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => switchPage(tab.dataset.page));
@@ -9824,7 +9531,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.101'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.102'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -9879,11 +9586,6 @@ renderTodayStatus();
 initRecordPage();
 initGoodsFilter();
 initSummaryPage();
-// 首页右上角「极简」按钮：初始显示（switchPage 也会同步显隐）
-(function () {
-  const smBtn = document.getElementById('simpleModeBtn');
-  if (smBtn) smBtn.style.display = 'inline-flex';
-})();
 // 隐私政策同意（首次进入必须同意，否则阻止使用）
 function initPrivacyConsent() {
   try {
