@@ -4035,7 +4035,7 @@ function isLoggedIn() {
 function setLoggedIn(v) {
   try { localStorage.setItem('kuanwei_logged_in', v ? '1' : '0'); } catch(e) {}
 }
-function openLoginModal() { document.getElementById('loginModal').classList.add('show'); }
+function openLoginModal() { showModal('loginModal'); }
 function closeLoginModal() { document.getElementById('loginModal').classList.remove('show'); }
 
 // ======== 密码调试日志（测试期用，帮助定位"密码错误"根因） ========
@@ -4148,7 +4148,7 @@ function openDeleteAccountModal() {
   document.getElementById('deleteRegret').style.display = 'none';
   document.getElementById('delPhoneLabel').textContent = maskPhone(getCloudPhone());
   document.getElementById('delPwd').value = '';
-  document.getElementById('deleteAccountModal').classList.add('show');
+  showModal('deleteAccountModal');
 }
 function closeDeleteAccountModal() { document.getElementById('deleteAccountModal').classList.remove('show'); }
 function goDeleteStep2() {
@@ -4213,7 +4213,7 @@ function removeLocalAccountData(phone) {
 }
 
 // 设置密码
-function openSetupModal() { document.getElementById('setupModal').classList.add('show'); }
+function openSetupModal() { showModal('setupModal'); }
 function closeSetupModal() { document.getElementById('setupModal').classList.remove('show'); }
 async function doSetupAccount() {
   const phone = document.getElementById('setupPhone').value.trim();
@@ -4264,13 +4264,13 @@ function openVerifyModal() {
     if (p) { openRestoreConfirm(); return; }
   }
   // 未登录：走密码验证恢复
-  document.getElementById('verifyModal').classList.add('show');
+  showModal('verifyModal');
 }
 function closeVerifyModal() { document.getElementById('verifyModal').classList.remove('show'); }
 // ===== 恢复确认弹窗（防误操作覆盖本地数据） =====
 function openRestoreConfirm() {
   const el = document.getElementById('restoreConfirmModal');
-  if (el) el.classList.add('show');
+  if (el) showModal('restoreConfirmModal');
 }
 function closeRestoreConfirm() {
   const el = document.getElementById('restoreConfirmModal');
@@ -4402,7 +4402,7 @@ async function doVerifyAccount() {
 }
 
 // 更改密码
-function openChangePwdModal() { document.getElementById('changePwdModal').classList.add('show'); }
+function openChangePwdModal() { showModal('changePwdModal'); }
 function closeChangePwdModal() { document.getElementById('changePwdModal').classList.remove('show'); }
 async function doChangePwd() {
   const phone = document.getElementById('cpPhone').value.trim();
@@ -4453,7 +4453,7 @@ async function doChangePwd() {
 }
 
 // 忘记密码
-function openForgotModal() { document.getElementById('forgotModal').classList.add('show'); }
+function openForgotModal() { showModal('forgotModal'); }
 function closeForgotModal() { document.getElementById('forgotModal').classList.remove('show'); }
 async function doForgotReset() {
   const phone = document.getElementById('fgPhone').value.trim();
@@ -4497,7 +4497,7 @@ async function doForgotReset() {
 // 管理员
 let adminUsers = [];
 let adminKey = ''; // 验证通过后保存的管理员密码，供面板内操作使用（无需二次输入）
-function openAdminAuthModal() { document.getElementById('adminAuthModal').classList.add('show'); document.getElementById('adminAuthErr').style.display = 'none'; }
+function openAdminAuthModal() { showModal('adminAuthModal'); document.getElementById('adminAuthErr').style.display = 'none'; }
 function closeAdminAuthModal() { document.getElementById('adminAuthModal').classList.remove('show'); }
 async function doAdminAuth() {
   const pwd = document.getElementById('adminAuthPwd').value;
@@ -4520,7 +4520,7 @@ async function doAdminAuth() {
     document.getElementById('adminAuthErr').style.display = 'block';
   }
 }
-function openAdminModal() { document.getElementById('adminModal').classList.add('show'); loadAdminStats(); }
+function openAdminModal() { showModal('adminModal'); loadAdminStats(); }
 function closeAdminModal() { document.getElementById('adminModal').classList.remove('show'); }
 // 管理员统计：注册人数 + 用户列表
 async function loadAdminStats() {
@@ -4862,6 +4862,42 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
 }
+
+// ===== 弹窗互斥管理器（B 方案）：同一时间只显示一个弹窗，避免叠加冲突 =====
+// 规则：
+// 1. 打开新弹窗前，关闭其他所有弹窗/浮层（排除 toast / loadingOverlay / transparentToast）
+// 2. 隐私政策优先级最高：未同意时其他弹窗排队（modalPending），同意后才依次弹出
+// 3. 欢迎引导被更新弹窗顶掉后，关闭更新弹窗时自动恢复（若从未看过欢迎）
+let modalPending = null; // 隐私未同意时排队等待的弹窗 id
+function showModal(id) {
+  try {
+    const privacy = document.getElementById('privacyModal');
+    // 隐私政策未同意 → 其他弹窗排队（隐私不被覆盖）
+    if (privacy && privacy.classList.contains('show') && id !== 'privacyModal') {
+      modalPending = id;
+      return;
+    }
+    modalPending = null;
+    // 互斥：关闭其他所有用 .show 控制的弹窗/浮层（toast/loading 不参与）
+    const EXCLUDE = new Set(['toast', 'loadingOverlay', 'transparentToast']);
+    document.querySelectorAll('.show').forEach(m => {
+      try {
+        if (m.id && EXCLUDE.has(m.id)) return;
+        if (m.id !== id) m.classList.remove('show');
+      } catch (e) {}
+    });
+    const el = document.getElementById(id);
+    if (el) el.classList.add('show');
+  } catch (e) {}
+}
+// 隐私同意后：处理排队的弹窗
+function flushModalPending() {
+  if (modalPending) {
+    const pending = modalPending;
+    modalPending = null;
+    setTimeout(() => showModal(pending), 120);
+  }
+}
 // OCR 取消标志
 let ocrCancelled = false;
 // 安抚文案轮换
@@ -5078,7 +5114,7 @@ function saveRecoverOrder(order) {
 // ===== 回收页调整店序弹窗（拖动 + ▲▼，实时保存）=====
 function openRecoverStoreOrderModal() {
   renderRecoverStoreOrder();
-  document.getElementById('recoverStoreOrderModal').classList.add('show');
+  showModal('recoverStoreOrderModal');
 }
 function closeRecoverStoreOrderModal() {
   document.getElementById('recoverStoreOrderModal').classList.remove('show');
@@ -5155,7 +5191,7 @@ function openEmitGoodsSelect() {
       '<span style="flex:1;text-align:left;font-weight:700;color:#fff;">' + escapeHtml(n) + '</span>' +
       '<span style="color:rgba(245,220,146,.7);font-size:18px;">›</span></button>';
   }).join('');
-  document.getElementById('emitGoodsSelectModal').classList.add('show');
+  showModal('emitGoodsSelectModal');
 }
 function closeEmitGoodsSelect() {
   document.getElementById('emitGoodsSelectModal').classList.remove('show');
@@ -5319,7 +5355,7 @@ function saveEmitRecords() {
   // 弹保存成功提示框（回到主页 / 切换筐）
   const total = records.reduce((s, r) => s + r.qtyIn, 0);
   document.getElementById('emitSaveSummary').textContent = '已保存 ' + records.length + ' 家店 · 共 ' + total + ' 个「' + goodsName + '」';
-  document.getElementById('emitSaveResultModal').classList.add('show');
+  showModal('emitSaveResultModal');
 }
 function emitSaveContinue() {
   document.getElementById('emitSaveResultModal').classList.remove('show');
@@ -5348,7 +5384,7 @@ function openEmitStoreOrderModal() {
   const hint = document.getElementById('emitStoreOrderHint');
   if (hint && gName) hint.textContent = '按住 ☰ 拖动，或点 ▲▼ 调整（仅影响' + gName + '页顺序）';
   renderEmitStoreOrder();
-  document.getElementById('emitStoreOrderModal').classList.add('show');
+  showModal('emitStoreOrderModal');
 }
 function closeEmitStoreOrderModal() {
   document.getElementById('emitStoreOrderModal').classList.remove('show');
@@ -5589,7 +5625,7 @@ function emitShowVoiceNums(nums) {
   }
   emitPendingNums = list;
   renderEmitVoiceConfirm(list);
-  document.getElementById('emitVoiceConfirmModal').classList.add('show');
+  showModal('emitVoiceConfirmModal');
 }
 // 语音文本 → 本地解析（中文数字词转换，AI 失败时回退）
 function emitParseVoiceNums(text) {
@@ -5948,7 +5984,7 @@ function fillEmitConfirm(rows) {
   emitCurrentCols = Array.from(allCandidates);
   emitPendingNums = matchedNums;
   renderEmitVoiceConfirm(matchedNums);
-  document.getElementById('emitVoiceConfirmModal').classList.add('show');
+  showModal('emitVoiceConfirmModal');
   showToast('✅ AI 识别完成，请确认（识别 ' + rows.length + ' 家店，取列：' + emitCurrentCol + '）');
 }
 // 用户所选类型 与 识别类型 是否不一致（冷冻/常温是两种单据，绝不互通）
@@ -5973,7 +6009,7 @@ function showTypeMismatchModal(userType, detectedType) {
   if (desc) desc.innerHTML = '你选的是<b>【' + escapeHtml(userType) + '】</b>，但图片看起来是<b>【' + escapeHtml(typeDisplayName(detectedType)) + '】</b>单';
   const btn = document.getElementById('typeMismatchSwitchBtn');
   if (btn) btn.textContent = '按' + typeDisplayName(detectedType) + '重新识别';
-  document.getElementById('typeMismatchModal').classList.add('show');
+  showModal('typeMismatchModal');
 }
 function closeTypeMismatchModal() {
   document.getElementById('typeMismatchModal').classList.remove('show');
@@ -6024,7 +6060,7 @@ function openVoiceInputModal() {
   document.getElementById('voiceModeLabel').textContent = label;
   document.getElementById('voiceInBtn').style.display = currentActionType === 'in' ? '' : 'none';
   document.getElementById('voiceOutBtn').style.display = currentActionType === 'out' ? '' : 'none';
-  document.getElementById('voiceInputModal').classList.add('show');
+  showModal('voiceInputModal');
 }
 function closeVoiceInputModal() {
   document.getElementById('voiceInputModal').classList.remove('show');
@@ -6032,7 +6068,7 @@ function closeVoiceInputModal() {
 function openPhotoInputModal() {
   const label = currentActionType === 'out' ? '回收' : '发出';
   document.getElementById('photoModeLabel').textContent = label;
-  document.getElementById('photoInputModal').classList.add('show');
+  showModal('photoInputModal');
 }
 function closePhotoInputModal() {
   document.getElementById('photoInputModal').classList.remove('show');
@@ -6080,7 +6116,7 @@ function initWelcome() {
   try {
     if (localStorage.getItem('kuanwei_welcome_seen')) return;
     const m = document.getElementById('welcomeModal');
-    if (m) m.classList.add('show');
+    if (m) showModal('welcomeModal');
   } catch(e) {}
 }
 function closeWelcome(goTutorial) {
@@ -6146,7 +6182,7 @@ try {
 // 统一显示/隐藏引导弹窗里的三块内容：微信提示 / 安卓下载 / 苹果步骤
 function showInstallTip(which) {
   const modal = document.getElementById('installModal');
-  if (modal) modal.classList.add('show');
+  if (modal) showModal('installModal');
   const wx = document.getElementById('installWechatTip');
   const and = document.getElementById('installAndroidTip');
   const ios = document.getElementById('installIosTip');
@@ -6221,7 +6257,7 @@ function showRestoreResult(storeCount, goodsCount, recordCount, backupTime) {
   set('restoreGoodsCount', goodsCount);
   set('restoreRecordCount', recordCount);
   set('restoreBackupTime', backupTime || '-');
-  m.classList.add('show');
+  showModal('restoreResultModal');
 }
 function closeRestoreResult() {
   const m = document.getElementById('restoreResultModal');
@@ -6245,7 +6281,7 @@ function showBackupResult(stores, goodsCount, recordCount) {
       return '<div style="color:#EAF9FB;">🔸 <b style="color:#FFFFFF;">' + (i + 1) + '.</b> ' + s.name + alias + '</div>';
     }).join('') || '<div style="color:rgba(255,255,255,.7);">未备份店面</div>';
   }
-  m.classList.add('show');
+  showModal('backupResultModal');
 }
 function closeBackupResult() {
   const m = document.getElementById('backupResultModal');
@@ -6531,7 +6567,7 @@ function showDeleteGoodsModal() {
     document.getElementById('goodsDeleteConfirmBtn').textContent = '确认删除';
     document.getElementById('goodsDeleteConfirmBtn').style.display = '';
   }
-  document.getElementById('goodsDeleteModal').classList.add('show');
+  showModal('goodsDeleteModal');
 }
 function closeGoodsDeleteModal() {
   document.getElementById('goodsDeleteModal').classList.remove('show');
@@ -6569,7 +6605,7 @@ function setFilterDateRange(idFrom, fromDate, toDate) {
 // ======== 备份教程弹窗 ========
 function showBackupTutorial() {
   const modal = document.getElementById('backupTutorialModal');
-  if (modal) modal.classList.add('show');
+  if (modal) showModal('backupTutorialModal');
   // 4 秒后自动关闭（避免一直遮挡其他操作）
   if (window._backupTutorialTimer) clearTimeout(window._backupTutorialTimer);
   window._backupTutorialTimer = setTimeout(() => closeBackupTutorialModal(), 4000);
@@ -6773,7 +6809,7 @@ function openExtraModal() {
   });
   html += '</tbody></table>';
   container.innerHTML = html;
-  document.getElementById('extraModal').classList.add('show');
+  showModal('extraModal');
 }
 function closeExtraModal() {
   document.getElementById('extraModal').classList.remove('show');
@@ -6982,7 +7018,7 @@ function startVoice(mode) {
   const voiceText = document.getElementById('voiceText');
   transcript.textContent = '';
   voiceText.textContent = '正在请求麦克风…';
-  overlay.classList.add('show');
+  showModal('voiceOverlay');
   document.getElementById(mode === 'in' ? 'voiceInBtn' : 'voiceOutBtn').classList.add('recording');
 
   // 录音（MediaRecorder）+ 云端语音识别（兼容所有安卓浏览器）
@@ -7078,7 +7114,7 @@ function parseVoiceText(text, mode) {
   document.getElementById('voiceConfirmInfo').textContent = rows;
   // 立即收起语音识别浮层（不等 onend 的500ms延迟），让确认框完全置顶显示
   document.getElementById('voiceOverlay').classList.remove('show');
-  document.getElementById('voiceConfirmModal').classList.add('show');
+  showModal('voiceConfirmModal');
 }
 
 // AI 语音理解入口：ASR 文本 → 大模型理解（中文数字/同音字/口语）→ 回退正则
@@ -7107,7 +7143,7 @@ async function parseVoiceWithAI(text, mode) {
     const rows = Object.keys(results).map(idx => `${names[idx]}：${results[idx]}`).join('，');
     document.getElementById('voiceConfirmInfo').textContent = rows;
     document.getElementById('voiceOverlay').classList.remove('show');
-    document.getElementById('voiceConfirmModal').classList.add('show');
+    showModal('voiceConfirmModal');
     return true;
   }
   return false; // AI 不可用/没解析出来 → 走正则兜底
@@ -7369,7 +7405,7 @@ async function doOCR(imageDataUrl, file) {
       if (unreg.length > 0) {
         showUnregisteredStoresConfirm(unreg);
       } else {
-        document.getElementById('ocrResultModal').classList.add('show');
+        showModal('ocrResultModal');
       }
     } else {
       parseOcrResult(ocrData);
@@ -7752,7 +7788,7 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
   if (unregBaidu.length > 0) {
     showUnregisteredStoresConfirm(unregBaidu);
   } else {
-    document.getElementById('ocrResultModal').classList.add('show');
+    showModal('ocrResultModal');
   }
 }
 
@@ -7876,7 +7912,7 @@ function checkUnregisteredStores(rows) {
 function showUnregisteredStoresConfirm(names) {
   const desc = document.getElementById('unregStoreDesc');
   if (desc) desc.innerHTML = '识别到以下门店<b style="color:var(--danger);">还没录入</b>「店面管理」：<br><b>' + names.map(n => escapeHtml(n)).join('、') + '</b><br><br>请先去「店面管理」把门店加进去，再重新识别，识别结果才会准确对应到你的店。';
-  document.getElementById('unregStoreModal').classList.add('show');
+  showModal('unregStoreModal');
 }
 function closeUnregStoreModal() {
   document.getElementById('unregStoreModal').classList.remove('show');
@@ -7884,7 +7920,7 @@ function closeUnregStoreModal() {
 // 忽略继续：直接显示识别结果
 function unregStoreIgnore() {
   closeUnregStoreModal();
-  document.getElementById('ocrResultModal').classList.add('show');
+  showModal('ocrResultModal');
 }
 // 去录入：关闭结果弹窗 → 切到管理页 → 打开店面管理
 function unregStoreGotoManage() {
@@ -8079,7 +8115,7 @@ function openDailyReport() {
     const el = document.getElementById('drf_' + k);
     if (el) el.checked = (fields[k] === undefined) ? true : fields[k];
   });
-  modal.classList.add('show');
+  showModal('dailyReportModal');
 }
 function closeDailyReportModal() {
   document.getElementById('dailyReportModal').classList.remove('show');
@@ -8223,7 +8259,7 @@ function updateDailyLivePreview() {
 // 打开日报预览确认弹窗（内容可编辑）
 function showDailyPreview(text) {
   document.getElementById('dailyPreviewText').value = text;
-  document.getElementById('dailyPreviewModal').classList.add('show');
+  showModal('dailyPreviewModal');
 }
 function closeDailyPreview() {
   document.getElementById('dailyPreviewModal').classList.remove('show');
@@ -8267,7 +8303,7 @@ function openPhotoPanel() {
   const today = todayStr();
   document.getElementById('photoPanelDate').textContent = '日期：' + today;
   renderDailyPhotoList();
-  modal.classList.add('show');
+  showModal('photoPanelModal');
 }
 function closePhotoPanel() {
   document.getElementById('photoPanelModal').classList.remove('show');
@@ -8427,7 +8463,7 @@ function openEditRecord(id) {
     `📅 ${r.date} · 🏪 ${storeName} · ${r.goodsName || ''}`;
   document.getElementById('editQtyIn').value = r.qtyIn || 0;
   document.getElementById('editQtyOut').value = r.qtyOut || 0;
-  document.getElementById('editRecordModal').classList.add('show');
+  showModal('editRecordModal');
 }
 function closeEditRecordModal() {
   document.getElementById('editRecordModal').classList.remove('show');
@@ -8468,7 +8504,7 @@ function deleteRecord(id) {
     }
   } catch(e) {}
   pendingDeleteRecordId = id;
-  document.getElementById('recordDeleteModal').classList.add('show');
+  showModal('recordDeleteModal');
 }
 
 function closeRecordDeleteModal() {
@@ -8831,7 +8867,7 @@ function openAvatarModal() {
   } else {
     hint.textContent = '点击「更换头像」选择图片，拖动调整位置、滑块缩放';
   }
-  modal.classList.add('show');
+  showModal('avatarModal');
 }
 function closeAvatarModal() {
   document.getElementById('avatarModal').classList.remove('show');
@@ -9124,7 +9160,7 @@ function showStoreOcrResult(ocrData) {
   }
   document.getElementById('storeOcrCount').textContent = storeOcrParsed.length;
   renderStoreOcrTable();
-  document.getElementById('storeOcrModal').classList.add('show');
+  showModal('storeOcrModal');
 }
 
 function renderStoreOcrTable() {
@@ -9283,7 +9319,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.92'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.93'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -9342,7 +9378,7 @@ initSummaryPage();
 function initPrivacyConsent() {
   try {
     if (localStorage.getItem('kuanwei_privacy_consent')) return;
-    document.getElementById('privacyModal').classList.add('show');
+    showModal('privacyModal');
   } catch(e) {}
 }
 function acceptPrivacy() {
@@ -9350,6 +9386,8 @@ function acceptPrivacy() {
   document.getElementById('privacyModal').classList.remove('show');
   // 隐私同意后，再弹欢迎引导（使用说明入口）——保证顺序：隐私 → 使用说明
   initWelcome();
+  // 隐私同意后：处理排队中的弹窗（如版本更新，避免与隐私叠加）
+  flushModalPending();
 }
 function rejectPrivacy() {
   showToast('不同意隐私政策将无法使用本系统');
@@ -9428,13 +9466,17 @@ function showVersionConfirm(ver) {
   if (!m) return;
   const nl = document.getElementById('verNewLabel');
   if (nl) nl.textContent = ver || APP_VERSION;
-  m.classList.add('show');
+  showModal('versionConfirmModal');
   // 遮罩点击可关闭（可选，非强制）
   m.onclick = () => closeVersionConfirm();
 }
 function closeVersionConfirm() {
   const m = document.getElementById('versionConfirmModal');
   if (m) m.classList.remove('show');
+  // 更新弹窗关闭后：若欢迎引导从未看过（可能被更新弹窗顶掉），恢复显示
+  if (!localStorage.getItem('kuanwei_welcome_seen')) {
+    setTimeout(() => showModal('welcomeModal'), 150);
+  }
 }
 // 用户点"稍后"：关闭弹窗，本次不再提示
 function dismissVersionConfirm() {
@@ -9510,12 +9552,16 @@ function showApkUpdate(info) {
     btn.textContent = '📦 立即安装';
   }
   var m = document.getElementById('apkUpdateModal');
-  if (m) m.classList.add('show');
+  if (m) showModal('apkUpdateModal');
 }
 function dismissApkUpdate() {
   stopApkProgressPolling();
   var m = document.getElementById('apkUpdateModal');
   if (m) m.classList.remove('show');
+  // 更新弹窗关闭后：若欢迎引导从未看过（可能被更新弹窗顶掉），恢复显示
+  if (!localStorage.getItem('kuanwei_welcome_seen')) {
+    setTimeout(() => showModal('welcomeModal'), 150);
+  }
 }
 // ======== APK 下载进度条（轮询原生 DownloadManager 进度） ========
 var apkPollTimer = null;
