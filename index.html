@@ -164,8 +164,8 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
 }
-.header h1 { font-size: 18px; font-weight: 700; padding: 0 48px 0 12px; background: linear-gradient(90deg, var(--primary), var(--success)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
-.header .date-today { font-size: 12px; color: var(--text-light); margin-top: 2px; padding: 0 48px 0 12px; }
+.header h1 { font-size: 18px; font-weight: 700; padding: 0 116px 0 12px; background: linear-gradient(90deg, var(--primary), var(--success)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.header .date-today { font-size: 12px; color: var(--text-light); margin-top: 2px; padding: 0 116px 0 12px; }
 
 /* 首页角落登录状态胶囊 */
 .login-pill {
@@ -246,6 +246,8 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
 }
 .page { display: none; padding: 12px; padding-bottom: 76px; }
 .page.active { display: block; animation: pageFadeIn .25s ease; }
+/* 极简模式：底部导航隐藏，收窄底部留白 */
+#page-simple, #page-simple-history { padding-bottom: 24px; }
 @keyframes pageFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .card {
   background: var(--card-bg);
@@ -2218,6 +2220,21 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
       <div id="simpleGoodsList"></div>
     </div>
     <button class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;margin-top:10px;border:none;border-radius:12px;" onclick="saveSimpleRecord()">保存当日总数</button>
+    <button class="btn" style="width:100%;padding:11px;font-size:14px;margin-top:8px;border:1px solid var(--primary);border-radius:12px;background:transparent;color:var(--primary);" onclick="simpleGoView()">查看记录</button>
+  </div>
+  <div style="height:20px;"></div>
+</div>
+
+<!-- 极简模式 · 记录查看页（与录入页分开，模式互斥：极简页内无默认模式入口） -->
+<div class="page" id="page-simple-history">
+  <!-- 极简模式顶栏：返回录入页 + 标题 -->
+  <div class="card" style="padding:10px 12px;display:flex;align-items:center;gap:8px;">
+    <button onclick="switchPage('simple')" style="background:none;border:none;font-size:16px;cursor:pointer;padding:6px 10px;color:var(--primary);font-weight:600;white-space:nowrap;">← 返回</button>
+    <span style="flex:1;text-align:center;font-size:14px;font-weight:600;color:var(--text);">极简模式 · 记录查看</span>
+  </div>
+  <!-- 模式提醒（切换进入时提示一次） -->
+  <div style="margin:8px 12px 0;padding:8px 10px;border-radius:10px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);font-size:12px;color:#d97706;line-height:1.5;" id="simpleModeNotice">
+    当前是<b>极简模式</b>：只记录每天每种筐的发出/回收<b>总数</b>（不按店面分），与详细记录分开保存、互不影响。
   </div>
 
   <!-- 查看卡片 -->
@@ -6890,6 +6907,10 @@ function switchPage(pageName) {
   if (pageName === 'manage') renderManage();
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
   if (pageName === 'simple') { renderSimpleMode(); }
+  if (pageName === 'simple-history') { renderSimpleView(); }
+  // 模式互斥：极简模式下隐藏底部导航（极简内部只有录入/查看/返回，不暴露默认模式入口）
+  const tabsEl = document.querySelector('.tabs');
+  if (tabsEl) tabsEl.style.display = (pageName === 'simple' || pageName === 'simple-history') ? 'none' : 'flex';
   // 首页右上角「极简」按钮：仅首页显示
   const smBtn = document.getElementById('simpleModeBtn');
   if (smBtn) smBtn.style.display = (pageName === 'record') ? 'inline-flex' : 'none';
@@ -6919,6 +6940,10 @@ function enterSimpleMode() {
       showModal('simpleModeTipModal');
     }
   } catch (e) {}
+}
+// 极简录入页 → 记录查看页（内部切换，switchPage 统一处理 tab 显隐与互斥）
+function simpleGoView() {
+  switchPage('simple-history');
 }
 function closeSimpleModeTip() {
   const m = document.getElementById('simpleModeTipModal');
@@ -9799,7 +9824,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.100'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.101'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
