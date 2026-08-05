@@ -1,7 +1,7 @@
 {
-  "versionCode": 89,
-  "versionName": "6.0.89",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.89-p0fix.apk",
-  "note": "【v6.0.89 更新内容】\n1. 修复主页「测试版」横条用 emoji 作为功能图标（违反设计规范），改为 SVG 图标\n2. 含上一版的麦克风权限修复 + 语音录入错误细分提示（v6.0.88 全部修复）\n3. 其他 emoji 功能图标违规（约 156 处）将在后续版本系统修复",
+  "versionCode": 90,
+  "versionName": "6.0.90",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.90-nativerec.apk",
+  "note": "【v6.0.90 更新内容】\n1. 新增原生录音通道：彻底修复小米手机无法录音问题（系统权限全开仍报『麦克风设备被占用』）——改用 Android 原生录音，不经过网页层，绕开 WebView 兼容限制\n2. 网页版保留原录音方式不受影响\n3. 包含此前全部修复（麦克风权限/更新提示/图标规范）",
   "force": false
 }

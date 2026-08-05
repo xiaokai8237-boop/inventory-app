@@ -56,6 +56,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(AppUpdatePlugin.class);
+        registerPlugin(AudioRecorderPlugin.class);
         super.onCreate(savedInstanceState);
 
         // ===== 状态栏 / 导航栏配色（深色，与页面"深空蓝晶"主题一致） =====

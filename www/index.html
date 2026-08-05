@@ -111,18 +111,19 @@
 
       // ======== Capacitor iframe 桥接（转发 iframe 内线上页面的插件调用） ========
       // 线上页面在 iframe 内拿不到 Capacitor（插件只注入主 frame），通过 postMessage 转发：
-      // iframe 发 {__capBridgeReq:true, method, args, id} → 壳调真实插件 → 回传 {__capBridgeResp:true, id, ok, data|error}
+      // iframe 发 {__capBridgeReq:true, plugin, method, args, id} → 壳调真实插件 → 回传 {__capBridgeResp:true, id, ok, data|error}
       window.addEventListener('message', function (ev) {
         var d = ev.data;
         if (!d || d.__capBridgeReq !== true) return;
-        var plugin = (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppUpdate);
+        var pluginName = d.plugin || 'AppUpdate';
+        var plugin = (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins[pluginName]);
         if (!plugin) {
-          try { ev.source.postMessage({ __capBridgeResp: true, id: d.id, ok: false, error: 'AppUpdate plugin not available' }, '*'); } catch (e) {}
+          try { ev.source.postMessage({ __capBridgeResp: true, id: d.id, ok: false, error: pluginName + ' plugin not available' }, '*'); } catch (e) {}
           return;
         }
         var method = d.method;
         if (typeof plugin[method] !== 'function') {
-          try { ev.source.postMessage({ __capBridgeResp: true, id: d.id, ok: false, error: 'method not found: ' + method }, '*'); } catch (e) {}
+          try { ev.source.postMessage({ __capBridgeResp: true, id: d.id, ok: false, error: 'method not found: ' + pluginName + '.' + method }, '*'); } catch (e) {}
           return;
         }
         try {

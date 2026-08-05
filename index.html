@@ -5496,8 +5496,40 @@ function getUserMediaAudio() {
   });
 }
 
+// ===== 原生录音通道（APK 内优先）：绕开 WebView getUserMedia 兼容问题 =====
+// 小米等国产 ROM 上 getUserMedia 持续 NotReadableError（权限全开/重启仍无效），
+// 改用 Android 原生 MediaRecorder 直接录音（AudioRecorderPlugin），前端拿到 base64 直接喂 ASR。
+// 网页版 / 无原生插件环境自动回退到 getUserMedia 通道。
+let nativeRecActive = false;    // 原生录音中
+let nativeRecResult = null;     // 原生录音结果 {base64, mime, size}（等待识别）
+function canNativeRecord() {
+  try {
+    return !!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AudioRecorder);
+  } catch (e) { return false; }
+}
+function nativeRecStart() {
+  nativeRecActive = true;
+  return window.Capacitor.Plugins.AudioRecorder.start();
+}
+function nativeRecStop() {
+  nativeRecActive = false;
+  return window.Capacitor.Plugins.AudioRecorder.stop();
+}
+
 function emitStartVoice() {
   if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
+  // APK 内：优先原生录音（绕开 WebView getUserMedia 兼容问题）
+  if (canNativeRecord()) {
+    showEmitVoiceOverlay('record');
+    nativeRecStart().then(function () {
+      // 录音中状态已由 showEmitVoiceOverlay('record') 展示；无波形动画（原生流不可见）
+    }).catch(function (err) {
+      nativeRecActive = false;
+      hideEmitVoiceOverlay();
+      showToast('🔒 录音启动失败: ' + (err && err.message || err));
+    });
+    return;
+  }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
     showToast('当前浏览器不支持录音'); return;
   }
@@ -5526,6 +5558,18 @@ function emitStartVoice() {
   }
 }
 function emitStopVoice() {
+  if (nativeRecActive) {
+    // 原生录音：停止并取 base64 → 直接走识别
+    nativeRecStop().then(function (res) {
+      nativeRecResult = res || null;
+      emitHandleVoiceBlob();
+    }).catch(function (err) {
+      nativeRecActive = false;
+      hideEmitVoiceOverlay();
+      showToast('🔒 录音失败: ' + (err && err.message || err));
+    });
+    return;
+  }
   if (emitVoiceRec && emitVoiceRec.state !== 'inactive') emitVoiceRec.stop();
 }
 // 录音浮层控制：record=录音中（波形）/ recognizing=识别中（转圈）
@@ -5598,6 +5642,31 @@ function stopEmitVoiceWave() {
 async function emitHandleVoiceBlob() {
   stopEmitVoiceWave();
   showEmitVoiceOverlay('recognizing'); // 录音结束 → 切换"AI 正在识别"转圈
+  // 原生录音通道：直接使用插件返回的 base64，无需 Blob/FileReader
+  if (nativeRecResult) {
+    const rec = nativeRecResult; nativeRecResult = null;
+    try {
+      const resp = await fetch(API_BASE + '/tcloud-asr', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ audioBase64: rec.base64, mime: rec.mime || 'audio/mp4', len: rec.size || 0 })
+      });
+      const data = await resp.json();
+      hideEmitVoiceOverlay();
+      if (data.ok && data.text) {
+        emitVoiceText = data.text; // 暂存 ASR 原文（范例积累用）
+        emitVoiceSource = 'voice';
+        // AI 理解优先（中文数字词/同音字纠错），失败回退本地解析
+        const usedAI = await parseEmitVoiceWithAI(data.text);
+        if (!usedAI) emitParseVoiceNums(data.text);
+      } else {
+        showToast('语音识别失败: ' + (data.error || ''));
+      }
+    } catch (e) {
+      hideEmitVoiceOverlay();
+      showToast('语音识别失败，请检查网络');
+    }
+    return;
+  }
   const mime = emitVoiceRec ? emitVoiceRec.mimeType : '';
   const blob = new Blob(emitVoiceChunks, { type: mime });
   const reader = new FileReader();
@@ -6214,25 +6283,30 @@ var IS_STANDALONE = !!(typeof window !== 'undefined' && window.matchMedia && win
       if (d.ok) p.resolve(d.data);
       else p.reject(new Error(d.error || 'Capacitor bridge error'));
     });
-    function capCall(method, args) {
+    function capCall(method, args, pluginName) {
       return new Promise(function (resolve, reject) {
         var id = ++capSeq;
         capPending[id] = { resolve: resolve, reject: reject };
         try {
-          window.parent.postMessage({ __capBridgeReq: true, method: method, args: args || [], id: id }, '*');
+          window.parent.postMessage({ __capBridgeReq: true, plugin: pluginName || 'AppUpdate', method: method, args: args || [], id: id }, '*');
         } catch (e) { delete capPending[id]; reject(e); }
       });
     }
-    var AppUpdateProxy = {};
-    ['getVersion', 'hasDownloadedApk', 'installDownloaded', 'getDownloadProgress', 'downloadAndInstall'].forEach(function (m) {
-      AppUpdateProxy[m] = function () {
-        var args = Array.prototype.slice.call(arguments);
-        return capCall(m, args);
-      };
-    });
+    function makeProxy(pluginName, methods) {
+      var p = {};
+      methods.forEach(function (m) {
+        p[m] = function () {
+          var args = Array.prototype.slice.call(arguments);
+          return capCall(m, args, pluginName);
+        };
+      });
+      return p;
+    }
+    var AppUpdateProxy = makeProxy('AppUpdate', ['getVersion', 'hasDownloadedApk', 'installDownloaded', 'getDownloadProgress', 'downloadAndInstall']);
+    var AudioRecorderProxy = makeProxy('AudioRecorder', ['start', 'stop', 'isAvailable']);
     window.Capacitor = {
       isNativePlatform: function () { return true; },
-      Plugins: { AppUpdate: AppUpdateProxy }
+      Plugins: { AppUpdate: AppUpdateProxy, AudioRecorder: AudioRecorderProxy }
     };
   } catch (e) {}
 })();
@@ -7114,6 +7188,21 @@ function startVoice(mode) {
   showModal('voiceOverlay');
   document.getElementById(mode === 'in' ? 'voiceInBtn' : 'voiceOutBtn').classList.add('recording');
 
+  // APK 内：优先原生录音（绕开 WebView getUserMedia 兼容问题）
+  if (canNativeRecord()) {
+    voiceText.textContent = '🔴 录音中，说完点「结束」…';
+    nativeRecStart().then(function () {
+      // 录音中状态已展示
+    }).catch(function (err) {
+      nativeRecActive = false;
+      overlay.classList.remove('show');
+      document.getElementById('voiceInBtn').classList.remove('recording');
+      document.getElementById('voiceOutBtn').classList.remove('recording');
+      showToast('🔒 录音启动失败: ' + (err && err.message || err));
+    });
+    return;
+  }
+
   // 录音（MediaRecorder）+ 云端语音识别（兼容所有安卓浏览器）
   try {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -7155,6 +7244,24 @@ function startVoice(mode) {
 // 录音结束 → 上传云端识别
 function handleVoiceBlob() {
   const overlay = document.getElementById('voiceOverlay');
+  // 原生录音通道：直接使用插件返回的 base64，无需 Blob/FileReader
+  if (nativeRecResult) {
+    const rec = nativeRecResult; nativeRecResult = null;
+    showToast('🔍 正在识别语音…');
+    fetch(API_BASE + '/tcloud-asr', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ audioBase64: rec.base64, mime: rec.mime || 'audio/mp4', len: rec.size || 0 })
+    }).then(r => r.json()).then(async data => {
+      if (data.ok && data.text) {
+        // AI 理解优先（中文数字/同音字/口语），失败自动回退正则解析
+        const usedAI = await parseVoiceWithAI(data.text, voiceRecMode);
+        if (!usedAI) parseVoiceText(data.text, voiceRecMode);
+      } else {
+        showToast('语音识别失败: ' + (data.error || ''));
+      }
+    }).catch(() => showToast('语音识别失败，请检查网络'));
+    return;
+  }
   const mime = voiceRec ? voiceRec.mimeType : '';
   const blob = new Blob(voiceChunks, { type: mime });
   const reader = new FileReader();
@@ -7184,6 +7291,20 @@ function handleVoiceBlob() {
 }
 
 function stopVoice() {
+  if (nativeRecActive) {
+    // 原生录音：停止并取 base64 → 直接走识别
+    nativeRecStop().then(function (res) {
+      nativeRecResult = res || null;
+      handleVoiceBlob();
+    }).catch(function (err) {
+      nativeRecActive = false;
+      try { document.getElementById('voiceOverlay').classList.remove('show'); } catch (e2) {}
+      document.getElementById('voiceInBtn').classList.remove('recording');
+      document.getElementById('voiceOutBtn').classList.remove('recording');
+      showToast('🔒 录音失败: ' + (err && err.message || err));
+    });
+    return;
+  }
   if (voiceRec && voiceRec.state !== 'inactive') {
     voiceRec.stop();
   }
@@ -9410,7 +9531,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.98'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.99'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
