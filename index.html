@@ -4886,9 +4886,14 @@ function openEmitGoodsSelect() {
   const names = loadGoodsNames();
   const container = document.getElementById('emitGoodsSelectButtons');
   if (!container) return;
-  container.innerHTML = names.map((n, i) =>
-    `<button class="btn btn-outline" style="width:100%;padding:12px;font-size:15px;display:flex;align-items:center;gap:10px;" onclick="selectEmitGoods(${i})"><span style="font-size:22px;">${goodsIcon(n)}</span><span style="flex:1;text-align:left;">${escapeHtml(n)}</span></button>`
-  ).join('');
+  container.innerHTML = names.map((n, i) => {
+    const ic = extraIconFor(n);
+    const e = goodsIcon(n);
+    return '<button class="btn" style="width:100%;padding:12px 16px;font-size:15px;display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1.5px solid rgba(245,220,146,.25);border-radius:18px;" onclick="selectEmitGoods(' + i + ')">' +
+      '<span style="font-size:24px;filter:url(#' + ic.f + ');">' + e + '</span>' +
+      '<span style="flex:1;text-align:left;font-weight:700;color:#fff;">' + escapeHtml(n) + '</span>' +
+      '<span style="color:rgba(245,220,146,.7);font-size:18px;">›</span></button>';
+  }).join('');
   document.getElementById('emitGoodsSelectModal').classList.add('show');
 }
 function closeEmitGoodsSelect() {
@@ -4923,13 +4928,18 @@ function openEmitFlow() {
   if (!isLoggedIn()) { showToast('🔒 请先登录后再录入'); openLoginModal(); return; }
   const storeNames = loadStoreNames();
   if (!storeNames || storeNames.length === 0) { showToast('请先到「店面管理」添加店面'); return; }
-  // 渲染手动录入 5 筐按钮到入口卡
+  // 渲染手动录入 5 筐按钮到入口卡（图标本体染成对应筐深色，对齐设计稿 v6）
   const names = loadGoodsNames();
   const container = document.getElementById('emitGoodsButtons');
   if (container) {
-    container.innerHTML = names.map((n, i) =>
-      `<button class="btn btn-outline" style="width:100%;padding:12px;font-size:15px;display:flex;align-items:center;gap:10px;" onclick="selectEmitGoods(${i})"><span style="font-size:22px;">${goodsIcon(n)}</span><span style="flex:1;text-align:left;">${escapeHtml(n)}</span></button>`
-    ).join('');
+    container.innerHTML = names.map((n, i) => {
+      const ic = extraIconFor(n);
+      const e = goodsIcon(n);
+      return '<button class="btn" style="width:100%;padding:12px 16px;font-size:15px;display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1.5px solid rgba(245,220,146,.25);border-radius:18px;" onclick="selectEmitGoods(' + i + ')">' +
+        '<span style="font-size:26px;filter:url(#' + ic.f + ');">' + e + '</span>' +
+        '<span style="flex:1;text-align:left;font-weight:700;color:#fff;">' + escapeHtml(n) + '</span>' +
+        '<span style="color:rgba(245,220,146,.7);font-size:20px;">›</span></button>';
+    }).join('');
   }
   // 显示入口态
   const ea = document.getElementById('emitEntryArea');
@@ -8998,7 +9008,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.86'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.87'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
