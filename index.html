@@ -1169,6 +1169,79 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   box-shadow: 0 6px 14px rgba(43,184,168,.32);
 }
 #emitSaveResultModal .btn-view-records:active { transform: scale(.98); }
+/* ===== 发出店序弹窗（emitStoreOrderModal）：深空蓝晶定稿风格 ===== */
+#emitStoreOrderModal.store-ocr-modal { background: rgba(4,24,32,.78); width: 100%; height: 100%; }
+#emitStoreOrderModal .store-ocr-content {
+  background: linear-gradient(180deg, #13454F 0%, #0B3240 100%);
+  border: 1.5px solid rgba(245,220,146,.55);
+  border-radius: 22px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.55);
+  padding: 18px 16px 16px;
+  max-width: 360px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+#emitStoreOrderModal .eso-title { color: #F5DC92; font-size: 18px; font-weight: 800; letter-spacing: .5px; }
+#emitStoreOrderModal .eso-close { background: none; border: none; font-size: 24px; color: rgba(255,255,255,.7); cursor: pointer; padding: 0 4px; line-height: 1; }
+#emitStoreOrderModal .eso-close:hover { color: #FFFFFF; }
+#emitStoreOrderModal .eso-hint { color: rgba(124,232,224,.9); font-size: 12px; line-height: 1.6; }
+#emitStoreOrderModal #emitStoreOrderList {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(245,220,146,.18);
+  border-radius: 12px;
+  padding: 4px 8px;
+  max-height: 52vh;
+  overflow-y: auto;
+}
+#emitStoreOrderModal .eso-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 2px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+#emitStoreOrderModal .eso-row:last-child { border-bottom: none; }
+#emitStoreOrderModal .eso-handle { cursor: grab; color: rgba(255,255,255,.45); font-size: 18px; flex: 0 0 auto; }
+#emitStoreOrderModal .eso-idx { color: #F5DC92; font-size: 14px; font-weight: 800; flex: 0 0 auto; width: 18px; text-align: center; }
+#emitStoreOrderModal .eso-name {
+  flex: 1; min-width: 0;
+  font-size: 14px; font-weight: 700; color: #FFFFFF;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#emitStoreOrderModal .eso-numtag {
+  flex: 0 0 auto;
+  font-size: 10.5px; color: #F5DC92; font-weight: 700;
+  background: rgba(245,220,146,.16);
+  border: 1px solid rgba(245,220,146,.4);
+  border-radius: 12px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+#emitStoreOrderModal .eso-btns { flex: 0 0 auto; display: flex; flex-direction: column; gap: 4px; }
+#emitStoreOrderModal .eso-arrow {
+  width: 34px; height: 22px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(245,220,146,.3);
+  background: rgba(255,255,255,.06);
+  color: #F5DC92;
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; line-height: 1;
+  padding: 0;
+}
+#emitStoreOrderModal .eso-arrow:active { background: rgba(245,220,146,.2); }
+#emitStoreOrderModal .btn-save-eso {
+  width: 100%;
+  background: linear-gradient(180deg, #F8E3A6 0%, #C89B4E 100%);
+  color: #0B2E38;
+  border: none;
+  border-radius: 28px;
+  padding: 11px 0;
+  font-size: 15px; font-weight: 800;
+  letter-spacing: .5px;
+  margin-top: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(200,155,78,.35);
+}
+#emitStoreOrderModal .btn-save-eso:active { transform: scale(.98); }
 /* ===== 账号表单弹窗：深空蓝晶定稿风格（设置密码/登录/恢复/找回密码/改密/注销共用） ===== */
 .ocr-form-modal.store-ocr-modal { background: rgba(4,24,32,.78); }
 .ocr-form-modal .store-ocr-content {
@@ -1940,15 +2013,16 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
 
   <!-- 调整店序弹窗（只在发出页生效） -->
+  <!-- 调整发出店序弹窗（深空蓝晶定稿风格） -->
   <div class="store-ocr-modal" id="emitStoreOrderModal">
-    <div class="store-ocr-content" style="max-width:330px;" onclick="event.stopPropagation()">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <span style="font-weight:700;font-size:16px;color:var(--text);">✏️ 调整店序</span>
-        <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitStoreOrderModal()">×</span>
+    <div class="store-ocr-content" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span class="eso-title">✏️ 调整店序</span>
+        <button class="eso-close" onclick="closeEmitStoreOrderModal()">×</button>
       </div>
-      <div id="emitStoreOrderHint" style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响发出页顺序）</div>
-      <div id="emitStoreOrderList" style="max-height:50vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:6px;"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="saveEmitStoreOrder()">💾 保存店序</button>
+      <div id="emitStoreOrderHint" class="eso-hint" style="margin-bottom:10px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响发出页顺序）</div>
+      <div id="emitStoreOrderList" style="margin-bottom:2px;"></div>
+      <button class="btn-save-eso" onclick="saveEmitStoreOrder()">💾 保存店序</button>
     </div>
   </div>
 
@@ -5170,12 +5244,15 @@ function renderEmitStoreOrder() {
   container.innerHTML = order.map((storeName, i) => {
     const store = cfg.find(s => s.name === storeName);
     const num = storeNumberLabel(store);
-    return `<div style="display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid var(--border);" draggable="true" ondragstart="emitDragStart(event, ${i})" ondragover="event.preventDefault()" ondrop="emitDrop(event, ${i})">
-      <span style="cursor:grab;color:var(--text-light);font-size:18px;flex:0 0 auto;">☰</span>
-      <span style="flex:1;min-width:0;font-size:15px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(storeName)}</span>
-      <span style="flex:0 0 auto;font-size:11px;color:#fff;background:var(--primary);padding:3px 10px;border-radius:12px;line-height:1.4;white-space:nowrap;">🏪 ${num ? escapeHtml(num) : '无编号'}</span>
-      <button style="padding:2px 8px;font-size:12px;width:auto;flex:0 0 auto;border:1px solid var(--border);background:var(--card-bg);color:var(--text);border-radius:6px;cursor:pointer;" onclick="emitMoveOrder(${i}, -1)">▲</button>
-      <button style="padding:2px 8px;font-size:12px;width:auto;flex:0 0 auto;border:1px solid var(--border);background:var(--card-bg);color:var(--text);border-radius:6px;cursor:pointer;" onclick="emitMoveOrder(${i}, 1)">▼</button>
+    return `<div class="eso-row" draggable="true" ondragstart="emitDragStart(event, ${i})" ondragover="event.preventDefault()" ondrop="emitDrop(event, ${i})">
+      <span class="eso-handle">☰</span>
+      <span class="eso-idx">${i + 1}</span>
+      <span class="eso-name">${escapeHtml(storeName)}</span>
+      <span class="eso-numtag">🏪 ${num ? escapeHtml(num) : '无编号'}</span>
+      <span class="eso-btns">
+        <button class="eso-arrow" onclick="emitMoveOrder(${i}, -1)">▲</button>
+        <button class="eso-arrow" onclick="emitMoveOrder(${i}, 1)">▼</button>
+      </span>
     </div>`;
   }).join('');
   emitDragFrom = -1;
@@ -9089,7 +9166,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.89'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.90'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
