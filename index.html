@@ -1933,14 +1933,14 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     </div>
   </div>
 
-  <!-- 保存成功提示框：回到主页 / 切换筐 -->
+  <!-- 保存成功提示框：继续录入 / 查看记录 -->
   <div class="store-ocr-modal" id="emitSaveResultModal">
     <div class="store-ocr-content" style="max-width:320px;" onclick="event.stopPropagation()">
       <div style="text-align:center;font-size:20px;margin-bottom:6px;">✅</div>
       <div style="text-align:center;font-weight:700;font-size:17px;color:var(--text);margin-bottom:4px;">保存成功</div>
       <div id="emitSaveSummary" style="text-align:center;font-size:13px;color:var(--text-light);margin-bottom:14px;"></div>
-      <button class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;margin-bottom:8px;" onclick="emitSaveGoHome()">🏠 回到主页</button>
-      <button class="btn btn-outline" style="width:100%;padding:12px;font-size:15px;" onclick="emitSaveSwitchGoods()">🔁 切换筐</button>
+      <button class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;margin-bottom:8px;" onclick="emitSaveContinue()">📸 继续录入</button>
+      <button class="btn btn-outline" style="width:100%;padding:12px;font-size:15px;" onclick="emitSaveViewRecords()">📋 查看记录</button>
     </div>
   </div>
 
@@ -5060,14 +5060,21 @@ function saveEmitRecords() {
   document.getElementById('emitSaveSummary').textContent = '已保存 ' + records.length + ' 家店 · 共 ' + total + ' 个「' + goodsName + '」';
   document.getElementById('emitSaveResultModal').classList.add('show');
 }
-function emitSaveGoHome() {
+function emitSaveContinue() {
   document.getElementById('emitSaveResultModal').classList.remove('show');
-  closeEmitPanel();
+  // 回到发出页入口态（智能识别卡 + 手动录入5筐），可继续拍照/语音/手动录入
+  const ea = document.getElementById('emitEntryArea');
+  const fa = document.getElementById('emitFillArea');
+  if (ea) ea.style.display = '';
+  if (fa) fa.style.display = 'none';
+  emitGoodsIdx = -1;
+  emitGoodsName = '';
+  // 保留当前选择的记录日期（方便连续补录同一天）
 }
-function emitSaveSwitchGoods() {
+function emitSaveViewRecords() {
   document.getElementById('emitSaveResultModal').classList.remove('show');
-  // 保留当前店序，弹出筐选择；发出页保持打开
-  openEmitGoodsSelect();
+  // 跳到记录页查看刚保存的数据
+  switchPage('history');
 }
 
 // ===== 调整店序弹窗 =====
@@ -9008,7 +9015,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.87'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.88'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
