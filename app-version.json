@@ -1,7 +1,7 @@
 {
-  "versionCode": 88,
-  "versionName": "6.0.88",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.88-capperm.apk",
-  "note": "【v6.0.88 更新内容】\n1. 彻底修复语音录入麦克风权限：服务端 Permissions-Policy 头允许 iframe 内 self origin 使用麦克风/相机 + 壳 iframe 加 allow 属性（双保险）；用户无需去设置手动开权限\n2. 同时含 v6.0.87 的 Capacitor 桥接修复（更新提示能正常弹出）\n3. 本版为自动更新提示（v6.0.87 桥接修复已让更新链路恢复），无需手动安装",
+  "versionCode": 89,
+  "versionName": "6.0.89",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.89-p0fix.apk",
+  "note": "【v6.0.89 更新内容】\n1. 修复主页「测试版」横条用 emoji 作为功能图标（违反设计规范），改为 SVG 图标\n2. 含上一版的麦克风权限修复 + 语音录入错误细分提示（v6.0.88 全部修复）\n3. 其他 emoji 功能图标违规（约 156 处）将在后续版本系统修复",
   "force": false
 }
