@@ -1539,6 +1539,26 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 #page-reconcile .btn-export { background: linear-gradient(160deg,#F8E3A6,#C89B4E); color: #0B2E38; border: none; font-weight: 700; font-size: 15px; padding: 12px; border-radius: 12px; box-shadow: 0 4px 14px rgba(200,155,78,.25); }
 #page-reconcile .btn-export:active { transform: scale(.97); }
 
+/* ========== 设置页·使用说明（设计稿深空蓝晶） ========== */
+#page-settings { background: linear-gradient(160deg,#2A7D8A 0%,#15555F 45%,#082E38 100%); min-height: calc(100vh - 130px); }
+#page-settings .settings-hero { background: rgba(255,255,255,.07); border: 1px solid rgba(245,220,146,.35); border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; }
+#page-settings .settings-hero-title { font-size: 17px; font-weight: 800; color: #F5DC92; }
+#page-settings .settings-hero-sub { font-size: 12px; color: #EAF9FB; margin-top: 4px; }
+#page-settings .settings-step { background: rgba(255,255,255,.06); border: 1px solid rgba(245,220,146,.18); border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; }
+#page-settings .step-head { display: flex; align-items: center; gap: 8px; }
+#page-settings .step-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(160deg,#F8E3A6,#C89B4E); color: #0B2E38; font-weight: 800; font-size: 17px; box-shadow: 0 2px 8px rgba(245,220,146,.35); flex-shrink: 0; }
+#page-settings .step-title { font-size: 15px; font-weight: 800; line-height: 1.4; }
+#page-settings .step-title-gold { color: #F5DC92; }
+#page-settings .step-title-cyan { color: #7CE8E0; }
+#page-settings .step-body { margin-top: 8px; font-size: 13px; line-height: 2; color: #FFFFFF; }
+#page-settings .step-body b { color: #F5DC92; }
+#page-settings .step-hint { background: rgba(124,232,224,.12); border: 1px solid rgba(124,232,224,.35); color: #7CE8E0; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
+#page-settings .step-warn { background: rgba(245,178,107,.12); border: 1px solid rgba(245,178,107,.4); color: #F5B26B; padding: 2px 8px; border-radius: 6px; font-size: 12px; }
+#page-settings .settings-faq { background: rgba(255,255,255,.06); border: 1px solid rgba(245,220,146,.18); border-radius: 18px; padding: 12px 16px; margin-bottom: 10px; }
+#page-settings .faq-q { font-size: 14px; font-weight: 700; color: #F5DC92; margin-bottom: 4px; }
+#page-settings .faq-a { font-size: 12.5px; line-height: 1.9; color: #EAF9FB; }
+#page-settings .faq-a b { color: #FFFFFF; }
+
 /* ======== 发出页语音录音浮层 ======== */
 .emit-voice-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 21000;
@@ -1995,150 +2015,147 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 
 <!-- ========== 设置页 ========== -->
 <div class="page" id="page-settings">
-  <div class="card" style="background:linear-gradient(135deg,var(--soft-bg),var(--card-bg));border-left:4px solid var(--primary);">
-    <div style="font-size:16px;font-weight:700;color:var(--primary-dark);">📋 使用说明（一步一步教你用）</div>
-    <div style="font-size:12px;margin-top:4px;color:var(--text-light);">跟着下面的步骤做，每一步都写清楚了「点哪里、填什么」</div>
+  <!-- 顶部导言 hero -->
+  <div class="settings-hero">
+    <div class="settings-hero-title">📋 一分钟看懂这个软件</div>
+    <div class="settings-hero-sub">发出 + 回收，每天 2 分钟搞定 · 跟着下面的步骤做，每一步都写清楚「点哪里、填什么」</div>
   </div>
 
-  <div class="card" style="border-left:4px solid var(--primary);">
-    <div style="font-size:14px;font-weight:700;color:var(--primary-dark);">👀 第0步：先认识一下这个页面</div>
-    <div style="margin-top:8px;font-size:13px;line-height:2;">
-      打开网页后你会看到：<br>
-      ① <b>顶部蓝色大字</b>：软件的名字和今天的日期<br>
-      ② <b>顶部下面一排按钮</b>：<b>首页</b>（主操作）、<b>记录</b>（看以前记的数据）、<b>管理</b>（店面/备份/汇总等设置）<br>
-      ③ <b>首页中间大按钮</b>：<b>📤 发出</b>（蓝色）和 <b>📥 回收</b>（橙色）—— 这是你<b>每天都要点的两个按钮</b><br>
-      <br>
-      <b>第一次打开，建议先做两件事（只做一次）：</b><br>
-      ① 点底部「管理」→「店面管理」，把你要记的店面加进来<br>
-      ② 点底部「管理」→「备份与恢复」，设置一个账号密码（防止数据丢失）<br>
-      下面每一步都会教你。
+  <!-- 第0步：认识页面 -->
+  <div class="settings-step">
+    <div class="step-head"><span class="step-badge">0</span><span class="step-title step-title-cyan">先认一下页面长啥样</span></div>
+    <div class="step-body">
+      ① 顶部蓝色大字 = 软件名字 + 今天的日期<br>
+      ② 中间一排按钮 = <b>首页</b>（主操作）、<b>记录</b>（看以前记的数据）、<b>管理</b>（店面/备份/汇总等）<br>
+      ③ 首页两个大按钮 = <b>📤 发出</b>（蓝）和 <b>📥 回收</b>（橙）—— 你<b>每天都要点</b>的两个按钮<br>
+      <span class="step-hint">💡 第一次打开，建议先去「管理」→「店面管理」加店面，再设账号密码（下面每步都会教）</span>
     </div>
   </div>
 
-  <div class="card" style="border-left:4px solid var(--primary);">
-    <div style="font-size:14px;font-weight:700;color:var(--primary-dark);">🔧 第1步：设置店面（只做一次）</div>
-    <div style="margin-top:8px;font-size:13px;line-height:2;">
+  <!-- 第1步：设置店面 -->
+  <div class="settings-step">
+    <div class="step-head"><span class="step-badge">1</span><span class="step-title step-title-gold">设置店面（只做一次）</span></div>
+    <div class="step-body">
       <b>问题：我要记的店还没在列表里，怎么办？</b><br>
       ① 点底部 <b>「管理」</b> → 点 <b>「🏪 店面管理」</b><br>
-      ② 点 <b>「➕ 新增店面」</b> 按钮<br>
-      ③ 在最上面那个输入框里，把店的名字打进去（比如"北区店"）<br>
-      ④ 点下面的 <b>「💾 保存修改」</b> 按钮<br>
-      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">✅ 完成！以后选店面就能看到它了</span><br><br>
-      <b>顺便说下「别名」是干嘛的：</b><br>
-      比如店全名叫"北区总店"，但你想叫它"北区"，就点「添加」把"北区"加进去。以后说话、拍照识别时叫"北区"也能找到这家店。
+      ② 点 <b>「➕ 新增店面」</b> → 输入店名（比如"北区店"）→ 点 <b>「💾 保存修改」</b><br>
+      <span class="step-hint">✅ 完成！以后选店面就能看到它了</span><br>
+      <b>顺便说下「别名」是干嘛的：</b> 比如店全名叫"北区总店"，你想叫它"北区"，就把"北区"加进去。以后说话、拍照识别时叫"北区"也能找到这家店。
     </div>
   </div>
 
-  <div class="card" style="border-left:4px solid var(--primary);">
-    <div style="font-size:14px;font-weight:700;color:var(--primary-dark);">🔑 第2步：设置账号密码（强烈建议，只做一次）</div>
-    <div style="margin-top:8px;font-size:13px;line-height:2;">
-      <b>为什么要设密码？</b> 设了之后，就算换手机、清缓存，数据都不会丢。<br><br>
+  <!-- 第2步：设置账号密码 -->
+  <div class="settings-step">
+    <div class="step-head"><span class="step-badge">2</span><span class="step-title step-title-gold">设置账号密码（强烈建议）</span></div>
+    <div class="step-body">
+      <b>为什么要设密码？</b> 设了之后，就算换手机、清缓存，数据都不会丢。<br>
       <b>怎么设置：</b><br>
-      ① 点底部 <b>「管理」</b> → 点 <b>「💾 备份与恢复」</b><br>
-      ② 看到"🔑 账号（未设置）"那一块，点 <b>「🔑 设置账号密码」</b><br>
-      ③ 手机号：填你的 11 位手机号（只能填数字，不是手机号填不了）<br>
-      ④ 密码：随便想一个，但<b>必须同时包含：字母 + 数字 + 符号</b>，而且<b>至少 8 位</b>。比如：<span style="background:var(--amber-soft);padding:2px 8px;border-radius:6px;font-size:12px;">Abc@123456</span><br>
-      <span style="font-size:12px;color:var(--text-light);">💡 密码框右边有个 <b>👁</b> 按钮，点一下能看到你输的密码，防止打错</span><br>
-      ⑤ 再输入一遍同样的密码（两次必须一模一样）<br>
-      ⑥ 选一个密保问题（有很多可选），再填上答案（<b>这个答案一定要记住！</b>忘了密码靠它找回）<br>
-      ⑦ 点 <b>「✅ 设置密码」</b><br>
-      <span style="background:var(--green-soft);padding:2px 8px;border-radius:6px;font-size:12px;">✅ 完成！以后数据会自动备份到云端</span><br><br>
-      <b>🔐 下次用手机打开怎么登录？</b><br>
-      ① 点底部「管理」→「备份与恢复」→ 看到"🔑 账号（未登录）"→ 点 <b>「🔐 登录」</b><br>
-      ② 输入手机号 + 密码 → 登录成功 → 自动同步云端数据<br><br>
+      ① 点底部 <b>「管理」</b> → 点 <b>「💾 备份与恢复」</b> → 点 <b>「🔑 设置账号密码」</b><br>
+      ② 手机号：填你的 11 位手机号（只能填数字）<br>
+      ③ 密码：<b>字母 + 数字 + 符号</b>，至少 8 位。比如：<span class="step-hint">Abc@123456</span>　<span style="font-size:12px;color:var(--text-light);">💡 密码框右边 👁 按钮点一下能看到你输的密码，防止打错</span><br>
+      ④ 再输入一遍同样的密码（两次必须一模一样）<br>
+      ⑤ 选一个密保问题 + 填答案（<b>这个答案一定要记住！</b>忘了密码靠它找回）<br>
+      ⑥ 点 <b>「✅ 设置密码」</b><br>
+      <span class="step-hint">✅ 完成！以后数据会自动备份到云端</span><br><br>
+      <b>🔐 下次怎么登录？</b><br>
+      点底部「管理」→「备份与恢复」→「🔐 登录」→ 输入手机号 + 密码 → 自动同步云端数据<br><br>
       <b>❓ 忘了密码怎么办？</b><br>
       点「❓ 忘记密码」→ 输入手机号 → 答密保问题 → 设新密码
     </div>
   </div>
 
-  <div class="card" style="border-left:4px solid var(--success);">
-    <div style="font-size:14px;font-weight:700;color:var(--success);">📝 第3步：每天怎么录入数据（3种方法，随便选）</div>
-    <div style="margin-top:8px;font-size:13px;line-height:2;">
+  <!-- 第3步：每天怎么录入数据（3种方法） -->
+  <div class="settings-step">
+    <div class="step-head"><span class="step-badge">3</span><span class="step-title step-title-cyan">每天怎么录入数据（3 种方法，随便选）</span></div>
+    <div class="step-body">
       <b>方法一 ✍️ 手动输入（最稳）</b><br>
-      ① 点首页的 <b>「📤 发出」</b> 按钮：<br>
-      　先选<b>筐类型</b>（鲜食/面包/低温/冷冻/常温）→ 每家店一行，填<b>发出</b>数量 → 点保存<br>
-      ② 或点 <b>「📥 回收」</b> 按钮：<br>
-      　顶部<b>点店名切换店面</b> → 填 5 种筐的<b>回收</b>数量 → 点下面的 <b>「💾 保存当日记录」</b><br>
-      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">💡 没填的框留空就行，不会出错</span>
-      <br><br>
+      ① 点首页的 <b>「📤 发出」</b>：先选筐类型（鲜食/面包/低温/冷冻/常温）→ 每家店填<b>发出</b>数量 → 点保存<br>
+      ② 或点 <b>「📥 回收」</b>：顶部<b>点店名切换店面</b> → 填 5 种筐的<b>回收</b>数量 → 点「💾 保存当日记录」<br>
+      <span class="step-hint">💡 没填的框留空就行，不会出错</span><br><br>
       <b>方法二 🎤 用嘴说（最快，AI 听得懂）</b><br>
-      ① 进「📤 发出」或「📥 回收」页后，点页面上的 <b>「🎤 语音录入」</b> 按钮<br>
-      ② 手机上会弹出一个录音框<br>
-      ③ 对着手机说：<span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">"鲜食1 面包2 低温3 冷冻5 常温6"</span><br>
-      ④ 说完点「结束」，数字会自动填进去<br>
-      ⑤ 检查一遍没问题，点 <b>「💾 保存当日记录」</b><br>
-      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">💡 AI 能听懂中文数字和口语：说"鲜食五"、"面包来一十二个"、"先食两个"（同音字也能纠对）都行</span>
-      <br><br>
+      ① 进「发出」或「回收」页后，点 <b>「🎤 语音录入」</b><br>
+      ② 对着手机说：<span class="step-hint">"鲜食1 面包2 低温3 冷冻5 常温6"</span><br>
+      ③ 说完点「结束」→ 数字自动填进去 → 检查没问题点保存<br>
+      <span class="step-hint">💡 AI 听得懂中文数字和口语：说"鲜食五"、"面包来一十二个"、"先食两个"（同音字也能纠对）都行</span><br><br>
       <b>方法三 📸 拍照识别（最省事，AI 智能识别）</b><br>
-      ① 进「📤 发出」或「📥 回收」页后，点页面上的 <b>「📸 拍照识别」</b> 按钮<br>
-      ② 点 <b>「📷 拍照」</b>（现拍）或 <b>「🖼️ 相册选」</b>（用已有的照片）<br>
-      ③ 对准路单拍照，等一两秒，AI 会自动看懂整张表格：每家店一行、编号自动补齐、模糊数字结合表格位置判对（比如把 4 看成 3 的会纠正回来）<br>
-      ④ 识别完成后，会弹出一个表格，每行是一家店，黄色那列是物流箱数量<br>
-      ⑤ <b>仔细核对一下数字</b>，不对的直接点数字改掉<br>
-      ⑥ 全对了点 <b>「✅ 确认录入」</b><br>
-      <span style="background:var(--blue-soft);padding:2px 8px;border-radius:6px;font-size:12px;">💡 万一哪家店没识别出来，点表格下面的「➕ 新增一行」自己补上；没网时自动退回普通识别</span>
+      ① 进「发出」或「回收」页后，点 <b>「📸 拍照识别」</b><br>
+      ② 点 <b>「📷 拍照」</b>（现拍）或 <b>「🖼️ 相册选」</b>（用已有照片）<br>
+      ③ 对准路单拍照，等一两秒 → AI 自动看懂整张表格：每家店一行、编号自动补齐、模糊数字按表格位置判对<br>
+      ④ 弹出表格核对（黄色列=物流箱数量），<b>不对的直接点数字改掉</b><br>
+      ⑤ 全对了点 <b>「✅ 确认录入」</b><br>
+      <span class="step-hint">💡 万一哪家店没识别出来，点表格下面的「➕ 新增一行」自己补上；没网时自动退回普通识别</span>
     </div>
   </div>
 
-  <div class="card" style="border-left:4px solid var(--primary);">
-    <div style="font-size:14px;font-weight:700;color:var(--primary-dark);">📊 第4步：查看和核对数据</div>
-    <div style="margin-top:8px;font-size:13px;line-height:2;">
+  <!-- 第4步：查看和核对数据 -->
+  <div class="settings-step">
+    <div class="step-head"><span class="step-badge">4</span><span class="step-title step-title-cyan">查看和核对数据</span></div>
+    <div class="step-body">
       <b>📋 想看以前记过什么？</b><br>
-      点顶部 <b>「记录」</b> → 能看到所有历史记录，可按日期/店面/筐筛选<br>
-      记错了点 <b>「编辑」</b> 直接改数量，不用删了重录；想删才点「删除」<br><br>
+      点顶部 <b>「记录」</b> → 能看到所有历史记录，可按日期/店面/筐筛选；记错了点 <b>「编辑」</b> 直接改数量，不用删了重录；想删才点「删除」<br><br>
       <b>📊 想一眼看今天每家店发了/收了多少？</b><br>
-      进「📤 发出」或「📥 回收」页，底部有「今日各筐统计（全部门店）」和「📋 今日各店明细」，每家店每个筐都列出来了<br><br>
+      进「发出」或「回收」页，底部有「今日各筐统计（全部门店）」和「📋 今日各店明细」，每家店每个筐都列出来了<br><br>
       <b>📈 想看统计总数？</b><br>
-      ① 点底部 <b>「管理」</b> → 点 <b>「📈 汇总」</b> 按钮<br>
-      ② 选日期范围（或点"近3天"）<br>
-      ③ 选店面（选"全部店"看所有店加起来）<br>
-      ④ 下面表格就是每种筐的发出、回收、差异数<br><br>
+      ① 点底部 <b>「管理」</b> → 点 <b>「📈 汇总」</b> → ② 选日期范围（或点"近3天"）→ ③ 选店面（"全部店"看所有店加起来）→ ④ 表格显示每种筐的发出、回收、差异数
     </div>
   </div>
 
-  <div class="card" style="border-left:4px solid var(--success);">
-    <div style="font-size:14px;font-weight:700;color:var(--success);">🔐 第5步：数据安全（一定要看）</div>
-    <div style="margin-top:8px;font-size:13px;line-height:2;">
-      <b>⚠️ 最重要的一句话：</b>数据默认存在手机里，<b>千万别清浏览器缓存</b>，清了记录就没了！<br><br>
+  <!-- 第5步：数据安全 -->
+  <div class="settings-step">
+    <div class="step-head"><span class="step-badge">5</span><span class="step-title step-title-gold">数据安全（一定要看）</span></div>
+    <div class="step-body">
+      <span class="step-warn">⚠️ 最重要的一句话：数据默认存在手机里，千万别清浏览器缓存，清了记录就没了！</span><br><br>
       <b>✅ 已经设置了密码怎么办？</b><br>
-      什么都不用做。每次你保存数据，它会自动备份到云端（约3秒后自动完成）。<br><br>
+      什么都不用做。每次你保存数据，它会自动备份到云端（约 3 秒后自动完成）。<br><br>
       <b>📱 换了新手机怎么办？</b><br>
-      ① 新手机打开网页 → 点底部 <b>「管理」→「💾 备份与恢复」</b><br>
-      ② 点 <b>「📥 恢复数据」</b><br>
-      ③ 输入你的<b>手机号</b>和<b>密码</b> → 点「📥 恢复」<br>
-      ④ 数据全部回来了 ✅<br><br>
+      ① 新手机打开网页 → 点底部 <b>「管理」→「💾 备份与恢复」</b> → ② 点 <b>「📥 恢复数据」</b> → ③ 输入<b>手机号</b>和<b>密码</b> → 点「📥 恢复」→ ④ 数据全部回来了 ✅<br><br>
       <b>🔑 忘记密码了怎么办？</b><br>
-      ① 点 <b>「❓ 忘记密码」</b><br>
-      ② 输入手机号 + 你当初设置的<b>密保答案</b> → 设置一个新密码 → 完成<br><br>
+      点 <b>「❓ 忘记密码」</b> → 输入手机号 + 当初设置的<b>密保答案</b> → 设置一个新密码 → 完成<br><br>
       <b>✏️ 想改密码？</b><br>
       点 <b>「✏️ 更改密码」</b> → 输入原密码 + 新密码两次 → 完成
     </div>
   </div>
 
-  <div class="card" style="border-left:4px solid var(--warning);">
-    <div style="font-size:14px;font-weight:700;color:var(--warning);">❓ 常见问题</div>
-    <div style="margin-top:8px;font-size:13px;line-height:2;">
-      <b>❓ 登录时提示密码不对怎么办？</b><br>
-      ① 先点密码框右边的 <b>👁</b> 看看有没有打错（大小写/空格/符号）；② 还是不对就点「❓ 忘记密码」→ 答密保问题重置新密码。<br><br>
-      <b>❓ 拍照识别出来的数字不准怎么办？</b><br>
-      AI 识别结果每个数字都可以<b>直接点进去改</b>，改成对的再点「确认录入」。绿色=AI 高置信，黄色=建议核对。拍照时尽量拍正、光线亮一点，识别更准。<br><br>
-      <b>❓ 识别漏了一家店怎么办？</b><br>
-      点表格下面 <b>「➕ 新增一行」</b>，自己把编号、店名、数量填进去。<br><br>
-      <b>❓ 填错了已经保存了，怎么改？</b><br>
-      点顶部 <b>「记录」</b> → 找到那条 → 点<b>「编辑」</b> → 直接改发出/回收数量 → 保存。<br><br>
-      <b>❓ 语音识别不准怎么办？</b><br>
-      说的时候稍微慢一点、清楚一点；识别后<b>会先弹确认框</b>，看到数字对了再点「填入」，说错了点「取消」重说。<br><br>
-      <b>❓ 手写单据能识别吗？</b><br>
-      手写单会走「手写增强识别」，尽量拍清晰；如果个别数字识别不到，在弹窗里手动改或补填。<br><br>
-      <b>❓ 识别要等好几秒，是卡住了吗？</b><br>
-      不是，AI 识别会先看懂整张表格再填数，一般 1-3 秒出结果；没网或识别繁忙时会退回普通识别稍慢一点。急的话可以点「取消识别」重拍。<br><br>
-      <b>❓ 两台手机的数据能合并吗？</b><br>
-      能。点底部「管理」→「备份与恢复」→「选择文件导入」时，点「取消」就是<b>合并</b>（不会覆盖），两台手机数据合到一起。<br><br>
-      <b>❓ 没网络能用吗？</b><br>
-      打开过一次后，页面会缓存，<b>没网也能打开看数据</b>；但录入/拍照识别需要联网。<br><br>
-      <b><span id="adminTapZone" onclick="adminTap()" style="cursor:default;user-select:none;">❓</span> 每天要录很多店怎么办？</b><br>
-      保存后<b>自动跳到下一家店</b>，一路填完不用选店；配合语音或拍照更快。
-    </div>
+  <!-- 常见问题 FAQ -->
+  <div class="settings-faq">
+    <div class="faq-q">❓ 登录时提示密码不对怎么办？</div>
+    <div class="faq-a">① 先点密码框右边的 <b>👁</b> 看看有没有打错（大小写/空格/符号）；② 还是不对就点「❓ 忘记密码」→ 答密保问题重置新密码。</div>
+  </div>
+  <div class="settings-faq">
+    <div class="faq-q">❓ 拍照识别出来的数字不准怎么办？</div>
+    <div class="faq-a">AI 识别结果每个数字都可以<b>直接点进去改</b>，改成对的再点「确认录入」。绿色=AI 高置信，黄色=建议核对。拍照时尽量拍正、光线亮一点，识别更准。</div>
+  </div>
+  <div class="settings-faq">
+    <div class="faq-q">❓ 识别漏了一家店怎么办？</div>
+    <div class="faq-a">点表格下面 <b>「➕ 新增一行」</b>，自己把编号、店名、数量填进去。</div>
+  </div>
+  <div class="settings-faq">
+    <div class="faq-q">❓ 填错了已经保存了，怎么改？</div>
+    <div class="faq-a">点顶部 <b>「记录」</b> → 找到那条 → 点<b>「编辑」</b> → 直接改发出/回收数量 → 保存。</div>
+  </div>
+  <div class="settings-faq">
+    <div class="faq-q">❓ 语音识别不准怎么办？</div>
+    <div class="faq-a">说的时候稍微慢一点、清楚一点；识别后<b>会先弹确认框</b>，看到数字对了再点「填入」，说错了点「取消」重说。</div>
+  </div>
+  <div class="settings-faq">
+    <div class="faq-q">❓ 手写单据能识别吗？</div>
+    <div class="faq-a">手写单会走「手写增强识别」，尽量拍清晰；如果个别数字识别不到，在弹窗里手动改或补填。</div>
+  </div>
+  <div class="settings-faq">
+    <div class="faq-q">❓ 识别要等好几秒，是卡住了吗？</div>
+    <div class="faq-a">不是，AI 识别会先看懂整张表格再填数，一般 1-3 秒出结果；没网或识别繁忙时会退回普通识别稍慢一点。急的话可以点「取消识别」重拍。</div>
+  </div>
+  <div class="settings-faq">
+    <div class="faq-q">❓ 两台手机的数据能合并吗？</div>
+    <div class="faq-a">能。点底部「管理」→「备份与恢复」→「选择文件导入」时，点「取消」就是<b>合并</b>（不会覆盖），两台手机数据合到一起。</div>
+  </div>
+  <div class="settings-faq">
+    <div class="faq-q">❓ 没网络能用吗？</div>
+    <div class="faq-a">打开过一次后，页面会缓存，<b>没网也能打开看数据</b>；但录入/拍照识别需要联网。</div>
+  </div>
+  <div class="settings-faq">
+    <div class="faq-q"><span id="adminTapZone" onclick="adminTap()" style="cursor:default;user-select:none;">❓</span> 每天要录很多店怎么办？</div>
+    <div class="faq-a">保存后<b>自动跳到下一家店</b>，一路填完不用选店；配合语音或拍照更快。</div>
   </div>
 </div>
 
@@ -8813,7 +8830,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.83'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.84'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
