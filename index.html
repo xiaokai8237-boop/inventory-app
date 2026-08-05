@@ -1541,13 +1541,13 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 #page-record .login-pill.logged-in { color: #7CE8E0; border-color: rgba(124,232,224,.55); background: rgba(124,232,224,.12); }
 /* 发出/回收主按钮：暖金 + 青绿 渐变大字 */
 #page-record .home-btn-main {
-  border-radius: 22px; font-size: 26px; font-weight: 800; letter-spacing: 6px;
-  padding: 20px 0; line-height: 1.4;
+  border-radius: 6px; font-size: 17px; font-weight: 800; letter-spacing: 2px;
+  padding: 4px 0; line-height: 1.25;
 }
-#page-record .home-btn-main .hb-icon { font-size: 42px; margin-bottom: 6px; display: block; }
-#page-record .home-btn-main .hb-sub { display: block; font-size: 13px; font-weight: 500; letter-spacing: 0; color: rgba(11,46,56,.75); margin-top: 4px; }
-#page-record .home-btn-main .hb-sub2 { display: block; font-size: 12px; font-weight: 500; letter-spacing: 0; color: rgba(11,46,56,.65); margin-top: 2px; }
-#page-record .home-btn-main .hb-icon svg { display: block; margin: 0 auto; }
+#page-record .home-btn-main .hb-icon { font-size: 18px; margin-bottom: 1px; display: block; }
+#page-record .home-btn-main .hb-icon svg { width: 16px; height: 16px; display: block; margin: 0 auto; }
+#page-record .home-btn-main .hb-sub { display: block; font-size: 10px; font-weight: 500; letter-spacing: 0; color: rgba(11,46,56,.75); margin-top: 1px; }
+#page-record .home-btn-main .hb-sub2 { display: block; font-size: 9px; font-weight: 500; letter-spacing: 0; color: rgba(11,46,56,.65); margin-top: 0; }
 #page-record .home-btn-issue {
   background: linear-gradient(160deg, #F8E3A6 0%, #E3BE68 55%, #C89B4E 100%);
   color: #0B2E38;
@@ -9283,7 +9283,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.91'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.92'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
