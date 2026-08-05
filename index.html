@@ -996,7 +996,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 #ocrResultModal .ocr-table tbody td { border-bottom: 1px solid rgba(255,255,255,.07); }
 #ocrResultModal .ocr-table .total-row td { background: rgba(245,220,146,.08); color: #F5DC92; font-weight: 700; }
 /* ===== 额外发收登记弹窗：深空蓝晶定稿风格 ===== */
-#extraModal.store-ocr-modal { background: rgba(4,24,32,.78); }
+#extraModal.store-ocr-modal { background: rgba(4,24,32,.78); width: 100%; height: 100%; }
 #extraModal .store-ocr-content {
   background: #0E3340;
   border: 1.5px solid rgba(245,220,146,.55);
@@ -1598,6 +1598,16 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </style>
 </head>
 <body>
+  <!-- emoji 染色滤镜（全局定义，供额外发收登记弹窗图标着色：鲜食=深青绿/面包=深金/低温=深冰蓝/冷冻=深蓝紫/常温=深橙） -->
+  <svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;" aria-hidden="true">
+    <defs>
+      <filter id="tintExtraLeaf"><feColorMatrix type="matrix" values="0 0 0 0 0.09 0 0 0 0 0.65 0 0 0 0 0.54 0 0 0 1 0"/></filter>
+      <filter id="tintExtraBread"><feColorMatrix type="matrix" values="0 0 0 0 0.83 0 0 0 0 0.63 0 0 0 0 0.09 0 0 0 1 0"/></filter>
+      <filter id="tintExtraIce"><feColorMatrix type="matrix" values="0 0 0 0 0.23 0 0 0 0 0.61 0 0 0 0 0.85 0 0 0 1 0"/></filter>
+      <filter id="tintExtraSnow"><feColorMatrix type="matrix" values="0 0 0 0 0.36 0 0 0 0 0.42 0 0 0 0 0.84 0 0 0 1 0"/></filter>
+      <filter id="tintExtraBox"><feColorMatrix type="matrix" values="0 0 0 0 0.88 0 0 0 0 0.48 0 0 0 0 0.14 0 0 0 1 0"/></filter>
+    </defs>
+  </svg>
 
 <!-- 启动加载遮罩：与 APP 原生启动页无缝衔接，避免网页加载期间闪白 -->
 <div id="bootOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background-color:#082E38;background-image:url('splash-v10-vision.png');background-size:cover;background-position:center;background-repeat:no-repeat;z-index:2147483647;">
@@ -1703,30 +1713,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
           <div class="gi-out"><input type="number" id="giOut4" placeholder="0" min="0" inputmode="numeric" data-idx="4"></div>
         </div></div>
       <button class="btn btn-primary" style="margin-top:8px;" onclick="saveManualRecord()">保存当日记录</button>
-    </div>
-
-    <!-- 额外发收登记弹窗（针对所有门店） -->
-    <div class="store-ocr-modal" id="extraModal" onclick="closeExtraModal()">
-      <!-- emoji 染色滤镜：把图标本体染成对应筐深色（鲜食=深青绿/面包=深金/低温=深冰蓝/冷冻=深蓝紫/常温=深橙） -->
-      <svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;" aria-hidden="true">
-        <defs>
-          <filter id="tintExtraLeaf"><feColorMatrix type="matrix" values="0 0 0 0 0.09 0 0 0 0 0.65 0 0 0 0 0.54 0 0 0 1 0"/></filter>
-          <filter id="tintExtraBread"><feColorMatrix type="matrix" values="0 0 0 0 0.83 0 0 0 0 0.63 0 0 0 0 0.09 0 0 0 1 0"/></filter>
-          <filter id="tintExtraIce"><feColorMatrix type="matrix" values="0 0 0 0 0.23 0 0 0 0 0.61 0 0 0 0 0.85 0 0 0 1 0"/></filter>
-          <filter id="tintExtraSnow"><feColorMatrix type="matrix" values="0 0 0 0 0.36 0 0 0 0 0.42 0 0 0 0 0.84 0 0 0 1 0"/></filter>
-          <filter id="tintExtraBox"><feColorMatrix type="matrix" values="0 0 0 0 0.88 0 0 0 0 0.48 0 0 0 0 0.14 0 0 0 1 0"/></filter>
-        </defs>
-      </svg>
-      <div class="store-ocr-content" onclick="event.stopPropagation()">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <span class="extra-title">➕ 额外发收登记</span>
-          <button class="extra-modal-close" onclick="closeExtraModal()">×</button>
-        </div>
-        <div class="extra-sub" style="margin-bottom:12px;">针对所有门店的额外发出/回收，填对应筐的数量后点保存</div>
-        <div class="goods-input-list" id="extraGoodsList" style="margin-bottom:12px;"></div>
-        <button class="btn-save-extra" onclick="saveExtraRecord()">💾 保存登记</button>
-        <button class="btn-cancel-extra" onclick="closeExtraModal()">取消</button>
-      </div>
     </div>
   </div>
 
@@ -9152,5 +9138,18 @@ document.getElementById('exportStart')?.setAttribute('value', `${dStart.getFullY
 document.getElementById('exportEnd')?.setAttribute('value', dEnd);
 </script>
 
+<!-- 额外发收登记弹窗（针对所有门店，挂 BODY 直接子级：按钮在记录页，切页时首页 display:none 不影响弹窗显示） -->
+<div class="store-ocr-modal" id="extraModal" onclick="closeExtraModal()">
+  <div class="store-ocr-content" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span class="extra-title">➕ 额外发收登记</span>
+      <button class="extra-modal-close" onclick="closeExtraModal()">×</button>
+    </div>
+    <div class="extra-sub" style="margin-bottom:12px;">针对所有门店的额外发出/回收，填对应筐的数量后点保存</div>
+    <div class="goods-input-list" id="extraGoodsList" style="margin-bottom:12px;"></div>
+    <button class="btn-save-extra" onclick="saveExtraRecord()">💾 保存登记</button>
+    <button class="btn-cancel-extra" onclick="closeExtraModal()">取消</button>
+  </div>
+</div>
 
 </body></html>
