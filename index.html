@@ -5457,7 +5457,7 @@ function micErrorTip(err) {
   else if (name === 'NotFoundError') tip = '未找到麦克风设备，请检查耳机/麦克风连接';
   else if (name === 'SecurityError') tip = '浏览器安全策略拦截了麦克风，请关闭隐私模式后重试';
   else if (name === 'AbortError') tip = '麦克风被其他应用占用，请关闭其他录音应用后重试';
-  else if (name === 'NotReadableError') tip = '麦克风设备被占用或不可用，请关闭其他录音应用后重试';
+  else if (name === 'NotReadableError') tip = '麦克风设备被占用或不可用：请①关闭微信/QQ等后台录音应用 ②断开蓝牙耳机 ③检查系统设置-隐私-麦克风访问已开启 ④重启手机后重试';
   else if (name === 'OverconstrainedError') tip = '麦克风不满足录音要求，请更换设备后重试';
   else if (name === 'TypeError' || name === 'InvalidStateError') tip = '录音初始化失败，请重试';
   else {
@@ -5469,6 +5469,33 @@ function micErrorTip(err) {
   return tip;
 }
 
+// ===== 统一获取麦克风流：细化约束 + 失败自动重试（排除瞬态占用误判） =====
+// 旧代码直接 getUserMedia({audio:true})，小米 WebView 偶发 NotReadableError（设备瞬态被占/初始化竞争）。
+// 策略：第一次用细化音频约束（echoCancellation 等），NotReadableError/AbortError 时延迟 600ms 自动重试一次简单约束。
+function getUserMediaAudio() {
+  return new Promise(function (resolve, reject) {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      reject(new Error('当前浏览器不支持录音')); return;
+    }
+    var attempt = 0;
+    function tryOnce() {
+      attempt++;
+      var constraints = (attempt === 1)
+        ? { audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }
+        : { audio: true };
+      navigator.mediaDevices.getUserMedia(constraints).then(resolve).catch(function (err) {
+        // 设备瞬态占用/初始化竞争 → 自动重试一次；权限类错误不重试（重试无效）
+        if (attempt < 2 && err && (err.name === 'NotReadableError' || err.name === 'AbortError')) {
+          setTimeout(tryOnce, 600);
+        } else {
+          reject(err);
+        }
+      });
+    }
+    tryOnce();
+  });
+}
+
 function emitStartVoice() {
   if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
@@ -5476,7 +5503,7 @@ function emitStartVoice() {
   }
   showEmitVoiceOverlay('record');
   try {
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    getUserMediaAudio().then(stream => {
       emitVoiceStream = stream;
       emitVoiceChunks = [];
       let mime = '';
@@ -7095,7 +7122,7 @@ function startVoice(mode) {
     if (typeof MediaRecorder === 'undefined') {
       throw new Error('当前浏览器不支持录音');
     }
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    getUserMediaAudio().then(stream => {
       voiceStream = stream;
       let mime = '';
       if (MediaRecorder.isTypeSupported('audio/mp4')) mime = 'audio/mp4';
@@ -9383,7 +9410,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.97'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.98'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
