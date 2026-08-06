@@ -1644,6 +1644,19 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 #adminModal .am-pending-meta { font-size: 11px; color: #5E9AA4; margin-bottom: 6px; }
 #adminModal .am-pending-btns { display: flex; gap: 6px; }
 #adminModal .am-sm { flex: 1; padding: 6px 0; font-size: 12px; border-radius: 8px; }
+#voiceConfirmModal.vc-modal { background: rgba(4,24,32,.78); }
+#voiceConfirmModal .vc-content { background: #0E3340; border: 1.5px solid rgba(245,220,146,.55); border-radius: 22px; box-shadow: 0 12px 44px rgba(0,0,0,.55); max-width: 340px; padding: 18px 16px 16px; color: #fff; }
+#voiceConfirmModal .vc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+#voiceConfirmModal .vc-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; color: #F5DC92; }
+#voiceConfirmModal .vc-title svg { width: 21px; height: 21px; flex-shrink: 0; }
+#voiceConfirmModal .vc-close { background: none; border: none; cursor: pointer; padding: 0 2px; line-height: 1; }
+#voiceConfirmModal .vc-label { font-size: 14px; color: #fff; margin-bottom: 6px; }
+#voiceConfirmModal .vc-info { font-size: 15px; font-weight: 600; color: #7CE8E0; background: #13454F; border: 1.5px solid rgba(143,216,224,.4); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+#voiceConfirmModal .vc-tip { font-size: 12px; color: rgba(255,255,255,.55); margin-bottom: 14px; }
+#voiceConfirmModal .vc-btns { display: flex; gap: 8px; }
+#voiceConfirmModal .vc-primary { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 0; font-size: 15px; font-weight: 700; color: #0B2E38; background: linear-gradient(180deg, #8BE8D4 0%, #2AAE93 100%); border: none; border-radius: 28px; cursor: pointer; box-shadow: 0 6px 16px rgba(42,174,147,.35); }
+#voiceConfirmModal .vc-primary:active { transform: scale(.98); }
+#voiceConfirmModal .vc-outline { flex: 1; padding: 12px 0; font-size: 15px; font-weight: 700; color: #fff; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.35); border-radius: 28px; cursor: pointer; }
 
 /* ===== 深色模式兼容（覆盖 JS 内联硬编码浅色底） ===== */
 html[data-theme="dark"] .native-file-btn { background: var(--card-bg); color: var(--primary); }
@@ -3329,18 +3342,18 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 </div>
 
 <!-- 语音识别确认弹窗 -->
-<div class="store-ocr-modal" id="voiceConfirmModal">
-  <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:340px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;">🎤 确认识别结果</span>
-      <button onclick="cancelVoiceFill()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+<div class="store-ocr-modal vc-modal" id="voiceConfirmModal" onclick="cancelVoiceFill()">
+  <div class="store-ocr-content vc-content" onclick="event.stopPropagation()">
+    <div class="vc-head">
+      <span class="vc-title"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#F5DC92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>确认识别结果</span>
+      <button class="vc-close" onclick="cancelVoiceFill()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
     </div>
-    <div style="font-size:14px;color:var(--text);margin-bottom:6px;">识别到：</div>
-    <div id="voiceConfirmInfo" style="font-size:15px;font-weight:600;color:var(--primary);background:var(--blue-soft);border-radius:8px;padding:12px;margin-bottom:6px;"></div>
-    <div style="font-size:12px;color:var(--text-light);margin-bottom:14px;">确认无误后点「填入」；说错了点「取消」重说</div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-primary" style="flex:1;" onclick="confirmVoiceFill()">✅ 填入</button>
-      <button class="btn btn-outline" style="flex:1;" onclick="cancelVoiceFill()">取消</button>
+    <div class="vc-label">识别到：</div>
+    <div id="voiceConfirmInfo" class="vc-info"></div>
+    <div class="vc-tip">确认无误后点「填入」；说错了点「取消」重说</div>
+    <div class="vc-btns">
+      <button class="vc-primary" onclick="confirmVoiceFill()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0B2E38" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 7"/></svg>填入</button>
+      <button class="vc-outline" onclick="cancelVoiceFill()">取消</button>
     </div>
   </div>
 </div>
@@ -9795,7 +9808,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.114'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.115'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
