@@ -1527,6 +1527,29 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 #recordDeleteModal .gd-danger { background: linear-gradient(135deg, #FF7A59 0%, #E8453C 100%); color: #fff; box-shadow: 0 6px 18px rgba(232,69,60,.35); }
 #recordDeleteModal .gd-outline { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.35); }
 
+/* ===== #47 记录编辑弹窗：深空蓝晶定稿壳（沿用 #ocrResultModal 规范） ===== */
+#editRecordModal.er-modal { background: rgba(4,24,32,.78); }
+#editRecordModal .er-content {
+  background: #0E3340; border: 1.5px solid rgba(245,220,146,.55); border-radius: 22px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.55); color: #FFFFFF; max-width: 330px;
+}
+#editRecordModal .er-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+#editRecordModal .er-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; color: #F5DC92; }
+#editRecordModal .er-title svg { width: 20px; height: 20px; stroke: #7CE8E0; flex-shrink: 0; }
+#editRecordModal .er-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.7); padding: 2px; display: flex; align-items: center; transition: color .15s; }
+#editRecordModal .er-close:hover { color: #fff; }
+#editRecordModal .er-close svg { width: 22px; height: 22px; }
+#editRecordModal .er-info { font-size: 13px; line-height: 1.6; color: #EAF9FB; margin-bottom: 14px; }
+#editRecordModal .er-qty-row { display: flex; gap: 10px; margin-bottom: 16px; }
+#editRecordModal .er-in-box { flex: 1; background: rgba(56,139,253,.12); border: 1px solid rgba(56,139,253,.45); border-radius: 12px; padding: 10px; text-align: center; }
+#editRecordModal .er-out-box { flex: 1; background: rgba(72,199,142,.12); border: 1px solid rgba(72,199,142,.45); border-radius: 12px; padding: 10px; text-align: center; }
+#editRecordModal .er-label { font-size: 12px; color: rgba(255,255,255,.7); margin-bottom: 6px; }
+#editRecordModal .er-input { width: 80px; padding: 6px; border: 1px solid rgba(255,255,255,.25); border-radius: 6px; font-size: 16px; text-align: center; background: rgba(255,255,255,.06); color: #fff; }
+#editRecordModal .er-btns { display: flex; gap: 10px; }
+#editRecordModal .btn { flex: 1; border: none; border-radius: 12px; padding: 11px 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+#editRecordModal .er-primary { background: linear-gradient(135deg, #7CE8E0 0%, #38B2AC 100%); color: #04210F; box-shadow: 0 6px 18px rgba(56,178,172,.35); }
+#editRecordModal .er-outline { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+
 /* ===== 深色模式兼容（覆盖 JS 内联硬编码浅色底） ===== */
 html[data-theme="dark"] .native-file-btn { background: var(--card-bg); color: var(--primary); }
 html[data-theme="dark"] .store-chip { background: var(--soft-bg); }
@@ -2565,26 +2588,36 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <!-- 记录编辑弹窗 -->
-<div class="gd-modal" id="editRecordModal" onclick="closeEditRecordModal()">
-  <div class="gd-content" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;">✏️ 编辑记录</span>
-      <button onclick="closeEditRecordModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+<div class="gd-modal er-modal" id="editRecordModal" onclick="closeEditRecordModal()">
+  <div class="gd-content er-content" onclick="event.stopPropagation()">
+    <div class="er-head">
+      <span class="er-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+        </svg>
+        编辑记录
+      </span>
+      <button class="er-close" onclick="closeEditRecordModal()" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+          <path d="M18 6 6 18"/><path d="M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
-    <div style="font-size:13px;color:var(--text);margin-bottom:12px;" id="editRecordInfo"></div>
-    <div style="display:flex;gap:10px;margin-bottom:14px;">
-      <div style="flex:1;background:var(--blue-soft);border-radius:8px;padding:10px;text-align:center;">
-        <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">发出</div>
-        <input type="number" id="editQtyIn" min="0" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:6px;font-size:16px;text-align:center;">
+    <div class="er-info" id="editRecordInfo"></div>
+    <div class="er-qty-row">
+      <div class="er-in-box">
+        <div class="er-label">发出</div>
+        <input type="number" id="editQtyIn" min="0" class="er-input">
       </div>
-      <div style="flex:1;background:var(--green-soft);border-radius:8px;padding:10px;text-align:center;">
-        <div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">回收</div>
-        <input type="number" id="editQtyOut" min="0" style="width:80px;padding:6px;border:1px solid var(--border);border-radius:6px;font-size:16px;text-align:center;">
+      <div class="er-out-box">
+        <div class="er-label">回收</div>
+        <input type="number" id="editQtyOut" min="0" class="er-input">
       </div>
     </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-primary" style="flex:1;" onclick="confirmEditRecord()">✅ 保存修改</button>
-      <button class="btn btn-outline" style="flex:1;" onclick="closeEditRecordModal()">取消</button>
+    <div class="er-btns">
+      <button class="btn er-primary" onclick="confirmEditRecord()">保存修改</button>
+      <button class="btn er-outline" onclick="closeEditRecordModal()">取消</button>
     </div>
   </div>
 </div>
@@ -9633,7 +9666,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.105'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.106'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
