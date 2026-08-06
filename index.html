@@ -1595,6 +1595,30 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 #verifyModal .vm-primary { background: linear-gradient(135deg, #F7E3A6 0%, #E9C975 45%, #C49A4E 100%); color: #0B2E38; box-shadow: 0 6px 18px rgba(201,158,78,.35); }
 #verifyModal .vm-outline { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.35); }
 
+/* ===== #53 更改密码弹窗（changePwdModal）：深空蓝晶定稿壳（沿用 #ocrResultModal 规范） ===== */
+#changePwdModal.cp-modal { background: rgba(4,24,32,.78); }
+#changePwdModal .cp-content {
+  background: #0E3340; border: 1.5px solid rgba(245,220,146,.55); border-radius: 22px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.55); color: #FFFFFF; max-width: 330px;
+}
+#changePwdModal .cp-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+#changePwdModal .cp-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; color: #F5DC92; }
+#changePwdModal .cp-title svg { width: 21px; height: 21px; stroke: #F5DC92; flex-shrink: 0; }
+#changePwdModal .cp-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.7); padding: 2px; display: flex; align-items: center; transition: color .15s; }
+#changePwdModal .cp-close:hover { color: #fff; }
+#changePwdModal .cp-close svg { width: 22px; height: 22px; }
+#changePwdModal .cp-label { display: block; font-size: 12px; color: #8FD8E0; margin: 4px 6px 6px; letter-spacing: 1px; }
+#changePwdModal .cp-input-row { position: relative; display: flex; align-items: center; background: #0A3542; border: 1px solid rgba(143,216,224,.3); border-radius: 26px; padding: 0 14px; height: 46px; margin-bottom: 9px; box-sizing: border-box; }
+#changePwdModal .cp-input-row svg.ai-icon { width: 19px; height: 19px; stroke: #8FDDE6; flex-shrink: 0; }
+#changePwdModal .cp-input-row input { flex: 1; background: none; border: none; outline: none; color: #fff; font-size: 15px; margin-left: 10px; height: 100%; min-width: 0; box-sizing: border-box; }
+#changePwdModal .cp-input-row input::placeholder { color: #7FB8C0; }
+#changePwdModal .cp-input-row .pwd-toggle { background: none; border: none; padding: 4px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; }
+#changePwdModal .cp-input-row .pwd-toggle svg { width: 20px; height: 20px; stroke: #8FD8E0; display: block; }
+#changePwdModal .cp-btns { display: flex; gap: 10px; margin-top: 2px; }
+#changePwdModal .btn { flex: 1; border: none; border-radius: 12px; padding: 11px 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+#changePwdModal .cp-primary { background: linear-gradient(135deg, #F7E3A6 0%, #E9C975 45%, #C49A4E 100%); color: #0B2E38; box-shadow: 0 6px 18px rgba(201,158,78,.35); }
+#changePwdModal .cp-outline { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+
 /* ===== 深色模式兼容（覆盖 JS 内联硬编码浅色底） ===== */
 html[data-theme="dark"] .native-file-btn { background: var(--card-bg); color: var(--primary); }
 html[data-theme="dark"] .store-chip { background: var(--soft-bg); }
@@ -2934,32 +2958,49 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   </div>
 </div>
 
-<!-- 更改密码弹窗 -->
-<div class="store-ocr-modal" id="changePwdModal" onclick="closeChangePwdModal()">
-  <div class="store-ocr-content" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;">✏️ 更改密码</span>
-      <button onclick="closeChangePwdModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+<!-- ===== #53 更改密码弹窗（changePwdModal）：深空蓝晶定稿壳（沿用 #ocrResultModal 规范） ===== -->
+<div class="store-ocr-modal cp-modal" id="changePwdModal" onclick="closeChangePwdModal()">
+  <div class="store-ocr-content cp-content" onclick="event.stopPropagation()">
+    <div class="cp-head">
+      <span class="cp-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="21" height="21">
+          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+          <path d="m15 5 4 4"/>
+        </svg>
+        更改密码
+      </span>
+      <button class="cp-close" onclick="closeChangePwdModal()" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+          <path d="M18 6 6 18"/><path d="M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
-    <div class="form-group">
-      <label class="form-label">手机号</label>
-      <input type="tel" class="form-input" id="cpPhone" maxlength="11" placeholder="11位手机号" inputmode="numeric">
+    <label class="cp-label">手机号</label>
+    <div class="cp-input-row">
+      <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+      <input type="tel" id="cpPhone" maxlength="11" placeholder="请输入11位手机号" inputmode="numeric">
     </div>
-    <div class="form-group">
-      <label class="form-label">原密码</label>
-      <div class="pwd-wrap"><input type="password" class="form-input" id="cpOldPwd" placeholder="输入原密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="cpOldPwd_eye" onclick="togglePwd('cpOldPwd')" tabindex="-1">👁</button></div>
+    <label class="cp-label">原密码</label>
+    <div class="cp-input-row">
+      <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <input type="password" id="cpOldPwd" placeholder="请输入原密码" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button type="button" class="pwd-toggle" id="cpOldPwd_eye" onclick="togglePwd('cpOldPwd')" tabindex="-1" aria-label="显示密码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
-    <div class="form-group">
-      <label class="form-label">新密码（字母+数字+符号，至少8位）</label>
-      <div class="pwd-wrap"><input type="password" class="form-input" id="cpNewPwd" placeholder="输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="cpNewPwd_eye" onclick="togglePwd('cpNewPwd')" tabindex="-1">👁</button></div>
+    <label class="cp-label">新密码（字母+数字+符号，至少8位）</label>
+    <div class="cp-input-row">
+      <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <input type="password" id="cpNewPwd" placeholder="请输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button type="button" class="pwd-toggle" id="cpNewPwd_eye" onclick="togglePwd('cpNewPwd')" tabindex="-1" aria-label="显示密码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
-    <div class="form-group">
-      <label class="form-label">再次输入新密码</label>
-      <div class="pwd-wrap"><input type="password" class="form-input" id="cpNewPwd2" placeholder="再次输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="cpNewPwd2_eye" onclick="togglePwd('cpNewPwd2')" tabindex="-1">👁</button></div>
+    <label class="cp-label">再次输入新密码</label>
+    <div class="cp-input-row">
+      <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <input type="password" id="cpNewPwd2" placeholder="请再次输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false">
+      <button type="button" class="pwd-toggle" id="cpNewPwd2_eye" onclick="togglePwd('cpNewPwd2')" tabindex="-1" aria-label="显示密码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closeChangePwdModal()">取消</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="doChangePwd()">✅ 确认更改</button>
+    <div class="cp-btns">
+      <button class="btn cp-outline" onclick="closeChangePwdModal()">取消</button>
+      <button class="btn cp-primary" onclick="doChangePwd()">确认更改</button>
     </div>
   </div>
 </div>
@@ -9849,7 +9890,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.109'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.110'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
