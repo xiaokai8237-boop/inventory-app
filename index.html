@@ -1482,6 +1482,28 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 .gd-modal.show { display:flex; }
 .gd-content { background: var(--glass-bg); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%); border: 1px solid var(--glass-border); border-radius:12px; padding:14px; max-width:320px; width:90%; box-shadow:0 4px 20px rgba(0,0,0,.3); }
 
+/* ===== #45 删筐确认弹窗：深空蓝晶定稿壳（沿用 #ocrResultModal 已验收规范） ===== */
+#goodsDeleteModal.goods-del-modal { background: rgba(4,24,32,.78); }
+#goodsDeleteModal .goods-del-content {
+  background: #0E3340;
+  border: 1.5px solid rgba(245,220,146,.55);
+  border-radius: 22px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.55);
+  color: #FFFFFF;
+  max-width: 330px;
+}
+#goodsDeleteModal .gd-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+#goodsDeleteModal .gd-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; color: #F5DC92; }
+#goodsDeleteModal .gd-title svg { width: 21px; height: 21px; stroke: #F5A623; flex-shrink: 0; }
+#goodsDeleteModal .gd-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.7); padding: 2px; display: flex; align-items: center; transition: color .15s; }
+#goodsDeleteModal .gd-close:hover { color: #fff; }
+#goodsDeleteModal .gd-close svg { width: 22px; height: 22px; }
+#goodsDeleteModal .gd-msg { font-size: 14px; line-height: 1.65; margin-bottom: 16px; color: #EAF9FB; }
+#goodsDeleteModal .gd-btns { display: flex; gap: 10px; }
+#goodsDeleteModal .btn { flex: 1; border: none; border-radius: 12px; padding: 11px 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px; }
+#goodsDeleteModal .gd-danger { background: linear-gradient(135deg, #FF7A59 0%, #E8453C 100%); color: #fff; box-shadow: 0 6px 18px rgba(232,69,60,.35); }
+#goodsDeleteModal .gd-outline { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+
 /* ===== 深色模式兼容（覆盖 JS 内联硬编码浅色底） ===== */
 html[data-theme="dark"] .native-file-btn { background: var(--card-bg); color: var(--primary); }
 html[data-theme="dark"] .store-chip { background: var(--soft-bg); }
@@ -2463,16 +2485,26 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <!-- 筐删除弹窗 -->
-<div class="gd-modal" id="goodsDeleteModal" onclick="closeGoodsDeleteModal()">
-  <div class="gd-content" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;">⚠️ 删除提醒</span>
-      <button onclick="closeGoodsDeleteModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+<div class="gd-modal goods-del-modal" id="goodsDeleteModal" onclick="closeGoodsDeleteModal()">
+  <div class="gd-content goods-del-content" onclick="event.stopPropagation()">
+    <div class="gd-head">
+      <span class="gd-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="21" height="21">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+          <path d="M12 9v4"/><path d="M12 17h.01"/>
+        </svg>
+        删除提醒
+      </span>
+      <button class="gd-close" onclick="closeGoodsDeleteModal()" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+          <path d="M18 6 6 18"/><path d="M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
-    <p id="goodsDeleteMsg" style="font-size:14px;line-height:1.6;margin-bottom:14px;"></p>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-danger" style="flex:1;" id="goodsDeleteConfirmBtn" onclick="confirmDeleteGoods()">确认删除</button>
-      <button class="btn btn-outline" style="flex:1;" onclick="goViewGoodsData()">查看数据</button>
+    <p id="goodsDeleteMsg" class="gd-msg"></p>
+    <div class="gd-btns">
+      <button class="btn btn-danger gd-danger" id="goodsDeleteConfirmBtn" onclick="confirmDeleteGoods()">确认删除</button>
+      <button class="btn btn-outline gd-outline" onclick="goViewGoodsData()">查看数据</button>
     </div>
   </div>
 </div>
@@ -9570,7 +9602,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.103'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.104'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
