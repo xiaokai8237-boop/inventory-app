@@ -1928,6 +1928,39 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   cursor: pointer;
 }
 .beta-banner:active { opacity: .7; }
+
+/* ========== 登录/注册/忘记密码 整页（深空蓝晶定稿 图1/3·图2/3·图3/3） ========== */
+.auth-page { padding: 0 !important; padding-bottom: 0 !important; min-height: 100vh; box-sizing: border-box; background: radial-gradient(circle at 50% 22%, #2A7D8A 0%, #15545F 46%, #082E38 100%); }
+.auth-scene { max-width: 480px; margin: 0 auto; padding: 0 20px calc(env(safe-area-inset-bottom) + 30px); min-height: 100vh; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
+.auth-brand { text-align: center; margin-top: 7vh; }
+.auth-logo { width: 88px; height: 88px; margin: 0 auto; border-radius: 20px; background: #0E4A58; border: 2px solid rgba(245,220,146,.85); display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 700; color: #fff; box-shadow: 0 8px 20px rgba(0,0,0,.35); }
+.auth-title { margin-top: 14px; font-size: 22px; font-weight: 800; color: #F5DC92; letter-spacing: 4px; text-align: center; }
+.auth-sub { margin-top: 6px; font-size: 12px; color: #8FD8E0; letter-spacing: 2px; text-align: center; }
+.auth-card { width: 100%; margin-top: 30px; background: rgba(12,64,80,.92); border: 1px solid rgba(245,220,146,.35); border-radius: 22px; padding: 22px 18px 20px; box-shadow: 0 12px 30px rgba(0,0,0,.35); box-sizing: border-box; }
+.auth-card-title { text-align: center; font-size: 20px; font-weight: 800; color: #F5DC92; letter-spacing: 8px; margin-bottom: 18px; }
+.auth-card-sub { text-align: center; font-size: 12px; color: #7FB8C0; letter-spacing: 1px; margin: -10px 0 14px; }
+.auth-label { display: block; font-size: 12px; color: #8FD8E0; margin: 6px 8px 6px; letter-spacing: 1px; }
+.auth-input-row { position: relative; display: flex; align-items: center; background: #0A3542; border: 1px solid rgba(143,216,224,.3); border-radius: 26px; padding: 0 14px; height: 52px; margin-bottom: 12px; box-sizing: border-box; }
+.auth-input-row svg.ai-icon { width: 20px; height: 20px; stroke: #8FDDE6; flex-shrink: 0; }
+.auth-input-row input { flex: 1; background: none; border: none; outline: none; color: #fff; font-size: 15px; margin-left: 10px; height: 100%; min-width: 0; box-sizing: border-box; }
+.auth-input-row input::placeholder { color: #7FB8C0; }
+.auth-input-row .pwd-toggle { background: none; border: none; padding: 4px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; }
+.auth-input-row .pwd-toggle svg { width: 20px; height: 20px; stroke: #8FD8E0; display: block; }
+.auth-select { width: 100%; height: 52px; background: #0A3542; border: 1px solid rgba(143,216,224,.3); border-radius: 26px; color: #fff; font-size: 14px; padding: 0 16px; outline: none; margin-bottom: 12px; box-sizing: border-box; }
+.auth-opt-row { display: flex; justify-content: space-between; align-items: center; margin: 2px 6px 14px; }
+.auth-remember { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #8FD8E0; cursor: pointer; }
+.auth-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid rgba(143,216,224,.5); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: #33E0BD; }
+.auth-check svg { opacity: 0; transition: opacity .15s; }
+.auth-check[data-checked="1"] svg { opacity: 1; }
+.auth-link { font-size: 13px; color: #8FD8E0; cursor: pointer; }
+.auth-btn { width: 100%; height: 52px; border: none; border-radius: 26px; background: linear-gradient(180deg, #F7E3A6, #E9C975 45%, #C49A4E); color: #0B2E38; font-size: 18px; font-weight: 700; letter-spacing: 8px; cursor: pointer; box-shadow: 0 6px 16px rgba(0,0,0,.4); }
+.auth-switch { text-align: center; margin-top: 14px; font-size: 13px; color: #7FB8C0; }
+.auth-switch-link { color: #F5DC92; font-weight: 700; cursor: pointer; margin-left: 4px; }
+.auth-foot { margin-top: auto; text-align: center; padding-top: 26px; }
+.auth-foot div { font-size: 11px; color: rgba(143,216,224,.7); letter-spacing: 2px; margin-top: 4px; }
+.auth-lock-msg { font-size: 11px; color: #F5B26B; margin: -2px 6px 10px; min-height: 14px; }
+.auth-close { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border-radius: 50%; background: rgba(10,53,66,.6); border: 1px solid rgba(245,220,146,.4); color: #F5DC92; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; }
+body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body.auth-mode .beta-banner, body.auth-mode .offline-banner { display: none !important; }
 </style>
 </head>
 <body>
@@ -2520,6 +2553,135 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
 </div>
 
+<!-- ========== 登录整页（深空蓝晶定稿 图1/3） ========== -->
+<div class="page auth-page" id="page-login">
+  <button class="auth-close" onclick="closeLoginModal()" aria-label="返回"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div class="auth-scene">
+    <div class="auth-brand">
+      <div class="auth-logo">筐</div>
+      <div class="auth-title">物流筐收发管理系统</div>
+      <div class="auth-sub">让筐数清清楚楚 · 让配送更轻松</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-card-title">登 录 账 号</div>
+      <div class="auth-input-row">
+        <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        <input type="tel" id="loginPhone" maxlength="11" placeholder="请输入手机号" inputmode="numeric">
+      </div>
+      <div class="auth-input-row">
+        <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="loginPwd" placeholder="请输入密码" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button type="button" class="pwd-toggle" id="loginPwd_eye" onclick="togglePwd('loginPwd')" tabindex="-1" aria-label="显示密码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <div class="auth-lock-msg" id="loginLockMsg"></div>
+      <div class="auth-opt-row">
+        <label class="auth-remember" onclick="toggleAuthRemember(event)"><span class="auth-check" id="loginRemember" data-checked="0"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>记住账号</label>
+        <span class="auth-link" onclick="switchPage('forgot')">忘记密码？</span>
+      </div>
+      <button class="auth-btn" onclick="doLogin()">登 录</button>
+      <div class="auth-switch">还没有账号？<span class="auth-switch-link" onclick="switchPage('setup')">立即注册</span></div>
+    </div>
+    <div class="auth-foot">
+      <div>登录后数据自动云端备份 · 永不丢失</div>
+      <div>说话就能录 · 拍照就能填 · AI 智能识别</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 注册整页（深空蓝晶定稿 图2/3） ========== -->
+<div class="page auth-page" id="page-setup">
+  <button class="auth-close" onclick="closeSetupModal()" aria-label="返回"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div class="auth-scene">
+    <div class="auth-brand">
+      <div class="auth-logo">筐</div>
+      <div class="auth-title">物流筐收发管理系统</div>
+      <div class="auth-sub">让筐数清清楚楚 · 让配送更轻松</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-card-title">注 册 账 号</div>
+      <label class="auth-label">手机号</label>
+      <div class="auth-input-row">
+        <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        <input type="tel" id="setupPhone" maxlength="11" placeholder="请输入11位手机号" inputmode="numeric">
+      </div>
+      <label class="auth-label">密码（字母+数字+符号，至少8位）</label>
+      <div class="auth-input-row">
+        <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="setupPwd" placeholder="请输入密码" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button type="button" class="pwd-toggle" id="setupPwd_eye" onclick="togglePwd('setupPwd')" tabindex="-1" aria-label="显示密码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <label class="auth-label">再次输入密码</label>
+      <div class="auth-input-row">
+        <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="setupPwd2" placeholder="请再次输入密码" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button type="button" class="pwd-toggle" id="setupPwd2_eye" onclick="togglePwd('setupPwd2')" tabindex="-1" aria-label="显示密码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <label class="auth-label">密保问题（忘记密码时验证用）</label>
+      <select class="auth-select" id="setupSecQ">
+        <option value="我的家乡是哪里？">我的家乡是哪里？</option>
+        <option value="我母亲的名字是？">我母亲的名字是？</option>
+        <option value="我父亲的名字是？">我父亲的名字是？</option>
+        <option value="我小学的名字是？">我小学的名字是？</option>
+        <option value="我初中/高中的学校名字是？">我初中/高中的学校名字是？</option>
+        <option value="我最喜欢的食物是？">我最喜欢的食物是？</option>
+        <option value="我第一只宠物的名字是？">我第一只宠物的名字是？</option>
+        <option value="我最好的朋友的名字是？">我最好的朋友的名字是？</option>
+        <option value="我出生在哪个城市？">我出生在哪个城市？</option>
+        <option value="我小时候的昵称是？">我小时候的昵称是？</option>
+        <option value="我最喜欢的歌手/明星是？">我最喜欢的歌手/明星是？</option>
+        <option value="我第一份工作的公司/地方是？">我第一份工作的公司/地方是？</option>
+      </select>
+      <label class="auth-label">密保答案</label>
+      <div class="auth-input-row">
+        <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <input type="text" id="setupSecA" placeholder="请输入密保答案" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <button class="auth-btn" style="margin-top:4px;" onclick="doSetupAccount()">立 即 注 册</button>
+      <div class="auth-switch">已有账号？<span class="auth-switch-link" onclick="switchPage('login')">去登录</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 忘记密码整页（深空蓝晶定稿 图3/3） ========== -->
+<div class="page auth-page" id="page-forgot">
+  <button class="auth-close" onclick="closeForgotModal()" aria-label="返回"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  <div class="auth-scene">
+    <div class="auth-brand">
+      <div class="auth-logo">筐</div>
+      <div class="auth-title">物流筐收发管理系统</div>
+      <div class="auth-sub">让筐数清清楚楚 · 让配送更轻松</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-card-title">忘 记 密 码</div>
+      <div class="auth-card-sub">输入手机号 + 密保答案 → 设置新密码</div>
+      <label class="auth-label">手机号</label>
+      <div class="auth-input-row">
+        <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        <input type="tel" id="fgPhone" maxlength="11" placeholder="请输入11位手机号" inputmode="numeric">
+      </div>
+      <label class="auth-label">密保答案</label>
+      <div class="auth-input-row">
+        <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <input type="text" id="fgSecA" placeholder="请输入密保答案" autocapitalize="off" autocorrect="off" spellcheck="false">
+      </div>
+      <label class="auth-label">新密码（字母+数字+符号，至少8位）</label>
+      <div class="auth-input-row">
+        <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="fgNewPwd" placeholder="请输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button type="button" class="pwd-toggle" id="fgNewPwd_eye" onclick="togglePwd('fgNewPwd')" tabindex="-1" aria-label="显示密码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <label class="auth-label">再次输入新密码</label>
+      <div class="auth-input-row">
+        <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="fgNewPwd2" placeholder="请再次输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button type="button" class="pwd-toggle" id="fgNewPwd2_eye" onclick="togglePwd('fgNewPwd2')" tabindex="-1" aria-label="显示密码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <button class="auth-btn" style="margin-top:4px;" onclick="doForgotReset()">重 置 密 码</button>
+      <div class="auth-switch">想起密码了？<span class="auth-switch-link" onclick="switchPage('login')">去登录</span></div>
+    </div>
+  </div>
+</div>
+
 <!-- 浮层 -->
 <div class="toast" id="toast"></div>
 <div class="voice-overlay" id="voiceOverlay">
@@ -2709,81 +2871,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
   </div>
 </div>
 
-<!-- 登录弹窗 -->
-<div class="store-ocr-modal" id="loginModal" onclick="closeLoginModal()">
-  <div class="store-ocr-content" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;">🔐 登录账号</span>
-      <button onclick="closeLoginModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
-    </div>
-    <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">输入设置过的手机号+密码登录，登录后自动同步云端数据</div>
-    <div class="form-group">
-      <label class="form-label">手机号</label>
-      <input type="tel" class="form-input" id="loginPhone" maxlength="11" placeholder="11位手机号" inputmode="numeric">
-    </div>
-    <div class="form-group">
-      <label class="form-label">密码</label>
-      <div class="pwd-wrap"><input type="password" class="form-input" id="loginPwd" placeholder="输入密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="loginPwd_eye" onclick="togglePwd('loginPwd')" tabindex="-1">👁</button></div>
-    </div>
-    <div style="font-size:11px;color:var(--text-light);margin-bottom:8px;" id="loginLockMsg"></div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closeLoginModal()">取消</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="doLogin()">🔐 登录</button>
-    </div>
-    <div style="font-size:12px;color:var(--text-light);text-align:center;margin-top:10px;">
-      没有账号？<span style="color:var(--primary);font-weight:600;cursor:pointer;" onclick="closeLoginModal();openSetupModal()">去设置密码</span>
-    </div>
-  </div>
-</div>
-
-<!-- 设置密码弹窗 -->
-<div class="store-ocr-modal ocr-form-modal" id="setupModal" onclick="closeSetupModal()">
-  <div class="store-ocr-content" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-      <span class="ocr-form-title">🔑 设置账号密码</span>
-      <button class="ocr-modal-close" onclick="closeSetupModal()">×</button>
-    </div>
-    <div class="ocr-form-sub" style="margin-bottom:12px;">设置后，换手机/清缓存输入手机号+密码即可恢复数据</div>
-    <div class="form-group">
-      <label class="form-label">手机号</label>
-      <input type="tel" class="form-input" id="setupPhone" maxlength="11" placeholder="11位手机号" inputmode="numeric">
-    </div>
-    <div class="form-group">
-      <label class="form-label">密码（字母+数字+符号，至少8位）</label>
-      <div class="pwd-wrap"><input type="password" class="form-input" id="setupPwd" placeholder="输入密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="setupPwd_eye" onclick="togglePwd('setupPwd')" tabindex="-1">👁</button></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">再次输入密码</label>
-      <div class="pwd-wrap"><input type="password" class="form-input" id="setupPwd2" placeholder="再次输入密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="setupPwd2_eye" onclick="togglePwd('setupPwd2')" tabindex="-1">👁</button></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">密保问题（忘记密码时用）</label>
-      <select class="form-select" id="setupSecQ">
-        <option value="我的家乡是哪里？">我的家乡是哪里？</option>
-        <option value="我母亲的名字是？">我母亲的名字是？</option>
-        <option value="我父亲的名字是？">我父亲的名字是？</option>
-        <option value="我小学的名字是？">我小学的名字是？</option>
-        <option value="我初中/高中的学校名字是？">我初中/高中的学校名字是？</option>
-        <option value="我最喜欢的食物是？">我最喜欢的食物是？</option>
-        <option value="我第一只宠物的名字是？">我第一只宠物的名字是？</option>
-        <option value="我最好的朋友的名字是？">我最好的朋友的名字是？</option>
-        <option value="我出生在哪个城市？">我出生在哪个城市？</option>
-        <option value="我小时候的昵称是？">我小时候的昵称是？</option>
-        <option value="我最喜欢的歌手/明星是？">我最喜欢的歌手/明星是？</option>
-        <option value="我第一份工作的公司/地方是？">我第一份工作的公司/地方是？</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">密保答案</label>
-      <input type="text" class="form-input" id="setupSecA" placeholder="输入答案（忘记密码时验证用）">
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-cancel-form" style="flex:1;" onclick="closeSetupModal()">取 消</button>
-      <button class="btn btn-primary-form" style="flex:1;" onclick="doSetupAccount()">✅ 设置密码</button>
-    </div>
-  </div>
-</div>
-
 <!-- 恢复数据弹窗 -->
 <div class="store-ocr-modal" id="verifyModal" onclick="closeVerifyModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
@@ -2834,37 +2921,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
     <div style="display:flex;gap:8px;">
       <button class="btn btn-outline" style="flex:1;" onclick="closeChangePwdModal()">取消</button>
       <button class="btn btn-primary" style="flex:1;" onclick="doChangePwd()">✅ 确认更改</button>
-    </div>
-  </div>
-</div>
-
-<!-- 忘记密码弹窗 -->
-<div class="store-ocr-modal" id="forgotModal" onclick="closeForgotModal()">
-  <div class="store-ocr-content" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;">❓ 忘记密码</span>
-      <button onclick="closeForgotModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
-    </div>
-    <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">输入手机号 + 密保答案 → 设置新密码</div>
-    <div class="form-group">
-      <label class="form-label">手机号</label>
-      <input type="tel" class="form-input" id="fgPhone" maxlength="11" placeholder="11位手机号" inputmode="numeric">
-    </div>
-    <div class="form-group">
-      <label class="form-label">密保答案</label>
-      <input type="text" class="form-input" id="fgSecA" placeholder="输入设置的密保答案">
-    </div>
-    <div class="form-group">
-      <label class="form-label">新密码（字母+数字+符号，至少8位）</label>
-      <div class="pwd-wrap"><input type="password" class="form-input" id="fgNewPwd" placeholder="输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="fgNewPwd_eye" onclick="togglePwd('fgNewPwd')" tabindex="-1">👁</button></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">再次输入新密码</label>
-      <div class="pwd-wrap"><input type="password" class="form-input" id="fgNewPwd2" placeholder="再次输入新密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="fgNewPwd2_eye" onclick="togglePwd('fgNewPwd2')" tabindex="-1">👁</button></div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="closeForgotModal()">取消</button>
-      <button class="btn btn-primary" style="flex:1;" onclick="doForgotReset()">✅ 重置密码</button>
     </div>
   </div>
 </div>
@@ -4134,10 +4190,10 @@ function toggleAccountMenu(e) {
   menu.className = 'account-menu';
   let html = `<div class="am-head">${phone && logged ? '👤 当前账号：' + maskPhone(phone) : '账号管理'}</div>`;
   if (!logged) {
-    html += `<div class="am-item" onclick="openLoginModal();closeAccountMenu()">🔐 登录账号</div>`;
-    html += `<div class="am-item" onclick="openSetupModal();closeAccountMenu()">🔑 设置账号密码</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()">🔐 登录账号</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openSetupModal()">🔑 设置账号密码</div>`;
   } else {
-    html += `<div class="am-item" onclick="openLoginModal();closeAccountMenu()">🔄 切换用户</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()">🔄 切换用户</div>`;
     html += `<div class="am-item" onclick="openChangePwdModal();closeAccountMenu()">✏️ 更改密码</div>`;
     html += `<div class="am-item" onclick="logout();closeAccountMenu()">🚪 退出登录</div>`;
     html += `<div class="am-item danger" onclick="openDeleteAccountModal();closeAccountMenu()">🗑️ 注销账号</div>`;
@@ -4190,11 +4246,20 @@ function renderAccountStatus() {
     </div>`;
 }
 
-// 密码框显示/隐藏切换
+// 密码框显示/隐藏切换（整页用 SVG 眼睛图标；旧弹窗按钮仍为 emoji 时保持原逻辑）
+const AUTH_EYE_OPEN = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const AUTH_EYE_OFF = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
 function togglePwd(id) {
   const el = document.getElementById(id); const btn = document.getElementById(id + '_eye');
   if (!el || !btn) return;
-  if (el.type === 'password') { el.type = 'text'; btn.textContent = '🙈'; } else { el.type = 'password'; btn.textContent = '👁'; }
+  if (btn.querySelector('svg')) {
+    // 整页 SVG 模式：切换眼睛/闭眼图标
+    if (el.type === 'password') { el.type = 'text'; btn.innerHTML = AUTH_EYE_OFF; }
+    else { el.type = 'password'; btn.innerHTML = AUTH_EYE_OPEN; }
+  } else {
+    // 旧弹窗 emoji 模式（保持兼容，待后续替换）
+    if (el.type === 'password') { el.type = 'text'; btn.textContent = '🙈'; } else { el.type = 'password'; btn.textContent = '👁'; }
+  }
 }
 
 // ======== 登录 / 登出 ========
@@ -4204,8 +4269,53 @@ function isLoggedIn() {
 function setLoggedIn(v) {
   try { localStorage.setItem('kuanwei_logged_in', v ? '1' : '0'); } catch(e) {}
 }
-function openLoginModal() { showModal('loginModal'); }
-function closeLoginModal() { document.getElementById('loginModal').classList.remove('show'); }
+function openLoginModal() { authGoTo('login'); }
+function closeLoginModal() { authGoBack(); }
+function openSetupModal() { authGoTo('setup'); }
+function closeSetupModal() { authGoBack(); }
+function openForgotModal() { authGoTo('forgot'); }
+function closeForgotModal() { authGoBack(); }
+// 账号整页：记录来源页 → 切到整页（隐藏底部导航），返回时回到来源页
+let authReturnPage = 'record';
+function authGoTo(pageName) {
+  const act = document.querySelector('.page.active');
+  authReturnPage = act && act.id ? act.id.replace('page-', '') : 'record';
+  switchPage(pageName);
+  // 打开登录页时回填记住的手机号
+  if (pageName === 'login') {
+    try {
+      const rp = localStorage.getItem('kuanwei_remember_phone');
+      const inp = document.getElementById('loginPhone');
+      const chk = document.getElementById('loginRemember');
+      if (rp && inp) inp.value = rp;
+      if (rp && chk) { chk.setAttribute('data-checked', '1'); chk.style.background = 'rgba(51,224,189,.25)'; }
+    } catch (e) {}
+  }
+}
+function authGoBack() {
+  document.body.classList.remove('auth-mode');
+  switchPage(authReturnPage);
+}
+// 记住账号：勾选时保存手机号（下次打开自动填入），未勾选时清除
+function authRememberPhone(phone) {
+  try {
+    const chk = document.querySelector('#page-login .auth-remember .auth-check');
+    const remembered = chk && chk.getAttribute('data-checked') === '1';
+    if (remembered) localStorage.setItem('kuanwei_remember_phone', phone);
+    else localStorage.removeItem('kuanwei_remember_phone');
+  } catch (e) {}
+}
+// 记住账号勾选切换
+function toggleAuthRemember(ev) {
+  try {
+    ev.preventDefault();
+    const chk = document.getElementById('loginRemember');
+    if (!chk) return;
+    const on = chk.getAttribute('data-checked') === '1';
+    chk.setAttribute('data-checked', on ? '0' : '1');
+    chk.style.background = on ? '' : 'rgba(51,224,189,.25)';
+  } catch (e) {}
+}
 
 // ======== 密码调试日志（测试期用，帮助定位"密码错误"根因） ========
 // 打印前端实际发送的手机号/密码 + 后端返回 + 云端该账号密码对比
@@ -4265,14 +4375,15 @@ async function doLogin() {
       setCloudPhone(phone);
       migrateDataToScope(); // 首次登录：旧全局数据迁入该账号作用域
       setLoggedIn(true);
+      authRememberPhone(phone); // 记住账号（勾选状态）
       closeLoginModal();
       renderAccountStatus();
       renderCloudBackupStatus();
       renderAccountBadge();
-      showToast('✅ 登录成功');
+      showToast('登录成功');
       refreshRecordViews(); // 登录后无条件刷新，避免切换账号时界面残留上一账号数据
       // 不再自动同步云端：恢复/同步数据需用户手动点击「恢复云端数据」
-      showToast('💡 如需要云端数据，请手动点「恢复云端数据」');
+      showToast('如需要云端数据，请手动点「恢复云端数据」');
     } else {
       recordFail(phone);
       showToast(result.error || '登录失败');
@@ -4382,8 +4493,6 @@ function removeLocalAccountData(phone) {
 }
 
 // 设置密码
-function openSetupModal() { showModal('setupModal'); }
-function closeSetupModal() { document.getElementById('setupModal').classList.remove('show'); }
 async function doSetupAccount() {
   const phone = document.getElementById('setupPhone').value.trim();
   const pwd = document.getElementById('setupPwd').value;
@@ -4416,7 +4525,7 @@ async function doSetupAccount() {
       renderAccountBadge();
       setLoggedIn(true);
       refreshRecordViews(); // 设置账号后刷新数据视图
-      showToast('✅ 密码设置成功');
+      showToast('密码设置成功');
       // 新账号首次备份本地数据到云端；不再自动同步（恢复需用户手动点「恢复云端数据」）
       backupToCloud(true);
     } else {
@@ -4622,8 +4731,6 @@ async function doChangePwd() {
 }
 
 // 忘记密码
-function openForgotModal() { showModal('forgotModal'); }
-function closeForgotModal() { document.getElementById('forgotModal').classList.remove('show'); }
 async function doForgotReset() {
   const phone = document.getElementById('fgPhone').value.trim();
   const secA = document.getElementById('fgSecA').value.trim().toLowerCase();
@@ -4653,9 +4760,9 @@ async function doForgotReset() {
       closeForgotModal();
       renderAccountStatus();
       setLoggedIn(true);
-      showToast('✅ 密码已重置');
+      showToast('密码已重置');
       // 不再自动同步云端：恢复/同步数据需用户手动点击「恢复云端数据」
-      showToast('💡 如需要云端数据，请手动点「恢复云端数据」');
+      showToast('如需要云端数据，请手动点「恢复云端数据」');
     } else {
       recordFail(phone);
       showToast(result.error || '重置失败');
@@ -6974,6 +7081,9 @@ function switchPage(pageName) {
   if (pageEl) pageEl.classList.add('active');
   const tabEl = document.querySelector(`.tab[data-page="${pageName}"]`);
   if (tabEl) tabEl.classList.add('active');
+  // 登录/注册/忘记密码整页：隐藏顶部导航条/底部导航/未登录横条（深空蓝晶整页设计稿无底部导航）
+  const AUTH_PAGES = ['login', 'setup', 'forgot'];
+  document.body.classList.toggle('auth-mode', AUTH_PAGES.indexOf(pageName) >= 0);
   updateLoginLock(); // 每次切换页面同步登录锁定状态，避免已登录但按钮（如额外发收登记）残留锁定点击无效
   if (pageName === 'record') refreshRecordViews();
   if (pageName === 'history') { renderHistory(); updateDailyPhotoInfo(); initGoodsFilter(); }
@@ -9202,11 +9312,11 @@ function toggleManageAccountMenu(e) {
   menu.className = 'account-menu';
   let html = `<div class="am-head">${phone && logged ? '👤 当前账号：' + maskPhone(phone) : '账号管理'}</div>`;
   if (!logged) {
-    html += `<div class="am-item" onclick="openLoginModal();closeAccountMenu()">🔐 登录账号</div>`;
-    html += `<div class="am-item" onclick="openSetupModal();closeAccountMenu()">🔑 设置账号密码</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()">🔐 登录账号</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openSetupModal()">🔑 设置账号密码</div>`;
   } else {
     html += `<div class="am-item" onclick="openAvatarModal();closeAccountMenu()">🖼️ 设置头像</div>`;
-    html += `<div class="am-item" onclick="openLoginModal();closeAccountMenu()">🔄 切换用户</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()">🔄 切换用户</div>`;
     html += `<div class="am-item" onclick="openChangePwdModal();closeAccountMenu()">✏️ 更改密码</div>`;
     html += `<div class="am-item" onclick="logout();closeAccountMenu()">🚪 退出登录</div>`;
     html += `<div class="am-item danger" onclick="openDeleteAccountModal();closeAccountMenu()">🗑️ 注销账号</div>`;
@@ -9700,7 +9810,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.107'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.108'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
