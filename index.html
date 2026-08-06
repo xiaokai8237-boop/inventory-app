@@ -9021,13 +9021,9 @@ function doDeleteRecord(id) {
   let data = loadData();
   data = data.filter(r => String(r.id) !== String(id));
   saveDataArr(data);
-  // 删除标记：若还有剩余记录 → 非"清空全部"，清除标记（避免永久阻止后续云端恢复）；
-  // 若删光（records 空）→ 保留标记，让云端"防丢失保护"允许空覆盖，实现真正删除
-  if (data.length === 0) {
-    try { localStorage.setItem('kuanwei_last_delete', new Date().toISOString()); } catch(e) {}
-  } else {
-    try { localStorage.removeItem('kuanwei_last_delete'); } catch(e) {}
-  }
+  // 删除标记：无论删光还是删部分都写删除时间戳 → 防止备份失败时云端旧数据在启动时自动恢复覆盖本地（"删了又复活"）
+  // 备份成功后 backupToCloud 会清除该标记（见 4053 行），实现"删除已同步到云端后才解除保护"
+  try { localStorage.setItem('kuanwei_last_delete', new Date().toISOString()); } catch(e) {}
   // 删除后立即同步云端（不等 3 秒防抖），避免刷新页面时云端还是删除前的旧数据
   try { backupToCloud(false); } catch(e) {}
   renderHistory();
@@ -9808,7 +9804,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.115'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.116'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
