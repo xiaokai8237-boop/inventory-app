@@ -435,28 +435,7 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 }
 .btn-row .btn { flex: 1; }
 
-/* 语音按钮 */
-.voice-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 16px;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: all .2s;
-}
-.voice-btn:active { transform: scale(.97); }
-.voice-btn.recording { animation: pulse 1s infinite; }
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: .6; }
-}
-.voice-in { background: linear-gradient(135deg, var(--success), #009a7e); color: #fff; box-shadow: 0 3px 12px var(--success-glow); }
-.voice-out { background: linear-gradient(135deg, #ff5a5a, var(--danger)); color: #fff; box-shadow: 0 3px 12px rgba(239,74,74,.18); }
+/* 语音按钮（voiceInputModal 已移除，样式随弹窗清理） */
 
 /* 拍照区 */
 .photo-section {
@@ -1169,79 +1148,6 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   box-shadow: 0 6px 14px rgba(43,184,168,.32);
 }
 #emitSaveResultModal .btn-view-records:active { transform: scale(.98); }
-/* ===== 发出店序弹窗（emitStoreOrderModal）：深空蓝晶定稿风格 ===== */
-#emitStoreOrderModal.store-ocr-modal { background: rgba(4,24,32,.78); width: 100%; height: 100%; }
-#emitStoreOrderModal .store-ocr-content {
-  background: linear-gradient(180deg, #13454F 0%, #0B3240 100%);
-  border: 1.5px solid rgba(245,220,146,.55);
-  border-radius: 22px;
-  box-shadow: 0 12px 44px rgba(0,0,0,.55);
-  padding: 18px 16px 16px;
-  max-width: 360px;
-  max-height: 88vh;
-  overflow-y: auto;
-}
-#emitStoreOrderModal .eso-title { color: #F5DC92; font-size: 18px; font-weight: 800; letter-spacing: .5px; }
-#emitStoreOrderModal .eso-close { background: none; border: none; font-size: 24px; color: rgba(255,255,255,.7); cursor: pointer; padding: 0 4px; line-height: 1; }
-#emitStoreOrderModal .eso-close:hover { color: #FFFFFF; }
-#emitStoreOrderModal .eso-hint { color: rgba(124,232,224,.9); font-size: 12px; line-height: 1.6; }
-#emitStoreOrderModal #emitStoreOrderList {
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(245,220,146,.18);
-  border-radius: 12px;
-  padding: 4px 8px;
-  max-height: 52vh;
-  overflow-y: auto;
-}
-#emitStoreOrderModal .eso-row {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 2px;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-}
-#emitStoreOrderModal .eso-row:last-child { border-bottom: none; }
-#emitStoreOrderModal .eso-handle { cursor: grab; color: rgba(255,255,255,.45); font-size: 18px; flex: 0 0 auto; }
-#emitStoreOrderModal .eso-idx { color: #F5DC92; font-size: 14px; font-weight: 800; flex: 0 0 auto; width: 18px; text-align: center; }
-#emitStoreOrderModal .eso-name {
-  flex: 1; min-width: 0;
-  font-size: 14px; font-weight: 700; color: #FFFFFF;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-#emitStoreOrderModal .eso-numtag {
-  flex: 0 0 auto;
-  font-size: 10.5px; color: #F5DC92; font-weight: 700;
-  background: rgba(245,220,146,.16);
-  border: 1px solid rgba(245,220,146,.4);
-  border-radius: 12px;
-  padding: 2px 8px;
-  white-space: nowrap;
-}
-#emitStoreOrderModal .eso-btns { flex: 0 0 auto; display: flex; flex-direction: column; gap: 4px; }
-#emitStoreOrderModal .eso-arrow {
-  width: 34px; height: 22px;
-  border-radius: 8px;
-  border: 1.5px solid rgba(245,220,146,.3);
-  background: rgba(255,255,255,.06);
-  color: #F5DC92;
-  font-size: 11px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; line-height: 1;
-  padding: 0;
-}
-#emitStoreOrderModal .eso-arrow:active { background: rgba(245,220,146,.2); }
-#emitStoreOrderModal .btn-save-eso {
-  width: 100%;
-  background: linear-gradient(180deg, #F8E3A6 0%, #C89B4E 100%);
-  color: #0B2E38;
-  border: none;
-  border-radius: 28px;
-  padding: 11px 0;
-  font-size: 15px; font-weight: 800;
-  letter-spacing: .5px;
-  margin-top: 12px;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(200,155,78,.35);
-}
-#emitStoreOrderModal .btn-save-eso:active { transform: scale(.98); }
 /* ===== 账号表单弹窗：深空蓝晶定稿风格（设置密码/登录/恢复/找回密码/改密/注销共用） ===== */
 .ocr-form-modal.store-ocr-modal { background: rgba(4,24,32,.78); }
 .ocr-form-modal .store-ocr-content {
@@ -2327,20 +2233,6 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
         <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitGoodsSelect()">×</span>
       </div>
       <div id="emitGoodsSelectButtons" style="display:flex;flex-direction:column;gap:8px;"></div>
-    </div>
-  </div>
-
-  <!-- 调整店序弹窗（只在发出页生效） -->
-  <!-- 调整发出店序弹窗（深空蓝晶定稿风格） -->
-  <div class="store-ocr-modal" id="emitStoreOrderModal">
-    <div class="store-ocr-content" onclick="event.stopPropagation()">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <span class="eso-title">✏️ 调整店序</span>
-        <button class="eso-close" onclick="closeEmitStoreOrderModal()">×</button>
-      </div>
-      <div id="emitStoreOrderHint" class="eso-hint" style="margin-bottom:10px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响发出页顺序）</div>
-      <div id="emitStoreOrderList" style="margin-bottom:2px;"></div>
-      <button class="btn-save-eso" onclick="saveEmitStoreOrder()">💾 保存店序</button>
     </div>
   </div>
 
@@ -3436,26 +3328,6 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   </div>
 </div>
 
-<!-- 语音录入弹窗 -->
-<div class="store-ocr-modal" id="voiceInputModal" onclick="closeVoiceInputModal()">
-  <div class="store-ocr-content" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <span style="font-weight:600;font-size:15px;">🎤 语音录入</span>
-      <button onclick="closeVoiceInputModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
-    </div>
-    <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">
-      当前模式：<span id="voiceModeLabel" style="color:var(--primary);font-weight:600;">发出</span>
-    </div>
-    <div class="btn-row" id="voiceButtonsRow" style="margin-bottom:8px;">
-      <button class="voice-btn voice-in" id="voiceInBtn" onclick="startVoice('in')" style="flex:1;">🔊 语音录发出</button>
-      <button class="voice-btn voice-out" id="voiceOutBtn" onclick="startVoice('out')" style="flex:1;">🔊 语音录回收</button>
-    </div>
-    <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;text-align:center;">
-      说"鲜食1面包2常温3低温5冷冻6"自动填入
-    </div>
-  </div>
-</div>
-
 <!-- 语音识别确认弹窗 -->
 <div class="store-ocr-modal" id="voiceConfirmModal">
   <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:340px;">
@@ -3469,29 +3341,6 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div style="display:flex;gap:8px;">
       <button class="btn btn-primary" style="flex:1;" onclick="confirmVoiceFill()">✅ 填入</button>
       <button class="btn btn-outline" style="flex:1;" onclick="cancelVoiceFill()">取消</button>
-    </div>
-  </div>
-</div>
-
-<!-- 拍照识别弹窗 -->
-<div class="store-ocr-modal" id="photoInputModal" onclick="closePhotoInputModal()">
-  <div class="store-ocr-content" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <span style="font-weight:600;font-size:15px;">📸 拍照识别</span>
-      <button onclick="closePhotoInputModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
-    </div>
-    <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">
-      当前模式：<span id="photoModeLabel" style="color:var(--primary);font-weight:600;">发出</span>
-      <span style="margin-left:8px;">识别后自动填到对应输入框</span>
-    </div>
-    <div style="font-size:12px;color:var(--text-light);margin-bottom:12px;text-align:center;">拍摄配送路单，自动识别物流箱合计</div>
-    <div class="btn-row">
-      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">📷 拍照
-        <input type="file" accept="image/*" capture="environment" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;" onchange="handlePhoto(event)" oncancel="this.value=''">
-      </label>
-      <label class="btn btn-outline store-file-btn" style="flex:1;text-align:center;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;">🖼️ 相册选
-        <input type="file" accept="image/*" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;" onchange="handlePhoto(event)" oncancel="this.value=''">
-      </label>
     </div>
   </div>
 </div>
@@ -5875,67 +5724,6 @@ function closeEmitSaveResult() {
   document.getElementById('emitSaveResultModal').classList.remove('show');
 }
 
-// ===== 调整店序弹窗 =====
-function openEmitStoreOrderModal() {
-  const gName = currentEmitGoodsName();
-  const hint = document.getElementById('emitStoreOrderHint');
-  if (hint && gName) hint.textContent = '按住 ☰ 拖动，或点 ▲▼ 调整（仅影响' + gName + '页顺序）';
-  renderEmitStoreOrder();
-  showModal('emitStoreOrderModal');
-}
-function closeEmitStoreOrderModal() {
-  document.getElementById('emitStoreOrderModal').classList.remove('show');
-}
-function renderEmitStoreOrder() {
-  const order = getEmitOrder();
-  const cfg = loadStoreConfig();
-  const container = document.getElementById('emitStoreOrderList');
-  if (!container) return;
-  container.innerHTML = order.map((storeName, i) => {
-    const store = cfg.find(s => s.name === storeName);
-    const num = storeNumberLabel(store);
-    return `<div class="eso-row" draggable="true" ondragstart="emitDragStart(event, ${i})" ondragover="event.preventDefault()" ondrop="emitDrop(event, ${i})">
-      <span class="eso-handle">☰</span>
-      <span class="eso-idx">${i + 1}</span>
-      <span class="eso-name">${escapeHtml(storeName)}</span>
-      <span class="eso-numtag">🏪 ${num ? escapeHtml(num) : '无编号'}</span>
-      <span class="eso-btns">
-        <button class="eso-arrow" onclick="emitMoveOrder(${i}, -1)">▲</button>
-        <button class="eso-arrow" onclick="emitMoveOrder(${i}, 1)">▼</button>
-      </span>
-    </div>`;
-  }).join('');
-  emitDragFrom = -1;
-}
-let emitDragFrom = -1;
-function emitDragStart(e, i) { emitDragFrom = i; }
-function emitDrop(e, to) {
-  e.preventDefault();
-  if (emitDragFrom < 0 || emitDragFrom === to) return;
-  const order = getEmitOrder();
-  const [moved] = order.splice(emitDragFrom, 1);
-  order.splice(to, 0, moved);
-  saveEmitOrder(order);
-  renderEmitStoreOrder();
-  renderEmitStoreList();
-}
-function emitMoveOrder(i, dir) {
-  const order = getEmitOrder();
-  const to = i + dir;
-  if (to < 0 || to >= order.length) return;
-  const [moved] = order.splice(i, 1);
-  order.splice(to, 0, moved);
-  saveEmitOrder(order);
-  renderEmitStoreOrder();
-  renderEmitStoreList();
-}
-function saveEmitStoreOrder() {
-  // 顺序已实时保存到 localStorage；保存后关闭并刷新发出页
-  closeEmitStoreOrderModal();
-  renderEmitStoreList();
-  showToast('✅ 店序已更新（仅发出页）');
-}
-
 // ===== 语音录入（发出页：只说数字序列，按店顺序填入）=====
 let emitVoiceRec = null;
 let emitVoiceChunks = [];
@@ -6670,23 +6458,8 @@ function manualEntry(type) {
   renderGoodsInputList();
 }
 
-function openVoiceInputModal() {
-  const label = currentActionType === 'out' ? '回收' : '发出';
-  document.getElementById('voiceModeLabel').textContent = label;
-  document.getElementById('voiceInBtn').style.display = currentActionType === 'in' ? '' : 'none';
-  document.getElementById('voiceOutBtn').style.display = currentActionType === 'out' ? '' : 'none';
-  showModal('voiceInputModal');
-}
-function closeVoiceInputModal() {
-  document.getElementById('voiceInputModal').classList.remove('show');
-}
-function openPhotoInputModal() {
-  const label = currentActionType === 'out' ? '回收' : '发出';
-  document.getElementById('photoModeLabel').textContent = label;
-  showModal('photoInputModal');
-}
 function closePhotoInputModal() {
-  document.getElementById('photoInputModal').classList.remove('show');
+  // 弹窗已移除（拍照直接走 triggerPhoto/emitTriggerPhoto），保留空函数兼容历史调用
 }
 // 拍照/相册选（针对 PWA 桌面模式最可靠方案）：
 // 每次点击动态创建一个「全屏透明可见」的 file input 并立即触发，触发后移除。
@@ -7686,7 +7459,6 @@ function startVoice(mode) {
   transcript.textContent = '';
   voiceText.textContent = '正在请求麦克风…';
   showModal('voiceOverlay');
-  document.getElementById(mode === 'in' ? 'voiceInBtn' : 'voiceOutBtn').classList.add('recording');
 
   // APK 内：优先原生录音（绕开 WebView getUserMedia 兼容问题）
   if (canNativeRecord()) {
@@ -7696,8 +7468,6 @@ function startVoice(mode) {
     }).catch(function (err) {
       nativeRecActive = false;
       overlay.classList.remove('show');
-      document.getElementById('voiceInBtn').classList.remove('recording');
-      document.getElementById('voiceOutBtn').classList.remove('recording');
       showToast('🔒 录音启动失败: ' + (err && err.message || err));
     });
     return;
@@ -7729,14 +7499,10 @@ function startVoice(mode) {
       voiceText.textContent = '🔴 录音中，说完点「结束」…';
     }).catch(err => {
       overlay.classList.remove('show');
-      document.getElementById('voiceInBtn').classList.remove('recording');
-      document.getElementById('voiceOutBtn').classList.remove('recording');
       showToast('🔒 ' + micErrorTip(err));
     });
   } catch (e) {
     overlay.classList.remove('show');
-    document.getElementById('voiceInBtn').classList.remove('recording');
-    document.getElementById('voiceOutBtn').classList.remove('recording');
     showToast('🔒 ' + e.message);
   }
 }
@@ -7799,8 +7565,6 @@ function stopVoice() {
     }).catch(function (err) {
       nativeRecActive = false;
       try { document.getElementById('voiceOverlay').classList.remove('show'); } catch (e2) {}
-      document.getElementById('voiceInBtn').classList.remove('recording');
-      document.getElementById('voiceOutBtn').classList.remove('recording');
       showToast('🔒 录音失败: ' + (err && err.message || err));
     });
     return;
@@ -10031,7 +9795,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.113'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.114'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
