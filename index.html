@@ -1387,6 +1387,34 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 .avatar-btn-row { display: flex; gap: 8px; margin-top: 12px; }
 .avatar-btn-row button { flex: 1; }
 
+/* ===== #40 头像弹窗：深空蓝晶定稿壳（沿用 #ocrResultModal 已验收规范） ===== */
+#avatarModal.store-ocr-modal { background: rgba(4,24,32,.78); }
+#avatarModal .store-ocr-content.avatar-modal-shell {
+  background: #0E3340;
+  border: 1.5px solid rgba(245,220,146,.55);
+  border-radius: 22px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.55);
+  color: #FFFFFF;
+}
+.avatar-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.avatar-modal-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; color: #F5DC92; }
+.avatar-modal-title svg { width: 20px; height: 20px; stroke: #F5DC92; }
+.avatar-modal-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.7); padding: 2px; display: flex; align-items: center; transition: color .15s; }
+.avatar-modal-close:hover { color: #fff; }
+.avatar-modal-close svg { width: 22px; height: 22px; }
+/* 圆形裁剪预览：宽高沿用 JS 常量 AVATAR_WRAP=240，仅改定稿配色 */
+#avatarModal .avatar-crop-wrap {
+  background: linear-gradient(135deg, #2A5563, #123845);
+  border: 2px solid rgba(245,220,146,.4);
+}
+#avatarModal .avatar-crop-hint { color: rgba(255,255,255,.6); }
+.avatar-slider-ico { width: 16px; height: 16px; stroke: rgba(255,255,255,.7); flex-shrink: 0; }
+#avatarModal .avatar-slider-row input[type=range] { accent-color: #7CE8E0; }
+#avatarModal .avatar-btn-row .btn { display: flex; align-items: center; justify-content: center; gap: 6px; }
+#avatarModal .avatar-btn-row .btn svg { width: 17px; height: 17px; }
+#avatarModal .btn-outline { background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+#avatarModal .btn-primary { background: linear-gradient(135deg, #7CE8E0, #38B2AC); color: #06343B; box-shadow: none; }
+
 /* 管理页：菜单列表 */
 .manage-item {
   display: flex; align-items: center; gap: 14px;
@@ -2816,23 +2844,34 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <div class="store-ocr-modal" id="avatarModal">
-  <div class="store-ocr-content" style="max-width:340px;" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-      <span style="font-weight:700;font-size:16px;color:var(--text);">🖼️ 设置头像</span>
-      <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeAvatarModal()">×</span>
+  <div class="store-ocr-content avatar-modal-shell" style="max-width:340px;" onclick="event.stopPropagation()">
+    <div class="avatar-modal-head">
+      <span class="avatar-modal-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        设置头像
+      </span>
+      <button class="avatar-modal-close" onclick="closeAvatarModal()" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <div class="avatar-crop-wrap" id="avatarCropWrap">
       <img id="avatarCropImg" alt="" style="display:none;">
     </div>
     <div class="avatar-crop-hint" id="avatarCropHint">点击「更换头像」选择图片，拖动调整位置、滑块缩放</div>
     <div class="avatar-slider-row" id="avatarSliderRow" style="display:none;">
-      <span class="avatar-slider-icon">🔍</span>
+      <svg class="avatar-slider-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
       <input type="range" id="avatarZoom" min="1" max="4" step="0.01" value="1" oninput="avatarSetZoom(this.value)">
-      <span class="avatar-slider-icon">＋</span>
+      <svg class="avatar-slider-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
     </div>
     <div class="avatar-btn-row">
-      <button class="btn btn-outline" style="flex:1;" onclick="triggerAvatarFile()">🖼️ 更换头像</button>
-      <button class="btn btn-primary" style="flex:1;" id="avatarSaveBtn" onclick="saveAvatar()">💾 保存</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="triggerAvatarFile()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        更换头像
+      </button>
+      <button class="btn btn-primary" style="flex:1;" id="avatarSaveBtn" onclick="saveAvatar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        保存
+      </button>
     </div>
     <input type="file" id="avatarFileInput" accept="image/*" style="display:none;" onchange="onAvatarFileChange(event)">
   </div>
@@ -9178,7 +9217,7 @@ function saveAvatar() {
     const sh = AVATAR_WRAP / totalScale;
     ctx.drawImage(st.img, sx, sy, sw, sh, 0, 0, AVATAR_OUT, AVATAR_OUT);
     localStorage.setItem('kuanwei_avatar__' + phone, canvas.toDataURL('image/png'));
-    showToast('✅ 头像已保存');
+    showToast('头像已保存');
     closeAvatarModal();
     renderManage();
     scheduleCloudBackup();
@@ -9531,7 +9570,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.102'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.103'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
