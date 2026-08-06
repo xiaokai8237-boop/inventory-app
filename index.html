@@ -1619,6 +1619,50 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 #changePwdModal .cp-primary { background: linear-gradient(135deg, #F7E3A6 0%, #E9C975 45%, #C49A4E 100%); color: #0B2E38; box-shadow: 0 6px 18px rgba(201,158,78,.35); }
 #changePwdModal .cp-outline { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.35); }
 
+/* ===== #54 注销账号弹窗（deleteAccountModal）：深空蓝晶定稿壳（沿用 #ocrResultModal 规范） ===== */
+#deleteAccountModal.dd-modal { background: rgba(4,24,32,.78); }
+#deleteAccountModal .dd-content {
+  background: #0E3340; border: 1.5px solid rgba(245,220,146,.55); border-radius: 22px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.55); color: #FFFFFF; max-width: 330px;
+}
+#deleteAccountModal .dd-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+#deleteAccountModal .dd-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; color: #F5DC92; }
+#deleteAccountModal .dd-title svg { width: 21px; height: 21px; stroke: #F5DC92; flex-shrink: 0; }
+#deleteAccountModal .dd-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.7); padding: 2px; display: flex; align-items: center; transition: color .15s; }
+#deleteAccountModal .dd-close:hover { color: #fff; }
+#deleteAccountModal .dd-close svg { width: 22px; height: 22px; }
+#deleteAccountModal .dd-warn { background: rgba(255,138,122,.1); border: 1px solid rgba(239,74,74,.5); border-radius: 14px; padding: 12px; font-size: 12px; line-height: 1.8; color: #FFD9D4; margin-bottom: 12px; }
+#deleteAccountModal .dd-warn-title { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: #FF8A7A; margin-bottom: 4px; }
+#deleteAccountModal .dd-warn-title svg { width: 16px; height: 16px; stroke: #FF8A7A; flex-shrink: 0; }
+#deleteAccountModal .dd-warn p { margin: 2px 0; }
+#deleteAccountModal .dd-warn p b { color: #FFC9C2; }
+#deleteAccountModal .dd-warn-strong { font-weight: 700; color: #FF8A7A; margin-top: 4px !important; }
+#deleteAccountModal .dd-label { display: block; font-size: 12px; color: #8FD8E0; margin: 4px 6px 6px; letter-spacing: 1px; }
+#deleteAccountModal .dd-input-row { position: relative; display: flex; align-items: center; background: #0A3542; border: 1px solid rgba(143,216,224,.3); border-radius: 26px; padding: 0 14px; height: 48px; margin-bottom: 10px; box-sizing: border-box; }
+#deleteAccountModal .dd-input-row svg.ai-icon { width: 19px; height: 19px; stroke: #8FDDE6; flex-shrink: 0; }
+#deleteAccountModal .dd-input-row input { flex: 1; background: none; border: none; outline: none; color: #fff; font-size: 15px; margin-left: 10px; height: 100%; min-width: 0; box-sizing: border-box; }
+#deleteAccountModal .dd-input-row input::placeholder { color: #7FB8C0; }
+#deleteAccountModal .dd-input-row .pwd-toggle { background: none; border: none; padding: 4px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; }
+#deleteAccountModal .dd-input-row .pwd-toggle svg { width: 20px; height: 20px; stroke: #8FD8E0; display: block; }
+#deleteAccountModal .dd-btns { display: flex; gap: 10px; margin-top: 2px; }
+#deleteAccountModal .dd-btn { flex: 1; border: none; border-radius: 12px; padding: 11px 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+#deleteAccountModal .dd-primary { background: linear-gradient(135deg, #F7E3A6 0%, #E9C975 45%, #C49A4E 100%); color: #0B2E38; box-shadow: 0 6px 18px rgba(201,158,78,.35); }
+#deleteAccountModal .dd-danger { background: linear-gradient(135deg, #FF8A7A 0%, #F26B5E 50%, #D9483C 100%); color: #fff; box-shadow: 0 6px 18px rgba(217,72,60,.3); }
+#deleteAccountModal .dd-outline { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+#deleteAccountModal .dd-success { text-align: center; padding: 6px 0 2px; }
+#deleteAccountModal .dd-success-icon { width: 56px; height: 56px; stroke: #33E0BD; margin-bottom: 8px; }
+#deleteAccountModal .dd-success-title { font-size: 17px; font-weight: 700; color: #33E0BD; margin-bottom: 6px; }
+#deleteAccountModal .dd-success-sub { font-size: 12px; color: #A8D8D0; margin-bottom: 14px; }
+#deleteAccountModal .dd-success-sub b { color: #CFF0E8; }
+#deleteAccountModal .dd-pill { background: none; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; color: #33E0BD; font-size: 13px; font-weight: 700; margin-top: 12px; padding: 4px 8px; }
+#deleteAccountModal .dd-pill svg { width: 17px; height: 17px; stroke: #33E0BD; }
+#deleteAccountModal .dd-regret { background: rgba(51,224,189,.1); border: 1px solid rgba(0,184,148,.35); border-radius: 14px; padding: 12px; font-size: 12px; line-height: 1.8; color: #CFF0E8; margin-bottom: 4px; }
+#deleteAccountModal .dd-regret-title { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 13px; color: #33E0BD; margin-bottom: 4px; }
+#deleteAccountModal .dd-regret-title svg { width: 16px; height: 16px; stroke: #33E0BD; flex-shrink: 0; }
+#deleteAccountModal .dd-regret p { margin: 2px 0; }
+#deleteAccountModal .dd-regret p b { color: #8BE8D4; }
+#deleteAccountModal .dd-regret-note { font-size: 11px; color: #5E9AA4; margin-top: 6px; }
+
 /* ===== 深色模式兼容（覆盖 JS 内联硬编码浅色底） ===== */
 html[data-theme="dark"] .native-file-btn { background: var(--card-bg); color: var(--primary); }
 html[data-theme="dark"] .store-chip { background: var(--soft-bg); }
@@ -3006,64 +3050,68 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 </div>
 
 <!-- 账号注销弹窗（两步确认 + 后悔药） -->
-<div class="store-ocr-modal" id="deleteAccountModal" onclick="closeDeleteAccountModal()">
-  <div class="store-ocr-content" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;color:var(--danger);">🗑️ 账号注销</span>
-      <button onclick="closeDeleteAccountModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+<div class="store-ocr-modal dd-modal" id="deleteAccountModal" onclick="closeDeleteAccountModal()">
+  <div class="store-ocr-content dd-content" onclick="event.stopPropagation()">
+    <!-- 头部（四步共用） -->
+    <div class="dd-head">
+      <div class="dd-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+        账号注销
+      </div>
+      <button type="button" class="dd-close" onclick="closeDeleteAccountModal()" aria-label="关闭"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <!-- 第一步：注销警告 -->
     <div id="deleteStep1">
-      <div style="background:var(--red-soft);border:1.5px solid rgba(239,74,74,.4);border-radius:10px;padding:12px;font-size:13px;line-height:1.9;color:var(--danger);">
-        <b>⚠️ 账号注销</b><br>
-        账号注销后，本账号的<b>所有数据将被永久删除</b>：<br>
-        📊 全部收发记录 · 🏪 所有店面 · 📦 全部筐配置<br>
-        账号密码及登录信息也将一并清除。<br>
-        <b>数据删除后无法恢复、无法找回！</b><br>
-        此操作<b>不可撤销</b>，请谨慎决定。
+      <div class="dd-warn">
+        <div class="dd-warn-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>账号注销</div>
+        <p>账号注销后，本账号的<b>所有数据将被永久删除</b>：</p>
+        <p>全部收发记录 · 所有店面 · 全部筐配置<br>账号密码及登录信息也将一并清除。</p>
+        <p class="dd-warn-strong">数据删除后无法恢复、无法找回！</p>
+        <p>此操作<b>不可撤销</b>，请谨慎决定。</p>
       </div>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button class="btn btn-outline" style="flex:1;" onclick="closeDeleteAccountModal()">取消</button>
-        <button class="btn btn-danger" style="flex:1;" onclick="goDeleteStep2()">我已知晓，继续</button>
+      <div class="dd-btns">
+        <button class="dd-btn dd-outline" onclick="closeDeleteAccountModal()">取消</button>
+        <button class="dd-btn dd-danger" onclick="goDeleteStep2()">我已知晓，继续</button>
       </div>
     </div>
-    <!-- 第二步：输密码二次确认 + 后悔药 -->
+    <!-- 第二步：输密码二次确认（无后悔药） -->
     <div id="deleteStep2" style="display:none;">
-      <div style="background:var(--red-soft);border:1.5px solid rgba(239,74,74,.4);border-radius:10px;padding:12px;font-size:13px;line-height:1.8;color:var(--danger);">
-        <b>🚫 再次确认注销</b><br>
-        你正在注销账号 <b><span id="delPhoneLabel"></span></b><br>
-        这是<b>最后一次确认</b>：点击确认后，该账号所有数据将<b>被永久清除，且无法恢复</b>。
+      <div class="dd-warn">
+        <div class="dd-warn-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>再次确认注销</div>
+        <p>你正在注销账号 <b><span id="delPhoneLabel"></span></b></p>
+        <p>这是<b>最后一次确认</b>：点击确认后，该账号所有数据将<b>被永久清除，且无法恢复</b>。</p>
       </div>
-      <div class="form-group" style="margin-top:10px;">
-        <label class="form-label">请输入账号密码确认</label>
-        <div class="pwd-wrap"><input type="password" class="form-input" id="delPwd" placeholder="输入密码" autocapitalize="off" autocorrect="off" spellcheck="false"><button type="button" class="pwd-toggle" id="delPwd_eye" onclick="togglePwd('delPwd')" tabindex="-1">👁</button></div>
+      <label class="dd-label" for="delPwd">请输入账号密码确认</label>
+      <div class="dd-input-row">
+        <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="delPwd" placeholder="输入密码" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <button type="button" class="pwd-toggle" id="delPwd_eye" onclick="togglePwd('delPwd')" tabindex="-1" aria-label="显示密码"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-outline" style="flex:1;" onclick="closeDeleteAccountModal()">取消</button>
-        <button class="btn btn-danger" style="flex:1;" onclick="doDeleteAccount()">确认注销</button>
+      <div class="dd-btns">
+        <button class="dd-btn dd-outline" onclick="closeDeleteAccountModal()">取消</button>
+        <button class="dd-btn dd-danger" onclick="doDeleteAccount()">确认注销</button>
       </div>
-      <div class="cancel-pill" onclick="showDeleteRegret()">💊 后悔药</div>
     </div>
     <!-- 注销成功（含后悔药） -->
     <div id="deleteSuccess" style="display:none;">
-      <div style="text-align:center;padding:8px 0;">
-        <div style="font-size:18px;font-weight:700;color:var(--success);margin-bottom:6px;">✅ 账号已注销</div>
-        <div style="font-size:13px;color:var(--text);">该账号及其所有数据<b>已永久删除</b>。</div>
-        <button class="btn btn-primary" style="width:100%;margin-top:14px;" onclick="closeDeleteAccountModal()">知道了</button>
-        <div class="cancel-pill" onclick="showDeleteRegret()">💊 后悔药</div>
+      <div class="dd-success">
+        <svg class="dd-success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        <div class="dd-success-title">账号已注销</div>
+        <div class="dd-success-sub">该账号及其所有数据<b>已永久删除</b>。</div>
+        <button class="dd-btn dd-primary" onclick="closeDeleteAccountModal()">知道了</button>
+        <button type="button" class="dd-pill" onclick="showDeleteRegret()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 1 1 0-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.46 1.537l-.493.31a3.524 3.524 0 1 1-3.66-6.008l.493-.31c.94-.585 1.953-.947 3.025-1.072m0-9.18c-.253-.962-.584-1.892-.985-2.783-.247-.55-.06-1.21.46-1.537l.493-.31a3.524 3.524 0 1 1 3.66 6.008l-.493.31c-.94.585-1.953.947-3.025 1.072m0 0c.689.06 1.386.09 2.09.09h.75a4.5 4.5 0 1 1 0 9h-.75c-.704 0-1.402-.03-2.09-.09"/></svg>后悔药</button>
       </div>
     </div>
     <!-- 后悔药内容 -->
     <div id="deleteRegret" style="display:none;">
-      <div style="background:var(--green-soft);border:1.5px solid rgba(0,184,148,.35);border-radius:10px;padding:12px;font-size:13px;line-height:1.9;color:var(--success);">
-        <b>😌 别担心，数据还在！</b><br>
-        其实你的数据<b>并没有真正删除</b>，只是暂时封存起来了。<br>
-        如果你后悔注销了，可以<b>联系程序管理员</b>帮你恢复：<br>
-        ① 告诉管理员你的<b>原手机号</b><br>
-        ② 管理员确认后即可恢复你的全部数据<br>
-        <div style="font-size:11px;color:var(--text-light);margin-top:6px;">* 此提示仅显示给本次操作，用于防止误注销后悔。</div>
+      <div class="dd-regret">
+        <div class="dd-regret-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>别担心，数据还在！</div>
+        <p>其实你的数据<b>并没有真正删除</b>，只是暂时封存起来了。</p>
+        <p>如果你后悔注销了，可以<b>联系程序管理员</b>帮你恢复：</p>
+        <p>1. 告诉管理员你的<b>原手机号</b><br>2. 管理员确认后即可恢复你的全部数据</p>
+        <p class="dd-regret-note">此提示仅显示给本次操作，用于防止误注销后悔。</p>
       </div>
-      <button class="btn btn-outline" style="width:100%;margin-top:10px;" onclick="closeDeleteAccountModal()">知道了</button>
+      <button class="dd-btn dd-outline" style="width:100%;margin-top:10px;" onclick="closeDeleteAccountModal()">知道了</button>
     </div>
   </div>
 </div>
@@ -9890,7 +9938,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.110'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.111'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
