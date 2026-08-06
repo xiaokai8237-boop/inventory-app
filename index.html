@@ -1504,6 +1504,29 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
 #goodsDeleteModal .gd-danger { background: linear-gradient(135deg, #FF7A59 0%, #E8453C 100%); color: #fff; box-shadow: 0 6px 18px rgba(232,69,60,.35); }
 #goodsDeleteModal .gd-outline { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.35); }
 
+/* ===== #46 记录删除确认弹窗：深空蓝晶定稿壳（沿用 #ocrResultModal 规范） ===== */
+#recordDeleteModal.rec-del-modal { background: rgba(4,24,32,.78); }
+#recordDeleteModal .rec-del-content {
+  background: #0E3340; border: 1.5px solid rgba(245,220,146,.55); border-radius: 22px;
+  box-shadow: 0 12px 44px rgba(0,0,0,.55); color: #FFFFFF; max-width: 330px;
+}
+#recordDeleteModal .gd-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+#recordDeleteModal .gd-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; color: #F5DC92; }
+#recordDeleteModal .gd-title svg { width: 20px; height: 20px; stroke: #FF8A7A; flex-shrink: 0; }
+#recordDeleteModal .gd-close { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.7); padding: 2px; display: flex; align-items: center; transition: color .15s; }
+#recordDeleteModal .gd-close:hover { color: #fff; }
+#recordDeleteModal .gd-close svg { width: 22px; height: 22px; }
+#recordDeleteModal .gd-msg { font-size: 14px; line-height: 1.65; margin-bottom: 14px; color: #EAF9FB; }
+#recordDeleteModal .gd-msg b { color: #FF8A7A; font-weight: 700; }
+#recordDeleteModal .gd-noremind { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; }
+#recordDeleteModal .gd-noremind-label { font-size: 12px; color: rgba(255,255,255,.6); margin-bottom: 6px; }
+#recordDeleteModal .gd-noremind label { display: flex; align-items: center; gap: 6px; font-size: 14px; padding: 6px 0; cursor: pointer; color: #EAF9FB; }
+#recordDeleteModal .gd-noremind input { width: 18px; height: 18px; accent-color: #7CE8E0; }
+#recordDeleteModal .gd-btns { display: flex; gap: 10px; }
+#recordDeleteModal .btn { flex: 1; border: none; border-radius: 12px; padding: 11px 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+#recordDeleteModal .gd-danger { background: linear-gradient(135deg, #FF7A59 0%, #E8453C 100%); color: #fff; box-shadow: 0 6px 18px rgba(232,69,60,.35); }
+#recordDeleteModal .gd-outline { background: rgba(255,255,255,.08); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+
 /* ===== 深色模式兼容（覆盖 JS 内联硬编码浅色底） ===== */
 html[data-theme="dark"] .native-file-btn { background: var(--card-bg); color: var(--primary); }
 html[data-theme="dark"] .store-chip { background: var(--soft-bg); }
@@ -2510,25 +2533,33 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 </div>
 
 <!-- 记录删除确认弹窗 -->
-<div class="gd-modal" id="recordDeleteModal" onclick="closeRecordDeleteModal()">
-  <div class="gd-content" onclick="event.stopPropagation()">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;">🗑️ 删除确认</span>
-      <button onclick="closeRecordDeleteModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
+<div class="gd-modal rec-del-modal" id="recordDeleteModal" onclick="closeRecordDeleteModal()">
+  <div class="gd-content rec-del-content" onclick="event.stopPropagation()">
+    <div class="gd-head">
+      <span class="gd-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+          <path d="M3 6h18"/>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          <line x1="10" y1="11" x2="10" y2="17"/>
+          <line x1="14" y1="11" x2="14" y2="17"/>
+        </svg>
+        删除确认
+      </span>
+      <button class="gd-close" onclick="closeRecordDeleteModal()" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">
+          <path d="M18 6 6 18"/><path d="M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
-    <p style="font-size:14px;line-height:1.6;margin-bottom:14px;">确定要删除这条记录吗？删除后不可恢复。</p>
-    <div style="background:var(--soft-bg);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:14px;">
-      <div style="font-size:12px;color:var(--text-light);margin-bottom:6px;">不再提醒：</div>
-      <label style="display:flex;align-items:center;gap:6px;font-size:14px;padding:6px 0;cursor:pointer;">
-        <input type="checkbox" id="delNoRemindToday" style="width:18px;height:18px;"> 今日不再提醒
-      </label>
-      <label style="display:flex;align-items:center;gap:6px;font-size:14px;padding:6px 0;cursor:pointer;">
-        <input type="checkbox" id="delNoRemind7d" style="width:18px;height:18px;"> 7 天不再提醒
-      </label>
+    <p class="gd-msg">确定要删除这条记录吗？删除后<b>不可恢复</b>。</p>
+    <div class="gd-noremind">
+      <div class="gd-noremind-label">不再提醒：</div>
+      <label><input type="checkbox" id="delNoRemindToday"> 今日不再提醒</label>
+      <label><input type="checkbox" id="delNoRemind7d"> 7 天不再提醒</label>
     </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-danger" style="flex:1;" onclick="confirmDeleteRecord()">🗑️ 确认删除</button>
-      <button class="btn btn-outline" style="flex:1;" onclick="closeRecordDeleteModal()">取消</button>
+    <div class="gd-btns">
+      <button class="btn btn-danger gd-danger" onclick="confirmDeleteRecord()">确认删除</button>
+      <button class="btn btn-outline gd-outline" onclick="closeRecordDeleteModal()">取消</button>
     </div>
   </div>
 </div>
@@ -9602,7 +9633,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '6.0.104'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '6.0.105'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
