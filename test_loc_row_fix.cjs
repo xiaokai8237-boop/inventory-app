@@ -75,28 +75,25 @@ function report(name, ok, detail = '') {
       return w <= 80; // 56px + padding
     }));
 
-    // 4. 点击录入有反应（toast 显示且不立即消失）
+    // 4. 点击录入有反应（#138：打开定位录入弹窗，不再 toast 开发中）
     await page.evaluate(() => {
       const b = document.querySelector('#storeManagePanel .sc-loc-btn');
       b.click();
     });
-    await page.waitForTimeout(50);
-    report('点击后 toast 显示', await page.evaluate(() => {
-      const t = document.getElementById('toast');
-      return t && t.classList.contains('show') && t.textContent.includes('定位录入');
+    await page.waitForTimeout(100);
+    report('点击后打开定位弹窗', await page.evaluate(() => {
+      const m = document.getElementById('locEntryModal');
+      return m && m.classList.contains('show');
     }));
-    await page.waitForTimeout(200);
-    report('toast 未闪退（200ms后仍显示）', await page.evaluate(() => {
-      const t = document.getElementById('toast');
-      return t && t.classList.contains('show');
-    }));
+    // 关闭弹窗
+    await page.evaluate(() => { closeLocEntryModal(); });
+    await page.waitForTimeout(100);
 
     // 5. 点击别处（非按钮）toast 立即消失（原#72行为保持）
+    // 用真实 showToast 显示（会设置 toastTimer + __toastShownAt），再测点击消失
     await page.waitForTimeout(100);
-    await page.evaluate(() => {
-      const t = document.getElementById('toast');
-      if (t) t.classList.add('show'); // 手动显示再测点击消失
-    });
+    await page.evaluate(() => { showToast('测试提示'); });
+    await page.waitForTimeout(150); // 超过 120ms 缓冲，此时点击应算"点击别处"
     await page.evaluate(() => document.body.click());
     await page.waitForTimeout(50);
     report('点击别处仍可立即消失', await page.evaluate(() => {

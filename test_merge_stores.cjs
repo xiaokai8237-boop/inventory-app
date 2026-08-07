@@ -98,10 +98,13 @@ function report(name, ok, detail = '') {
       btn.click();
     });
     await page.waitForTimeout(200);
-    report('点此录入提示开发中', await page.evaluate(() => {
-      const t = document.querySelector('.toast');
-      return t && (t.textContent.includes('开发中') || t.textContent.includes('定位录入'));
+    report('点此录入打开定位弹窗', await page.evaluate(() => {
+      const m = document.getElementById('locEntryModal');
+      return m && m.classList.contains('show');
     }));
+    // 关闭弹窗继续后续测试
+    await page.evaluate(() => { closeLocEntryModal(); });
+    await page.waitForTimeout(100);
 
     // 4. 保存修改仍可用（店名编辑保存到 storeConfig；含编号自动提取为别名逻辑）
     await page.fill('#sName0', '35-12 温州永嘉(改)');
