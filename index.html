@@ -6889,7 +6889,13 @@ function fillEmitConfirm(rows) {
   emitCurrentCols = Array.from(allCandidates);
   emitPendingNums = matchedNums;
   renderEmitVoiceConfirm(matchedNums);
-  showModal('emitVoiceConfirmModal');
+  // 识别出的店名检查：有未录入「店面管理」的 → 先弹提醒去录入（与 doOCR 通道一致）
+  const unreg = checkUnregisteredStores(rows);
+  if (unreg.length > 0) {
+    showUnregisteredStoresConfirm(unreg);
+  } else {
+    showModal('emitVoiceConfirmModal');
+  }
   showToast('AI 识别完成，请确认（识别 ' + rows.length + ' 家店，取列：' + emitCurrentCol + '）');
 }
 // 用户所选类型 与 识别类型 是否不一致（冷冻/常温是两种单据，绝不互通）
@@ -9277,17 +9283,23 @@ function showUnregisteredStoresConfirm(names) {
 function closeUnregStoreModal() {
   document.getElementById('unregStoreModal').classList.remove('show');
 }
-// 忽略继续：直接显示识别结果
+// 忽略继续：直接显示识别结果（来源：ocrResultModal 或 emitVoiceConfirmModal）
 function unregStoreIgnore() {
   closeUnregStoreModal();
-  showModal('ocrResultModal');
+  if (typeof pendingEmitRows !== 'undefined' && pendingEmitRows) {
+    showModal('emitVoiceConfirmModal');
+  } else {
+    showModal('ocrResultModal');
+  }
 }
 // 去录入：关闭结果弹窗 → 切到管理页 → 打开店面管理
 function unregStoreGotoManage() {
   closeUnregStoreModal();
   document.getElementById('ocrResultModal').classList.remove('show');
+  document.getElementById('emitVoiceConfirmModal').classList.remove('show');
   ocrCurrentResult = null;
   ocrCurrentImage = null;
+  pendingEmitRows = null;
   switchPage('manage');
   openStorePanel();
   showToast('请先录入这些门店，再回来识别');
@@ -10683,7 +10695,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.3.2'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.3.3'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
