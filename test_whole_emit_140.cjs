@@ -44,13 +44,21 @@ function T(name, cond, extra) {
       return inputs.map(i => ({
         whole: i.hasAttribute('data-emit-whole-idx'),
         log: i.hasAttribute('data-emit-idx'),
-        border: i.style.border
+        border: i.style.border,
+        width: i.style.width,
+        fontSize: i.style.fontSize,
+        background: i.style.background,
+        color: i.style.color
       }));
     });
   });
   T('常温筐每行 2 个输入框', rowInfo.length === 3 && rowInfo.every(r => r.length === 2), JSON.stringify(rowInfo));
   T('整箱数框在前（青色描边）', rowInfo[0][0].whole && !rowInfo[0][0].log && rowInfo[0][0].border.includes('232, 224'), JSON.stringify(rowInfo[0]));
   T('物流箱框在后', rowInfo[0][1].log && !rowInfo[0][1].whole, JSON.stringify(rowInfo[0]));
+  T('两框格式统一（同宽同字号同描边粗细）', rowInfo[0][0].width === '64px' && rowInfo[0][1].width === '64px'
+    && rowInfo[0][0].fontSize === '16px' && rowInfo[0][1].fontSize === '16px'
+    && rowInfo[0][1].border.startsWith('1.5px'), JSON.stringify(rowInfo[0]));
+  T('物流箱框橙色描边+橙色文字', rowInfo[0][1].border.includes('245, 166, 35') && rowInfo[0][1].color === 'rgb(245, 166, 35)', JSON.stringify(rowInfo[0]));
   // 列头
   const heads = await page.evaluate(() => {
     const el = document.querySelector('#emitStoreList > div[style*="justify-content"]');

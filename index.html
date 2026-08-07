@@ -6136,7 +6136,7 @@ function renderEmitStoreList() {
   if (isChangWen) {
     html += `<div style="display:flex;justify-content:flex-end;align-items:center;padding:4px 4px 8px;gap:6px;">
       <span style="color:#7CE8E0;font-size:11px;font-weight:600;width:64px;text-align:center;">整箱数</span>
-      <span style="color:#F5A623;font-size:11px;font-weight:600;width:92px;text-align:center;">物流箱</span>
+      <span style="color:#F5A623;font-size:11px;font-weight:600;width:64px;text-align:center;">物流箱</span>
     </div>`;
   }
   html += order.map((storeName, i) => {
@@ -6144,8 +6144,9 @@ function renderEmitStoreList() {
     const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
     const val = existing[storeName] !== undefined ? existing[storeName] : '';
     const valW = existingWhole[storeName] !== undefined ? existingWhole[storeName] : '';
+    // 两框格式统一（以整箱数框为准：#140 用户要求）：1.5px 描边 + 彩色文字 + 浅色底 + 同尺寸同字号；仅颜色区分（青=整箱数 / 橙=物流箱）
     const logInput = `<input type="number" inputmode="numeric" min="0" placeholder="0"
-      style="width:92px;text-align:center;font-size:18px;font-weight:700;padding:8px 6px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);"
+      style="width:64px;text-align:center;font-size:16px;font-weight:700;padding:8px 4px;border:1.5px solid rgba(245,166,35,.55);border-radius:8px;background:rgba(245,166,35,.06);color:#F5A623;"
       value="${val}" data-emit-store="${escapeHtml(storeName)}" data-emit-idx="${i}" oninput="emitNextOnDone(this)" onkeydown="emitOnEnter(event, this)">`;
     const wholeInput = `<input type="number" inputmode="numeric" min="0" placeholder="0"
       style="width:64px;text-align:center;font-size:16px;font-weight:700;padding:8px 4px;border:1.5px solid rgba(124,232,224,.55);border-radius:8px;background:rgba(124,232,224,.06);color:#7CE8E0;"
@@ -10733,7 +10734,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.3.4'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.3.5'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
