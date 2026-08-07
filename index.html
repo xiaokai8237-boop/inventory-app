@@ -8577,11 +8577,19 @@ async function doOCR(imageDataUrl, file) {
           // 按识别出的筐类型（goodsIdx）从 cols 里取业务目标列（物流箱/物流篮/面包筐）
           const gName = goodsIdx >= 0 ? (names[goodsIdx] || '') : '';
           const qty = pickColQty(r.cols, gName);
-          return { ...r, cols: r.cols || {}, nums: [qty], _rawNums: [qty] };
+          // 常温筐：单独取「整箱数量/整箱」列（#139 整箱数拍照识别）
+          let whole = 0;
+          if (goodsIdx === 4 && r.cols) {
+            const wv = r.cols['整箱数量'] !== undefined ? r.cols['整箱数量'] : (r.cols['整箱'] !== undefined ? r.cols['整箱'] : 0);
+            whole = parseInt(wv, 10) || 0;
+          }
+          return { ...r, cols: r.cols || {}, nums: [qty], _rawNums: [qty], whole };
         }),
         _rawTotalNums: [],
         totalNums: [0],
         logisticsColIdx: 0,
+        wholeColIdx: goodsIdx === 4 ? 1 : -1,
+        isChangWen: goodsIdx === 4,
         rawText: allText,
         words: allText.split('\n').slice(0, 30),
         trayType: goodsIdx >= 0 ? names[goodsIdx] : '未识别',
@@ -8738,7 +8746,7 @@ function fillMissingStores(rows, storeCfg) {
       }
     }
     if (found) {
-      addedRows.push({ code: targetCode, name: found.name, nums: [0], _rawNums: [], _missing: true });
+      addedRows.push({ code: targetCode, name: found.name, nums: [0], _rawNums: [], _missing: true, whole: 0 });
     }
   });
   if (!addedRows.length) return rows;
@@ -8796,7 +8804,7 @@ function crossValidateOcr(result, tcloudWords) {
   Object.keys(tcMap).forEach(code => {
     if (haveCodes.has(code)) return;
     if (tcMap[code].qty <= 0 && !tcMap[code].name) return; // 空行不补
-    result.rows.push({ code, name: tcMap[code].name || '', nums: [tcMap[code].qty], _rawNums: [tcMap[code].qty], _missing: true });
+    result.rows.push({ code, name: tcMap[code].name || '', nums: [tcMap[code].qty], _rawNums: [tcMap[code].qty], _missing: true, whole: 0 });
     added = true;
   });
   if (added) {
@@ -8841,25 +8849,39 @@ function parseOcrResult(ocrData) {
   };
   const targetCols = TARGET_COLS[goodsIdx] || ['物流箱', '物流筐', '物流篮', '整箱数量'];
   // 数字类列关键词（表头里代表数量的列名）
-  const NUM_COL_KWS = ['整箱', '物流箱', '物流筐', '物流篮', '低温', '常温', '冷冻', '鲜食', '面包',
+  // 注意：剔除「常温/低温/冷冻/鲜食/面包」——它们是抬头筐类型词，不是表头数量列（会误抬列索引）
+  const NUM_COL_KWS = ['整箱', '物流箱', '物流筐', '物流篮',
     '筐', '箱', '篮', '袋', '笼车', '冰板', '甜品', '纸箱', '信差', '保温', '数量', '发货', '发出', '回收'];
+  // 常温筐：除物流箱外，还识别「整箱数量」列（#139 整箱数拍照识别）
+  // 常温筐单据有两列：物流箱（整筐数）+ 整箱数量（整箱数），都要识别
+  const isChangWen = goodsIdx === 4;
   let logisticsColIdx = -1;
+  let wholeColIdx = -1;
   let colCnt = 0;
   for (const w of words) {
     const tokens = w.split(/\s+/);
     for (const t of tokens) {
       const isNumCol = NUM_COL_KWS.some(k => t.includes(k));
       if (isNumCol) {
-        if (targetCols.some(k => t.includes(k)) && logisticsColIdx < 0) {
-          logisticsColIdx = colCnt; // 目标列是当前第几个数字列
+        // 物流箱/物流筐 → 物流箱列；整箱数量/整箱 → 整箱数列（常温筐专属）
+        if (logisticsColIdx < 0 && (t.includes('物流箱') || t.includes('物流筐') || t.includes('物流篮'))) {
+          logisticsColIdx = colCnt;
+        } else if (logisticsColIdx < 0 && (t.includes('发货') || t.includes('发出') || t.includes('数量'))) {
+          logisticsColIdx = colCnt; // 无"物流箱"表头时退化为第一个数量列
+        }
+        if (isChangWen && wholeColIdx < 0 && (t.includes('整箱数量') || (t.includes('整箱') && !t.includes('物流')))) {
+          wholeColIdx = colCnt;
         }
         colCnt++;
       }
     }
-    if (logisticsColIdx >= 0) break;
   }
-  // 兜底：取第一个数字列
+  // 兜底：取第一个数字列（物流箱）
   if (logisticsColIdx < 0) logisticsColIdx = 0;
+  // 常温筐：若未找到整箱列，从物流箱列后一列推断（常见布局：物流箱后紧跟整箱数量）
+  if (isChangWen && wholeColIdx < 0) {
+    wholeColIdx = logisticsColIdx + 1;
+  }
 
   // 3. 用 parseStoreOcr 提取所有门店（处理分行、错字等情况）
   const stores = parseStoreOcr(words);
@@ -8886,9 +8908,11 @@ function parseOcrResult(ocrData) {
   stores.forEach(s => {
     let nums = [];
     // 策略A：找到包含 s.code 的原始 word，从编号后提取数字
-    const codeStr = s.code.replace('-', '\\-');
+    // 前导零容错：编号被归一化去前导零（35-01 → 35-1），原始单据可能带 0 → 用 0*35-0*1 匹配
+    const codeParts = s.code.split('-');
+    const codeRe = new RegExp('[A-Za-z]*0*' + codeParts.map(p => '0*' + p).join('[\\-–−_]') + '(?=[^\\d]|$)');
     for (const w of words) {
-      if (w.match(new RegExp(codeStr))) {
+      if (w.match(codeRe)) {
         const m = w.match(/^[A-Za-z]*\s*0*(\d{1,3})\s*[\-–−_]\s*0*(\d{1,3})\b/i);
         if (m) {
           const code = parseInt(m[1], 10) + '-' + parseInt(m[2], 10);
@@ -8904,7 +8928,7 @@ function parseOcrResult(ocrData) {
     if (nums.length === 0) {
       let pos = -1;
       for (let i = 0; i < words.length; i++) {
-        if (words[i].includes(s.code) || words[i].includes(s.name.slice(0,4))) { pos = i; break; }
+        if (words[i].match(codeRe) || words[i].includes(s.name.slice(0,4))) { pos = i; break; }
       }
       if (pos >= 0) {
 for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
@@ -8923,6 +8947,7 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
     // 取识别到的目标列；若未找到或值异常（疑似代号/时间），则取nums中合理的发出数量
     // 合理范围：1-999 的数字（排除 6 位店代号、时间 HHMM）
     let li = 0;
+    let wi = 0; // 整箱数（常温筐）
     if (logisticsColIdx >= 0 && nums[logisticsColIdx] !== undefined && nums[logisticsColIdx] < 1000) {
       li = nums[logisticsColIdx];
     } else {
@@ -8932,7 +8957,10 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
       }
       if (!li && nums[0] !== undefined && nums[0] < 1000) li = nums[0];
     }
-    rows.push({ code: s.code, name: s.name, nums: [li], _rawNums: nums.slice() });
+    if (isChangWen && wholeColIdx >= 0 && nums[wholeColIdx] !== undefined && nums[wholeColIdx] < 1000) {
+      wi = nums[wholeColIdx];
+    }
+    rows.push({ code: s.code, name: s.name, nums: [li], _rawNums: nums.slice(), whole: wi });
   });
 
   // 5. 找合计行（精确：包含"合计"且含数字，排除抬头里的"总数"等）
@@ -8966,6 +8994,8 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
     _rawTotalNums: totalNums,
     totalNums: totalFiltered.slice(),
     logisticsColIdx,
+    wholeColIdx: isChangWen ? wholeColIdx : -1,
+    isChangWen,
     rawText: words.join('\n'),
     words: words.slice(0, 30), // 供 debug
     trayType: goodsIdx >= 0 ? names[goodsIdx] : '未识别'
@@ -8986,14 +9016,16 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
   }
 }
 
-// 渲染 OCR 表格（只显示物流箱一列；编号/门店/数字均可编辑）
+// 渲染 OCR 表格（物流箱一列；常温筐额外显示「整箱数」列；编号/门店/数字均可编辑）
 function refreshOcrQtyCol() {
   if (!ocrCurrentResult) return;
   const rows = ocrCurrentResult.rows;
-  const maxNumCols = 1;
+  const isChangWen = !!ocrCurrentResult.isChangWen;
 
   let html = '<div style="overflow-x:auto;"><table class="summary-table ocr-table" style="margin-top:6px;min-width:100%;">';
-  html += '<thead><tr><th style="min-width:58px;">编号</th><th style="min-width:120px;text-align:left;padding-left:6px;">店名</th><th style="min-width:66px;background:rgba(245,166,35,.28);color:#F5A623;">物流箱</th><th style="min-width:28px;"></th></tr></thead><tbody>';
+  html += '<thead><tr><th style="min-width:58px;">编号</th><th style="min-width:120px;text-align:left;padding-left:6px;">店名</th><th style="min-width:66px;background:rgba(245,166,35,.28);color:#F5A623;">物流箱</th>' +
+    (isChangWen ? '<th style="min-width:66px;background:rgba(124,232,224,.25);color:#7CE8E0;">整箱数</th>' : '') +
+    '<th style="min-width:28px;"></th></tr></thead><tbody>';
   rows.forEach((r, i) => {
     // 自动补的行：黄色警示背景提示用户核对
     const isMissing = r._missing;
@@ -9002,7 +9034,7 @@ function refreshOcrQtyCol() {
     // 双引擎不一致：标黄待核对（优先于绿色）
     const isConflict = r._conflict;
     const rowBg = isMissing || isConflict ? ' style="background:rgba(245,166,35,.10);"' : '';
-    const hint = isMissing ? ' <span style="color:#F5A623;font-size:11px;">⚠️可能漏识别</span>' : (isConflict ? ' <span style="color:#F5A623;font-size:11px;">⚠️两引擎结果不同</span>' : '');
+    const hint = isMissing ? ' <span style="color:#F5A623;font-size:11px;">可能漏识别</span>' : (isConflict ? ' <span style="color:#F5A623;font-size:11px;">两引擎结果不同</span>' : '');
     html += '<tr' + rowBg + '>';
     html += '<td><input type="text" id="ocrCode_' + i + '" value="' + escapeHtml(r.code || '') + '" maxlength="10" style="width:60px;padding:5px;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:14px;text-align:center;background:rgba(255,255,255,.06);color:#FFFFFF;"></td>';
     html += '<td style="text-align:left;padding-left:6px;"><input type="text" id="ocrName_' + i + '" value="' + escapeHtml(r.name || '') + '" style="width:100%;padding:5px;border:1px solid rgba(255,255,255,.25);border-radius:6px;font-size:14px;background:rgba(255,255,255,.06);color:#FFFFFF;">' + hint + '</td>';
@@ -9013,30 +9045,50 @@ function refreshOcrQtyCol() {
         ? 'width:64px;padding:5px;border:2px solid #F5A623;border-radius:6px;font-size:14px;text-align:center;font-weight:700;color:#F5A623;background:rgba(245,166,35,.12);'
         : 'width:64px;padding:5px;border:1.5px solid #F5A623;border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#F5A623;');
     html += '<td style="background:' + (isHighConf && !isConflict ? 'rgba(124,232,224,.07);' : (isConflict ? 'rgba(245,166,35,.12);' : 'rgba(245,166,35,.12);')) + '"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="' + qtyStyle + '"></td>';
+    // 整箱数列（常温筐）
+    if (isChangWen) {
+      const wv = r.whole !== undefined ? r.whole : 0;
+      const wholeStyle = 'width:64px;padding:5px;border:1.5px solid rgba(124,232,224,.5);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#7CE8E0;background:rgba(124,232,224,.08);';
+      html += '<td style="background:rgba(124,232,224,.05);"><input type="number" id="ocrWhole_' + i + '" value="' + wv + '" min="0" style="' + wholeStyle + '"></td>';
+    }
     html += '<td><button onclick="removeOcrRow(' + i + ')" style="background:none;border:none;color:#FF6B6B;font-size:20px;cursor:pointer;padding:0 6px;line-height:1;">×</button></td>';
     html += '</tr>';
   });
   if (rows.length > 0) {
     let sum = 0;
+    let wsum = 0;
     rows.forEach((r, i) => {
       const inp = document.getElementById('ocrQty_' + i);
       if (inp) sum += parseInt(inp.value) || 0;
+      if (isChangWen) {
+        const wInp = document.getElementById('ocrWhole_' + i);
+        if (wInp) wsum += parseInt(wInp.value) || 0;
+      }
     });
-    html += '<tr class="total-row"><td>合计</td><td></td><td style="background:rgba(245,220,146,.14);font-weight:800;color:#F5DC92;" id="ocrTotalCell_0">' + sum + '</td><td></td></tr>';
+    html += '<tr class="total-row"><td>合计</td><td></td><td style="background:rgba(245,220,146,.14);font-weight:800;color:#F5DC92;" id="ocrTotalCell_0">' + sum + '</td>' +
+      (isChangWen ? '<td style="background:rgba(124,232,224,.12);font-weight:800;color:#7CE8E0;" id="ocrTotalCell_1">' + wsum + '</td>' : '') +
+      '<td></td></tr>';
   }
   html += '</tbody></table></div>';
-  html += '<button onclick="addOcrRow()" style="margin-top:10px;padding:9px 14px;border:1.5px dashed rgba(245,220,146,.6);border-radius:10px;background:rgba(245,220,146,.08);color:#F5DC92;font-size:13px;font-weight:700;cursor:pointer;width:100%;">➕ 新增一行（识别漏了时手动添加）</button>';
+  html += '<button onclick="addOcrRow()" style="margin-top:10px;padding:9px 14px;border:1.5px dashed rgba(245,220,146,.6);border-radius:10px;background:rgba(245,220,146,.08);color:#F5DC92;font-size:13px;font-weight:700;cursor:pointer;width:100%;">+ 新增一行（识别漏了时手动添加）</button>';
   document.getElementById('ocrEditFields').innerHTML = html;
-  // 绑定 input 事件：编号/门店 改 r.code/r.name；物流箱 改 r.nums[0] 并重算合计
+  // 绑定 input 事件：编号/门店 改 r.code/r.name；物流箱 改 r.nums[0]；整箱数 改 r.whole；并重算合计
   rows.forEach((r, i) => {
     const codeInp = document.getElementById('ocrCode_' + i);
     const nameInp = document.getElementById('ocrName_' + i);
     const qtyInp = document.getElementById('ocrQty_' + i);
+    const wholeInp = document.getElementById('ocrWhole_' + i);
     if (codeInp) codeInp.addEventListener('input', e => { r.code = e.target.value; });
     if (nameInp) nameInp.addEventListener('input', e => { r.name = e.target.value; });
     if (qtyInp) {
       qtyInp.addEventListener('input', e => {
         r.nums[0] = parseInt(e.target.value) || 0;
+        updateOcrTotal();
+      });
+    }
+    if (wholeInp) {
+      wholeInp.addEventListener('input', e => {
+        r.whole = parseInt(e.target.value) || 0;
         updateOcrTotal();
       });
     }
@@ -9054,22 +9106,29 @@ function addOcrRow() {
     if (m) maxN = Math.max(maxN, parseInt(m[1]));
   });
   const nextCode = maxN > 0 ? (maxN + 1) + '' : '';
-  ocrCurrentResult.rows.push({ code: nextCode, name: '', nums: [0], _rawNums: [] });
+  ocrCurrentResult.rows.push({ code: nextCode, name: '', nums: [0], _rawNums: [], whole: 0 });
   refreshOcrQtyCol();
 }
 
 function updateOcrTotal() {
   if (!ocrCurrentResult) return;
   const rows = ocrCurrentResult.rows;
+  const isChangWen = !!ocrCurrentResult.isChangWen;
   // 重算两列的合计
-  for (let c = 0; c < 1; c++) {
-    let sum = 0;
-    rows.forEach((r, i) => {
-      const inp = document.getElementById('ocrQty_' + i);
-      if (inp) sum += parseInt(inp.value) || 0;
-    });
-    const cell = document.getElementById('ocrTotalCell_' + c);
-    if (cell) cell.textContent = sum;
+  let sum = 0, wsum = 0;
+  rows.forEach((r, i) => {
+    const inp = document.getElementById('ocrQty_' + i);
+    if (inp) sum += parseInt(inp.value) || 0;
+    if (isChangWen) {
+      const wInp = document.getElementById('ocrWhole_' + i);
+      if (wInp) wsum += parseInt(wInp.value) || 0;
+    }
+  });
+  const cell0 = document.getElementById('ocrTotalCell_0');
+  if (cell0) cell0.textContent = sum;
+  if (isChangWen) {
+    const cell1 = document.getElementById('ocrTotalCell_1');
+    if (cell1) cell1.textContent = wsum;
   }
 }
 
@@ -9137,11 +9196,17 @@ function confirmOcrResult() {
   const data = loadData();
   const cfgAll = loadStoreConfig();
   let saved = 0, unmatched = 0, aliasAdded = 0;
-  // 只录入物流箱列（index=0）
+  const isChangWen = !!ocrCurrentResult.isChangWen;
+  // 录入物流箱列（index=0）+ 常温筐整箱数列
   ocrCurrentResult.rows.forEach((r, i) => {
     const inp = document.getElementById('ocrQty_' + i);
     const qty = parseInt(inp?.value || '0');
-    if (!qty || qty <= 0) return;
+    let whole = 0;
+    if (isChangWen) {
+      const wInp = document.getElementById('ocrWhole_' + i);
+      whole = parseInt(wInp?.value || '0') || 0;
+    }
+    if ((!qty || qty <= 0) && whole <= 0) return;
     let storeIdx = -1;
     // 店名模糊匹配：去除常见 OCR 错认字（店/分/总/路）+ 一致性匹配
     const normName = (s) => String(s || '').replace(/[店分总路 ]/g, '');
@@ -9202,17 +9267,20 @@ function confirmOcrResult() {
     if (existing) {
       if (currentActionType === 'out') existing.qtyOut = qty;
       else existing.qtyIn = qty;
+      if (isChangWen) existing.qtyWhole = whole;
       existing.source = 'ocr';
       existing.updatedAt = new Date().toISOString();
     } else {
-      data.push({
+      const rec = {
         id: Date.now() + '-ocr-' + storeIdx + '-' + goodsIdx,
         date, storeIdx, storeName: storeNames[storeIdx] || '',
         goodsIdx, goodsName: names[goodsIdx],
         qtyIn: currentActionType === 'out' ? 0 : qty,
         qtyOut: currentActionType === 'out' ? qty : 0,
         source: 'ocr', createdAt: new Date().toISOString()
-      });
+      };
+      if (isChangWen) rec.qtyWhole = whole;
+      data.push(rec);
     }
     saved++;
   });
@@ -10508,7 +10576,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.3.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.3.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
