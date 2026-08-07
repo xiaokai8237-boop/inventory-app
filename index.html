@@ -6119,35 +6119,59 @@ function renderEmitStoreList() {
   const data = loadData();
   const names = loadGoodsNames();
   const goodsName = names[emitGoodsIdx] || '';
+  const isChangWen = emitGoodsIdx === 4; // 常温筐才有整箱数（#140）
   // 已有记录（当天该筐各店）用于回显
   const existing = {};
+  const existingWhole = {};
   data.forEach(r => {
     if (r.date === date && r.goodsIdx === emitGoodsIdx && r.qtyIn > 0) {
       existing[r.storeName] = r.qtyIn;
     }
+    if (r.date === date && r.goodsIdx === emitGoodsIdx && r.qtyWhole > 0) {
+      existingWhole[r.storeName] = r.qtyWhole;
+    }
   });
-  container.innerHTML = order.map((storeName, i) => {
+  // 常温筐列头（整箱数在前 · 物流箱在后，#140）
+  let html = '';
+  if (isChangWen) {
+    html += `<div style="display:flex;justify-content:flex-end;align-items:center;padding:4px 4px 8px;gap:6px;">
+      <span style="color:#7CE8E0;font-size:11px;font-weight:600;width:64px;text-align:center;">整箱数</span>
+      <span style="color:#F5A623;font-size:11px;font-weight:600;width:92px;text-align:center;">物流箱</span>
+    </div>`;
+  }
+  html += order.map((storeName, i) => {
     const store = cfg.find(s => s.name === storeName);
     const alias = store && Array.isArray(store.aliases) && store.aliases.length ? '·' + store.aliases.join('、') : '';
     const val = existing[storeName] !== undefined ? existing[storeName] : '';
+    const valW = existingWhole[storeName] !== undefined ? existingWhole[storeName] : '';
+    const logInput = `<input type="number" inputmode="numeric" min="0" placeholder="0"
+      style="width:92px;text-align:center;font-size:18px;font-weight:700;padding:8px 6px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);"
+      value="${val}" data-emit-store="${escapeHtml(storeName)}" data-emit-idx="${i}" oninput="emitNextOnDone(this)" onkeydown="emitOnEnter(event, this)">`;
+    const wholeInput = `<input type="number" inputmode="numeric" min="0" placeholder="0"
+      style="width:64px;text-align:center;font-size:16px;font-weight:700;padding:8px 4px;border:1.5px solid rgba(124,232,224,.55);border-radius:8px;background:rgba(124,232,224,.06);color:#7CE8E0;"
+      value="${valW}" data-emit-whole-idx="${i}" onkeydown="emitWholeOnEnter(event, this)">`;
     return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 4px;border-bottom:1px solid var(--border);">
       <div style="flex:1;min-width:0;">
         <div style="font-weight:600;font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:var(--secondary,#e67e22);font-size:12px;">${alias}</span></div>
         <div style="font-size:11px;color:var(--text-light);">${goodsName}</div>
       </div>
-      <input type="number" inputmode="numeric" min="0" placeholder="0"
-        style="width:92px;text-align:center;font-size:18px;font-weight:700;padding:8px 6px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);"
-        value="${val}" data-emit-store="${escapeHtml(storeName)}" data-emit-idx="${i}" oninput="emitNextOnDone(this)" onkeydown="emitOnEnter(event, this)">
+      <div style="display:flex;gap:6px;align-items:center;">${isChangWen ? wholeInput + logInput : logInput}</div>
     </div>`;
   }).join('');
+  container.innerHTML = html;
 }
 
-// 键盘"确定/Enter"自动跳下一框（最后一框跳保存按钮）
+// 键盘"确定/Enter"自动跳下一框（常温筐：物流箱 → 下一家店整箱数 → 物流箱；最后一框跳保存按钮）
 function emitOnEnter(e, input) {
   if (e.key === 'Enter') {
     e.preventDefault();
     const inputs = Array.from(document.querySelectorAll('#emitStoreList input[data-emit-idx]'));
     const cur = inputs.indexOf(input);
+    // 常温筐：优先跳下一家店的整箱数框（若存在）
+    if (cur >= 0 && cur < inputs.length) {
+      const nextWhole = document.querySelector('#emitStoreList input[data-emit-whole-idx="' + (cur + 1) + '"]');
+      if (nextWhole) { nextWhole.focus(); nextWhole.select(); return; }
+    }
     if (cur < inputs.length - 1) {
       inputs[cur + 1].focus();
       inputs[cur + 1].select();
@@ -6155,6 +6179,15 @@ function emitOnEnter(e, input) {
       // 最后一框 → 跳保存按钮
       document.querySelector('#emitPanel .btn[onclick="saveEmitRecords()"]')?.focus();
     }
+  }
+}
+// 整箱数框回车 → 跳同店物流箱框（#140）
+function emitWholeOnEnter(e, input) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const idx = input.getAttribute('data-emit-whole-idx');
+    const logInput = document.querySelector('#emitStoreList input[data-emit-idx="' + idx + '"]');
+    if (logInput) { logInput.focus(); logInput.select(); }
   }
 }
 function emitNextOnDone(input) {
@@ -6172,6 +6205,7 @@ function saveEmitRecords() {
   const names = loadGoodsNames();
   const goodsName = names[emitGoodsIdx] || '';
   const inputs = Array.from(document.querySelectorAll('#emitStoreList input[data-emit-idx]'));
+  const isChangWen = emitGoodsIdx === 4; // 常温筐：整箱数随物流箱一起保存（#140）
   // 移除当天+所选筐的所有旧记录（各店）
   const filtered = data.filter(r => !(r.date === date && r.goodsIdx === emitGoodsIdx));
   const records = [];
@@ -6181,6 +6215,9 @@ function saveEmitRecords() {
     const storeName = input.getAttribute('data-emit-store');
     const cfg = loadStoreConfig();
     const storeIdx = cfg.findIndex(s => s.name === storeName);
+    const idx = input.getAttribute('data-emit-idx');
+    const wholeInp = isChangWen ? document.querySelector('#emitStoreList input[data-emit-whole-idx="' + idx + '"]') : null;
+    const whole = wholeInp ? (parseInt(wholeInp.value) || 0) : 0;
     records.push({
       id: Date.now() + '-emit-' + storeIdx + '-' + emitGoodsIdx,
       date: date,
@@ -6190,6 +6227,7 @@ function saveEmitRecords() {
       goodsName: goodsName,
       qtyIn: qty,
       qtyOut: 0,
+      qtyWhole: whole,
       source: 'manual',
       createdAt: new Date().toISOString()
     });
@@ -10695,7 +10733,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.3.3'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.3.4'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
