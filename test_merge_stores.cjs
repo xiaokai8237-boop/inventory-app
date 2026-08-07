@@ -55,7 +55,7 @@ function report(name, ok, detail = '') {
     }));
     report('通知栏管理入口已加', await page.evaluate(() => {
       const b = [...document.querySelectorAll('#page-manage .manage-item')].find(b => b.textContent.includes('通知栏管理'));
-      return !!b && b.textContent.includes('提醒样式') && b.querySelector('svg');
+      return !!b && b.textContent.includes('模板预览') && b.querySelector('svg');
     }));
     report('店面管理副标题更新', await page.evaluate(() => {
       const b = [...document.querySelectorAll('#page-manage .manage-item')].find(b => b.textContent.includes('店面管理'));
@@ -121,16 +121,18 @@ function report(name, ok, detail = '') {
     await page.waitForTimeout(300);
     report('返回管理页', await page.evaluate(() => document.getElementById('page-manage').classList.contains('active')));
 
-    // 6. 通知栏管理按钮点击 → toast 开发中
+    // 6. 通知栏管理按钮点击 → 打开模板预览弹窗（#142）
     await page.evaluate(() => {
       const b = [...document.querySelectorAll('#page-manage .manage-item')].find(b => b.textContent.includes('通知栏管理'));
       b.click();
     });
     await page.waitForTimeout(200);
-    report('通知栏管理点击提示', await page.evaluate(() => {
-      const t = document.querySelector('.toast');
-      return t && t.textContent.includes('开发中');
+    report('通知栏管理点击打开模板面板', await page.evaluate(() => {
+      const m = document.getElementById('notifyTemplatesModal');
+      return m && m.classList.contains('show') && document.querySelectorAll('#notifyTplGrid .ntp-card').length === 8;
     }));
+    await page.evaluate(() => closeNotifyTemplatesPanel());
+    await page.waitForTimeout(100);
 
     // 7. 无 JS 错误
     const realErrors = errors.filter(e => !e.includes('Service worker') && !e.includes('file:') && !e.includes('401') && !e.includes('404'));

@@ -2294,6 +2294,127 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 .auth-lock-msg { font-size: 11px; color: #F5B26B; margin: -2px 6px 10px; min-height: 14px; }
 .auth-close { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border-radius: 50%; background: rgba(10,53,66,.6); border: 1px solid rgba(245,220,146,.4); color: #F5DC92; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; }
 body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body.auth-mode .beta-banner, body.auth-mode .offline-banner { display: none !important; }
+/* ===== #142 通知栏 8 套样式模板 ===== */
+.ntp-modal {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(4,24,32,.78); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 18px 14px;
+}
+.ntp-modal.show { display: flex; }
+.ntp-content {
+  width: 100%; max-width: 660px; max-height: 86vh; overflow-y: auto;
+  background: #0E3340; border: 1.5px solid rgba(245,220,146,.55);
+  border-radius: 22px; padding: 18px 16px;
+}
+.ntp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.ntp-title { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; color: #F5DC92; }
+.ntp-title svg { width: 20px; height: 20px; stroke: #F5DC92; }
+.ntp-close { width: 34px; height: 34px; border-radius: 50%; background: rgba(10,53,66,.6); border: 1px solid rgba(245,220,146,.4); color: #F5DC92; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.ntp-close svg { width: 18px; height: 18px; stroke: #F5DC92; }
+.ntp-sub { font-size: 12px; color: #9FD0D6; margin-bottom: 14px; line-height: 1.6; }
+.ntp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.ntp-card {
+  background: rgba(255,255,255,.04); border: 1px solid rgba(124,184,200,.25);
+  border-radius: 14px; padding: 10px; cursor: pointer; position: relative;
+  transition: border-color .15s;
+}
+.ntp-card:hover { border-color: rgba(245,220,146,.7); }
+.ntp-card .ntp-meta { display: flex; align-items: center; gap: 6px; margin: 8px 4px 0; }
+.ntp-card .ntp-meta .ntp-no { font-size: 12px; font-weight: 800; color: #F5DC92; }
+.ntp-card .ntp-meta .ntp-name { font-size: 13px; font-weight: 800; color: #FFFFFF; }
+.ntp-card .ntp-meta .ntp-tag { font-size: 10px; color: #7E97A1; font-weight: 600; }
+.ntp-card .ntp-badge {
+  position: absolute; top: 8px; right: 8px;
+  font-size: 10px; font-weight: 800; color: #0B2E38;
+  background: linear-gradient(135deg,#F8E3A6,#E0A63E);
+  border-radius: 10px; padding: 2px 8px; letter-spacing: .5px;
+}
+.ntp-card .ntp-desc { font-size: 10px; color: #7E97A1; margin: 3px 4px 0; }
+.ntp-foot { margin-top: 14px; text-align: center; font-size: 11px; color: #7E97A1; }
+.ntp-foot b { color: #F5DC92; }
+/* 通知卡预览（模拟通知栏卡片） */
+.ntpv { background: #0E3340; border: 1px solid rgba(124,184,200,.25); border-radius: 13px; padding: 10px; font-family: 'PingFang SC','Microsoft YaHei',sans-serif; }
+.ntpv .ntpv-top { display: flex; gap: 8px; align-items: flex-start; }
+.ntpv .ntpv-ico { width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#F8E3A6,#E0A63E); }
+.ntpv .ntpv-ico svg { width: 22px; height: 22px; stroke: #0B2E38; }
+.ntpv .ntpv-body { flex: 1; min-width: 0; }
+.ntpv .ntpv-meta { display: flex; justify-content: space-between; font-size: 9px; color: #7E97A1; margin-bottom: 3px; }
+.ntpv .ntpv-meta .app { color: #A9C2CA; font-weight: 700; }
+.ntpv .ntpv-arrive { font-size: 13px; font-weight: 800; color: #FFFFFF; line-height: 1.3; }
+.ntpv .ntpv-arrive .store { color: #F5DC92; font-weight: 900; font-size: 15px; }
+.ntpv .ntpv-arrive .dist { color: #7CE8E0; font-size: 11px; font-weight: 700; margin-left: 4px; }
+.ntpv .ntpv-qty { display: flex; gap: 4px; margin-top: 8px; }
+.ntpv .ntpv-cell { flex: 1; background: rgba(255,255,255,.05); border-radius: 8px; padding: 6px 3px 5px; text-align: center; min-width: 0; }
+.ntpv .ntpv-cell .g { font-size: 10px; color: #FFFFFF; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ntpv .ntpv-cell .n { font-size: 16px; font-weight: 900; line-height: 1.15; margin-top: 2px; }
+.ntpv .ntpv-cell .n.log { color: #F5A623; }
+.ntpv .ntpv-cell .n.whole { color: #7CE8E0; }
+.ntpv .ntpv-cell .n.single { color: #F5A623; }
+.ntpv .ntpv-cell .c { font-size: 8px; color: #93A7B0; margin-top: 1px; }
+.ntpv .ntpv-cell .c.log { color: #F5A623; opacity: .85; }
+.ntpv .ntpv-cell .c.whole { color: #7CE8E0; opacity: .85; }
+.ntpv .ntpv-clock { margin-top: 7px; background: rgba(255,107,107,.14); border: 1.5px solid rgba(255,107,107,.6); border-radius: 9px; padding: 6px 10px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.ntpv .ntpv-clock svg { width: 14px; height: 14px; stroke: #FF6B6B; flex-shrink: 0; }
+.ntpv .ntpv-clock span { font-size: 12px; font-weight: 900; color: #FF6B6B; letter-spacing: 1px; }
+.ntpv .ntpv-actions { display: flex; gap: 7px; margin-top: 8px; }
+.ntpv .ntpv-act { flex: 1; text-align: center; font-size: 11px; font-weight: 700; color: #0B2E38; padding: 7px 0; border-radius: 18px; background: linear-gradient(135deg,#F8E3A6 0%,#E0A63E 100%); box-shadow: 0 2px 8px rgba(224,166,62,.3); }
+.ntpv .ntpv-act.b { background: linear-gradient(135deg,#8FA9FF 0%,#5B84FF 100%); color: #FFFFFF; box-shadow: 0 2px 8px rgba(91,132,255,.3); }
+/* ① 极简 */
+.ntpv.t-minimal { background: transparent; border-color: rgba(255,255,255,.18); }
+.ntpv.t-minimal .ntpv-arrive { font-size: 13px; }
+.ntpv.t-minimal .ntpv-arrive .store { font-weight: 900; }
+.ntpv.t-minimal .ntpv-qty { gap: 4px; }
+.ntpv.t-minimal .ntpv-cell { background: transparent; }
+.ntpv.t-minimal .ntpv-cell .g { font-size: 9px; color: #A9C2CA; }
+.ntpv.t-minimal .ntpv-cell .n { font-size: 14px; color: #FFFFFF; }
+.ntpv.t-minimal .ntpv-cell .n.log { color: #F5A623; }
+.ntpv.t-minimal .ntpv-cell .n.whole { color: #7CE8E0; }
+.ntpv.t-minimal .ntpv-clock { background: transparent; border: none; }
+.ntpv.t-minimal .ntpv-act { border: 1px solid rgba(255,255,255,.4); background: transparent; color: #FFFFFF; }
+.ntpv.t-minimal .ntpv-act.g { background: linear-gradient(135deg,#F8E3A6,#E0A63E); color: #0B2E38; border: none; }
+/* ③ 距离 */
+.ntpv.t-dist .ntpv-dist-bar { margin-top: 7px; background: rgba(124,232,224,.12); border: 1.5px solid rgba(124,232,224,.55); border-radius: 9px; padding: 5px 12px; display: flex; align-items: baseline; gap: 6px; }
+.ntpv.t-dist .ntpv-dist-bar .l { font-size: 11px; color: #7CE8E0; font-weight: 700; }
+.ntpv.t-dist .ntpv-dist-bar .v { font-size: 30px; font-weight: 900; color: #7CE8E0; line-height: 1; }
+.ntpv.t-dist .ntpv-dist-bar .u { font-size: 11px; color: #7CE8E0; font-weight: 700; }
+/* ④ 详细 */
+.ntpv.t-detail .ntpv-qty { flex-direction: column; gap: 4px; }
+.ntpv.t-detail .ntpv-cell { display: flex; align-items: center; justify-content: space-between; padding: 6px 12px; }
+.ntpv.t-detail .ntpv-cell .g { font-size: 12px; }
+.ntpv.t-detail .ntpv-cell .n { margin-top: 0; font-size: 17px; }
+.ntpv.t-detail .ntpv-cell .c { display: inline; margin-left: 4px; font-size: 9px; }
+.ntpv.t-detail .ntpv-cell .gwrap { display: flex; align-items: baseline; }
+/* ⑤ 清单 */
+.ntpv.t-list .ntpv-route { margin-top: 7px; border: 1px solid rgba(124,184,200,.2); border-radius: 9px; overflow: hidden; }
+.ntpv.t-list .ntpv-route .rr { padding: 5px 10px; border-bottom: 1px solid rgba(255,255,255,.07); }
+.ntpv.t-list .ntpv-route .rr:last-child { border-bottom: none; }
+.ntpv.t-list .ntpv-route .rr .r1 { display: flex; justify-content: space-between; align-items: center; }
+.ntpv.t-list .ntpv-route .rr .rname { font-size: 11px; color: #FFFFFF; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ntpv.t-list .ntpv-route .rr .rname.cur { color: #F5DC92; }
+.ntpv.t-list .ntpv-route .rr .rd { font-size: 10px; color: #7CE8E0; font-weight: 700; flex-shrink: 0; margin-left: 6px; }
+.ntpv.t-list .ntpv-route .rr .r2 { display: flex; gap: 6px; margin-top: 3px; }
+.ntpv.t-list .ntpv-route .rr .r2 .rc { flex: 1; text-align: center; font-size: 8px; color: #93A7B0; }
+.ntpv.t-list .ntpv-route .rr .r2 .rc b { display: block; font-size: 12px; font-weight: 900; color: #FFFFFF; line-height: 1.2; }
+.ntpv.t-list .ntpv-route .rr .r2 .rc b.log { color: #F5A623; }
+.ntpv.t-list .ntpv-route .rr .r2 .rc b.whole { color: #7CE8E0; }
+/* ⑥ 提醒 */
+.ntpv.t-alarm { background: #3A1620; border-color: rgba(255,107,107,.7); }
+.ntpv.t-alarm .ntpv-arrive .store { color: #FFD6D6; }
+.ntpv.t-alarm .ntpv-arrive .dist { color: #FF6B6B; font-size: 12px; font-weight: 900; }
+.ntpv.t-alarm .ntpv-alarm { margin-top: 7px; background: rgba(255,107,107,.22); border: 1.5px solid rgba(255,107,107,.8); border-radius: 9px; padding: 6px 10px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.ntpv.t-alarm .ntpv-alarm svg { width: 15px; height: 15px; stroke: #FF6B6B; flex-shrink: 0; }
+.ntpv.t-alarm .ntpv-alarm span { font-size: 13px; font-weight: 900; color: #FF6B6B; letter-spacing: 1px; }
+.ntpv.t-alarm .ntpv-act { background: linear-gradient(135deg,#FF8A8A,#E04848); color: #FFF; }
+.ntpv.t-alarm .ntpv-act.b { background: linear-gradient(135deg,#8FA9FF,#5B84FF); color: #FFF; }
+/* ⑦ 静默 */
+.ntpv.t-silent { background: #1A2730; border-color: rgba(150,170,180,.25); filter: saturate(.55); }
+.ntpv.t-silent .ntpv-silent { margin-top: 7px; text-align: center; font-size: 10px; color: #7E97A1; letter-spacing: 2px; font-weight: 700; }
+.ntpv.t-silent .ntpv-cell .n { color: #D8E0E4; }
+.ntpv.t-silent .ntpv-act { background: rgba(255,255,255,.08); color: #D8E0E4; }
+.ntpv.t-silent .ntpv-act.b { background: rgba(255,255,255,.14); }
+/* ⑧ 图文（定稿 v6，默认） */
+.ntpv.t-rich { border-color: rgba(245,220,146,.55); }
 </style>
 </head>
 <body>
@@ -2672,7 +2793,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="card manage-user-card" id="manageUserCard" style="padding:14px;"></div>
   <div class="card" style="padding:0;overflow:hidden;">
     <button class="manage-item" onclick="openStorePanel()"><span class="mi-icon">🏪</span><span class="mi-title">店面管理<span class="mi-sub" id="manageStoreSub">店面 · 别称 · 到店提醒 · 定位</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="showToast('通知栏管理开发中，敬请期待')"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span class="mi-title">通知栏管理<span class="mi-sub">提醒样式 · 距离设置</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openNotifyTemplatesPanel()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span class="mi-title">通知栏管理<span class="mi-sub" id="manageNotifySub">模板预览 · 默认图文版</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openGoodsPanel()"><span class="mi-icon">📦</span><span class="mi-title">框名设置<span class="mi-sub" id="manageGoodsSub">筐类名称 · 顺序</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openBackupPanel()"><span class="mi-icon">💾</span><span class="mi-title">备份与恢复<span class="mi-sub">云端同步 · 换机不丢</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('summary')"><span class="mi-icon">📈</span><span class="mi-title">汇总<span class="mi-sub">统计报表</span></span><span class="mi-arrow">›</span></button>
@@ -2683,6 +2804,24 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <button class="manage-item" onclick="installApp()"><span class="mi-icon" id="installBtnIcon">📱</span><span class="mi-title" id="installBtnLabel">添加到桌面<span class="mi-sub">安装 APP</span></span><span class="mi-arrow">›</span></button>
   </div>
   <div class="footer" id="footerVer">物流筐收发管理系统 <span id="footerVerNum"></span></div>
+</div>
+
+<!-- ========== #142 通知栏模板预览弹窗 ========== -->
+<div class="ntp-modal" id="notifyTemplatesModal" onclick="closeNotifyTemplatesPanel()">
+  <div class="ntp-content" onclick="event.stopPropagation()">
+    <div class="ntp-head">
+      <span class="ntp-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        通知栏样式模板
+      </span>
+      <button class="ntp-close" onclick="closeNotifyTemplatesPanel()" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="ntp-sub">到店提醒通知的 8 套样式，信息统一（店名 · 距离 · 各筐含整箱 · 打卡 · 双按钮）。<b style="color:#F5DC92;">图文版</b>为默认模板。点击模板卡可看完整预览。</div>
+    <div class="ntp-grid" id="notifyTplGrid"></div>
+    <div class="ntp-foot">完整设置（选择模板 · 距离阈值 · 响铃开关）在 <b>提醒设置</b> 页（后续开放）</div>
+  </div>
 </div>
 
 <!-- ========== 汇总页 ========== -->
@@ -10867,7 +11006,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.3.6'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.3.7'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -11209,6 +11348,153 @@ const dStart = new Date();
 dStart.setDate(dStart.getDate() - 29);
 document.getElementById('exportStart')?.setAttribute('value', `${dStart.getFullYear()}-${String(dStart.getMonth()+1).padStart(2,'0')}-${String(dStart.getDate()).padStart(2,'0')}`);
 document.getElementById('exportEnd')?.setAttribute('value', dEnd);
+
+// ================= #142 通知栏 8 套样式模板 =================
+var NOTIFY_TEMPLATES = [
+  { id: 'minimal', name: '极简版', desc: '白字无装饰，最不打扰', tag: '最不打扰' },
+  { id: 'classic', name: '经典版', desc: '标准深空蓝晶卡片', tag: '日常推荐' },
+  { id: 'dist',    name: '距离版', desc: '距离超大青色高亮', tag: '关注剩余距离' },
+  { id: 'detail',  name: '详细版', desc: '每筐一行竖排明细', tag: '到店前核对' },
+  { id: 'list',    name: '清单版', desc: '整条路线一店一行', tag: '多店配送' },
+  { id: 'alarm',   name: '提醒版', desc: '红色警告 + 响铃震动', tag: '紧急提醒' },
+  { id: 'silent',  name: '静默版', desc: '灰色降饱和，无声', tag: '夜间/不打扰' },
+  { id: 'rich',    name: '图文版', desc: '大图标 + 5 筐 + 双按钮', tag: '默认模板', isDefault: true }
+];
+var NOTIFY_TPL_DEFAULT = 'rich';
+
+function getNotifyTemplate(id) {
+  if (!id) return NOTIFY_TEMPLATES.find(t => t.isDefault) || NOTIFY_TEMPLATES[0];
+  return NOTIFY_TEMPLATES.find(t => t.id === id) || getNotifyTemplate(null);
+}
+
+// 示例门店数据（#142 预览用；#144 接入真实数据）
+function notifyPreviewData() {
+  return {
+    storeName: '35-01 温州永嘉上塘下堡店',
+    distM: 500,
+    curIdx: 0, totalStores: 6,
+    nextStoreName: '35-02 温州永嘉瓯北店',
+    goods: [
+      { name: '鲜食筐', qty: 8 },
+      { name: '面包筐', qty: 8 },
+      { name: '低温筐', qty: 5 },
+      { name: '冷冻筐', qty: 10 },
+      { name: '常温筐', qty: 12, whole: 3 }
+    ],
+    route: [
+      { name: '35-01 温州永嘉上塘下堡店', dist: '500m', qty: 12, whole: 3 },
+      { name: '35-02 温州永嘉瓯北店', dist: '1.2km', qty: 8, whole: 2 },
+      { name: '35-03 温州永嘉桥下店', dist: '2.8km', qty: 15, whole: 5 }
+    ]
+  };
+}
+
+// 构建通知内容（供 #144 到店提醒实际发通知用）
+// data: { storeName, distM, curIdx, totalStores, nextStoreName, goods:[{name,qty,whole?}], route? }
+function buildNotifyContent(tplId, data) {
+  const tpl = getNotifyTemplate(tplId);
+  const d = data || {};
+  const goods = d.goods || [];
+  const lines = [];
+  goods.forEach(g => {
+    if (g.whole > 0) lines.push(g.name + ' ' + g.qty + ' 物流箱 / ' + g.whole + ' 整箱');
+    else if (g.qty > 0) lines.push(g.name + ' ' + g.qty);
+  });
+  const body = '距你 ' + (d.distM || 0) + ' 米\n' + (lines.join('\n') || '本店无配送量');
+  return {
+    tplId: tpl.id,
+    tplName: tpl.name,
+    title: '即将到达 ' + (d.storeName || ''),
+    body: body,
+    alarm: tpl.id === 'alarm',
+    silent: tpl.id === 'silent',
+    buttons: [
+      { label: '记录回筐', action: 'recycle' },
+      { label: '导航去下一家', action: 'navigate' }
+    ]
+  };
+}
+
+// 渲染单套通知卡预览（供模板面板/后续设置页用）
+function renderNotifyPreview(tplId, data) {
+  const tpl = getNotifyTemplate(tplId);
+  const d = data || notifyPreviewData();
+  const cls = 'ntpv t-' + tpl.id;
+  const iconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>';
+  const clockSvg = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>';
+  const bellSvg = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>';
+  // 筐数据格
+  let qtyHtml;
+  if (tpl.id === 'detail') {
+    qtyHtml = '<div class="ntpv-qty">' + d.goods.map(g => {
+      const num = (g.whole > 0)
+        ? '<span class="n log">' + g.qty + '</span><span class="n whole">' + g.whole + '</span><span class="c" style="margin-left:2px;">物流/整</span>'
+        : '<span class="n single">' + g.qty + '</span><span class="c">筐</span>';
+      return '<div class="ntpv-cell"><span class="g">' + escapeHtml(g.name) + '</span>' + num + '</div>';
+    }).join('') + '</div>';
+  } else if (tpl.id === 'list') {
+    qtyHtml = '<div class="ntpv-route">' + (d.route || []).map((r, i) =>
+      '<div class="rr"><div class="r1"><span class="rname' + (i === d.curIdx ? ' cur' : '') + '">' + escapeHtml(r.name) + '</span><span class="rd">' + r.dist + '</span></div>' +
+      '<div class="r2"><span class="rc"><b class="log">' + r.qty + '</b>物流</span><span class="rc"><b class="whole">' + r.whole + '</b>整箱</span></div></div>'
+    ).join('') + '</div>';
+  } else {
+    qtyHtml = '<div class="ntpv-qty">' + d.goods.map(g => {
+      if (g.whole > 0) {
+        return '<div class="ntpv-cell"><div class="g">' + escapeHtml(g.name) + '</div>' +
+          '<div class="n log">' + g.qty + '</div><div class="n whole">' + g.whole + '</div>' +
+          '<div class="c log">物流箱</div><div class="c whole">整箱</div></div>';
+      }
+      return '<div class="ntpv-cell"><div class="g">' + escapeHtml(g.name) + '</div>' +
+        '<div class="n single">' + g.qty + '</div><div class="c">筐</div></div>';
+    }).join('') + '</div>';
+  }
+  // 距离/打卡/按钮 按模板差异
+  const distInline = tpl.id === 'dist' ? '' : '<span class="dist">距你 ' + d.distM + ' 米</span>';
+  const distBar = tpl.id === 'dist' ? '<div class="ntpv-dist-bar"><span class="l">距你</span><span class="v">' + d.distM + '</span><span class="u">米</span></div>' : '';
+  const alarmBar = tpl.id === 'alarm' ? '<div class="ntpv-alarm">' + bellSvg + '<span>已到达附近 · 响铃提醒</span></div>' : '';
+  const silentTag = tpl.id === 'silent' ? '<div class="ntpv-silent">静 默 模 式 · 无 声 通 知</div>' : '';
+  const clockBar = (tpl.id === 'minimal' || tpl.id === 'dist' || tpl.id === 'detail' || tpl.id === 'list' || tpl.id === 'alarm')
+    ? '<div class="ntpv-clock">' + clockSvg + '<span>不要忘记打卡</span></div>'
+    : '<div class="ntpv-clock">' + clockSvg + '<span>不要忘记打卡</span></div>';
+  const actFirstCls = tpl.id === 'minimal' ? ' act g' : '';
+  return '<div class="' + cls + '">' +
+    '<div class="ntpv-top"><div class="ntpv-ico">' + iconSvg + '</div>' +
+    '<div class="ntpv-body"><div class="ntpv-meta"><span class="app">物流筐</span><span>6:40</span></div>' +
+    '<div class="ntpv-arrive">即将到达 ' + distInline + '<br><span class="store">' + escapeHtml(d.storeName) + '</span></div>' +
+    '</div></div>' +
+    distBar + alarmBar + silentTag +
+    qtyHtml +
+    clockBar +
+    '<div class="ntpv-actions"><div class="ntpv-act' + actFirstCls + '">记录回筐</div><div class="ntpv-act b">导航去下一家</div></div>' +
+    '</div>';
+}
+
+// 模板面板：渲染 8 套 + 打开/关闭
+function renderNotifyTemplatesPanel() {
+  const grid = document.getElementById('notifyTplGrid');
+  if (!grid) return;
+  grid.innerHTML = NOTIFY_TEMPLATES.map((t, i) =>
+    '<div class="ntp-card" onclick="openNotifyTplDetail(\'' + t.id + '\')">' +
+      (t.isDefault ? '<div class="ntp-badge">默认</div>' : '') +
+      renderNotifyPreview(t.id, notifyPreviewData()) +
+      '<div class="ntp-meta"><span class="ntp-no">' + (i + 1) + '</span><span class="ntp-name">' + t.name + '</span><span class="ntp-tag">' + t.tag + '</span></div>' +
+      '<div class="ntp-desc">' + t.desc + '</div>' +
+    '</div>'
+  ).join('');
+}
+function openNotifyTemplatesPanel() {
+  renderNotifyTemplatesPanel();
+  showModal('notifyTemplatesModal');
+}
+function closeNotifyTemplatesPanel() {
+  const el = document.getElementById('notifyTemplatesModal');
+  if (el) el.classList.remove('show');
+}
+// 点卡片放大预览（小弹窗内嵌完整通知卡）
+function openNotifyTplDetail(id) {
+  const tpl = getNotifyTemplate(id);
+  showToast('模板 ' + (NOTIFY_TEMPLATES.indexOf(tpl) + 1) + ' · ' + tpl.name + '：' + tpl.desc);
+}
 </script>
 
 <!-- 额外发收登记弹窗（针对所有门店，挂 BODY 直接子级：按钮在记录页，切页时首页 display:none 不影响弹窗显示） -->
