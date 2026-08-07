@@ -112,9 +112,9 @@ function T(name, cond, extra) {
   await page.waitForTimeout(200);
   const entry = await page.evaluate(() => {
     const btns = [...document.querySelectorAll('#page-manage .manage-item')];
-    return btns.some(b => (b.getAttribute('onclick') || '').includes('openNotifyTemplatesPanel'));
+    return btns.some(b => (b.getAttribute('onclick') || '').includes('openNotifyManagePage'));
   });
-  T('管理页入口改为打开模板面板', entry, '');
+  T('管理页入口改为打开通知栏管理独立页面', entry, '');
 
   await browser.close();
   server.close();
