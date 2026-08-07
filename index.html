@@ -4075,70 +4075,175 @@ async function callHunyuanVision(imageBase64, goodsName) {
   } catch (e) { return null; }
 }
 
-// AI 识别提速：裁剪表格区域（只把表格主体发给混元，减少 token → 提速 30%+）
-// 顶部固定裁掉抬头区；底部动态检测到表格最后一行内容，行数多（10~20家店）也不会漏
-const CROP_TEMPLATE_KEY = 'kuanwei_crop_template';
-const DEFAULT_CROP_TEMPLATE = { left: 0.04, top: 0.30, width: 0.95, height: 0.42 }; // 保守默认（可被动态检测覆盖）
-function getCropTemplate() {
-  try {
-    const raw = localStorage.getItem(CROP_TEMPLATE_KEY);
-    if (raw) {
-      const t = JSON.parse(raw);
-      if (t && t.left >= 0 && t.top >= 0 && t.width > 0.1 && t.height > 0.1) return t;
-    }
-  } catch (e) {}
-  return DEFAULT_CROP_TEMPLATE;
-}
-// 图片裁剪为表格区域（canvas 本地处理）：顶部裁到 top，底部动态检测"最后内容行"确定高度
+// 【全自动表格区域检测裁剪 v2】（2026-08-07）用户无感知，检测失败自动回退原图
+// 方案：灰度化 → 边缘检测（Sobel近似）→ 行列投影找表格边界（纯 canvas，无第三方依赖）
+// 兜底：检测不到/面积<原图30%/长宽过小 → 返回原图；宁可不裁，绝不裁错
+// 日志：console.log 输出 成功/失败/前后尺寸
 function cropImageToTable(dataUrl) {
   return new Promise((resolve) => {
     try {
-      const tpl = getCropTemplate();
       const img = new Image();
       img.onload = function() {
         try {
           const w = img.width, h = img.height;
-          const L = Math.max(0, Math.round(w * tpl.left));
-          const T = Math.max(0, Math.round(h * tpl.top));
-          const CW = Math.min(w - L, Math.round(w * tpl.width));
-          // 动态检测底部：从下往上找最后一行有表格内容的横线（深色像素较多）
-          let bottomY = Math.min(h, T + Math.round(h * 0.85)); // 上限：最多到 85% 高度
-          try {
-            const probe = document.createElement('canvas');
-            probe.width = w; probe.height = h;
-            const pctx = probe.getContext('2d');
-            pctx.drawImage(img, 0, 0);
-            const idata = pctx.getImageData(0, 0, w, h).data;
-            const startY = Math.max(T + 10, Math.round(h * 0.15));
-            let lastContentY = -1;
-            for (let y = h - 1; y >= startY; y -= 3) {
-              let darkCount = 0;
-              for (let x = Math.round(w * 0.02); x < w * 0.98; x += 5) {
-                const idx = (y * w + x) * 4;
-                const r = idata[idx], g = idata[idx + 1], b = idata[idx + 2];
-                // 深色像素（表格线/文字），排除浅色水印
-                if (r < 110 && g < 110 && b < 110) darkCount++;
-              }
-              if (darkCount > 4) { lastContentY = y; break; }
-            }
-            if (lastContentY > T) {
-              bottomY = Math.min(h, lastContentY + Math.round(h * 0.05)); // 底部留 5% 余量
-            }
-          } catch (e) { /* 检测失败用默认高度 */ }
-          const CH = Math.max(50, bottomY - T);
-          if (CW < 100 || CH < 100) return resolve(dataUrl);
+          // 缩小到最长边800px做检测（提速，边界精度足够）
+          const scale = Math.min(1, 800 / Math.max(w, h));
+          const dw = Math.round(w * scale), dh = Math.round(h * scale);
           const canvas = document.createElement('canvas');
-          canvas.width = CW; canvas.height = CH;
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#fff';
-          ctx.fillRect(0, 0, CW, CH);
-          ctx.drawImage(img, L, T, CW, CH, 0, 0, CW, CH);
-          resolve(canvas.toDataURL('image/jpeg', 0.9));
-        } catch (e) { resolve(dataUrl); }
+          canvas.width = dw; canvas.height = dh;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0, dw, dh);
+          const imgData = ctx.getImageData(0, 0, dw, dh);
+          const d = imgData.data;
+
+          // ---- 1. 灰度化 ----
+          const gray = new Uint8ClampedArray(dw * dh);
+          for (let i = 0, p = 0; i < d.length; i += 4, p++) {
+            gray[p] = (0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2]) | 0;
+          }
+
+          // ---- 2. 深色像素统计（表格线/文字都是深色，对任意线宽有效） ----
+          // 不依赖边缘检测，直接按"深色像素"做行/列投影——表格区域=深色像素密集区
+          const rowDark = new Uint32Array(dh); // 每行深色像素数
+          const colDark = new Uint32Array(dw); // 每列深色像素数
+          const DARK = 130; // 深色阈值（表格线/文字通常 <130，浅色背景 >200）
+          for (let y = 0; y < dh; y++) {
+            const rowBase = y * dw;
+            let cnt = 0;
+            for (let x = 0; x < dw; x++) {
+              if (gray[rowBase + x] < DARK) {
+                cnt++;
+                colDark[x]++;
+              }
+            }
+            rowDark[y] = cnt;
+          }
+
+          // ---- 3. 找表格边界 ----
+          // 行方向：滑动窗口求和（容忍倾斜导致横线分散到相邻行）→ 跨区扩展
+          const W25 = 25; // 窗口半径：容忍 ≤25px 的倾斜偏移（800px检测图约3%）
+          const rowTh = Math.max(10, dw * 0.06); // 行的深色像素阈值
+          const rowWin = new Uint32Array(dh);
+          for (let y = 0; y < dh; y++) {
+            let s = 0;
+            for (let k = Math.max(0, y - W25); k <= Math.min(dh - 1, y + W25); k++) s += rowDark[k];
+            rowWin[y] = s;
+          }
+          const midY = (dh / 2) | 0;
+          // 向上扩展：窗口内存在密集行 → 继续向上；连续160px无密集行 → 停止
+          let top = midY;
+          let lastHit = midY;
+          for (let y = midY; y >= 0; y--) {
+            if (rowWin[y] >= rowTh) { top = y; lastHit = y; }
+            else if (lastHit - y > 160) break; // 离开表格区（160px无内容）
+          }
+          // 向下扩展
+          let bottom = midY;
+          lastHit = midY;
+          for (let y = midY; y < dh; y++) {
+            if (rowWin[y] >= rowTh) { bottom = y; lastHit = y; }
+            else if (y - lastHit > 160) break;
+          }
+          // 列方向：竖线检测 —— 先去掉"横线基底"（横线对全列均匀贡献，窗口求和会放大污染）
+          // 基底取 colDark 中位数（表格内非竖线列≈横线贡献；竖线仅几列，不影响中位数；
+          // 不能用最小值——表格外空白列 colDark=0 会把基底拉到0，表格内横线贡献减不掉）
+          const colSorted = Array.from(colDark).sort((a, b) => a - b);
+          const colBase = colSorted[(colSorted.length / 2) | 0];
+          // 用 Float64Array：colDark[k]-colBase 可能为负（表格外空白列），Uint32Array 会溢出成巨大值
+          const colWin = new Float64Array(dw);
+          for (let x = 0; x < dw; x++) {
+            let s = 0;
+            for (let k = Math.max(0, x - W25); k <= Math.min(dw - 1, x + W25); k++) s += (colDark[k] - colBase);
+            colWin[x] = s;
+          }
+          // 竖线分段：状态阈值 strongTh（colWin≥strongTh 视为"竖线段"）。
+          // 阈值取 dh*0.45：真竖线窗口值 635~1905 远超；文字噪声窗口值 ~255 低于，
+          // 轻微模糊（线粗但清晰）仍识别，严重模糊/光线差 → 检测失败回退原图（符合需求）。
+          // 每段内找 colDark 峰值位置 = 竖线精确坐标（消除窗口±25px偏移）。
+          const strongTh = dh * 0.45;
+          const vLinePos = []; // 各竖线精确 x
+          let inLine = false, segStart = 0;
+          for (let x = 0; x < dw; x++) {
+            if (colWin[x] >= strongTh) { if (!inLine) { inLine = true; segStart = x; } }
+            else if (inLine) {
+              let bestX = segStart, bestV = -1;
+              for (let k = segStart; k < x; k++) { if (colDark[k] > bestV) { bestV = colDark[k]; bestX = k; } }
+              vLinePos.push(bestX);
+              inLine = false;
+            }
+          }
+          if (inLine) {
+            let bestX = segStart, bestV = -1;
+            for (let k = segStart; k < dw; k++) { if (colDark[k] > bestV) { bestV = colDark[k]; bestX = k; } }
+            vLinePos.push(bestX);
+          }
+          // 竖线 < 3 根 → 半张表/噪点/孤立线，检测失败
+          if (vLinePos.length < 3) {
+            console.log('[autoCrop] 检测失败(竖线数=' + vLinePos.length + '), 使用原图: ' + w + 'x' + h);
+            return resolve(dataUrl);
+          }
+          // 表格左右边界 = 最左/最右竖线
+          const left = vLinePos[0];
+          const right = vLinePos[vLinePos.length - 1];
+
+          // 边界有效性检查（不满足 → 检测失败）
+          const cw = right - left, ch = bottom - top;
+          const minSize = Math.min(dw, dh) * 0.25; // 表格最小边 = 原图短边25%
+          if (top >= bottom || left >= right || cw < minSize || ch < minSize) {
+            console.log('[autoCrop] 检测失败(区域过小), 使用原图: ' + w + 'x' + h);
+            return resolve(dataUrl);
+          }
+          // 面积兜底：裁剪后 < 原图30% → 检测失败（可能只框住了表格一角）
+          if (cw * ch < dw * dh * 0.30) {
+            console.log('[autoCrop] 检测失败(面积<' + Math.round(cw*ch/(dw*dh)*100) + '%30%), 使用原图: ' + w + 'x' + h);
+            return resolve(dataUrl);
+          }
+
+          // ---- 5. 映射回原图坐标，四周留 10px 边距 ----
+          const pad = 10;
+          let L = Math.max(0, Math.round((left / scale) - pad));
+          let T = Math.max(0, Math.round((top / scale) - pad));
+          let R = Math.min(w, Math.round((right / scale) + pad));
+          let B = Math.min(h, Math.round((bottom / scale) + pad));
+          if (R - L < 50 || B - T < 50) {
+            console.log('[autoCrop] 检测失败(边距后过小), 使用原图: ' + w + 'x' + h);
+            return resolve(dataUrl);
+          }
+
+          // ---- 6. 裁剪并输出 ----
+          const out = document.createElement('canvas');
+          out.width = R - L; out.height = B - T;
+          const octx = out.getContext('2d');
+          octx.fillStyle = '#fff';
+          octx.fillRect(0, 0, out.width, out.height);
+          octx.drawImage(img, L, T, R - L, B - T, 0, 0, out.width, out.height);
+          // 最长边控制在 1600px 内（额外要求3）
+          let ow = out.width, oh = out.height;
+          if (ow > 1600 || oh > 1600) {
+            const s2 = Math.min(1, 1600 / Math.max(ow, oh));
+            const c2 = document.createElement('canvas');
+            c2.width = Math.round(ow * s2); c2.height = Math.round(oh * s2);
+            const ctx2 = c2.getContext('2d');
+            ctx2.drawImage(out, 0, 0, c2.width, c2.height);
+            ow = c2.width; oh = c2.height;
+            const result = c2.toDataURL('image/jpeg', 0.9);
+            console.log('[autoCrop] 裁剪成功: ' + w + 'x' + h + ' → ' + ow + 'x' + oh + ' (留边10px)');
+            return resolve(result);
+          }
+          const result = out.toDataURL('image/jpeg', 0.9);
+          console.log('[autoCrop] 裁剪成功: ' + w + 'x' + h + ' → ' + ow + 'x' + oh + ' (留边10px)');
+          return resolve(result);
+        } catch (e) {
+          console.log('[autoCrop] 裁剪异常, 使用原图: ' + e.message);
+          resolve(dataUrl);
+        }
       };
-      img.onerror = function() { resolve(dataUrl); };
+      img.onerror = function() { console.log('[autoCrop] 图片加载失败, 使用原图'); resolve(dataUrl); };
       img.src = dataUrl;
-    } catch (e) { resolve(dataUrl); }
+    } catch (e) {
+      console.log('[autoCrop] 初始化异常, 使用原图: ' + e.message);
+      resolve(dataUrl);
+    }
   });
 }
 
@@ -6705,7 +6810,9 @@ async function emitDoOcr(imageDataUrl) {
   showLoading('🤖 AI 识别路单中…');
   try {
     const compressed = await compressImage(imageDataUrl, 1600);
-    const b64 = compressed.replace(/^data:image\/\w+;base64,/, '');
+    // 全自动表格区域裁剪（检测失败自动回退原图，用户无感知）
+    const cropped = await cropImageToTable(compressed).catch(function() { return compressed; });
+    const b64 = String(cropped).replace(/^data:image\/\w+;base64,/, '');
     const resp = await fetch(API_BASE + '/hunyuan', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageBase64: b64, goodsName: currentEmitGoodsName() || '' })
