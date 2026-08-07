@@ -1,7 +1,7 @@
 {
-  "versionCode": 90,
-  "versionName": "6.0.90",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-debug-v6.0.90-nativerec.apk",
-  "note": "【v6.0.90 更新内容】\n1. 新增原生录音通道：彻底修复小米手机无法录音问题（系统权限全开仍报『麦克风设备被占用』）——改用 Android 原生录音，不经过网页层，绕开 WebView 兼容限制\n2. 网页版保留原录音方式不受影响\n3. 包含此前全部修复（麦克风权限/更新提示/图标规范）",
+  "versionCode": 92,
+  "versionName": "7.2.7",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v7.2.7.apk",
+  "note": "【v7.2.7 更新内容】\n1. 修复返回键直接退出问题（按返回逐级关闭弹窗/面板/回首页，首页再按一次退出）\n2. 深色模式全面激活（所有页面文字提亮，对比度彻底修复）\n3. 安卓安全加固（禁用云备份防数据复活、禁明文流量、仅系统证书）\n4. 内存分级优化（后台自动清理缓存，不破坏离线数据）\n5. 启动页深青蓝统一（消除白闪）+ 错误页 SVG 图标\n6. 包含 v7.2.6 全部内容（对比度/图文帮助/使用说明）",
   "force": false
 }
