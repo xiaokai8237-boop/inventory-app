@@ -11,13 +11,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.WindowManager;
 import android.webkit.DownloadListener;
 import android.webkit.PermissionRequest;
-import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
@@ -170,8 +167,8 @@ public class MainActivity extends BridgeActivity {
             settings.setDomStorageEnabled(true);
             // 数据库
             settings.setDatabaseEnabled(true);
-            // 混合内容：与 capacitor.config.json 的 allowMixedContent 保持一致
-            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+            // 混合内容：禁止明文混合内容（页面全 HTTPS，无 http 资源依赖；防中间人窃听）
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
             // 缓存模式：LOAD_DEFAULT（配合 Service Worker 离线缓存，可离线使用）
             settings.setCacheMode(WebSettings.LOAD_DEFAULT);
             // 关闭缩放控件，避免界面抖动
@@ -257,9 +254,9 @@ public class MainActivity extends BridgeActivity {
     }
 
     /**
-     * 麦克风/相机系统权限预申请：
+     * 麦克风/相机/定位系统权限预申请：
      * 首次启动主动请求（弹系统授权框），用户选"仅在使用中允许"后系统权限在前台持续有效；
-     * 之后 WebView getUserMedia 由 onPermissionRequest 无条件放行，彻底绕开 Capacitor
+     * 之后 WebView getUserMedia / Geolocation 由 onPermissionRequest 无条件放行，彻底绕开 Capacitor
      * "每次重新弹系统权限 → 一次性授权被系统拒绝"的坑。
      */
     private void requestRuntimePermissions() {
@@ -267,7 +264,9 @@ public class MainActivity extends BridgeActivity {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
             String[] perms = new String[]{
                 Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.CAMERA
+                Manifest.permission.CAMERA,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             };
             boolean need = false;
             for (String p : perms) {
@@ -286,16 +285,33 @@ public class MainActivity extends BridgeActivity {
     }
 
     /**
-     * 按返回键：优先 WebView 回退历史（按一下退一页），无历史才退出应用。
-     * 防止"返回键直接退出 APP"。
+     * 按返回键：优先通知 WebView 前端处理（关闭弹窗/面板/返回上一页），
+     * 前端无法处理（已在首页）才走系统退出逻辑。
+     * - 前端通过 postMessage 回传 handled:true/false
+     * - 首页场景：前端返回 handled:false → 这里显示"再按一次退出"Toast，2 秒内再按才真正退出
      */
+    private long lastBackPressTime = 0;
+
     @Override
     public void onBackPressed() {
         try {
             if (bridge != null) {
                 WebView webView = bridge.getWebView();
-                if (webView != null && webView.canGoBack()) {
-                    webView.goBack();
+                if (webView != null) {
+                    // 通知前端处理返回（前端会尝试关弹窗/面板/退页）
+                    webView.evaluateJavascript(
+                        "(function(){try{var handled=window.__handleNativeBack?window.__handleNativeBack():false;" +
+                        "return JSON.stringify({handled:!!handled});}catch(e){return JSON.stringify({handled:false});}})();",
+                        value -> {
+                            boolean handled = false;
+                            try {
+                                if (value != null && value.contains("\"handled\":true")) handled = true;
+                            } catch (Exception ignored) {}
+                            if (!handled) {
+                                runOnUiThread(() -> handleExitOnHome());
+                            }
+                        }
+                    );
                     return;
                 }
             }
@@ -303,20 +319,34 @@ public class MainActivity extends BridgeActivity {
         super.onBackPressed();
     }
 
+    /** 首页时：再按一次退出（2 秒窗口） */
+    private void handleExitOnHome() {
+        long now = System.currentTimeMillis();
+        if (now - lastBackPressTime < 2000) {
+            finish(); // 2 秒内再按 → 退出
+            return;
+        }
+        lastBackPressTime = now;
+        showToast("再按一次退出");
+    }
+
     /**
-     * 低内存回收：主动清理 WebView 缓存，防止长时间使用越来越卡 / 闪退。
+     * 低内存回收：主动释放内存，防止长时间使用越来越卡 / 闪退。
+     * 注意：只清内存级缓存（clearCache(false) 不清磁盘/Service Worker 离线缓存），
+     * 避免影响离线可用性。
      */
     @Override
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
-        if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL) {
-            try {
-                WebView webView = bridge != null ? bridge.getWebView() : null;
-                if (webView != null) {
-                    webView.clearCache(true);
-                }
-            } catch (Exception ignored) {}
-        }
+        try {
+            WebView webView = bridge != null ? bridge.getWebView() : null;
+            if (webView == null) return;
+            if (level >= ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE) {
+                // 内存告警：仅清图片内存缓存（不影响磁盘数据/离线缓存）
+                webView.clearCache(false);
+                webView.freeMemory();
+            }
+        } catch (Exception ignored) {}
     }
 
     private void hideSplashOverlay() {
