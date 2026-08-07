@@ -720,6 +720,11 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   background: #E0C080;
   color: #1a1406;
 }
+#storeManagePanel .btn-outline {
+  border-color: rgba(224,192,128,.5);
+  color: #E0C080;
+  background: transparent;
+}
 #storeManagePanel .import-zone {
   border: 2px dashed rgba(224,192,128,.55);
   background: rgba(18,59,58,.55);
@@ -730,10 +735,16 @@ html[data-theme="dark"] .form-select { color-scheme: dark; }
   border: none;
   font-weight: 700;
 }
-#storeManagePanel .btn-outline {
-  border-color: rgba(224,192,128,.5);
-  color: #E0C080;
-  background: transparent;
+/* 点此录入按钮：同添加按钮金色样式，缩短宽度（后定义覆盖 btn-outline） */
+#storeManagePanel .sc-loc-btn.btn-outline {
+  background: #E0C080;
+  color: #1a1406;
+  border: none;
+  font-weight: 700;
+  padding: 4px 8px;
+  font-size: 11px;
+  width: 56px;
+  white-space: nowrap;
 }
 #storeManagePanel .panel-header {
   background: linear-gradient(135deg, #0f3a38, #0a2e2e);
@@ -5487,19 +5498,21 @@ function todayStr() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 let toastTimer = null;
+let __toastShownAt = 0;
 function showToast(msg) {
   const t = document.getElementById('toast');
   // 清理 emoji 前缀（P0：emoji 不作为功能图标；语义完整保留）
   msg = String(msg || '').replace(/^\s*[✅❌⚠️🙏🎉💾📋🔄🔁⏳⚙️❓🎁🔒📡📝👑🔍🗑️✏️📥📤💡🚀🔔🏆⭐🔥💬]+\s*/g, '');
   t.textContent = msg;
   t.classList.add('show');
+  __toastShownAt = Date.now();
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
 }
-// 显示期间点击任意地方消失
+// 显示期间点击任意地方消失（同一事件触发 toast 的不算：120ms 缓冲，避免"点按钮显示 toast 立即被同一点击关掉"）
 document.addEventListener('click', () => {
   const t = document.getElementById('toast');
-  if (t && t.classList.contains('show') && toastTimer) {
+  if (t && t.classList.contains('show') && toastTimer && Date.now() - __toastShownAt > 120) {
     clearTimeout(toastTimer);
     toastTimer = null;
     t.classList.remove('show');
@@ -7106,7 +7119,7 @@ function renderStorePanelUI() {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${hasLoc ? '#7CE8E0' : '#7a8699'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 21s-7-5.2-7-11a7 7 0 1 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
         ${hasLoc
           ? `<span style="font-size:12px;color:#7CE8E0;flex:1;">已定位 · ${escapeHtml(s.address || (s.lat.toFixed(5) + ', ' + s.lng.toFixed(5)))}</span>`
-          : `<span style="font-size:12px;color:#b8c4de;flex:1;">未录定位</span><button class="btn btn-outline" style="padding:3px 10px;font-size:11px;flex-shrink:0;" onclick="showToast('定位录入功能开发中')">点此录入</button>`}
+          : `<span style="font-size:14px;color:#FF5252;font-weight:700;flex:1;text-align:center;">未录定位</span><button class="btn btn-outline sc-loc-btn" style="padding:4px 8px;font-size:11px;flex-shrink:0;" onclick="showToast('定位录入功能开发中')">点此录入</button>`}
       </div>
       <div class="sc-alias-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> 别名（识别时可替代店名）</div>
       <div class="sc-aliases" id="sAliases${idx}">
@@ -10178,7 +10191,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.2.8'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.2.9'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
