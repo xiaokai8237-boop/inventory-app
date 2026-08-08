@@ -104,39 +104,57 @@ function T(name, cond, extra) {
   const g5b = await page.evaluate(() => !document.querySelector('#page-notify .gd-banner'));
   T('渲染后权限横幅消失（已开全）', g5b, '');
 
-  // ===== 6. 权限管理弹窗 =====
-  await page.evaluate(() => { openPermManage(); });
-  await page.waitForTimeout(200);
+  // ===== 6. 权限管理独立页面（管理页入口） =====
+  await page.evaluate(() => { switchPage('manage'); openPermPage(); });
+  await page.waitForTimeout(250);
   const g6 = await page.evaluate(() => {
-    const rows = [...document.querySelectorAll('#permManageList .mg-row')];
-    const states = rows.map(r => r.querySelector('.mg-state')?.textContent.trim());
+    const rows = [...document.querySelectorAll('#permPageRows .pm-row')];
+    const states = rows.map(r => r.querySelector('.pr-state')?.textContent.trim());
+    const explains = [...document.querySelectorAll('#page-perm .pm-explain')];
     return {
-      shown: document.getElementById('permManageModal').classList.contains('show'),
+      active: document.getElementById('page-perm').classList.contains('active'),
       rowCount: rows.length,
-      names: rows.map(r => r.querySelector('.mg-name')?.textContent.trim()),
+      names: rows.map(r => r.querySelector('.pr-name')?.textContent.trim()),
       states,
-      hasTip: !!document.querySelector('#permManageModal .mg-tip'),
-      hasLast: !!document.querySelector('#permManageModal .mg-last'),
-      reGuide: document.querySelector('#permManageModal .mg-reguide')?.textContent.replace(/\s+/g,' ').trim()
+      explainCount: explains.length,
+      explainNames: explains.map(e => e.querySelector('.px-name')?.textContent.trim()),
+      explainHasSafe: explains.every(e => e.querySelector('.px-safe')),
+      hasMaster: !!document.querySelector('#pmMaster .mm-switch'),
+      hasLast: !!document.querySelector('#permPageLast'),
+      hasBack: !!document.querySelector('#page-perm .ntm-back')
     };
   });
-  T('权限管理弹窗打开 4 行', g6.shown && g6.rowCount === 4, '');
-  T('行名正确', JSON.stringify(g6.names) === '["位置权限","通知权限","允许后台运行","到店提醒总开关"]', JSON.stringify(g6.names));
+  T('权限管理独立页面激活', g6.active, '');
+  T('权限状态 3 行', g6.rowCount === 3, 'got ' + g6.rowCount);
+  T('行名正确', JSON.stringify(g6.names) === '["位置权限","通知权限","允许后台运行"]', JSON.stringify(g6.names));
   T('位置/通知已开启（同意过）', g6.states[0] === '已开启' && g6.states[1] === '已开启', JSON.stringify(g6.states));
-  T('总开关开启中', g6.states[3] === '开启中', '');
-  T('提示条/透明行/重看权限说明', g6.hasTip && g6.hasLast && g6.reGuide === '重新看一遍权限说明', JSON.stringify(g6.reGuide));
+  T('权限说明 3 卡（含承诺）', g6.explainCount === 3 && g6.explainHasSafe, JSON.stringify(g6.explainNames));
+  T('说明卡名正确', JSON.stringify(g6.explainNames) === '["位置权限","通知权限","允许后台运行"]', JSON.stringify(g6.explainNames));
+  T('总开关卡/数据透明/返回栏', g6.hasMaster && g6.hasLast && g6.hasBack, '');
 
-  // ===== 7. 重看权限说明 → 打开引导 =====
-  await page.evaluate(() => { document.querySelector('#permManageModal .mg-reguide').click(); });
+  // ===== 6b. 管理页入口按钮 =====
+  await page.evaluate(() => { switchPage('manage'); });
   await page.waitForTimeout(200);
-  const g7 = await page.evaluate(() => {
-    const guideShown = document.getElementById('permGuideModal').classList.contains('show');
-    const manageShown = document.getElementById('permManageModal').classList.contains('show');
-    return { guideShown, manageShown };
+  const g6b = await page.evaluate(() => {
+    const b = [...document.querySelectorAll('#page-manage .manage-item')].find(b => b.textContent.includes('权限管理'));
+    return {
+      exists: !!b,
+      hasSub: b ? b.textContent.includes('位置 · 通知 · 后台运行') : false,
+      hasNew: b ? b.textContent.includes('新') : false,
+      hasSvg: b ? !!b.querySelector('svg') : false
+    };
   });
-  T('重看权限说明打开引导', g7.guideShown, '');
-  T('权限管理弹窗关闭', !g7.manageShown, '');
-  await page.evaluate(() => { closePermGuide(); });
+  T('管理页有权限管理入口', g6b.exists && g6b.hasSub && g6b.hasNew && g6b.hasSvg, JSON.stringify(g6b));
+  await page.evaluate(() => { openPermPage(); });
+  await page.waitForTimeout(200);
+
+  // ===== 7. 返回按钮回管理页 =====
+  await page.evaluate(() => { document.querySelector('#page-perm .ntm-back').click(); });
+  await page.waitForTimeout(200);
+  const g7 = await page.evaluate(() => document.getElementById('page-manage').classList.contains('active'));
+  T('返回按钮回管理页', g7, '');
+  await page.evaluate(() => { openPermPage(); });
+  await page.waitForTimeout(200);
 
   // ===== 8. 到店监测：mock 定位触发 =====
   await page.evaluate(() => {

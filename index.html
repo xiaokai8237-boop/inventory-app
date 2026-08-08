@@ -2442,6 +2442,37 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 .mg-last { margin: 0 16px; font-size: 11px; color: #7E97A1; line-height: 1.6; background: rgba(255,255,255,.04); border-radius: 10px; padding: 9px 11px; }
 .mg-last b { color: #F5DC92; }
 .mg-reguide { margin: 14px 16px 4px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 800; color: #F5DC92; background: rgba(245,220,146,.08); border: 1px solid rgba(245,220,146,.35); border-radius: 22px; padding: 11px 0; cursor: pointer; }
+/* ===== #144b 权限管理独立页面 ===== */
+.perm-page { padding: 0 14px 20px; }
+.perm-page .pm-sec { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: #F5DC92; margin: 13px 2px 8px; }
+.perm-page .pm-sec-no { font-size: 10px; color: #0B2E38; background: #F5DC92; border-radius: 8px; padding: 1px 6px; font-weight: 800; }
+.perm-page .pm-master { display: flex; align-items: center; gap: 10px; background: rgba(245,220,146,.10); border: 1px solid rgba(245,220,146,.4); border-radius: 12px; padding: 11px 12px; cursor: pointer; }
+.perm-page .pm-master .mm-info { flex: 1; }
+.perm-page .pm-master .mm-name { font-size: 14px; font-weight: 800; color: #F5DC92; }
+.perm-page .pm-master .mm-desc { font-size: 10px; color: #9FD0D6; margin-top: 2px; }
+.perm-page .mm-switch { position: relative; width: 46px; height: 26px; border-radius: 15px; background: rgba(255,255,255,.14); flex-shrink: 0; transition: .2s; }
+.perm-page .mm-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: .2s; }
+.perm-page .mm-switch.on { background: linear-gradient(135deg,#F8E3A6,#E0A63E); }
+.perm-page .mm-switch.on::after { left: 23px; background: #0B2E38; }
+.perm-page .pm-card { background: rgba(255,255,255,.04); border: 1px solid rgba(124,184,200,.14); border-radius: 12px; padding: 4px 0; }
+.perm-page .pm-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.06); cursor: pointer; }
+.perm-page .pm-row:last-child { border-bottom: none; }
+.perm-page .pm-row .pr-ico { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.perm-page .pm-row .pr-info { flex: 1; min-width: 0; }
+.perm-page .pm-row .pr-name { font-size: 13px; font-weight: 600; color: #FFFFFF; }
+.perm-page .pm-row .pr-desc { font-size: 10px; color: #7E97A1; margin-top: 1px; }
+.perm-page .pm-row .pr-state { font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 11px; flex-shrink: 0; }
+.perm-page .pm-row .pr-state.on { color: #4ADE80; background: rgba(74,222,128,.12); }
+.perm-page .pm-row .pr-state.off { color: #FF6B6B; background: rgba(255,107,107,.12); }
+.perm-page .pm-row .pr-arrow { color: #7E97A1; font-size: 14px; }
+.perm-page .pm-explain { background: rgba(124,232,224,.05); border: 1px solid rgba(124,232,224,.25); border-radius: 12px; padding: 10px 12px; margin-bottom: 7px; }
+.perm-page .pm-explain .px-name { font-size: 12px; font-weight: 800; color: #7CE8E0; margin-bottom: 4px; }
+.perm-page .pm-explain .px-line { font-size: 11px; color: #CFECEF; line-height: 1.55; }
+.perm-page .pm-explain .px-line b { color: #FFFFFF; }
+.perm-page .pm-explain .px-safe { font-size: 10px; color: #4ADE80; font-weight: 700; margin-top: 3px; }
+.perm-page .pm-last { margin-top: 10px; font-size: 10px; color: #7E97A1; line-height: 1.6; background: rgba(255,255,255,.03); border-radius: 10px; padding: 8px 11px; }
+.perm-page .pm-last b { color: #F5DC92; }
+.perm-page .pm-explain-card { font-size: 11px; color: #9FD0D6; line-height: 1.6; background: rgba(255,255,255,.04); border: 1px solid rgba(124,184,200,.14); border-radius: 12px; padding: 9px 12px; }
 /* 通知栏管理页顶部权限横幅 */
 .gd-banner { display: flex; align-items: center; gap: 9px; background: rgba(245,220,146,.12); border: 1.5px solid rgba(245,220,146,.55); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; cursor: pointer; }
 .gd-banner .gb-ico { width: 28px; height: 28px; border-radius: 8px; background: rgba(245,220,146,.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -2928,6 +2959,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="card" style="padding:0;overflow:hidden;">
     <button class="manage-item" onclick="openStorePanel()"><span class="mi-icon">🏪</span><span class="mi-title">店面管理<span class="mi-sub" id="manageStoreSub">店面 · 别称 · 到店提醒 · 定位</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openNotifyManagePage()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span class="mi-title">通知栏管理<span class="mi-sub" id="manageNotifySub">模板 · 距离 · 响铃</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openPermPage()" style="border:1.5px solid rgba(245,220,146,.45);border-radius:12px;background:rgba(245,220,146,.06);"><span class="mi-icon" style="background:rgba(245,220,146,.16);color:#F5DC92;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span class="mi-title">权限管理<span class="mi-sub" id="managePermSub">位置 · 通知 · 后台运行<span class="mi-badge">新</span></span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openGoodsPanel()"><span class="mi-icon">📦</span><span class="mi-title">框名设置<span class="mi-sub" id="manageGoodsSub">筐类名称 · 顺序</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openBackupPanel()"><span class="mi-icon">💾</span><span class="mi-title">备份与恢复<span class="mi-sub">云端同步 · 换机不丢</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('summary')"><span class="mi-icon">📈</span><span class="mi-title">汇总<span class="mi-sub">统计报表</span></span><span class="mi-arrow">›</span></button>
@@ -2962,6 +2994,55 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div class="ntm-set" id="ntmSetCard"></div>
 
     <button class="ntm-save" onclick="saveNotifySettings()">保存设置</button>
+  </div>
+</div>
+
+<!-- ========== #144b 权限管理独立页面 ========== -->
+<div class="page" id="page-perm">
+  <div class="ntm-head">
+    <button class="ntm-back" onclick="switchPage('manage')" aria-label="返回">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="ntm-title">权限管理<small>到店提醒权限 · 随时可看可关</small></div>
+    <div class="ntm-ico">
+      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#F5DC92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+  </div>
+  <div class="ntm-body perm-page">
+    <!-- ① 到店提醒总开关 -->
+    <div class="pm-sec"><span class="pm-sec-no">1</span>到店提醒总开关</div>
+    <div class="pm-master" id="pmMaster" onclick="toggleArrivalMaster()">
+      <div class="mm-info">
+        <div class="mm-name">到店提醒</div>
+        <div class="mm-desc">关掉后不再触发到店提醒（记账 / 识别不受影响）</div>
+      </div>
+      <div class="mm-switch" id="pmMasterSwitch"></div>
+    </div>
+
+    <!-- ② 权限状态 -->
+    <div class="pm-sec"><span class="pm-sec-no">2</span>权限状态 <span style="font-size:10px;color:#7E97A1;font-weight:400;">点击任意一行可去系统设置开关</span></div>
+    <div class="pm-card" id="permPageRows"></div>
+
+    <!-- ③ 权限说明 -->
+    <div class="pm-sec"><span class="pm-sec-no">3</span>权限说明 <span style="font-size:10px;color:#7E97A1;font-weight:400;">每个权限是干嘛的，说清楚</span></div>
+    <div class="pm-explain">
+      <div class="px-name">位置权限</div>
+      <div class="px-line">干嘛用：<b>快到店门口时提醒你</b>「到店了，别忘了打卡」<br>什么时候用：<b>只在算「离店还有多远」时用一下，算完就停</b><br>不用会怎样：到店不提醒</div>
+      <div class="px-safe">安全承诺：位置只在你手机里算，不发给任何人、任何公司</div>
+    </div>
+    <div class="pm-explain">
+      <div class="px-name">通知权限</div>
+      <div class="px-line">干嘛用：<b>到店时通知栏弹一条消息</b>（店名 / 送多少筐 / 别忘了打卡）<br>什么时候用：<b>只在到店那一刻弹一下</b><br>不用会怎样：提醒弹不出来</div>
+      <div class="px-safe">安全承诺：只弹到店提醒，不弹广告</div>
+    </div>
+    <div class="pm-explain">
+      <div class="px-name">允许后台运行</div>
+      <div class="px-line">干嘛用：<b>让手机别省电省过头把提醒掐了</b>——开着它提醒才送得到<br>什么时候用：<b>一直挂着</b>（就是设置里的「允许后台运行」）<br>不用会怎样：手机省电模式可能杀掉软件，提醒就不响了</div>
+      <div class="px-safe">安全承诺：不做任何额外动作，只是别被手机杀</div>
+    </div>
+
+    <!-- ④ 数据透明 -->
+    <div class="pm-last" id="permPageLast">尚未定位记录。<br>用途：计算到店距离 · 已自动停止，无持续追踪</div>
   </div>
 </div>
 
@@ -8390,6 +8471,7 @@ function switchPage(pageName) {
   if (pageName === 'settings') { renderSettings(); }
   if (pageName === 'manage') renderManage();
   if (pageName === 'notify') renderNotifyManage();
+  if (pageName === 'perm') renderPermPage();
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
 }
 
@@ -11260,7 +11342,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.4.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.4.2'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -11780,7 +11862,7 @@ function saveNotifySettings() {
   if (miss > 0) {
     showToast('设置已保存，但位置/通知权限未开启，到店提醒还不会响');
     setTimeout(function() {
-      openPermManage();
+      openPermPage();
       showToast('点上面的权限行去开启');
     }, 800);
   } else {
@@ -11973,7 +12055,64 @@ function permGuideLater() {
   closePermGuide();
   showToast('可以，需要时随时在通知栏管理里开启');
 }
-// 权限管理弹窗
+// ===== #144b 权限管理独立页面 =====
+// 管理页入口 → 独立页面
+function openPermPage() {
+  switchPage('perm');
+}
+// 渲染独立页面：总开关 + 权限状态行 + 数据透明
+function renderPermPage() {
+  const st = getPermState();
+  // 总开关
+  const sw = document.getElementById('pmMasterSwitch');
+  if (sw) sw.className = 'mm-switch' + (arrivalTimer ? ' on' : '');
+  // 权限状态行
+  const rows = document.getElementById('permPageRows');
+  if (rows) {
+    rows.innerHTML =
+      '<div class="pm-row" onclick="permRowAction(\'location\');setTimeout(renderPermPage,900)">' +
+        '<span class="pr-ico" style="background:rgba(245,220,146,.16);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#F5DC92" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>' +
+        '<span class="pr-info"><span class="pr-name">位置权限</span><span class="pr-desc">到店提醒 · 只在算距离时用</span></span>' +
+        '<span class="pr-state ' + (st.location ? 'on' : 'off') + '">' + (st.location ? '已开启' : '未开启') + '</span><span class="pr-arrow">›</span>' +
+      '</div>' +
+      '<div class="pm-row" onclick="permRowAction(\'notification\');setTimeout(renderPermPage,900)">' +
+        '<span class="pr-ico" style="background:rgba(124,155,255,.16);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#8FA9FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>' +
+        '<span class="pr-info"><span class="pr-name">通知权限</span><span class="pr-desc">到店提醒显示</span></span>' +
+        '<span class="pr-state ' + (st.notification ? 'on' : 'off') + '">' + (st.notification ? '已开启' : '未开启') + '</span><span class="pr-arrow">›</span>' +
+      '</div>' +
+      '<div class="pm-row" onclick="permRowAction(\'background\')">' +
+        '<span class="pr-ico" style="background:rgba(124,232,224,.16);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#7CE8E0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>' +
+        '<span class="pr-info"><span class="pr-name">允许后台运行</span><span class="pr-desc">让提醒不被手机省电掐掉</span></span>' +
+        '<span class="pr-state ' + (st.background ? 'on' : 'off') + '">' + (st.background ? '已开启' : '未开启') + '</span><span class="pr-arrow">›</span>' +
+      '</div>';
+  }
+  // 数据透明行
+  const last = document.getElementById('permPageLast');
+  if (last) {
+    if (arrivalLastPos) {
+      const cfg = loadStoreConfig();
+      let near = null, best = 1e9;
+      cfg.forEach(s => {
+        if (!s.lat || !s.lng) return;
+        const d = haversineM(arrivalLastPos.lat, arrivalLastPos.lng, s.lat, s.lng);
+        if (d < best) { best = d; near = s; }
+      });
+      last.innerHTML = near
+        ? '最近一次定位：<b>' + escapeHtml(near.name) + '</b> · 距你约 ' + Math.round(best) + ' 米<br>用途：计算到店距离 · 已自动停止，无持续追踪'
+        : '最近一次定位：<b>当前坐标</b>（' + arrivalLastPos.lat.toFixed(5) + ', ' + arrivalLastPos.lng.toFixed(5) + '）<br>用途：计算到店距离 · 已自动停止，无持续追踪';
+    } else {
+      last.innerHTML = '尚未定位记录。<br>用途：计算到店距离 · 已自动停止，无持续追踪';
+    }
+  }
+}
+// 总开关
+function toggleArrivalMaster() {
+  toggleArrivalMonitor();
+  renderPermPage();
+  renderNotifyManage();
+  updateManageSubs();
+}
+// 权限管理弹窗（旧入口，保留兼容；保存提醒已改走独立页面）
 function openPermManage() {
   renderPermManage();
   const m = document.getElementById('permManageModal');
