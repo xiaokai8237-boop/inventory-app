@@ -1,5 +1,5 @@
 // 物流筐收发管理系统 - Service Worker（离线完整可用）
-const CACHE = 'kuanwei-v240';
+const CACHE = 'kuanwei-v241';
 const ASSETS = [
   '/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png', '/splash-v10-vision.png',
   // 预缓存 xlsx 库，保证离线时对账/导出可用
@@ -44,6 +44,20 @@ self.addEventListener('fetch', (e) => {
           return res;
         })
         .catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // app-version.json：网络优先（必须拿到最新 APK 更新清单，不能被缓存旧值）
+  if (url.pathname.includes('app-version.json')) {
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const clone = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, clone));
+          return res;
+        })
+        .catch(() => caches.match(req))
     );
     return;
   }
