@@ -48,7 +48,7 @@ function T(name, cond, extra) {
   T('权限管理入口存在', r1.has, '');
   T('入口无「新」字（已去掉）', !r1.hasNew, JSON.stringify(r1));
 
-  // ===== 2. 权限管理页：一键按钮 + 5 行 + 引导小字入口 =====
+  // ===== 2. 权限管理页：一键按钮 + 5 行 + 引导入口已移除 =====
   await page.evaluate(() => { openPermPage(); });
   await page.waitForTimeout(300);
   const r2 = await page.evaluate(() => {
@@ -71,7 +71,7 @@ function T(name, cond, extra) {
   T('状态行 5 行', r2.rowCount === 5, 'got ' + r2.rowCount);
   T('行名含电池优化/自启动', JSON.stringify(r2.names) === '["位置权限","电池优化","通知权限","允许自启动","后台运行 · 锁屏清理"]', JSON.stringify(r2.names));
   T('状态行无「新」字', r2.rowNewCount === 0, 'got ' + r2.rowNewCount);
-  T('引导页小字入口存在', r2.mini.includes('后台保活详细步骤引导'), r2.mini);
+  T('后台保活引导小字入口已删除', r2.mini === 'NONE', r2.mini);
 
   // ===== 3. 通知状态用原生真实值（mock enabled:true → 显示已开启）=====
   T('通知显示已开启（原生真实状态）', r2.states[2] === '已开启', JSON.stringify(r2.states));

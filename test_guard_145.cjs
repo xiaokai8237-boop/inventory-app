@@ -1,4 +1,4 @@
-// #145 后台保活一键优化测试
+// #145b 后台保活引导移除验证（原 #145 引导页 + 两个入口已删除，一键开启保留）
 const { chromium } = require('playwright');
 const http = require('http');
 const fs = require('fs');
@@ -38,83 +38,49 @@ function T(name, cond, extra) {
   });
   await page.waitForTimeout(300);
 
-  // ===== 1. 权限管理页有后台保活引导入口 =====
+  // ===== 1. 管理页有权限管理入口 =====
   const entry = await page.evaluate(() => {
     switchPage('manage');
-    return null;
+    return [...document.querySelectorAll('#page-manage .manage-item')].some(b => b.textContent.includes('权限管理'));
   });
   await page.waitForTimeout(200);
-  const entry2 = await page.evaluate(() => {
-    const b = [...document.querySelectorAll('#page-manage .manage-item')].find(b => b.textContent.includes('权限管理'));
-    const pm = document.getElementById('page-perm');
-    const guardBtn = pm.querySelector('.pm-guide-btn');
-    return { hasPermItem: !!b, guardBtnText: guardBtn ? guardBtn.textContent.replace(/\s+/g, ' ').trim() : 'NONE', guardBtnSvg: !!guardBtn?.querySelector('svg') };
-  });
-  T('管理页有权限管理入口', entry2.hasPermItem, '');
-  T('权限管理页有后台保活引导卡', entry2.guardBtnText.includes('后台保活引导'), entry2.guardBtnText);
-  T('引导卡有图标', entry2.guardBtnSvg, '');
+  T('管理页有权限管理入口', entry, '');
 
-  // ===== 2. 打开 page-guard =====
-  const g1 = await page.evaluate(() => {
-    openGuardPage();
+  // ===== 2. 权限管理页：后台保活引导已彻底移除 =====
+  const r2 = await page.evaluate(() => {
+    openPermPage();
     return {
-      active: document.getElementById('page-guard').classList.contains('active'),
-      title: document.querySelector('#page-guard .ntm-title')?.textContent.replace(/\s+/g, ' ').trim(),
-      items: document.querySelectorAll('#ggList .gg-item').length,
-      autoText: document.getElementById('ggAutoText')?.textContent.replace(/\s+/g, ' ').trim(),
-      btnText: document.getElementById('ggOptText')?.textContent.trim(),
-      hint: document.getElementById('ggHint')?.textContent.trim()
+      card: document.querySelector('#page-perm .pm-guide-btn'),
+      mini: document.querySelector('#page-perm .pm-guide-mini'),
+      guardPage: document.getElementById('page-guard'),
+      hasOpenGuard: typeof openGuardPage !== 'undefined',
+      hasRunGuard: typeof runGuardOptimize !== 'undefined',
+      optBtn: document.getElementById('pmOptAll'),
+      rows: document.querySelectorAll('#permPageRows .pm-row').length
     };
   });
-  await page.waitForTimeout(100);
-  T('page-guard 激活', g1.active, '');
-  T('标题正确', (g1.title || '').includes('后台保活优化'), g1.title);
-  T('4 个处理项渲染', g1.items === 4, 'got ' + g1.items);
-  T('自动检测文本含 4 项没开好', (g1.autoText || '').includes('4'), JSON.stringify(g1.autoText));
-  T('一键优化按钮', (g1.btnText || '').includes('一键优化'), g1.btnText);
-  T('提示含点允许', (g1.hint || '').includes('允许'), g1.hint);
-
-  // ===== 3. 一键优化流程（battery → notification 跳过 → autostart → background）=====
-  await page.evaluate(() => { runGuardOptimize(); });
   await page.waitForTimeout(300);
-  const g2 = await page.evaluate(() => {
-    const items = [...document.querySelectorAll('#ggList .gg-item')];
-    return {
-      states: items.map(i => i.querySelector('.gi-state')?.textContent.trim()),
-      cls: items.map(i => i.className),
-      btnDisabled: document.getElementById('ggOptBtn').disabled,
-      btnText: document.getElementById('ggOptText')?.textContent.trim(),
-      capCalls: (window.__capCalls || []).slice()
-    };
-  });
-  T('电池项处理中', g2.states[0] === '处理中…', JSON.stringify(g2.states));
-  T('按钮禁用（自动处理中）', g2.btnDisabled, '');
-  T('电池弹框已触发', g2.capCalls.includes('battery'), JSON.stringify(g2.capCalls));
+  T('权限管理页底部引导卡已删除', !r2.card, '');
+  T('小字入口已删除', !r2.mini, '');
+  T('page-guard 页面已删除', !r2.guardPage, '');
+  T('openGuardPage 已删除', !r2.hasOpenGuard, '');
+  T('runGuardOptimize 已删除', !r2.hasRunGuard, '');
+  T('一键开启所有权限按钮保留', !!r2.optBtn, '');
+  T('权限状态行仍为 5 行', r2.rows === 5, 'got ' + r2.rows);
 
-  // 等电池 5s 完成 → notification 跳过 → autostart 5s → background 5s → 全部完成（~15s）
-  await page.waitForTimeout(16500);
-  const g3 = await page.evaluate(() => {
-    const items = [...document.querySelectorAll('#ggList .gg-item')];
-    const capCalls = (window.__capCalls || []).slice();
-    return {
-      states: items.map(i => i.querySelector('.gi-state')?.textContent.trim()),
-      doneVisible: document.getElementById('ggDone').style.display !== 'none',
-      btnText: document.getElementById('ggOptText')?.textContent.trim(),
-      btnDisabled: document.getElementById('ggOptBtn').disabled,
-      capCalls,
-      hasAutostart: capCalls.includes('autostart'),
-      hasSettings: capCalls.some(c => c.startsWith('settings:'))
-    };
+  // ===== 3. 一键开启所有权限仍正常（mock，第1项位置定位 2500ms → 第2项电池弹框）=====
+  const r3 = await page.evaluate(() => {
+    runPermAll();
+    return { running: typeof permAllRunning !== 'undefined' };
   });
-  T('全部 4 项完成', g3.states.every(s => s === '完成'), JSON.stringify(g3.states));
-  T('完成卡显示', g3.doneVisible, '');
-  T('按钮变全部已设置好', g3.btnText === '全部已设置好' && g3.btnDisabled, g3.btnText);
-  T('自启动厂商跳转已触发', g3.hasAutostart, JSON.stringify(g3.capCalls));
-  T('后台/锁屏跳转已触发', g3.hasSettings, JSON.stringify(g3.capCalls));
+  await page.waitForTimeout(3200);
+  const r3b = await page.evaluate(() => {
+    return { calls: (window.__capCalls || []).slice(), done: Object.keys(permAllDone || {}).length };
+  });
+  T('一键开启已启动并依次处理（电池弹框已触发）', r3.running && r3b.calls.includes('battery'), JSON.stringify(r3b.calls));
 
-  // ===== 4. 路线同步原生（门店围栏注册）=====
+  // ===== 4. 路线同步原生（门店围栏注册）仍正常 =====
   const sync = await page.evaluate(() => {
-    // 造一个已定位门店
     const stores = [
       { name: '35-01 温州永嘉上塘下堡店', aliases: ['35-01'], lat: 28.1530, lng: 120.6500, sort: 0 },
       { name: '35-02 温州永嘉瓯北店', aliases: ['35-02'], lat: 28.1700, lng: 120.6600, sort: 1 }
