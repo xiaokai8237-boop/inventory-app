@@ -51,7 +51,8 @@ function T(name, cond, extra) {
       active, curNm, curLbl,
       tplCount: tpls.length,
       selNo: sel?.querySelector('.nt-no')?.textContent,
-      distVals: dist.map(d => d.textContent),
+      distCur: document.querySelector('#ntmSetCard .ntm-dist-cur')?.textContent,
+      distRowText: document.querySelector('#ntmSetCard .ntm-row .st-l')?.textContent.trim(),
       selDist: selDist?.textContent,
       switchOn: switches.filter(s => s.classList.contains('on')).length,
       switchTotal: switches.length,
@@ -64,8 +65,21 @@ function T(name, cond, extra) {
   T('当前模板卡=图文版', pg.curNm === '图文版' && pg.curLbl === '正在使用', JSON.stringify(pg));
   T('8 套模板网格', pg.tplCount === 8, 'got ' + pg.tplCount);
   T('默认选中 08 图文版', pg.selNo === '08', 'got ' + pg.selNo);
-  T('距离档位 100/200/300/500/800', JSON.stringify(pg.distVals) === '["100m","200m","300m","500m","800m"]', JSON.stringify(pg.distVals));
-  T('默认距离 500m 选中', pg.selDist === '500m', 'got ' + pg.selDist);
+  T('距离行主标题（无小字副标题）', pg.distRowText === '到店提醒距离', 'got: ' + pg.distRowText);
+  T('距离行显示当前值 500m', pg.distCur === '500m', 'got ' + pg.distCur);
+  // 点击距离行 → 弹出档位选择弹窗
+  await page.evaluate(() => { openNotifyDistPicker(); });
+  await page.waitForTimeout(200);
+  const picker = await page.evaluate(() => {
+    const opts = [...document.querySelectorAll('#ntmDistPicker .d-opt')];
+    const sel = opts.find(o => o.classList.contains('sel'));
+    return { shown: document.getElementById('notifyDistPickerModal').classList.contains('show'), vals: opts.map(o => o.textContent), sel: sel?.textContent };
+  });
+  T('点击距离行弹出档位弹窗', picker.shown, '');
+  T('弹窗档位 100/200/300/500/800', JSON.stringify(picker.vals) === '["100m","200m","300m","500m","800m"]', JSON.stringify(picker.vals));
+  T('弹窗默认选中 500m', picker.sel === '500m', 'got ' + picker.sel);
+  await page.evaluate(() => { closeNotifyDistPicker(); });
+  await page.waitForTimeout(100);
   T('开关 2 开（响铃+震动）1 关（静默）', pg.switchOn === 2 && pg.switchTotal === 3, pg.switchOn + '/' + pg.switchTotal);
   T('有预览按钮/保存按钮/返回按钮', pg.hasPreviewBtn && pg.hasSave && pg.hasBack, '');
 
@@ -80,15 +94,19 @@ function T(name, cond, extra) {
   T('点选提醒版 → 网格高亮 06 + 当前卡更新', selAlarm.selNo === '06' && selAlarm.curNm === '提醒版', JSON.stringify(selAlarm));
   T('notifyPending 暂存 template=alarm', selAlarm.pending === 'alarm', JSON.stringify(selAlarm));
 
-  // ===== 4. 改距离 300m + 静默开 =====
-  await page.evaluate(() => { setNotifyDist(300); toggleNotifySilent(); });
+  // ===== 4. 弹窗选距离 300m + 静默开 =====
+  await page.evaluate(() => { openNotifyDistPicker(); });
+  await page.waitForTimeout(150);
+  await page.evaluate(() => { document.querySelector('#ntmDistPicker .d-opt[onclick*="300"]').click(); });
+  await page.evaluate(() => { toggleNotifySilent(); });
   await page.waitForTimeout(200);
   const setState = await page.evaluate(() => {
-    const selDist = document.querySelector('#ntmSetCard .d-opt.sel')?.textContent;
+    const distCur = document.querySelector('#ntmSetCard .ntm-dist-cur')?.textContent;
     const silentSwitch = [...document.querySelectorAll('#ntmSetCard .ntm-switch')][2];
-    return { selDist, silentOn: silentSwitch.classList.contains('on'), pending: notifyPending };
+    return { distCur, silentOn: silentSwitch.classList.contains('on'), pending: notifyPending };
   });
-  T('距离切到 300m', setState.selDist === '300m', JSON.stringify(setState.selDist));
+  T('距离切到 300m', setState.distCur === '300m', JSON.stringify(setState.distCur));
+  T('选档后弹窗自动关闭', await page.evaluate(() => !document.getElementById('notifyDistPickerModal').classList.contains('show')), '');
   T('静默开关变开', setState.silentOn, '');
   T('pending 含 template/distM/silent', setState.pending && setState.pending.template === 'alarm' && setState.pending.distM === 300 && setState.pending.silent === true, JSON.stringify(setState.pending));
 
@@ -110,7 +128,7 @@ function T(name, cond, extra) {
   await page.waitForTimeout(300);
   const reload = await page.evaluate(() => {
     const sel = document.querySelector('#ntmGrid .ntm-tpl.sel');
-    const selDist = document.querySelector('#ntmSetCard .d-opt.sel')?.textContent;
+    const selDist = document.querySelector('#ntmSetCard .ntm-dist-cur')?.textContent;
     const silentSwitch = [...document.querySelectorAll('#ntmSetCard .ntm-switch')][2];
     return { selNo: sel?.querySelector('.nt-no')?.textContent, selDist, silentOn: silentSwitch.classList.contains('on') };
   });
