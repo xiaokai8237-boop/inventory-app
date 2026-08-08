@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.DownloadManager;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -50,12 +51,48 @@ public class MainActivity extends BridgeActivity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean splashHidden = false;
 
+    // ===== 通知点击带过来的到店跳转（#146：记录回筐/导航/整卡）=====
+    // 通知 action 点击 → onNewIntent/onCreate 解析 extra → 存静态字段 → 前端 getPendingArrival 取用（冷启动网页加载完也能拿到）
+    private static volatile String pendingArrivalStore = null;
+    private static volatile String pendingArrivalAction = null;
+
+    public static void setPendingArrival(String store, String action) {
+        pendingArrivalStore = store;
+        pendingArrivalAction = action;
+    }
+
+    public static String[] takePendingArrival() {
+        String[] r = { pendingArrivalStore, pendingArrivalAction };
+        pendingArrivalStore = null;
+        pendingArrivalAction = null;
+        return r;
+    }
+
+    private void consumeArrivalIntent(Intent intent) {
+        try {
+            if (intent == null) return;
+            String store = intent.getStringExtra("arrival_store");
+            String action = intent.getStringExtra("arrival_action");
+            if (store != null && !store.isEmpty()) {
+                setPendingArrival(store, action == null ? "open" : action);
+            }
+        } catch (Exception ignored) {}
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        consumeArrivalIntent(intent);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(AppUpdatePlugin.class);
         registerPlugin(AudioRecorderPlugin.class);
         registerPlugin(ArrivalMonitorPlugin.class);
         super.onCreate(savedInstanceState);
+        consumeArrivalIntent(getIntent());
 
         // ===== 状态栏 / 导航栏配色（深色，与页面"深空蓝晶"主题一致） =====
         setupSystemBars();

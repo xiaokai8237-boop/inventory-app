@@ -114,7 +114,7 @@ public class ArrivalMonitorPlugin extends Plugin {
         }
     }
 
-    /** 发到店通知（前端已算好店名/距离/筐数）data: {storeName, distM, goods, template, ring, vibrate, silent} */
+    /** 发到店通知（#146：8 套模板差异渲染 + 记录回筐/导航按钮）data: {storeName, distM, goods, template, ring, vibrate, silent} */
     @PluginMethod
     public void notifyArrival(PluginCall call) {
         try {
@@ -125,36 +125,20 @@ public class ArrivalMonitorPlugin extends Plugin {
             String template = call.getString("template", "rich");
 
             ensureChannel();
-            // 静默模式：用低重要度渠道不发声音
             String channel = silent ? ArrivalForegroundService.CHANNEL_SERVICE : CHANNEL_ARRIVAL;
 
-            String title = "即将到达门店";
-            String body = "";
+            String storeName = "门店";
+            int dist = 0;
+            JSONArray goods = new JSONArray();
             try {
                 JSONObject d = new JSONObject(dataStr);
-                title = "即将到达 " + d.optString("storeName", "门店");
-                int dist = d.optInt("distM", 0);
-                StringBuilder sb = new StringBuilder();
-                sb.append("距你 ").append(dist).append(" 米\n");
-                JSONArray goods = d.optJSONArray("goods");
-                if (goods != null) {
-                    for (int i = 0; i < goods.length(); i++) {
-                        JSONObject g = goods.getJSONObject(i);
-                        String gn = g.optString("name", "");
-                        int qty = g.optInt("qty", 0);
-                        int whole = g.optInt("whole", 0);
-                        if (qty > 0) {
-                            sb.append(gn).append(" ").append(qty);
-                            if (whole > 0) sb.append(" / 整箱 ").append(whole);
-                            sb.append("\n");
-                        }
-                    }
-                }
-                sb.append("\n不要忘记打卡！");
-                body = sb.toString();
-            } catch (Exception e) {
-                body = "已到达门店附近\n不要忘记打卡！";
-            }
+                storeName = d.optString("storeName", "门店");
+                dist = d.optInt("distM", 0);
+                if (d.optJSONArray("goods") != null) goods = d.optJSONArray("goods");
+            } catch (Exception e) {}
+
+            String title = "即将到达 " + storeName;
+            String body = buildTemplateBody(template, storeName, dist, goods, dataStr);
 
             // 启动前台服务（保活 + 常驻牌子）
             try {
@@ -166,11 +150,24 @@ public class ArrivalMonitorPlugin extends Plugin {
                 }
             } catch (Exception ignored) {}
 
+            // 整卡点击：打开 APP 进回收页单店视图
             Intent open = new Intent(getContext(), MainActivity.class);
             open.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            open.putExtra("arrival_store", title);
+            open.putExtra("arrival_store", storeName);
+            open.putExtra("arrival_action", "open");
             PendingIntent pi = PendingIntent.getActivity(getContext(), 0, open,
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+
+            NotificationManager nm = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            // alarm 用高重要度渠道；silent 用低重要度渠道（无声音）
+            if ("alarm".equals(template) && nm != null) {
+                if (nm.getNotificationChannel("arrival_alarm") == null) {
+                    NotificationChannel ch = new NotificationChannel("arrival_alarm", "到店提醒(紧急)", NotificationManager.IMPORTANCE_HIGH);
+                    ch.enableVibration(true);
+                    nm.createNotificationChannel(ch);
+                }
+                channel = "arrival_alarm";
+            }
 
             Notification.Builder nb = new Notification.Builder(getContext(), channel)
                     .setSmallIcon(R.drawable.ic_stat_notify)
@@ -179,16 +176,125 @@ public class ArrivalMonitorPlugin extends Plugin {
                     .setStyle(new Notification.BigTextStyle().bigText(body))
                     .setAutoCancel(true)
                     .setContentIntent(pi);
+            // 模板差异：颜色条（alarm 红 / silent 灰 / rich 金 / dist 青）
+            if ("alarm".equals(template)) nb.setColor(0xFFE53935);
+            else if ("silent".equals(template)) nb.setColor(0xFF9E9E9E);
+            else if ("rich".equals(template)) nb.setColor(0xFFF5DC92);
+            else if ("dist".equals(template)) nb.setColor(0xFF7CE8E0);
+            // 默认声音/震动（alarm 强制响铃震动；silent 无）
+            if ("alarm".equals(template)) { ring = true; vibrate = true; }
             int def = 0;
-            if (ring) def |= Notification.DEFAULT_SOUND;
-            if (vibrate) def |= Notification.DEFAULT_VIBRATE;
+            if (ring && !silent) def |= Notification.DEFAULT_SOUND;
+            if (vibrate && !silent) def |= Notification.DEFAULT_VIBRATE;
             nb.setDefaults(def);
 
-            NotificationManager nm = (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            // 按钮：记录回筐（触发点 → 回收页单店视图）/ 导航去下一家
+            Intent recycleIntent = new Intent(getContext(), MainActivity.class);
+            recycleIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            recycleIntent.putExtra("arrival_store", storeName);
+            recycleIntent.putExtra("arrival_action", "recycle");
+            PendingIntent recyclePi = PendingIntent.getActivity(getContext(), 1, recycleIntent,
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+            nb.addAction(R.drawable.ic_stat_notify, "记录回筐", recyclePi);
+
+            Intent navIntent = new Intent(getContext(), MainActivity.class);
+            navIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            navIntent.putExtra("arrival_store", storeName);
+            navIntent.putExtra("arrival_action", "navigate");
+            PendingIntent navPi = PendingIntent.getActivity(getContext(), 2, navIntent,
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+            nb.addAction(R.drawable.ic_stat_notify, "导航去下一家", navPi);
+
+            // 记录待处理到店（供 MainActivity 转发给网页；冷启动时网页加载完再取）
+            MainActivity.setPendingArrival(storeName, "open");
+
             if (nm != null) nm.notify(7002, nb.build());
             call.resolve();
         } catch (Exception e) {
             call.reject("notify_error");
+        }
+    }
+
+    /** 前端取未处理的到店跳转（通知点击带过来的店名/动作；取后清空） */
+    @PluginMethod
+    public void getPendingArrival(PluginCall call) {
+        try {
+            String[] p = MainActivity.takePendingArrival();
+            JSObject ret = new JSObject();
+            ret.put("storeName", p[0] == null ? "" : p[0]);
+            ret.put("action", p[1] == null ? "" : p[1]);
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("pending_error");
+        }
+    }
+
+    /** 按 8 套模板构建通知正文 */
+    private String buildTemplateBody(String template, String storeName, int dist, JSONArray goods, String dataStr) {
+        StringBuilder sb = new StringBuilder();
+        boolean isDetail = "detail".equals(template);
+        boolean isList = "list".equals(template);
+        boolean isMinimal = "minimal".equals(template);
+        if (isMinimal) {
+            sb.append("距你 ").append(dist).append(" 米");
+        } else if (isDetail) {
+            sb.append("距你 ").append(dist).append(" 米\n");
+            appendGoodsLines(sb, goods, true);
+            sb.append("\n不要忘记打卡！");
+        } else if (isList) {
+            JSONArray route = null;
+            try { route = new JSONObject(dataStr).optJSONArray("route"); } catch (Exception ignored) {}
+            if (route != null && route.length() > 0) {
+                for (int i = 0; i < route.length(); i++) {
+                    JSONObject r = route.optJSONObject(i);
+                    if (r == null) continue;
+                    sb.append(r.optString("name", "店")).append("  ").append(r.optString("dist", ""));
+                    int qty = r.optInt("qty", 0);
+                    if (qty > 0) sb.append("  ").append(qty);
+                    sb.append("\n");
+                }
+            } else {
+                sb.append("距你 ").append(dist).append(" 米\n不要忘记打卡！");
+            }
+        } else if ("dist".equals(template)) {
+            sb.append("距你 ").append(dist).append(" 米\n");
+            appendGoodsLines(sb, goods, false);
+            sb.append("\n不要忘记打卡！");
+        } else if ("rich".equals(template)) {
+            sb.append("距你 ").append(dist).append(" 米\n此店需要发出的各筐整箱数量\n");
+            appendGoodsLines(sb, goods, true);
+            sb.append("\n不要忘记打卡！");
+        } else {
+            // classic / alarm / silent：标准一行各筐
+            sb.append("距你 ").append(dist).append(" 米\n");
+            StringBuilder line = new StringBuilder();
+            for (int i = 0; i < goods.length(); i++) {
+                JSONObject g = goods.optJSONObject(i);
+                if (g == null) continue;
+                int qty = g.optInt("qty", 0);
+                if (qty <= 0) continue;
+                if (line.length() > 0) line.append(" · ");
+                line.append(g.optString("name", "")).append(" ").append(qty);
+                int whole = g.optInt("whole", 0);
+                if (whole > 0) line.append("/整箱").append(whole);
+            }
+            if (line.length() > 0) sb.append(line).append("\n");
+            sb.append("不要忘记打卡！");
+        }
+        return sb.toString();
+    }
+
+    private void appendGoodsLines(StringBuilder sb, JSONArray goods, boolean withWholeLine) {
+        for (int i = 0; i < goods.length(); i++) {
+            JSONObject g = goods.optJSONObject(i);
+            if (g == null) continue;
+            int qty = g.optInt("qty", 0);
+            if (qty <= 0) continue;
+            sb.append(g.optString("name", "")).append(" ").append(qty);
+            int whole = g.optInt("whole", 0);
+            if (withWholeLine && whole > 0) sb.append(" · 整箱 ").append(whole);
+            else if (whole > 0) sb.append("/整箱").append(whole);
+            sb.append("\n");
         }
     }
 

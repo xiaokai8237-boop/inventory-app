@@ -2669,6 +2669,19 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       </div>
     </div>
 
+    <!-- 到店提示条（#146 单店回收定位：店名·到店了 + 切换门店，定位到才显示） -->
+    <div class="card" id="arrivalTipBar" style="display:none;padding:9px 12px;margin-top:8px;background:rgba(245,220,146,.1);border:1.5px solid rgba(245,220,146,.6);border-radius:12px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#F8E3A6,#E0A63E);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#0B2E38" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        </span>
+        <span style="flex:1;font-size:12px;color:#F5DC92;font-weight:800;line-height:1.45;">
+          <span id="arrivalTipStore">到店</span> · 到店了<small style="display:block;font-size:10px;color:rgba(245,220,146,.75);font-weight:400;">定位错了？点右边切换门店</small>
+        </span>
+        <button onclick="openSwitchStoreModal()" style="font-size:10px;font-weight:800;color:#F5DC92;border:1px solid rgba(245,220,146,.6);border-radius:12px;padding:4px 10px;background:none;cursor:pointer;flex-shrink:0;">切换门店</button>
+      </div>
+    </div>
+
     <div class="card">
       <div class="form-group">
         <label class="form-label">🏪 店面（点击切换）</label>
@@ -2804,6 +2817,25 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响回收页顺序）</div>
       <div id="recoverStoreOrderList" style="max-height:50vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:6px;"></div>
       <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="saveRecoverStoreOrder()">💾 保存店序</button>
+    </div>
+  </div>
+
+  <!-- 切换门店弹窗（#146：到店提示条「切换门店」触发，选一家回收该店所有筐） -->
+  <div class="store-ocr-modal" id="switchStoreModal" onclick="closeSwitchStoreModal()">
+    <div class="store-ocr-content" style="max-width:330px;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px;color:var(--text);">
+          <span style="width:26px;height:26px;border-radius:8px;background:rgba(245,220,146,.16);display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#F5DC92" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-6h6v6"/></svg>
+          </span>切换门店
+        </span>
+        <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeSwitchStoreModal()">×</span>
+      </div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">选一家门店，回收这家店的所有筐</div>
+      <div id="switchStoreList" style="max-height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
+      <div style="text-align:center;margin-top:10px;">
+        <span style="display:inline-block;font-size:12px;color:var(--text-light);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:5px 24px;cursor:pointer;" onclick="closeSwitchStoreModal()">取消</span>
+      </div>
     </div>
   </div>
 
@@ -11367,7 +11399,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.6.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.7.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -11495,6 +11527,8 @@ setTimeout(function() {
       try {
         if (localStorage.getItem('kuanwei_arrival_on') === '1') startArrivalMonitor();
       } catch(e) {}
+      // #146 消费通知点击（记录回筐/整卡 → 回收页单店视图；导航 → 高德）
+      checkPendingArrival();
     }
   } catch(e) {}
 }, 2600);
@@ -12413,6 +12447,8 @@ function arrivalTick() {
       if (!arrivalNotified[nearIdx]) {
         arrivalNotified[nearIdx] = Date.now();
         arrivalShow(nearIdx, best);
+        // #146 持久化最近到店门店（供回收页自动定位）
+        try { localStorage.setItem('kuanwei_arrival_last_store', cfg[nearIdx].name); } catch(e) {}
       }
     } else {
       // 离开范围 → 重置该店提醒标记
@@ -12476,10 +12512,119 @@ function arrivalDismiss() {
   const b = document.getElementById('arrivalBanner');
   if (b) b.classList.remove('show');
 }
+// ===== #146 回收页自动定位（到店 → 回收单店视图）=====
+// 打开回收模式并定位当前门店：优先原生通知带入的店名 → 持久化最近到店 → 内存最近到店 → 异步 GPS 兜底
+function openRecoverArrival(storeName) {
+  manualEntry('out');
+  const cfg = loadStoreConfig();
+  if (cfg.length === 0) return;
+  let idx = matchStoreIdx(storeName);
+  if (idx < 0) { try { idx = matchStoreIdx(localStorage.getItem('kuanwei_arrival_last_store')); } catch(e) {} }
+  if (idx < 0 && arrivalLastStoreIdx >= 0) idx = arrivalLastStoreIdx;
+  if (idx >= 0) { setRecoverStore(idx); return; }
+  // 异步 GPS 兜底（无传入/无记录时）
+  if (navigator.geolocation) {
+    try {
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        const idx2 = nearestStoreIdx(pos.coords.latitude, pos.coords.lng);
+        if (idx2 >= 0) setRecoverStore(idx2); else hideArrivalTip();
+      }, function() { hideArrivalTip(); }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 });
+    } catch(e) { hideArrivalTip(); }
+  } else hideArrivalTip();
+}
+function matchStoreIdx(nameOrAlias) {
+  if (!nameOrAlias) return -1;
+  const cfg = loadStoreConfig();
+  return cfg.findIndex(s => s.name === nameOrAlias || (s.aliases && s.aliases.indexOf(nameOrAlias) >= 0));
+}
+function nearestStoreIdx(lat, lng) {
+  const cfg = loadStoreConfig();
+  let best = 1e9, idx = -1;
+  cfg.forEach((s, i) => { if (s.lat && s.lng) { const d = haversineM(lat, lng, s.lat, s.lng); if (d < best) { best = d; idx = i; } } });
+  return idx;
+}
+function setRecoverStore(idx) {
+  currentStoreIdx = idx;
+  renderStoreChips();
+  reloadRecordInputs();
+  const cfg = loadStoreConfig();
+  if (cfg[idx]) showArrivalTip(cfg[idx].name);
+  const mf = document.getElementById('manualForm');
+  if (mf && mf.scrollIntoView) { try { mf.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e) {} }
+}
+function showArrivalTip(storeName) {
+  const bar = document.getElementById('arrivalTipBar');
+  if (!bar) return;
+  const t = document.getElementById('arrivalTipStore');
+  if (t) t.textContent = storeName;
+  bar.style.display = '';
+}
+function hideArrivalTip() {
+  const bar = document.getElementById('arrivalTipBar');
+  if (bar) bar.style.display = 'none';
+}
+// 切换门店弹窗（到店提示条「切换门店」触发）
+function openSwitchStoreModal() {
+  const cfg = loadStoreConfig();
+  const list = document.getElementById('switchStoreList');
+  if (!list || cfg.length === 0) return;
+  const orderNames = currentActionType === 'out' ? getRecoverOrder() : getSortedStores().map(x => x.s.name);
+  list.innerHTML = orderNames.map(n => {
+    const idx = cfg.findIndex(s => s.name === n);
+    if (idx < 0) return '';
+    const s = cfg[idx];
+    const alias = (s.aliases && s.aliases[0]) || '';
+    const isCur = idx === currentStoreIdx;
+    return '<div onclick="pickSwitchStore(' + idx + ')" style="display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:11px;cursor:pointer;' +
+      (isCur ? 'background:rgba(245,220,146,.12);border:1.5px solid rgba(245,220,146,.7);' : 'background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);') + '">' +
+      '<span style="flex:1;min-width:0;font-size:12px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(s.name) +
+      (alias ? '<span style="font-size:10px;color:#E8A33D;margin-left:4px;">·' + escapeHtml(alias) + '</span>' : '') + '</span>' +
+      (isCur ? '<span style="font-size:9px;font-weight:800;color:#0B2E38;background:linear-gradient(135deg,#F8E3A6,#E0A63E);border-radius:8px;padding:2px 7px;">当前</span>' : '') +
+      '</div>';
+  }).join('');
+  showModal('switchStoreModal');
+}
+function pickSwitchStore(idx) {
+  currentStoreIdx = idx;
+  renderStoreChips();
+  reloadRecordInputs();
+  const cfg = loadStoreConfig();
+  if (cfg[idx]) {
+    showArrivalTip(cfg[idx].name);
+    const alias = (cfg[idx].aliases && cfg[idx].aliases[0]) || '';
+    showTransparentToast('已切换 · ' + cfg[idx].name + (alias ? ' · ' + alias : ''));
+  }
+  closeSwitchStoreModal();
+}
+function closeSwitchStoreModal() {
+  const m = document.getElementById('switchStoreModal');
+  if (m) m.classList.remove('show');
+}
 function arrivalRecycle() {
   arrivalDismiss();
-  switchPage('recover');
-  showToast('已打开回收页，定位当前门店');
+  openRecoverArrival();
+}
+// #146 通知点击消费：原生通知「记录回筐」/整卡 → 回收页单店视图；「导航去下一家」→ 高德导航
+function checkPendingArrival() {
+  try {
+    const cap = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ArrivalMonitor;
+    if (!cap || !cap.getPendingArrival) return;
+    cap.getPendingArrival().then(function(r) {
+      if (!r || !r.storeName) return;
+      if (r.action === 'navigate') navigateToStoreName(r.storeName);
+      else openRecoverArrival(r.storeName);
+    }).catch(function() {});
+  } catch(e) {}
+}
+function navigateToStoreName(storeName) {
+  const cfg = loadStoreConfig();
+  const s = cfg.find(function(x) { return x.name === storeName || (x.aliases && x.aliases.indexOf(storeName) >= 0); });
+  if (s && s.lat && s.lng) {
+    const url = 'https://uri.amap.com/navigation?to=' + s.lng + ',' + s.lat + ',' + encodeURIComponent(s.name);
+    window.open(url, '_blank');
+  } else {
+    showToast('该店未录入定位，无法导航');
+  }
 }
 function arrivalNavNext() {
   arrivalDismiss();

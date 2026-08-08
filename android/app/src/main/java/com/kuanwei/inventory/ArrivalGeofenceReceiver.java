@@ -108,6 +108,7 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
             Intent open = new Intent(context, MainActivity.class);
             open.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             open.putExtra("arrival_store", hitName);
+            open.putExtra("arrival_action", "open");
             PendingIntent pi = PendingIntent.getActivity(context, 0, open,
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -119,6 +120,25 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
                     .setAutoCancel(true)
                     .setContentIntent(pi)
                     .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
+
+            // #146 按钮：记录回筐（→ 回收页单店视图）/ 导航去下一家
+            Intent recycleIntent = new Intent(context, MainActivity.class);
+            recycleIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            recycleIntent.putExtra("arrival_store", hitName);
+            recycleIntent.putExtra("arrival_action", "recycle");
+            PendingIntent recyclePi = PendingIntent.getActivity(context, 1, recycleIntent,
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+            nb.addAction(R.drawable.ic_stat_notify, "记录回筐", recyclePi);
+
+            Intent navIntent = new Intent(context, MainActivity.class);
+            navIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            navIntent.putExtra("arrival_store", hitName);
+            navIntent.putExtra("arrival_action", "navigate");
+            PendingIntent navPi = PendingIntent.getActivity(context, 2, navIntent,
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+            nb.addAction(R.drawable.ic_stat_notify, "导航去下一家", navPi);
+
+            MainActivity.setPendingArrival(hitName, "open");
 
             nm.notify(7003, nb.build());
         } catch (Exception ignored) {}
