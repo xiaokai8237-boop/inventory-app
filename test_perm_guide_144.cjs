@@ -125,14 +125,13 @@ function T(name, cond, extra) {
     };
   });
   T('权限管理独立页面激活', g6.active, '');
-  T('权限状态 3 行', g6.rowCount === 3, 'got ' + g6.rowCount);
-  T('行名正确', JSON.stringify(g6.names) === '["位置权限","通知权限","允许后台运行"]', JSON.stringify(g6.names));
-  T('位置/通知已开启（同意过）', g6.states[0] === '已开启' && g6.states[1] === '已开启', JSON.stringify(g6.states));
+  T('权限状态 5 行', g6.rowCount === 5, 'got ' + g6.rowCount);
+  T('行名正确', JSON.stringify(g6.names) === '["位置权限","电池优化","通知权限","允许自启动","后台运行 · 锁屏清理"]', JSON.stringify(g6.names));
+  T('位置/通知已开启（同意过）', g6.states[0] === '已开启' && g6.states[2] === '已开启', JSON.stringify(g6.states));
   T('权限说明 3 卡（含承诺）', g6.explainCount === 3 && g6.explainHasSafe, JSON.stringify(g6.explainNames));
-  T('说明卡名正确', JSON.stringify(g6.explainNames) === '["位置权限","通知权限","允许后台运行"]', JSON.stringify(g6.explainNames));
   T('总开关卡/数据透明/返回栏', g6.hasMaster && g6.hasLast && g6.hasBack, '');
 
-  // ===== 6b. 管理页入口按钮 =====
+  // ===== 6b. 管理页入口按钮（新字已去掉）=====
   await page.evaluate(() => { switchPage('manage'); });
   await page.waitForTimeout(200);
   const g6b = await page.evaluate(() => {
@@ -144,7 +143,7 @@ function T(name, cond, extra) {
       hasSvg: b ? !!b.querySelector('svg') : false
     };
   });
-  T('管理页有权限管理入口', g6b.exists && g6b.hasSub && g6b.hasNew && g6b.hasSvg, JSON.stringify(g6b));
+  T('管理页有权限管理入口', g6b.exists && g6b.hasSub && !g6b.hasNew && g6b.hasSvg, JSON.stringify(g6b));
   await page.evaluate(() => { openPermPage(); });
   await page.waitForTimeout(200);
 

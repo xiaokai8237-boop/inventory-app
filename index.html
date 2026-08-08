@@ -2542,6 +2542,24 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 }
 .gg-done-all .da-t { font-size: 14px; font-weight: 800; color: #4ADE80; }
 .gg-done-all .da-s { font-size: 11px; color: #9FD0D6; margin-top: 4px; }
+/* 权限状态区：一键开启所有权限按钮（#145b） */
+.perm-page .pm-opt-all {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 10px;
+  background: linear-gradient(135deg,#F8E3A6 0%,#E0A63E 100%);
+  border-radius: 13px; padding: 11px 14px; cursor: pointer;
+  box-shadow: 0 5px 14px rgba(224,166,62,.3);
+}
+.perm-page .pm-opt-all .oa-ico { width: 30px; height: 30px; border-radius: 9px; background: rgba(11,46,56,.14); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.perm-page .pm-opt-all .oa-info { flex: 1; min-width: 0; }
+.perm-page .pm-opt-all .oa-name { font-size: 14px; font-weight: 900; color: #0B2E38; }
+.perm-page .pm-opt-all .oa-desc { font-size: 10px; color: rgba(11,46,56,.65); margin-top: 2px; font-weight: 600; }
+.perm-page .pm-opt-all .oa-arrow { color: #0B2E38; font-size: 15px; flex-shrink: 0; font-weight: 900; }
+.perm-page .pm-opt-all.disabled { opacity: .6; pointer-events: none; }
+.perm-page .pm-guide-mini {
+  margin-top: 9px; text-align: center; font-size: 10px; color: #7E97A1; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 3px;
+}
 /* 通知栏管理页顶部权限横幅 */
 .gd-banner { display: flex; align-items: center; gap: 9px; background: rgba(245,220,146,.12); border: 1.5px solid rgba(245,220,146,.55); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; cursor: pointer; }
 .gd-banner .gb-ico { width: 28px; height: 28px; border-radius: 8px; background: rgba(245,220,146,.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -3028,7 +3046,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="card" style="padding:0;overflow:hidden;">
     <button class="manage-item" onclick="openStorePanel()"><span class="mi-icon">🏪</span><span class="mi-title">店面管理<span class="mi-sub" id="manageStoreSub">店面 · 别称 · 到店提醒 · 定位</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openNotifyManagePage()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span class="mi-title">通知栏管理<span class="mi-sub" id="manageNotifySub">模板 · 距离 · 响铃</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="openPermPage()" style="border:1.5px solid rgba(245,220,146,.45);border-radius:12px;background:rgba(245,220,146,.06);"><span class="mi-icon" style="background:rgba(245,220,146,.16);color:#F5DC92;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span class="mi-title">权限管理<span class="mi-sub" id="managePermSub">位置 · 通知 · 后台运行<span class="mi-badge">新</span></span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openPermPage()" style="border:1.5px solid rgba(245,220,146,.45);border-radius:12px;background:rgba(245,220,146,.06);"><span class="mi-icon" style="background:rgba(245,220,146,.16);color:#F5DC92;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span class="mi-title">权限管理<span class="mi-sub" id="managePermSub">位置 · 通知 · 后台运行</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openGoodsPanel()"><span class="mi-icon">📦</span><span class="mi-title">框名设置<span class="mi-sub" id="manageGoodsSub">筐类名称 · 顺序</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openBackupPanel()"><span class="mi-icon">💾</span><span class="mi-title">备份与恢复<span class="mi-sub">云端同步 · 换机不丢</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('summary')"><span class="mi-icon">📈</span><span class="mi-title">汇总<span class="mi-sub">统计报表</span></span><span class="mi-arrow">›</span></button>
@@ -3089,8 +3107,20 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     </div>
 
     <!-- ② 权限状态 -->
-    <div class="pm-sec"><span class="pm-sec-no">2</span>权限状态 <span style="font-size:10px;color:#7E97A1;font-weight:400;">点击任意一行可去系统设置开关</span></div>
+    <div class="pm-sec"><span class="pm-sec-no">2</span>权限状态 <span style="font-size:10px;color:#7E97A1;font-weight:400;">点「一键开启」自动处理全部，或点单行单独开</span></div>
+    <!-- 一键开启所有权限（#145b） -->
+    <div class="pm-opt-all" id="pmOptAll" onclick="runPermAll()">
+      <div class="oa-ico">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B2E38" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </div>
+      <div class="oa-info">
+        <div class="oa-name" id="pmOptAllName">一键开启所有权限</div>
+        <div class="oa-desc" id="pmOptAllDesc">自动处理 5 项 · 你只点系统框「允许」</div>
+      </div>
+      <div class="oa-arrow">›</div>
+    </div>
     <div class="pm-card" id="permPageRows"></div>
+    <div class="pm-guide-mini" onclick="openGuardPage()">后台保活详细步骤引导 ›</div>
 
     <!-- ③ 权限说明 -->
     <div class="pm-sec"><span class="pm-sec-no">3</span>权限说明 <span style="font-size:10px;color:#7E97A1;font-weight:400;">每个权限是干嘛的，说清楚</span></div>
@@ -3105,8 +3135,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <div class="px-safe">安全承诺：只弹到店提醒，不弹广告</div>
     </div>
     <div class="pm-explain">
-      <div class="px-name">允许后台运行</div>
-      <div class="px-line">干嘛用：<b>让手机别省电省过头把提醒掐了</b>——开着它提醒才送得到<br>什么时候用：<b>一直挂着</b>（就是设置里的「允许后台运行」）<br>不用会怎样：手机省电模式可能杀掉软件，提醒就不响了</div>
+      <div class="px-name">允许后台运行 · 电池优化 · 自启动（保活三件套）</div>
+      <div class="px-line">干嘛用：<b>让手机别省电省过头把提醒掐了</b>——三件套都开，提醒才送得到<br>什么时候用：<b>一直挂着</b>（就是设置里的「忽略电池优化 / 自启动 / 后台运行」）<br>不用会怎样：手机省电模式可能杀掉软件，提醒就不响了</div>
       <div class="px-safe">安全承诺：不做任何额外动作，只是别被手机杀</div>
     </div>
 
@@ -11450,7 +11480,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.5.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.6.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -12107,14 +12137,35 @@ var arrivalLastPos = null;
 var arrivalLastStoreIdx = -1;
 
 // 网页版权限状态检测（APK 内由原生插件增强）
+var notifEnabled = null; // null=未知；true/false=原生真实通知状态（修复 WebView Notification API 误报）
+
+// 查询原生通知真实状态（APK 内）
+function refreshNotificationState() {
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ArrivalMonitor) {
+    try {
+      window.Capacitor.Plugins.ArrivalMonitor.notificationEnabled().then(function(r) {
+        notifEnabled = !!(r && r.enabled);
+        renderPermPage();
+        renderNotifyManage();
+      }).catch(function() {});
+    } catch(e) {}
+  }
+}
+
 function getPermState() {
-  const st = { location: false, notification: false, background: false };
+  const st = { location: false, notification: false, background: false, battery: false, autostart: false };
   // 位置：尝试过一次 geolocation 成功则记 true（启动时轻量探测）
   try { st.location = !!(arrivalLastPos) || localStorage.getItem('kuanwei_loc_ok') === '1'; } catch(e) {}
-  // 通知：Notification API
-  try { st.notification = !!(window.Notification && Notification.permission === 'granted'); } catch(e) {}
+  // 通知：APK 内用原生真实状态；网页用 Notification API
+  try {
+    if (notifEnabled !== null) st.notification = notifEnabled;
+    else st.notification = !!(window.Notification && Notification.permission === 'granted');
+  } catch(e) {}
   // 后台运行：网页版无法检测，APK 内由原生返回；默认按已同意引导计（可重看）
   try { st.background = localStorage.getItem('kuanwei_bg_ok') === '1'; } catch(e) {}
+  // 电池优化 / 自启动：无法直接检测，一键处理过记 true
+  try { st.battery = localStorage.getItem('kuanwei_battery_ok') === '1'; } catch(e) {}
+  try { st.autostart = localStorage.getItem('kuanwei_autostart_ok') === '1'; } catch(e) {}
   return st;
 }
 function permMissingCount() {
@@ -12168,6 +12219,7 @@ function permGuideLater() {
 // ===== #144b 权限管理独立页面 =====
 // 管理页入口 → 独立页面
 function openPermPage() {
+  refreshNotificationState();
   switchPage('perm');
 }
 // 渲染独立页面：总开关 + 权限状态行 + 数据透明
@@ -12176,24 +12228,57 @@ function renderPermPage() {
   // 总开关
   const sw = document.getElementById('pmMasterSwitch');
   if (sw) sw.className = 'mm-switch' + (arrivalTimer ? ' on' : '');
-  // 权限状态行
+  // 一键开启所有权限按钮（#145b）
+  const optBtn = document.getElementById('pmOptAll');
+  if (optBtn) {
+    const nameEl = document.getElementById('pmOptAllName');
+    const descEl = document.getElementById('pmOptAllDesc');
+    if (nameEl && descEl) {
+      if (permAllRunning) { nameEl.textContent = '自动处理中…'; descEl.textContent = '你只需要点系统框「允许」'; }
+      else if (permAllAllDone()) { nameEl.textContent = '全部已开启'; descEl.textContent = '所有权限已就绪，到店提醒不会被掐'; }
+      else { nameEl.textContent = '一键开启所有权限'; descEl.textContent = '自动处理 5 项 · 你只点系统框「允许」'; }
+    }
+    optBtn.classList.toggle('disabled', permAllRunning);
+  }
+  // 权限状态行（5 项）
   const rows = document.getElementById('permPageRows');
   if (rows) {
+    const all = permAllRunning;
+    const stTxt = function(ok, id) {
+      if (all) {
+        if (permAllDone[id]) return '<span class="pr-state on">完成</span>';
+        if (permAllCurrent === id) return '<span class="pr-state off" style="color:#9FB8FF;">处理中…</span>';
+        return '<span class="pr-state off" style="color:#7E97A1;">排队中</span>';
+      }
+      return ok
+        ? '<span class="pr-state on">已开启</span>'
+        : '<span class="pr-state off">未开启</span>';
+    };
     rows.innerHTML =
-      '<div class="pm-row" onclick="permRowAction(\'location\');setTimeout(renderPermPage,900)">' +
-        '<span class="pr-ico" style="background:rgba(245,220,146,.16);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#F5DC92" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>' +
+      '<div class="pm-row" onclick="permRowAction(\'location\');setTimeout(renderPermPage,1200)">' +
+        '<span class="pr-ico" style="background:rgba(245,220,146,.16);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#F5DC92" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>' +
         '<span class="pr-info"><span class="pr-name">位置权限</span><span class="pr-desc">到店提醒 · 只在算距离时用</span></span>' +
-        '<span class="pr-state ' + (st.location ? 'on' : 'off') + '">' + (st.location ? '已开启' : '未开启') + '</span><span class="pr-arrow">›</span>' +
+        stTxt(st.location, 'location') + '<span class="pr-arrow">›</span>' +
       '</div>' +
-      '<div class="pm-row" onclick="permRowAction(\'notification\');setTimeout(renderPermPage,900)">' +
-        '<span class="pr-ico" style="background:rgba(124,155,255,.16);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#8FA9FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>' +
+      '<div class="pm-row" onclick="permRowAction(\'battery\')">' +
+        '<span class="pr-ico" style="background:rgba(255,107,107,.14);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#FF6B6B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>' +
+        '<span class="pr-info"><span class="pr-name">电池优化</span><span class="pr-desc">省电模式别把提醒掐了 · 自动弹框</span></span>' +
+        stTxt(st.battery, 'battery') + '<span class="pr-arrow">›</span>' +
+      '</div>' +
+      '<div class="pm-row" onclick="permRowAction(\'notification\');setTimeout(renderPermPage,1200)">' +
+        '<span class="pr-ico" style="background:rgba(124,155,255,.16);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#8FA9FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>' +
         '<span class="pr-info"><span class="pr-name">通知权限</span><span class="pr-desc">到店提醒显示</span></span>' +
-        '<span class="pr-state ' + (st.notification ? 'on' : 'off') + '">' + (st.notification ? '已开启' : '未开启') + '</span><span class="pr-arrow">›</span>' +
+        stTxt(st.notification, 'notification') + '<span class="pr-arrow">›</span>' +
+      '</div>' +
+      '<div class="pm-row" onclick="permRowAction(\'autostart\')">' +
+        '<span class="pr-ico" style="background:rgba(245,166,35,.14);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01"/></svg></span>' +
+        '<span class="pr-info"><span class="pr-name">允许自启动</span><span class="pr-desc">重启/清理后提醒能自己恢复</span></span>' +
+        stTxt(st.autostart, 'autostart') + '<span class="pr-arrow">›</span>' +
       '</div>' +
       '<div class="pm-row" onclick="permRowAction(\'background\')">' +
-        '<span class="pr-ico" style="background:rgba(124,232,224,.16);"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#7CE8E0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>' +
-        '<span class="pr-info"><span class="pr-name">允许后台运行</span><span class="pr-desc">让提醒不被手机省电掐掉</span></span>' +
-        '<span class="pr-state ' + (st.background ? 'on' : 'off') + '">' + (st.background ? '已开启' : '未开启') + '</span><span class="pr-arrow">›</span>' +
+        '<span class="pr-ico" style="background:rgba(124,232,224,.16);"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#7CE8E0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>' +
+        '<span class="pr-info"><span class="pr-name">后台运行 · 锁屏清理</span><span class="pr-desc">锁屏后别被清掉 · 自动跳设置</span></span>' +
+        stTxt(st.background, 'background') + '<span class="pr-arrow">›</span>' +
       '</div>';
   }
   // 数据透明行
@@ -12214,6 +12299,75 @@ function renderPermPage() {
       last.innerHTML = '尚未定位记录。<br>用途：计算到店距离 · 已自动停止，无持续追踪';
     }
   }
+}
+
+// ===== #145b 一键开启所有权限（5 项自动处理）=====
+var permAllRunning = false;
+var permAllCurrent = null;
+var permAllDone = {};
+function permAllAllDone() {
+  return ['location','battery','notification','autostart','background'].every(id => permAllDone[id]);
+}
+function runPermAll() {
+  if (permAllRunning) return;
+  permAllRunning = true;
+  permAllDone = {};
+  permAllStep();
+}
+function permAllStep() {
+  const items = ['location','battery','notification','autostart','background'];
+  const next = items.find(id => !permAllDone[id]);
+  if (!next) {
+    permAllRunning = false;
+    permAllCurrent = null;
+    // 持久化标记（表示已处理过，下次进入显示已开启）
+    try {
+      localStorage.setItem('kuanwei_battery_ok', permAllDone.battery ? '1' : '0');
+      localStorage.setItem('kuanwei_autostart_ok', permAllDone.autostart ? '1' : '0');
+      localStorage.setItem('kuanwei_bg_ok', permAllDone.background ? '1' : '0');
+    } catch(e) {}
+    renderPermPage();
+    showToast('所有权限已处理完成，到店提醒不会被省电掐掉了');
+    return;
+  }
+  permAllCurrent = next;
+  renderPermPage();
+  const cap = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ArrivalMonitor;
+  if (next === 'location') {
+    if (navigator.geolocation) {
+      try {
+        navigator.geolocation.getCurrentPosition(
+          function() { try { localStorage.setItem('kuanwei_loc_ok', '1'); } catch(e) {} },
+          function() {}, { enableHighAccuracy: true, timeout: 6000, maximumAge: 60000 }
+        );
+      } catch(e) {}
+    }
+    permAllMark(next, 2500);
+  } else if (next === 'battery') {
+    if (cap) { try { cap.requestBatteryIgnore(); } catch(e) {} }
+    else { showToast('请在手机设置 → 电池 → 忽略电池优化'); }
+    permAllMark(next, 5000);
+  } else if (next === 'notification') {
+    if (cap) { try { cap.requestPermissions(); } catch(e) {} }
+    else if (window.Notification && window.Notification.permission !== 'granted' && window.Notification.requestPermission) {
+      try { window.Notification.requestPermission(); } catch(e) {}
+    }
+    permAllMark(next, 3500);
+  } else if (next === 'autostart') {
+    if (cap) { try { cap.openAutoStart(); } catch(e) {} }
+    else { showToast('请在手机设置 → 自启动管理 → 打开物流筐'); }
+    permAllMark(next, 5000);
+  } else if (next === 'background') {
+    if (cap) { try { cap.openSettings('battery'); } catch(e) {} }
+    else { showToast('请在手机设置 → 应用 → 物流筐 → 后台运行 / 锁屏清理'); }
+    permAllMark(next, 5000);
+  }
+}
+function permAllMark(id, delay) {
+  setTimeout(function() {
+    permAllDone[id] = true;
+    permAllStep();
+  }, delay);
 }
 // 总开关
 function toggleArrivalMaster() {
@@ -12285,13 +12439,22 @@ function permRowAction(kind) {
     try { window.Capacitor.Plugins.ArrivalMonitor.openSettings(kind); return; } catch(e) {}
   }
   if (kind === 'location') {
-    try { navigator.geolocation.getCurrentPosition(function(){ try { localStorage.setItem('kuanwei_loc_ok','1'); } catch(e){} renderPermManage(); }, function(){ showToast('请在手机设置里允许位置权限'); }, { enableHighAccuracy: true, timeout: 8000 }); } catch(e) { showToast('请在手机设置里允许位置权限'); }
+    try { navigator.geolocation.getCurrentPosition(function(){ try { localStorage.setItem('kuanwei_loc_ok','1'); } catch(e){} renderPermManage(); renderPermPage(); }, function(){ showToast('请在手机设置里允许位置权限'); }, { enableHighAccuracy: true, timeout: 8000 }); } catch(e) { showToast('请在手机设置里允许位置权限'); }
   } else if (kind === 'notification') {
     try { if (Notification.permission === 'default') { Notification.requestPermission(); setTimeout(renderPermManage, 800); } else { showToast('请在手机设置里开启通知权限'); } } catch(e) { showToast('请在手机设置里开启通知权限'); }
+  } else if (kind === 'battery') {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ArrivalMonitor) {
+      try { window.Capacitor.Plugins.ArrivalMonitor.requestBatteryIgnore(); try { localStorage.setItem('kuanwei_battery_ok','1'); } catch(e){} showToast('已弹出系统框，点「允许」即可'); } catch(e) { showToast('请在手机设置 → 电池 → 忽略电池优化'); }
+    } else { showToast('请在手机设置 → 电池 → 忽略电池优化（网页版无法自动弹框）'); }
+  } else if (kind === 'autostart') {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ArrivalMonitor) {
+      try { window.Capacitor.Plugins.ArrivalMonitor.openAutoStart(); try { localStorage.setItem('kuanwei_autostart_ok','1'); } catch(e){} showToast('已尝试跳转自启动设置，开完回来即可'); } catch(e) { showToast('请在手机设置 → 自启动管理 → 打开物流筐'); }
+    } else { showToast('请在手机设置 → 自启动管理 → 打开物流筐'); }
   } else {
     showToast('后台运行：请在手机设置 → 电池/应用管理里允许后台运行（或重看权限说明）');
   }
   setTimeout(renderPermManage, 1000);
+  setTimeout(renderPermPage, 1000);
 }
 // 到店监测（前台 60s 轮询）
 function startArrivalMonitor() {

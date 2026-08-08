@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 
 import com.getcapacitor.JSObject;
@@ -266,6 +267,17 @@ public class ArrivalMonitorPlugin extends Plugin {
             } catch (Exception e2) {
                 call.reject("battery_request_error");
             }
+        }
+    }
+
+    /** 通知权限是否已开启（NotificationManagerCompat，系统真实状态，修复 WebView Notification API 误报） */
+    @PluginMethod
+    public void notificationEnabled(PluginCall call) {
+        try {
+            boolean enabled = NotificationManagerCompat.from(getContext()).areNotificationsEnabled();
+            call.resolve(new JSObject().put("enabled", enabled));
+        } catch (Exception e) {
+            call.resolve(new JSObject().put("enabled", false));
         }
     }
 
