@@ -7100,6 +7100,7 @@ function extractNumsFromText(text) {
 // 统一的数字展示入口：多/少自动处理 + toast 提示 + 弹确认框
 // #141：常温筐语音填物流箱列时，保留整箱列弹窗已填值（二次语音不丢）
 function emitShowVoiceNums(nums) {
+  emitVoiceSource = 'voice'; // 语音数字解析 → 确认弹窗按店序渲染（voice 来源）
   const order = getEmitOrder();
   let list = nums.slice();
   if (list.length > order.length) {
@@ -7155,6 +7156,7 @@ function pickWholeQty(cols) {
 // 语音文本 → 本地解析（中文数字词转换，AI 失败时回退）
 // #141：常温筐优先按关键词分列解析（整箱→整箱列；物流箱/常温箱→物流箱列）
 function emitParseVoiceNums(text) {
+  emitVoiceSource = 'voice'; // 语音数字解析 → 确认弹窗按店序渲染（voice 来源）
   if (emitGoodsIdx === 4) {
     const segs = parseChangWenVoiceSegs(text);
     if (segs) {
@@ -7217,8 +7219,6 @@ function getVoiceExamplesForType(goodsType, max) {
   return list.slice(-(max || 5));
 }
 function renderEmitVoiceConfirm(nums) {
-  const order = getEmitOrder();
-  const cfg = loadStoreConfig();
   const container = document.getElementById('emitVoiceConfirmList');
   if (!container) return;
   container.innerHTML = '';
@@ -7233,7 +7233,48 @@ function renderEmitVoiceConfirm(nums) {
     : '📌 AI 取的列：<b>' + escapeHtml(emitCurrentCol || '?') + '</b>';
   colTag.innerHTML = '<span>' + srcLabel + '</span><span style="color:#9FD0D6;font-size:11px;">数字可点开直接改</span>';
   container.appendChild(colTag);
-  // 行列表：按店序渲染 order.length 行，数字不足的留空
+  // 拍照识别：按识别行渲染（图片里识别几行就显示几行：编号+店名+物流箱数；不含图片外的门店）
+  if (emitVoiceSource === 'photo' && Array.isArray(pendingEmitRows) && pendingEmitRows.length > 0) {
+    pendingEmitRows.forEach((r, i) => {
+      const qty = (i < nums.length) ? nums[i] : (r.nums && r.nums[0] !== undefined ? r.nums[0] : 0);
+      const w = isChangWen ? (i < wholeNums.length ? wholeNums[i] : (parseInt(r.whole, 10) || 0)) : 0;
+      const row = document.createElement('div');
+      row.setAttribute('data-emit-row', '1');
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.08);';
+      const storeLabel = (r.code ? escapeHtml(r.code) + ' ' : '') + escapeHtml(r.name || '第' + (i + 1) + '家店');
+      if (isChangWen) {
+        row.innerHTML = `
+        <span style="flex:1;font-size:13px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${storeLabel}</span>
+        <input type="number" inputmode="numeric" min="0" value="${w}"
+          style="width:64px;text-align:center;font-size:16px;font-weight:700;padding:6px 4px;border:1.5px solid rgba(124,232,224,.55);border-radius:8px;background:rgba(124,232,224,.06);color:#7CE8E0;"
+          data-emit-confirm-whole-idx="${i}" oninput="updateEmitConfirmTotal()">
+        <input type="number" inputmode="numeric" min="0" value="${qty}"
+          style="width:64px;text-align:center;font-size:16px;font-weight:700;padding:6px 4px;border:1.5px solid rgba(245,166,35,.55);border-radius:8px;background:rgba(245,166,35,.06);color:#F5A623;"
+          data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()">`;
+      } else {
+        row.innerHTML = `
+        <span style="flex:1;font-size:13px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${storeLabel}</span>
+        <input type="number" inputmode="numeric" min="0" value="${qty}"
+          style="width:96px;text-align:center;font-size:17px;font-weight:700;padding:6px;border:1.5px solid rgba(245,166,35,.55);border-radius:10px;background:rgba(245,166,35,.06);color:#F5A623;"
+          data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()">`;
+      }
+      container.appendChild(row);
+    });
+    updateEmitConfirmTotal();
+    // 同步弹窗内日期/筐类型展示
+    const de = document.getElementById('emitConfirmDate');
+    const panelDate = document.getElementById('emitRecordDate');
+    if (de) { if (!de.value) de.value = (panelDate && panelDate.value) ? panelDate.value : todayStr(); }
+    const gName = currentEmitGoodsName() || '';
+    const gIcon = document.getElementById('emitConfirmGoodsIcon');
+    const gLabel = document.getElementById('emitConfirmGoodsName');
+    if (gIcon) gIcon.textContent = gName ? goodsIcon(gName) : '🗳️';
+    if (gLabel) gLabel.textContent = gName || '未选择';
+    return;
+  }
+  // 语音识别：按店序渲染（现状）
+  const order = getEmitOrder();
+  const cfg = loadStoreConfig();
   for (let i = 0; i < order.length; i++) {
     const storeName = order[i] || ('第' + (i + 1) + '家店');
     const store = cfg.find(s => s.name === storeName);
@@ -7244,7 +7285,6 @@ function renderEmitVoiceConfirm(nums) {
     row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.08);';
     if (isChangWen) {
       const w = i < wholeNums.length ? wholeNums[i] : '';
-      // 整箱数（青）在前 + 物流箱（橙）在后，与 #140 手动录入框格式统一
       row.innerHTML = `
       <span style="flex:1;font-size:13px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:#E67E22;font-size:11px;">${alias}</span></span>
       <input type="number" inputmode="numeric" min="0" value="${w}"
@@ -7359,8 +7399,58 @@ function closeEmitVoiceConfirm() {
   document.getElementById('emitVoiceConfirmModal').classList.remove('show');
 }
 function applyEmitVoice() {
-  const order = getEmitOrder();
   const isChangWen = emitGoodsIdx === 4;
+  // 拍照识别（#149）：按识别行直接保存——图片里识别几行存几行，未录入店面管理的店跳过并提示
+  if (emitVoiceSource === 'photo' && Array.isArray(pendingEmitRows) && pendingEmitRows.length > 0) {
+    const confirmInputs = Array.from(document.querySelectorAll('#emitVoiceConfirmList input[data-emit-confirm-idx]'));
+    const cfg = loadStoreConfig();
+    const date = document.getElementById('emitConfirmDate')?.value || todayStr();
+    const names = loadGoodsNames();
+    const goodsName = names[emitGoodsIdx] || '';
+    const data = loadData();
+    let saved = 0, unmatched = 0;
+    pendingEmitRows.forEach((r, i) => {
+      const qty = parseInt(confirmInputs[i]?.value || '0') || 0;
+      let whole = 0;
+      if (isChangWen) {
+        const wInp = document.querySelector('#emitVoiceConfirmList input[data-emit-confirm-whole-idx="' + i + '"]');
+        whole = parseInt(wInp?.value || '0') || 0;
+      }
+      if (qty <= 0 && whole <= 0) return;
+      const storeIdx = matchStoreIdxByNameOrAlias(r.name || '', r.code || '', cfg);
+      if (storeIdx < 0) { unmatched++; return; }
+      const existing = data.find(x => x.date === date && x.storeIdx === storeIdx && x.goodsIdx === emitGoodsIdx);
+      if (existing) {
+        if (currentActionType === 'out') existing.qtyOut = qty;
+        else existing.qtyIn = qty;
+        if (isChangWen) existing.qtyWhole = whole;
+        existing.source = 'ocr';
+        existing.updatedAt = new Date().toISOString();
+      } else {
+        data.push({
+          id: Date.now() + '-ocr-' + storeIdx + '-' + emitGoodsIdx,
+          date: date, storeIdx: storeIdx, storeName: cfg[storeIdx].name,
+          goodsIdx: emitGoodsIdx, goodsName: goodsName,
+          qtyIn: currentActionType === 'out' ? 0 : qty,
+          qtyOut: currentActionType === 'out' ? qty : 0,
+          qtyWhole: isChangWen ? whole : 0,
+          source: 'ocr', createdAt: new Date().toISOString()
+        });
+      }
+      saved++;
+    });
+    saveDataArr(data);
+    closeEmitVoiceConfirm();
+    renderTodayOverview();
+    refreshRecordViews();
+    if (saved > 0) {
+      showToast('已录入 ' + saved + ' 条' + (unmatched > 0 ? '，' + unmatched + ' 家店未录入被跳过' : ''));
+    } else {
+      showToast(unmatched > 0 ? '识别出的门店都还没录入店面管理，请先添加再识别' : '请至少填一家店的数量');
+    }
+    return;
+  }
+  const order = getEmitOrder();
   const confirmInputs = Array.from(document.querySelectorAll('#emitVoiceConfirmList input[data-emit-confirm-idx]'));
   // #141：常温筐整箱列 → 覆盖发出页整箱数框（data-emit-whole-idx）
   if (isChangWen) {
@@ -7548,47 +7638,29 @@ async function emitDoOcr(imageDataUrl) {
     showToast('识别失败，请检查网络');
   }
 }
-// 按 emitOrder 顺序填入识别结果；按用户所选筐类型从 cols 里挑对应列的数字
+// 按识别行填入识别结果（#149 用户要求：识别结果=图片实际内容，图片里几行就显示几行，不含图片外的门店）
 let emitCurrentCol = ''; // 当前 AI 取的列名（弹窗显示 + 手动切换）
 let emitCurrentCols = []; // cols 里所有"筐/箱/篮"候选列（供切换）
 function fillEmitConfirm(rows) {
   pendingEmitRows = rows; // 暂存供 switchEmitCol 使用
   emitVoiceSource = 'photo'; // 拍照识别来源
-  const order = getEmitOrder();
-  const cfg = loadStoreConfig();
-  const matchedNums = order.map(() => 0);
-  const isChangWen = emitGoodsIdx === 4;
-  const matchedWhole = isChangWen ? order.map(() => 0) : []; // #141 常温筐整箱列
-  const orderByName = {};
-  order.forEach((n, i) => { orderByName[n] = i; });
   const goodsName = currentEmitGoodsName() || '';
+  const isChangWen = emitGoodsIdx === 4;
   // 收集所有行的 cols 候选列（供弹窗切换）
   const allCandidates = new Set();
-  rows.forEach(r => {
-    const nm = (r.name || '').trim();
-    if (!nm) return;
-    // 店名/别名/路线编号匹配到店面管理 → 反查 emitOrder 位置（以用户店序为准）
-    const si = matchStoreIdxByNameOrAlias(nm, r.code, cfg);
-    if (si >= 0) {
-      const oi = orderByName[cfg[si].name];
-      if (oi !== undefined) {
-        matchedNums[oi] = pickColQty(r.cols, goodsName);
-        // 常温筐：AI rows 的 whole 字段（#139）或 cols 整箱数量列
-        if (isChangWen) {
-          const w = parseInt(r.whole, 10);
-          matchedWhole[oi] = !isNaN(w) ? w : pickWholeQty(r.cols);
-        }
-      }
-    }
-    listColCandidates(r.cols).forEach(c => allCandidates.add(c));
-  });
-  // 取一个代表列名（当前 goodsName 对应的）
-  const sampleRow = rows.find(r => r.name && orderByName[r.name.trim()] !== undefined);
+  (rows || []).forEach(r => { listColCandidates(r.cols).forEach(c => allCandidates.add(c)); });
+  const sampleRow = (rows || []).find(r => r.name);
   emitCurrentCol = sampleRow ? pickColLabel(sampleRow.cols, goodsName) : '?';
   emitCurrentCols = Array.from(allCandidates);
-  emitPendingNums = matchedNums;
-  emitPendingWholeNums = matchedWhole;
-  renderEmitVoiceConfirm(matchedNums);
+  // 每行数字：物流箱（nums[0] 或按列挑选）+ 常温整箱
+  const withQty = (rows || []).map(r => {
+    const qty = (r.nums && r.nums[0] !== undefined) ? r.nums[0] : pickColQty(r.cols, goodsName);
+    const w = isChangWen ? (parseInt(r.whole, 10) || pickWholeQty(r.cols) || 0) : 0;
+    return { code: r.code || '', name: r.name || '', qty: qty, whole: w };
+  });
+  emitPendingNums = withQty.map(x => x.qty);
+  emitPendingWholeNums = withQty.map(x => x.whole);
+  renderEmitVoiceConfirm(withQty.map(x => x.qty));
   // 识别出的店名检查：有未录入「店面管理」的 → 先弹提醒去录入（与 doOCR 通道一致）
   const unreg = checkUnregisteredStores(rows);
   if (unreg.length > 0) {
@@ -7596,7 +7668,7 @@ function fillEmitConfirm(rows) {
   } else {
     showModal('emitVoiceConfirmModal');
   }
-  showToast('AI 识别完成，请确认（识别 ' + rows.length + ' 家店，取列：' + emitCurrentCol + '）');
+  showToast('AI 识别完成，请确认（识别 ' + (rows || []).length + ' 家店，取列：' + emitCurrentCol + '）');
 }
 // 用户所选类型 与 识别类型 是否不一致（冷冻/常温是两种单据，绝不互通）
 function typeMismatchCheck(userType, detectedType) {
@@ -9376,8 +9448,7 @@ async function doOCR(imageDataUrl, file) {
         trayType: goodsIdx >= 0 ? names[goodsIdx] : '未识别',
         _aiUsed: true
       };
-      // AI 结果也做"门店固定"补行（双保险：混元漏行时按配置店补 0）
-      ocrCurrentResult.rows = fillMissingStores(ocrCurrentResult.rows, loadStoreConfig());
+      // #149 用户要求：识别结果=图片实际内容，不做"门店固定"补行（图片里没有的店不显示）
       document.getElementById('ocrModeLabel').textContent = currentActionType === 'out' ? '回收' : '发出';
       document.getElementById('ocrGoodsLabel').textContent = ocrCurrentResult.trayType;
       const rawEl = document.getElementById('ocrRawText');
@@ -9761,8 +9832,7 @@ for (let j = pos + 1; j < Math.min(pos + 14, words.length); j++) {
     totalFiltered[0] = (totalNums[logisticsColIdx] !== undefined ? totalNums[logisticsColIdx] : (totalNums[0] || 0));
   }
 
-  // ===== 智能补行：利用「门店固定」先验，编号缺口自动补全 =====
-  rows = fillMissingStores(rows, loadStoreConfig());
+  // #149 用户要求：识别结果=图片实际内容，去掉"编号缺口补行"（图片里没有的店不显示）
   // 表格识别来源 → 高置信标记（数字可信，绿色）
   const highConf = !!ocrData._highConf;
   if (highConf) {
@@ -11388,7 +11458,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.7.2'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.7.3'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
