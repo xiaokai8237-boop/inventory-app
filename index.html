@@ -2609,8 +2609,20 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   </svg>
 
 <!-- 启动加载遮罩：与 APP 原生启动页无缝衔接，避免网页加载期间闪白 -->
-<div id="bootOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background-color:#082E38;background-image:url('splash-v10-vision.png');background-size:cover;background-position:center;background-repeat:no-repeat;z-index:2147483647;">
-  <div id="bootVer" style="position:absolute;bottom:26px;left:0;right:0;text-align:center;color:rgba(255,255,255,.5);font-size:11px;letter-spacing:2px;">v6.0.55</div>
+<div id="bootOverlay" style="position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(120% 80% at 50% 0%, #0E3340 0%, #082E38 55%, #061F28 100%);z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(1.5px 1.5px at 20% 30%, rgba(255,255,255,.5), transparent),radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,.4), transparent),radial-gradient(1.5px 1.5px at 85% 25%, rgba(255,255,255,.35), transparent),radial-gradient(1px 1px at 40% 75%, rgba(255,255,255,.3), transparent),radial-gradient(1.5px 1.5px at 55% 15%, rgba(255,255,255,.4), transparent),radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,.3), transparent);"></div>
+  <div style="width:96px;height:96px;border-radius:26px;background:linear-gradient(135deg,#F8E3A6,#E0A63E);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(224,166,62,.4);position:relative;">
+    <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#0B2E38" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+  </div>
+  <div style="font-size:20px;font-weight:900;color:#fff;margin-top:18px;letter-spacing:1px;position:relative;">物流筐收发管理系统</div>
+  <div style="font-size:13px;color:#F5DC92;margin-top:8px;letter-spacing:3px;position:relative;">让筐数清清楚楚</div>
+  <div style="display:flex;flex-direction:column;gap:7px;margin-top:22px;position:relative;">
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#CFECEF;"><span style="width:7px;height:7px;border-radius:50%;background:#7CE8E0;"></span>手动 / 语音 / 拍照 都能记</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#CFECEF;"><span style="width:7px;height:7px;border-radius:50%;background:#7CE8E0;"></span>每个筐的去向一目了然</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#CFECEF;"><span style="width:7px;height:7px;border-radius:50%;background:#7CE8E0;"></span>到店提醒 · 自动定位门店</div>
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#CFECEF;"><span style="width:7px;height:7px;border-radius:50%;background:#7CE8E0;"></span>云备份，换机不丢数据</div>
+  </div>
+  <div id="bootVer" style="position:absolute;bottom:26px;left:0;right:0;text-align:center;color:rgba(255,255,255,.5);font-size:11px;letter-spacing:2px;"></div>
 </div>
 <style>@keyframes bootspin{to{transform:rotate(360deg)}}</style>
 
@@ -2835,6 +2847,44 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <div id="switchStoreList" style="max-height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px;"></div>
       <div style="text-align:center;margin-top:10px;">
         <span style="display:inline-block;font-size:12px;color:var(--text-light);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:5px 24px;cursor:pointer;" onclick="closeSwitchStoreModal()">取消</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 管理员删除注销账号确认弹窗（任务B：原 confirm() → 深空蓝晶红色警示） -->
+  <div class="store-ocr-modal" id="deleteConfirmModal" onclick="closeDeleteConfirmModal()">
+    <div class="store-ocr-content" style="max-width:320px;text-align:center;background:#0E3340;border:1.5px solid rgba(245,220,146,.55);border-radius:22px;padding:22px 18px 16px;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:center;margin-bottom:12px;">
+        <span style="width:54px;height:54px;border-radius:50%;background:rgba(255,107,107,.15);border:1.5px solid rgba(255,107,107,.6);display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#FF6B6B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        </span>
+      </div>
+      <div style="font-size:16px;font-weight:900;color:#FF6B6B;margin-bottom:8px;">确认注销账号？</div>
+      <div style="font-size:12px;color:#CFECEF;line-height:1.7;">确认彻底删除该注销账号的<br><b style="color:#FF6B6B;">所有数据</b>？</div>
+      <div style="font-size:11px;color:#FF6B6B;background:rgba(255,107,107,.1);border-radius:9px;padding:6px 10px;margin-top:10px;font-weight:700;">此操作不可恢复！</div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button onclick="closeDeleteConfirmModal()" style="flex:1;font-size:14px;font-weight:800;border-radius:20px;padding:11px 0;background:rgba(255,255,255,.07);color:#DDEBEE;border:1px solid rgba(255,255,255,.2);cursor:pointer;">取消</button>
+        <button onclick="confirmDeleteTemp()" style="flex:1;font-size:14px;font-weight:800;border-radius:20px;padding:11px 0;background:#FF6B6B;color:#fff;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(255,107,107,.35);">确认注销</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导入数据确认弹窗（任务C：原 confirm() → 深空蓝晶三按钮） -->
+  <div class="store-ocr-modal" id="importConfirmModal" onclick="closeImportConfirmModal()">
+    <div class="store-ocr-content" style="max-width:320px;text-align:center;background:#0E3340;border:1.5px solid rgba(245,220,146,.55);border-radius:22px;padding:22px 18px 16px;" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:center;margin-bottom:12px;">
+        <span style="width:54px;height:54px;border-radius:50%;background:rgba(245,220,146,.15);border:1.5px solid rgba(245,220,146,.6);display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#F5DC92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        </span>
+      </div>
+      <div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:6px;">导入数据</div>
+      <div style="font-size:26px;font-weight:900;color:#F5DC92;"><span id="importConfirmCount">0</span><small style="font-size:12px;color:#7E97A1;font-weight:600;margin-left:4px;">条记录</small></div>
+      <div style="font-size:12px;color:#CFECEF;line-height:1.7;margin-top:6px;">导入备份中的数据，怎么处理现有数据？</div>
+      <div style="font-size:11px;color:#7CE8E0;background:rgba(124,232,224,.1);border-radius:9px;padding:6px 10px;margin-top:10px;font-weight:700;">合并不会丢现有数据（推荐）</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
+        <button onclick="doImportMerge()" style="font-size:14px;font-weight:800;border-radius:20px;padding:11px 0;background:linear-gradient(135deg,#F8E3A6,#E0A63E);color:#0B2E38;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(224,166,62,.35);">合并到现有数据<small style="display:block;font-size:10px;font-weight:600;color:rgba(11,46,56,.7);margin-top:1px;">推荐 · 不会丢</small></button>
+        <button onclick="doImportOverwrite()" style="font-size:14px;font-weight:800;border-radius:20px;padding:11px 0;background:rgba(255,107,107,.12);color:#FF6B6B;border:1px solid rgba(255,107,107,.5);cursor:pointer;">覆盖当前所有数据</button>
+        <button onclick="closeImportConfirmModal()" style="font-size:12px;font-weight:700;border-radius:20px;padding:8px 0;background:rgba(255,255,255,.05);color:#7E97A1;border:1px solid rgba(255,255,255,.15);cursor:pointer;">取消</button>
       </div>
     </div>
   </div>
@@ -5906,9 +5956,17 @@ function adminRestore(code, origPhone) {
   }).catch(() => { hideLoading(); showToast('网络错误'); });
 }
 // 管理员彻底删除注销账号（不可恢复）
+let pendingDeleteCode = null;
 function adminDeleteTemp(code) {
   if (!adminKey) { showToast('请先验证管理员密码'); return; }
-  if (!confirm('⚠️ 确认彻底删除该注销账号的所有数据？\n此操作不可恢复！')) return;
+  pendingDeleteCode = code;
+  showModal('deleteConfirmModal');
+}
+function confirmDeleteTemp() {
+  const code = pendingDeleteCode;
+  pendingDeleteCode = null;
+  closeDeleteConfirmModal();
+  if (!code) return;
   showLoading('正在删除…');
   fetch(API_BASE + '/admin/delete-temp', {
     method: 'POST',
@@ -5919,6 +5977,10 @@ function adminDeleteTemp(code) {
     if (res.ok) { showToast('' + res.message); loadAdminStats(); }
     else showToast(res.error || '删除失败');
   }).catch(() => { hideLoading(); showToast('网络错误'); });
+}
+function closeDeleteConfirmModal() {
+  const m = document.getElementById('deleteConfirmModal');
+  if (m) m.classList.remove('show');
 }
 // 渲染用户列表（按搜索框过滤手机号或密码）
 function renderAdminUsers() {
@@ -11251,6 +11313,7 @@ function exportData() {
   showToast('已导出');
 }
 
+let __pendingImport = null;
 function importData(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -11262,56 +11325,76 @@ function importData(event) {
         showToast('文件格式错误');
         return;
       }
-      // 导入方式：点确定=覆盖，点取消=合并追加（推荐）
-      const overwrite = confirm(`导入 ${obj.records.length} 条记录：\n\n点「确定」= 覆盖当前所有数据\n点「取消」= 合并到现有数据（推荐，不会丢）`);
-      if (overwrite) {
-        saveDataArr(obj.records);
-      } else {
-        // 合并：按 日期+店面+筐 去重（同一天同一店同一筐保留新值）
-        const cur = loadData();
-        const byKey = new Map();
-        cur.forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
-        obj.records.forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
-        saveDataArr([...byKey.values()]);
-      }
-      if (obj.goodsNames) saveGoodsConfig(obj.goodsNames);
-      // 导入店面配置（含 sort 顺序）——防止用导出/导入迁移时店面丢失
-      if (obj.storeConfig && Array.isArray(obj.storeConfig) && obj.storeConfig.length > 0) {
-        saveStoreConfig(obj.storeConfig);
-      } else if (Array.isArray(obj.goodsNames) && !obj.storeConfig) {
-        // 旧格式导出无 storeConfig 时，尝试从记录店名补店面（保守，不覆盖已有）
-        try {
-          const cur = loadStoreConfig();
-          const names = new Set(cur.map(s => s.name));
-          const recNames = new Set(obj.records.map(r => r.storeName).filter(Boolean));
-          const cfg = cur.slice();
-          recNames.forEach(n => { if (n && !names.has(n)) { cfg.push({ name: n, aliases: [], sort: cfg.length }); names.add(n); } });
-          if (cfg.length !== cur.length) saveStoreConfig(cfg);
-        } catch(e) {}
-      }
-      // 导入界面偏好
-      if (obj.uiState && typeof obj.uiState === 'object' && typeof applyUiState === 'function') {
-        try { applyUiState(obj.uiState); } catch(e) {}
-      }
-      initGoodsFilter();
-      renderGoodsInputList();
-      renderTodayOverview();
-      renderStorePanelUI();
-      initAllStores();
-      showToast('导入成功' + (overwrite ? '' : '（合并）'));
+      // 弹深空蓝晶确认框：合并（推荐）/ 覆盖 / 取消（原 confirm() 改）
+      __pendingImport = obj;
+      const c = document.getElementById('importConfirmCount');
+      if (c) c.textContent = obj.records.length;
+      showModal('importConfirmModal');
     } catch(err) {
-      showToast('导入失败: ' + err.message);
+      showToast('文件解析失败');
     }
   };
   reader.readAsText(file);
 }
+function closeImportConfirmModal() {
+  const m = document.getElementById('importConfirmModal');
+  if (m) m.classList.remove('show');
+}
+function doImportMerge() {
+  const obj = __pendingImport; __pendingImport = null;
+  closeImportConfirmModal();
+  if (!obj) return;
+  // 合并：按 日期+店面+筐 去重（同一天同一店同一筐保留新值）
+  const cur = loadData();
+  const byKey = new Map();
+  cur.forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
+  obj.records.forEach(r => byKey.set(String(r.date) + '|' + r.storeIdx + '|' + r.goodsIdx, r));
+  saveDataArr([...byKey.values()]);
+  finishImport(obj, false);
+}
+function doImportOverwrite() {
+  const obj = __pendingImport; __pendingImport = null;
+  closeImportConfirmModal();
+  if (!obj) return;
+  saveDataArr(obj.records);
+  finishImport(obj, true);
+}
+function finishImport(obj, overwrite) {
+  // 导入店面配置（含 sort 顺序）——防止用导出/导入迁移时店面丢失
+  if (obj.goodsNames) saveGoodsConfig(obj.goodsNames);
+  if (obj.storeConfig && Array.isArray(obj.storeConfig) && obj.storeConfig.length > 0) {
+    saveStoreConfig(obj.storeConfig);
+  } else if (Array.isArray(obj.goodsNames) && !obj.storeConfig) {
+    // 旧格式导出无 storeConfig 时，尝试从记录店名补店面（保守，不覆盖已有）
+    try {
+      const cur = loadStoreConfig();
+      const names = new Set(cur.map(s => s.name));
+      const recNames = new Set(obj.records.map(r => r.storeName).filter(Boolean));
+      const cfg = cur.slice();
+      recNames.forEach(n => { if (n && !names.has(n)) { cfg.push({ name: n, aliases: [], sort: cfg.length }); names.add(n); } });
+      if (cfg.length !== cur.length) saveStoreConfig(cfg);
+    } catch(e) {}
+  }
+  // 导入界面偏好
+  if (obj.uiState && typeof obj.uiState === 'object' && typeof applyUiState === 'function') {
+    try { applyUiState(obj.uiState); } catch(e) {}
+  }
+  initGoodsFilter();
+  renderGoodsInputList();
+  renderTodayOverview();
+  renderStorePanelUI();
+  initAllStores();
+  showToast('导入成功' + (overwrite ? '' : '（合并）'));
+}
 
 // ======== 初始化 ========
-const APP_VERSION = '7.7.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.7.2'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
+const bootVerEl = document.getElementById('bootVer');
+if (bootVerEl) bootVerEl.textContent = '版本 v' + APP_VERSION;
 // 核弹级 sw 缓存清理：检测 sw 缓存版本，过期则强制清空+注销+刷新（解决旧 sw 缓存导致页面异常问题）
 (function nukeOldSw() {
   const EXPECTED_VER = (typeof CACHE !== 'undefined' ? CACHE : 'kuanwei-v200');
