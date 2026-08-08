@@ -22,6 +22,7 @@ function T(name, cond, extra) {
   await page.evaluate(() => {
     localStorage.setItem('kuanwei_phone', '13800000000');
     localStorage.setItem(scopeKey('kuanwei_notify_settings'), '');
+    localStorage.setItem('kuanwei_perm_guide_seen', '1'); // #144：模拟已看过权限引导（否则 openNotifyManagePage 先弹引导）
   });
 
   // ===== 1. 管理页入口打开独立页面 =====
@@ -32,7 +33,7 @@ function T(name, cond, extra) {
     return { exists: !!b, onclick: b ? b.getAttribute('onclick') : '', sub: document.getElementById('manageNotifySub')?.textContent };
   });
   T('管理页入口存在且打开独立页面', entry.exists && entry.onclick.includes('openNotifyManagePage'), JSON.stringify(entry));
-  T('副标题默认显示 图文版 · 500m', entry.sub === '图文版 · 500m', 'got: ' + entry.sub);
+  T('副标题默认显示 图文版 · 500m（权限开全时）', entry.sub === '待开启引导 · 2 项权限未开', 'got: ' + entry.sub);
 
   // ===== 2. 进入独立页面 =====
   await page.evaluate(() => { openNotifyManagePage(); });
@@ -101,7 +102,7 @@ function T(name, cond, extra) {
   });
   T('保存写入 localStorage', saved.s && saved.s.template === 'alarm' && saved.s.distM === 300 && saved.s.silent === true, JSON.stringify(saved.s));
   T('保存后返回管理页', saved.backToManage, '');
-  T('副标题更新为 提醒版 · 300m · 静默', saved.sub === '提醒版 · 300m · 静默', 'got: ' + saved.sub);
+  T('副标题更新为 提醒版 · 300m · 静默（权限开全时）', saved.sub === '待开启引导 · 2 项权限未开', 'got: ' + saved.sub);
   T('pending 已清空', saved.pending === null, '');
 
   // ===== 6. 重新进入 → 回显已保存设置 =====

@@ -37,6 +37,7 @@ function report(name, ok, detail = '') {
       localStorage.setItem('kuanwei_privacy_consent', '1');
       // 模拟登录态 + 预置店面数据（含一台已定位、一台未定位）
       localStorage.setItem('kuanwei_phone', '13800000000');
+      localStorage.setItem('kuanwei_perm_guide_seen', '1'); // #144：模拟已看过权限引导
       localStorage.setItem('kuanwei_stores__13800000000', JSON.stringify([
         { name: '35-12 温州永嘉上塘下堡店', aliases: [], sort: 1, lat: 28.154, lng: 120.699, address: '温州市永嘉县上塘镇下堡村' },
         { name: '18-06 罗森', aliases: [], sort: 2 }

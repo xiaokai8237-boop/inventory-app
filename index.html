@@ -2387,6 +2387,71 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 .ntm-switch.on::after { left: 22px; }
 /* 保存 */
 .ntm-save { width: 100%; margin-top: 18px; text-align: center; font-size: 15px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6 0%,#E0A63E 100%); padding: 13px 0; border-radius: 24px; border: none; box-shadow: 0 6px 16px rgba(224,166,62,.35); letter-spacing: 1px; cursor: pointer; }
+/* ===== #144 权限引导弹窗 ===== */
+.pg-modal { position: fixed; inset: 0; z-index: 9990; display: none; align-items: center; justify-content: center; background: rgba(4,24,32,.78); padding: 18px; }
+.pg-modal.show { display: flex; }
+.pg-content { width: 100%; max-width: 360px; max-height: 88vh; overflow-y: auto; background: #0E3340; border: 1.5px solid rgba(245,220,146,.55); border-radius: 22px; padding: 20px 16px 18px; box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+.pg-head { text-align: center; margin-bottom: 14px; }
+.pg-head .pg-ico { width: 60px; height: 60px; margin: 0 auto 9px; border-radius: 17px; background: linear-gradient(135deg,#F8E3A6,#E0A63E); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(224,166,62,.35); }
+.pg-head .pg-title { font-size: 18px; font-weight: 900; color: #FFFFFF; }
+.pg-head .pg-sub { font-size: 11px; color: #9FD0D6; margin-top: 4px; line-height: 1.5; }
+.perm-card { background: rgba(255,255,255,.05); border: 1px solid rgba(124,184,200,.16); border-radius: 14px; padding: 11px 13px; margin-bottom: 9px; }
+.perm-card .pc-head { display: flex; align-items: center; gap: 8px; }
+.perm-card .pc-ico { width: 30px; height: 30px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.pc-ico.gold { background: rgba(245,220,146,.16); }
+.pc-ico.blue { background: rgba(124,155,255,.16); }
+.pc-ico.green { background: rgba(74,222,128,.14); }
+.perm-card .pc-name { flex: 1; font-size: 14px; font-weight: 800; color: #FFFFFF; }
+.perm-card .pc-tag { font-size: 10px; color: #7E97A1; font-weight: 600; }
+.perm-card .pc-use { font-size: 12px; color: #B8CDD4; line-height: 1.55; margin-top: 7px; }
+.perm-card .pc-use b { color: #F5DC92; }
+.perm-card .pc-safe { margin-top: 7px; font-size: 11px; color: #4ADE80; font-weight: 700; background: rgba(74,222,128,.08); border-radius: 8px; padding: 5px 8px; }
+.pg-btn { margin-top: 14px; text-align: center; font-size: 15px; font-weight: 900; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6 0%,#E0A63E 100%); padding: 13px 0; border-radius: 24px; cursor: pointer; box-shadow: 0 6px 16px rgba(224,166,62,.35); }
+.pg-later { text-align: center; font-size: 12px; color: #7E97A1; margin-top: 10px; cursor: pointer; padding: 4px; }
+/* ===== #144 权限管理弹窗 ===== */
+.pm-modal { position: fixed; inset: 0; z-index: 9991; display: none; align-items: center; justify-content: center; background: rgba(4,24,32,.78); padding: 18px; }
+.pm-modal.show { display: flex; }
+.pm-content { width: 100%; max-width: 360px; max-height: 88vh; overflow-y: auto; background: #0E3340; border: 1.5px solid rgba(245,220,146,.55); border-radius: 22px; padding: 16px 0 16px; box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+.pm-head { display: flex; align-items: center; gap: 8px; padding: 0 16px 12px; border-bottom: 1px solid rgba(124,184,200,.12); }
+.pm-head .pm-title { flex: 1; font-size: 16px; font-weight: 800; color: #FFFFFF; }
+.pm-head .pm-close { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.07); color: #DDEBEE; cursor: pointer; }
+.mg-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,.06); cursor: pointer; }
+.mg-row .mg-ico { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mg-row .mg-info { flex: 1; min-width: 0; }
+.mg-row .mg-name { font-size: 14px; font-weight: 700; color: #FFFFFF; }
+.mg-row .mg-desc { font-size: 10px; color: #7E97A1; margin-top: 1px; }
+.mg-row .mg-state { font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 12px; flex-shrink: 0; }
+.mg-state.on { color: #4ADE80; background: rgba(74,222,128,.12); }
+.mg-state.off { color: #FF6B6B; background: rgba(255,107,107,.12); }
+.mg-row .mg-arrow { color: #7E97A1; font-size: 14px; }
+.mg-tip { margin: 12px 16px; font-size: 11px; color: #9FD0D6; line-height: 1.6; background: rgba(124,232,224,.07); border: 1px solid rgba(124,232,224,.22); border-radius: 10px; padding: 9px 11px; }
+.mg-last { margin: 0 16px; font-size: 11px; color: #7E97A1; line-height: 1.6; background: rgba(255,255,255,.04); border-radius: 10px; padding: 9px 11px; }
+.mg-last b { color: #F5DC92; }
+.mg-reguide { margin: 14px 16px 4px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 800; color: #F5DC92; background: rgba(245,220,146,.08); border: 1px solid rgba(245,220,146,.35); border-radius: 22px; padding: 11px 0; cursor: pointer; }
+/* 通知栏管理页顶部权限横幅 */
+.gd-banner { display: flex; align-items: center; gap: 9px; background: rgba(245,220,146,.12); border: 1.5px solid rgba(245,220,146,.55); border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; cursor: pointer; }
+.gd-banner .gb-ico { width: 28px; height: 28px; border-radius: 8px; background: rgba(245,220,146,.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.gd-banner .gb-text { flex: 1; font-size: 12px; color: #F5DC92; font-weight: 700; line-height: 1.45; }
+.gd-banner .gb-text small { display: block; font-size: 10px; color: rgba(245,220,146,.75); font-weight: 400; margin-top: 1px; }
+.gd-banner .gb-arrow { color: #F5DC92; font-size: 15px; }
+/* 到店提醒页面内横幅（网页版） */
+.arr-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 9985; display: none; background: linear-gradient(135deg,#123243,#0E3340); border-bottom: 2px solid rgba(245,220,146,.6); padding: 12px 16px 14px; box-shadow: 0 6px 20px rgba(0,0,0,.45); }
+.arr-banner.show { display: block; }
+.arr-banner .ab-top { display: flex; align-items: center; gap: 8px; }
+.arr-banner .ab-ico { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg,#F8E3A6,#E0A63E); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.arr-banner .ab-title { font-size: 14px; font-weight: 900; color: #FFFFFF; }
+.arr-banner .ab-title small { display: block; font-size: 10px; color: #F5DC92; font-weight: 700; margin-top: 1px; }
+.arr-banner .ab-close { margin-left: auto; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,.1); color: #DDEBEE; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; }
+.arr-banner .ab-store { font-size: 15px; font-weight: 800; color: #F5DC92; margin-top: 8px; }
+.arr-banner .ab-goods { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.arr-banner .ab-g { font-size: 11px; color: #DDEBEE; background: rgba(255,255,255,.07); border-radius: 8px; padding: 4px 8px; }
+.arr-banner .ab-g b { color: #F5A623; }
+.arr-banner .ab-g b.whole { color: #7CE8E0; }
+.arr-banner .ab-clock { margin-top: 9px; font-size: 12px; font-weight: 800; color: #FF6B6B; background: rgba(255,107,107,.12); border-radius: 8px; padding: 5px 9px; text-align: center; }
+.arr-banner .ab-actions { display: flex; gap: 8px; margin-top: 10px; }
+.arr-banner .ab-btn { flex: 1; text-align: center; font-size: 13px; font-weight: 800; padding: 9px 0; border-radius: 20px; cursor: pointer; }
+.arr-banner .ab-btn.gold { background: linear-gradient(135deg,#F8E3A6,#E0A63E); color: #0B2E38; }
+.arr-banner .ab-btn.blue { background: linear-gradient(135deg,#8FA9FF,#5B84FF); color: #fff; }
 
 /* 通知卡预览（模拟通知栏卡片） */
 .ntpv { background: #0E3340; border: 1px solid rgba(124,184,200,.25); border-radius: 13px; padding: 10px; font-family: 'PingFang SC','Microsoft YaHei',sans-serif; }
@@ -2901,6 +2966,84 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div class="ntp-sub">到店提醒通知的 8 套样式，信息统一（店名 · 距离 · 各筐含整箱 · 打卡 · 双按钮）。<b style="color:#F5DC92;">图文版</b>为默认模板。点击模板卡可看完整预览。</div>
     <div class="ntp-grid" id="notifyTplGrid"></div>
     <div class="ntp-foot">完整设置（选择模板 · 距离阈值 · 响铃开关）在 <b>提醒设置</b> 页（后续开放）</div>
+  </div>
+</div>
+
+<!-- ========== #144 权限引导弹窗（首次/重看） ========== -->
+<div class="pg-modal" id="permGuideModal">
+  <div class="pg-content" onclick="event.stopPropagation()">
+    <div class="pg-head">
+      <div class="pg-ico">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#0B2E38" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <div class="pg-title">物流筐 · 到店提醒</div>
+      <div class="pg-sub">只做一件事：你到店门口时提醒你。<br>下面 3 个权限，讲清楚再决定。</div>
+    </div>
+    <div class="perm-card">
+      <div class="pc-head">
+        <div class="pc-ico gold"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#F5DC92" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+        <div class="pc-name">位置权限</div><div class="pc-tag">到店提醒用</div>
+      </div>
+      <div class="pc-use">只在算<b>「离店还有多远」</b>时用一下，算完就停。<br>不用会怎样：到店不提醒。</div>
+      <div class="pc-safe">位置只在你手机里算，不发给任何人</div>
+    </div>
+    <div class="perm-card">
+      <div class="pc-head">
+        <div class="pc-ico blue"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#8FA9FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="pc-name">通知权限</div><div class="pc-tag">提醒显示用</div>
+      </div>
+      <div class="pc-use">只在<b>到店那一刻</b>弹一条消息（店名 / 送多少筐 / 别忘打卡）。<br>不用会怎样：提醒弹不出来。</div>
+      <div class="pc-safe">只弹到店提醒，不弹广告</div>
+    </div>
+    <div class="perm-card">
+      <div class="pc-head">
+        <div class="pc-ico green"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#4ADE80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div class="pc-name">允许后台运行</div><div class="pc-tag">保活用</div>
+      </div>
+      <div class="pc-use">让手机别<b>「省电省过头」</b>把提醒掐了。<br>不用会怎样：手机省电模式可能把 APP 杀掉，提醒不响。</div>
+      <div class="pc-safe">只是别被手机杀，不做任何额外动作</div>
+    </div>
+    <div class="pg-btn" onclick="permGuideAgree()">都明白，同意并开始</div>
+    <div class="pg-later" onclick="permGuideLater()">不着急，稍后再说（提醒暂时不开启）</div>
+  </div>
+</div>
+
+<!-- ========== #144 权限管理弹窗 ========== -->
+<div class="pm-modal" id="permManageModal">
+  <div class="pm-content" onclick="event.stopPropagation()">
+    <div class="pm-head">
+      <span class="pm-title">权限管理</span>
+      <span class="pm-close" onclick="closePermManage()" aria-label="关闭">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+      </span>
+    </div>
+    <div id="permManageList"></div>
+    <div class="mg-tip">关闭任何权限都只是「不提醒」——记账、拍照识别、定位录入、汇总对账全部照常使用。</div>
+    <div class="mg-last" id="permManageLast"></div>
+    <div class="mg-reguide" onclick="closePermManage();openPermGuide()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#F5DC92" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      重新看一遍权限说明
+    </div>
+  </div>
+</div>
+
+<!-- ========== #144 到店提醒横幅（网页版） ========== -->
+<div class="arr-banner" id="arrivalBanner">
+  <div class="ab-top">
+    <div class="ab-ico">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#0B2E38" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+    </div>
+    <div class="ab-title">即将到达 · 距你 <span id="arrDist">0</span> 米<small>到店提醒</small></div>
+    <div class="ab-close" onclick="arrivalDismiss()" aria-label="关闭">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+    </div>
+  </div>
+  <div class="ab-store" id="arrStore"></div>
+  <div class="ab-goods" id="arrGoods"></div>
+  <div class="ab-clock">不要忘记打卡</div>
+  <div class="ab-actions">
+    <div class="ab-btn gold" onclick="arrivalRecycle()">记录回筐</div>
+    <div class="ab-btn blue" onclick="arrivalNavNext()">导航去下一家</div>
   </div>
 </div>
 
@@ -10536,7 +10679,8 @@ function updateManageSubs() {
     const nf = document.getElementById('manageNotifySub');
     if (nf) {
       const ns = loadNotifySettings();
-      nf.textContent = getNotifyTemplate(ns.template).name + ' · ' + ns.distM + 'm' + (ns.silent ? ' · 静默' : '');
+      const miss = permMissingCount();
+      nf.textContent = miss > 0 ? '待开启引导 · ' + miss + ' 项权限未开' : (getNotifyTemplate(ns.template).name + ' · ' + ns.distM + 'm' + (ns.silent ? ' · 静默' : ''));
     }
   } catch(e) {}
 }
@@ -11092,7 +11236,7 @@ function importData(event) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.3.9'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.4.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -11206,6 +11350,23 @@ if (document.readyState === 'complete') {
   // 兜底：最多 5 秒强制隐藏，防止资源加载失败/过慢导致启动页卡住不消失
   setTimeout(hideBootOverlay, 5000);
 }
+// #144 首次权限引导 + 到店监测初始化（等登录态就绪后）
+setTimeout(function() {
+  try {
+    if (isLoggedIn()) {
+      // 首次（从未看过引导）→ 打开权限引导
+      let seen = false;
+      try { seen = localStorage.getItem(PERM_GUIDE_SEEN_KEY) === '1'; } catch(e) {}
+      if (!seen && permMissingCount() > 0) {
+        setTimeout(openPermGuide, 1200);
+      }
+      // 已开启过监测（上次会话开着）→ 恢复前台监测
+      try {
+        if (localStorage.getItem('kuanwei_arrival_on') === '1') startArrivalMonitor();
+      } catch(e) {}
+    }
+  } catch(e) {}
+}, 2600);
 // APP 版本检查：对比云端 version.txt，有新版本弹可选更新提示（旧版 APP 打开也能提示）
 setTimeout(checkAppVersion, 1500);
 // 注册 Service Worker（离线可用 + 加载加速），禁用 HTTP 缓存，确保每次拿到最新 sw.js
@@ -11590,10 +11751,28 @@ function saveNotifySettings() {
   if (typeof scheduleCloudBackup === 'function') scheduleCloudBackup();
   notifyPending = null;
   updateManageSubs();
-  showToast('提醒设置已保存');
+  // 权限未开全 → 智能提醒（不打断，给两个选择）
+  const miss = permMissingCount();
+  if (miss > 0) {
+    showToast('设置已保存，但位置/通知权限未开启，到店提醒还不会响');
+    setTimeout(function() {
+      openPermManage();
+      showToast('点上面的权限行去开启');
+    }, 800);
+  } else {
+    showToast('提醒设置已保存');
+    startArrivalMonitor();
+  }
   switchPage('manage');
 }
 function openNotifyManagePage() {
+  // 从未看过权限引导 → 先进引导（尊重稍后再说）
+  let seen = false;
+  try { seen = localStorage.getItem(PERM_GUIDE_SEEN_KEY) === '1'; } catch(e) {}
+  if (!seen) {
+    openPermGuide();
+    return;
+  }
   switchPage('notify');
 }
 // 当前模板卡迷你预览（与设计稿一致）
@@ -11614,6 +11793,21 @@ function notifyMiniThumb(tplId) {
 }
 function renderNotifyManage() {
   const s = Object.assign(loadNotifySettings(), notifyPending || {});
+  // 顶部权限横幅（未开全时显示）
+  const body = document.querySelector('#page-notify .ntm-body');
+  if (body) {
+    let bw = body.querySelector('.gd-banner');
+    const html = permBannerHtml();
+    if (html) {
+      if (!bw) {
+        bw = document.createElement('div');
+        body.insertBefore(bw, body.firstChild);
+      }
+      bw.outerHTML = html;
+    } else if (bw) {
+      bw.remove();
+    }
+  }
   // ① 当前默认模板卡
   const cur = document.getElementById('ntmCurCard');
   if (cur) {
@@ -11676,6 +11870,276 @@ function toggleNotifySilent() {
   notifyPending = Object.assign(s, { silent: !s.silent });
   renderNotifyManage();
 }
+// ===== #144 权限引导 / 权限管理 / 到店监测 =====
+var PERM_GUIDE_SEEN_KEY = 'kuanwei_perm_guide_seen';
+var ARRIVAL_INTERVAL = 60000; // 前台监测间隔 60s
+var arrivalTimer = null;
+var arrivalNotified = {}; // 每店已提醒标记（防重复）
+var arrivalLastPos = null;
+var arrivalLastStoreIdx = -1;
+
+// 网页版权限状态检测（APK 内由原生插件增强）
+function getPermState() {
+  const st = { location: false, notification: false, background: false };
+  // 位置：尝试过一次 geolocation 成功则记 true（启动时轻量探测）
+  try { st.location = !!(arrivalLastPos) || localStorage.getItem('kuanwei_loc_ok') === '1'; } catch(e) {}
+  // 通知：Notification API
+  try { st.notification = !!(window.Notification && Notification.permission === 'granted'); } catch(e) {}
+  // 后台运行：网页版无法检测，APK 内由原生返回；默认按已同意引导计（可重看）
+  try { st.background = localStorage.getItem('kuanwei_bg_ok') === '1'; } catch(e) {}
+  return st;
+}
+function permMissingCount() {
+  const st = getPermState();
+  return (st.location ? 0 : 1) + (st.notification ? 0 : 1);
+}
+// 打开引导（首次 or 重看）
+function openPermGuide() {
+  const m = document.getElementById('permGuideModal');
+  if (m) m.classList.add('show');
+}
+function closePermGuide() {
+  const m = document.getElementById('permGuideModal');
+  if (m) m.classList.remove('show');
+}
+// 同意并开始：逐个申请权限
+function permGuideAgree() {
+  // 通知权限
+  try {
+    if (window.Notification && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission();
+    }
+  } catch(e) {}
+  // 位置权限：请求一次定位（成功记 kuanwei_loc_ok）
+  try {
+    if (navigator.geolocation && !arrivalLastPos) {
+      navigator.geolocation.getCurrentPosition(
+        function(pos) { arrivalLastPos = { lat: pos.coords.latitude, lng: pos.coords.longitude }; try { localStorage.setItem('kuanwei_loc_ok', '1'); } catch(e) {} },
+        function() {}, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+      );
+    }
+  } catch(e) {}
+  try { localStorage.setItem('kuanwei_bg_ok', '1'); } catch(e) {}
+  try { localStorage.setItem(PERM_GUIDE_SEEN_KEY, '1'); } catch(e) {}
+  closePermGuide();
+  // APK 内：调用原生申请（含后台定位/通知），并启动监测
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ArrivalMonitor) {
+    try { window.Capacitor.Plugins.ArrivalMonitor.requestPermissions().then(function(){ renderNotifyManage(); }); } catch(e) {}
+  }
+  startArrivalMonitor();
+  showToast('好的，到店提醒开始工作了');
+  renderNotifyManage();
+}
+// 稍后再说：只记录已看过，不申请
+function permGuideLater() {
+  try { localStorage.setItem(PERM_GUIDE_SEEN_KEY, '1'); } catch(e) {}
+  closePermGuide();
+  showToast('可以，需要时随时在通知栏管理里开启');
+}
+// 权限管理弹窗
+function openPermManage() {
+  renderPermManage();
+  const m = document.getElementById('permManageModal');
+  if (m) m.classList.add('show');
+}
+function closePermManage() {
+  const m = document.getElementById('permManageModal');
+  if (m) m.classList.remove('show');
+}
+function renderPermManage() {
+  const st = getPermState();
+  const list = document.getElementById('permManageList');
+  if (list) {
+    list.innerHTML =
+      '<div class="mg-row" onclick="permRowAction(\'location\')">' +
+        '<div class="mg-ico gold" style="background:rgba(245,220,146,.16);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#F5DC92" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.5-7-11a7 7 0 0 1 14 0c0 6.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>' +
+        '<div class="mg-info"><div class="mg-name">位置权限</div><div class="mg-desc">到店提醒 · 只在算距离时用</div></div>' +
+        '<span class="mg-state ' + (st.location ? 'on' : 'off') + '">' + (st.location ? '已开启' : '未开启') + '</span><span class="mg-arrow">›</span>' +
+      '</div>' +
+      '<div class="mg-row" onclick="permRowAction(\'notification\')">' +
+        '<div class="mg-ico blue" style="background:rgba(124,155,255,.16);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#8FA9FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>' +
+        '<div class="mg-info"><div class="mg-name">通知权限</div><div class="mg-desc">到店提醒显示</div></div>' +
+        '<span class="mg-state ' + (st.notification ? 'on' : 'off') + '">' + (st.notification ? '已开启' : '未开启') + '</span><span class="mg-arrow">›</span>' +
+      '</div>' +
+      '<div class="mg-row" onclick="permRowAction(\'background\')">' +
+        '<div class="mg-ico green" style="background:rgba(74,222,128,.14);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#4ADE80" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>' +
+        '<div class="mg-info"><div class="mg-name">允许后台运行</div><div class="mg-desc">别被手机省电杀掉</div></div>' +
+        '<span class="mg-state ' + (st.background ? 'on' : 'off') + '">' + (st.background ? '已开启' : '未开启') + '</span><span class="mg-arrow">›</span>' +
+      '</div>' +
+      '<div class="mg-row" onclick="toggleArrivalMonitor()">' +
+        '<div class="mg-ico" style="background:rgba(255,255,255,.07);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#DDEBEE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>' +
+        '<div class="mg-info"><div class="mg-name">到店提醒总开关</div><div class="mg-desc">一键全关，不影响记账功能</div></div>' +
+        '<span class="mg-state ' + (arrivalTimer ? 'on' : 'off') + '">' + (arrivalTimer ? '开启中' : '已关闭') + '</span><span class="mg-arrow">›</span>' +
+      '</div>';
+  }
+  // 数据透明行：最近一次定位
+  const last = document.getElementById('permManageLast');
+  if (last) {
+    if (arrivalLastPos) {
+      // 找最近匹配门店
+      const cfg = loadStoreConfig();
+      let near = null, best = 1e9;
+      cfg.forEach(s => {
+        if (!s.lat || !s.lng) return;
+        const d = haversineM(arrivalLastPos.lat, arrivalLastPos.lng, s.lat, s.lng);
+        if (d < best) { best = d; near = s; }
+      });
+      last.innerHTML = near
+        ? '最近一次定位：<b>' + escapeHtml(near.name) + '</b> · 距你约 ' + Math.round(best) + ' 米<br>用途：计算到店距离 · 已自动停止，无持续追踪'
+        : '最近一次定位：<b>当前坐标</b>（' + arrivalLastPos.lat.toFixed(5) + ', ' + arrivalLastPos.lng.toFixed(5) + '）<br>用途：计算到店距离 · 已自动停止，无持续追踪';
+    } else {
+      last.innerHTML = '尚未定位记录。<br>用途：计算到店距离 · 已自动停止，无持续追踪';
+    }
+  }
+}
+// 权限行点击
+function permRowAction(kind) {
+  // APK 内：跳系统设置或重新申请
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ArrivalMonitor) {
+    try { window.Capacitor.Plugins.ArrivalMonitor.openSettings(kind); return; } catch(e) {}
+  }
+  if (kind === 'location') {
+    try { navigator.geolocation.getCurrentPosition(function(){ try { localStorage.setItem('kuanwei_loc_ok','1'); } catch(e){} renderPermManage(); }, function(){ showToast('请在手机设置里允许位置权限'); }, { enableHighAccuracy: true, timeout: 8000 }); } catch(e) { showToast('请在手机设置里允许位置权限'); }
+  } else if (kind === 'notification') {
+    try { if (Notification.permission === 'default') { Notification.requestPermission(); setTimeout(renderPermManage, 800); } else { showToast('请在手机设置里开启通知权限'); } } catch(e) { showToast('请在手机设置里开启通知权限'); }
+  } else {
+    showToast('后台运行：请在手机设置 → 电池/应用管理里允许后台运行（或重看权限说明）');
+  }
+  setTimeout(renderPermManage, 1000);
+}
+// 到店监测（前台 60s 轮询）
+function startArrivalMonitor() {
+  try { localStorage.setItem('kuanwei_arrival_on', '1'); } catch(e) {}
+  if (arrivalTimer) return;
+  arrivalTimer = setInterval(arrivalTick, ARRIVAL_INTERVAL);
+  arrivalTick();
+}
+function stopArrivalMonitor() {
+  try { localStorage.setItem('kuanwei_arrival_on', '0'); } catch(e) {}
+  if (arrivalTimer) { clearInterval(arrivalTimer); arrivalTimer = null; }
+}
+function toggleArrivalMonitor() {
+  if (arrivalTimer) { stopArrivalMonitor(); arrivalDismiss(); showToast('到店提醒已关闭（记账等功能不受影响）'); }
+  else { startArrivalMonitor(); showToast('到店提醒已开启'); }
+  renderPermManage();
+  renderNotifyManage();
+  updateManageSubs();
+}
+function arrivalTick() {
+  const ns = loadNotifySettings();
+  if (!ns || !ns.ring && !arrivalTimer) return; // 总开关：ring=false 不算关（ring 是响铃），总开关由 arrivalTimer 控制
+  if (!navigator.geolocation) return;
+  const cfg = loadStoreConfig();
+  if (!cfg.some(s => s.lat && s.lng)) return; // 无已定位门店不监测
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    arrivalLastPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    try { localStorage.setItem('kuanwei_loc_ok', '1'); } catch(e) {}
+    // 找最近的有定位门店
+    let nearIdx = -1, best = 1e9;
+    cfg.forEach((s, i) => {
+      if (!s.lat || !s.lng) return;
+      const d = haversineM(arrivalLastPos.lat, arrivalLastPos.lng, s.lat, s.lng);
+      if (d < best) { best = d; nearIdx = i; }
+    });
+    if (nearIdx < 0) return;
+    // 到店判定：距离 ≤ 设置档位
+    if (best <= ns.distM) {
+      // 防重复：进入范围且上次不在该店/未提醒过 → 提醒
+      if (!arrivalNotified[nearIdx]) {
+        arrivalNotified[nearIdx] = Date.now();
+        arrivalShow(nearIdx, best);
+      }
+    } else {
+      // 离开范围 → 重置该店提醒标记
+      delete arrivalNotified[nearIdx];
+    }
+    arrivalLastStoreIdx = nearIdx;
+  }, function() {}, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+}
+// 距离（米）
+function haversineM(lat1, lng1, lat2, lng2) {
+  const R = 6371000, rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad, dLng = (lng2 - lng1) * rad;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*rad) * Math.cos(lat2*rad) * Math.sin(dLng/2) * Math.sin(dLng/2);
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+// 组装到店数据（店名/距离/当天各筐发出量/整箱）
+function buildArrivalData(storeIdx, distM) {
+  const cfg = loadStoreConfig();
+  const s = cfg[storeIdx];
+  if (!s) return null;
+  const date = todayStr();
+  const data = loadData();
+  const goods = loadGoodsNames();
+  const byStore = data.filter(r => r.date === date && r.storeIdx === storeIdx && (r.qtyIn > 0 || r.qtyWhole > 0));
+  const map = {};
+  byStore.forEach(r => {
+    if (!map[r.goodsIdx]) map[r.goodsIdx] = { name: r.goodsName || (goods[r.goodsIdx] || ''), qty: 0, whole: 0 };
+    map[r.goodsIdx].qty += r.qtyIn || 0;
+    if (r.qtyWhole) map[r.goodsIdx].whole += r.qtyWhole;
+  });
+  const goodsArr = Object.keys(map).map(k => map[k]).filter(g => g.name);
+  // 缺的筐补 0（5 种筐全列）
+  goods.forEach((gn, gi) => {
+    if (!map[gi] && gn) goodsArr.push({ name: gn, qty: 0, whole: 0 });
+  });
+  return { storeIdx, storeName: s.name, distM: Math.round(distM), goods: goodsArr, curIdx: storeIdx };
+}
+// 网页版提醒横幅
+function arrivalShow(storeIdx, distM) {
+  const d = buildArrivalData(storeIdx, distM);
+  if (!d) return;
+  const b = document.getElementById('arrivalBanner');
+  document.getElementById('arrDist').textContent = d.distM;
+  document.getElementById('arrStore').textContent = '即将到达 ' + d.storeName;
+  const g = document.getElementById('arrGoods');
+  g.innerHTML = d.goods.map(x => {
+    let inner = '<b>' + x.qty + '</b> ' + escapeHtml(x.name);
+    if (x.whole > 0) inner += ' · <b class="whole">' + x.whole + '</b> 整箱';
+    return '<span class="ab-g">' + inner + '</span>';
+  }).join('');
+  if (b) b.classList.add('show');
+  // APK 内：调用原生发系统通知栏通知
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ArrivalMonitor) {
+    try {
+      const ns = loadNotifySettings();
+      window.Capacitor.Plugins.ArrivalMonitor.notifyArrival({ data: JSON.stringify(d), template: ns.template, ring: !!ns.ring, vibrate: !!ns.vibrate, silent: !!ns.silent });
+    } catch(e) {}
+  }
+}
+function arrivalDismiss() {
+  const b = document.getElementById('arrivalBanner');
+  if (b) b.classList.remove('show');
+}
+function arrivalRecycle() {
+  arrivalDismiss();
+  switchPage('recover');
+  showToast('已打开回收页，定位当前门店');
+}
+function arrivalNavNext() {
+  arrivalDismiss();
+  // 导航到下一家店（有定位的）
+  const cfg = loadStoreConfig();
+  const next = cfg.find((s, i) => i > arrivalLastStoreIdx && s.lat && s.lng) || cfg.find(s => s.lat && s.lng);
+  if (next && next.lat) {
+    const url = 'https://uri.amap.com/navigation?to=' + next.lng + ',' + next.lat + ',' + encodeURIComponent(next.name);
+    window.open(url, '_blank');
+  } else {
+    showToast('暂无下一家有定位的门店');
+  }
+}
+// 到店提醒横幅（通知栏管理页顶部）——renderNotifyManage 内调用
+function permBannerHtml() {
+  const miss = permMissingCount();
+  if (miss === 0) return '';
+  const st = getPermState();
+  const missing = [(!st.location ? '位置' : ''), (!st.notification ? '通知' : '')].filter(Boolean).join(' / ');
+  return '<div class="gd-banner" onclick="openPermGuide()">' +
+    '<div class="gb-ico"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#F5DC92" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></div>' +
+    '<div class="gb-text">到店提醒还没开：' + missing + '权限未开启<small>点我一步步开启，约 1 分钟</small></div>' +
+    '<div class="gb-arrow">›</div></div>';
+}
+
 </script>
 
 <!-- 额外发收登记弹窗（针对所有门店，挂 BODY 直接子级：按钮在记录页，切页时首页 display:none 不影响弹窗显示） -->
