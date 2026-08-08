@@ -1,7 +1,7 @@
 {
-  "versionCode": 105,
-  "versionName": "7.7.5",
-  "apkUrl": "https://raw.githubusercontent.com/xiaokai8237-boop/inventory-app/main/apk/app-v7.7.5.apk",
+  "versionCode": 106,
+  "versionName": "7.7.6",
+  "apkUrl": "https://raw.githubusercontent.com/xiaokai8237-boop/inventory-app/main/apk/app-v7.7.6.apk",
   "minVersionCode": 80,
-  "changelog": "门店未录入弹窗深空蓝晶化（去emoji+SVG图标+红字警示）；识别结果未录门店标黄+未录入小标；保存提示明确已录N家/未录M家"
+  "changelog": "未录门店数字暂存+一键补录：识别保存时未录门店数字自动暂存，店面管理添加门店后自动弹补录，数字一键带回直接入账不重填"
 }

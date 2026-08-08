@@ -4063,6 +4063,28 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   </div>
 </div>
 
+<!-- 未录门店补录弹窗（#151 方案A：保存时暂存数字 → 店面管理添加后自动弹补录） -->
+<div class="store-ocr-modal" id="unregPendingModal" onclick="closeUnregPendingModal()">
+  <div class="store-ocr-content" style="max-width:340px;text-align:center;background:#0E3340;border:1.5px solid rgba(245,220,146,.55);border-radius:22px;padding:22px 18px 16px;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:center;margin-bottom:12px;">
+      <span style="width:54px;height:54px;border-radius:50%;background:rgba(124,232,224,.15);border:1.5px solid rgba(124,232,224,.6);display:flex;align-items:center;justify-content:center;">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7CE8E0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </span>
+    </div>
+    <div id="unregPendingTitle" style="font-size:16px;font-weight:900;color:#fff;margin-bottom:4px;">上次有门店没存上</div>
+    <div style="font-size:11px;color:#8FA3AE;margin-bottom:12px;">现在已录入店面管理，补录一下？数字已带出上次填的，可改</div>
+    <div id="unregPendingList" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:6px 10px;"></div>
+    <div style="font-size:10px;color:#9FD0D6;margin-top:10px;line-height:1.6;text-align:left;">确认后直接入账，不用重新识别；常温筐填物流箱 + 整箱数</div>
+    <div style="display:flex;gap:10px;margin-top:14px;">
+      <button onclick="closeUnregPendingModal()" style="flex:1;font-size:14px;font-weight:800;border-radius:20px;padding:11px 0;background:rgba(255,255,255,.07);color:#DDEBEE;border:1px solid rgba(255,255,255,.2);cursor:pointer;">稍后再说</button>
+      <button onclick="doUnregPendingSave()" style="flex:1;font-size:14px;font-weight:800;border-radius:20px;padding:11px 0;background:linear-gradient(135deg,#F8E3A6,#E0A63E);color:#0B2E38;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(224,166,62,.35);display:flex;align-items:center;justify-content:center;gap:6px;">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        补录入账
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- 单据类型不一致提醒弹窗（body 顶层） -->
 <div class="store-ocr-modal" id="typeMismatchModal">
   <div class="store-ocr-content" style="max-width:360px;" onclick="event.stopPropagation()">
@@ -7429,7 +7451,7 @@ function applyEmitVoice() {
       }
       if (qty <= 0 && whole <= 0) return;
       const storeIdx = matchStoreIdxByNameOrAlias(r.name || '', r.code || '', cfg);
-      if (storeIdx < 0) { unmatched++; return; }
+      if (storeIdx < 0) { stashUnregStore(r, qty, whole, emitGoodsIdx, date); unmatched++; return; }
       const existing = data.find(x => x.date === date && x.storeIdx === storeIdx && x.goodsIdx === emitGoodsIdx);
       if (existing) {
         if (currentActionType === 'out') existing.qtyOut = qty;
@@ -8208,6 +8230,7 @@ function addStoreFromPanel() {
   saveStoreConfig(cfg);
   renderStorePanelUI();
   initAllStores();
+  checkUnregPending(); // #151 暂存里已录入的店 → 自动弹补录
 }
 function removeStoreFromPanel(idx) {
   let cfg = loadStoreConfig();
@@ -10060,6 +10083,121 @@ function unregStoreGotoManage() {
   showToast('请先录入这些门店，再回来识别');
 }
 
+// ======== #151 未录门店数字暂存 + 一键补录（方案A） ========
+// 保存时未录门店的数字暂存到本地（店名+编号+数量+筐+日期），店面管理添加门店后自动弹补录
+function loadUnregPending() {
+  try { return JSON.parse(localStorage.getItem(scopeKey('kuanwei_unreg_pending')) || '[]'); } catch(e) { return []; }
+}
+function saveUnregPending(arr) {
+  try { localStorage.setItem(scopeKey('kuanwei_unreg_pending'), JSON.stringify(arr)); } catch(e) {}
+}
+// 保存时调用：未匹配到店面管理的店 → 暂存数字（同店去重，保留最新）
+function stashUnregStore(r, qty, whole, goodsIdx, date) {
+  try {
+    const nm = (r.name || '').trim() || (r.code || '').trim() || '';
+    if (!nm) return;
+    const arr = loadUnregPending();
+    const ex = arr.find(x => (x.name || '') === nm);
+    const item = {
+      name: nm,
+      code: (r.code || '').trim(),
+      qty: qty || 0,
+      whole: whole || 0,
+      goodsIdx: goodsIdx,
+      date: date || todayStr(),
+      action: currentActionType === 'out' ? 'out' : 'in',
+      ts: Date.now()
+    };
+    if (ex) { Object.assign(ex, item); }
+    else { arr.push(item); }
+    saveUnregPending(arr);
+  } catch(e) {}
+}
+// 店面管理添加门店后调用：暂存里已录入的店 → 自动弹补录
+function checkUnregPending() {
+  try {
+    const arr = loadUnregPending();
+    if (!arr.length) return;
+    const cfg = loadStoreConfig();
+    const ready = arr.filter(x => matchStoreIdxByNameOrAlias(x.name || '', x.code || '', cfg) >= 0);
+    if (!ready.length) return;
+    renderUnregPendingModal(ready);
+    showModal('unregPendingModal');
+  } catch(e) {}
+}
+function renderUnregPendingModal(items) {
+  const list = document.getElementById('unregPendingList');
+  if (!list) return;
+  const names = loadGoodsNames();
+  const title = document.getElementById('unregPendingTitle');
+  if (title) title.textContent = '上次有 ' + items.length + ' 家店没存上';
+  list.innerHTML = items.map((x, i) => {
+    const isChangWen = x.goodsIdx === 4;
+    const goodsName = names[x.goodsIdx] || '筐';
+    const wholeInp = isChangWen
+      ? '<input type="number" inputmode="numeric" min="0" value="' + (x.whole || 0) + '" id="unregPendingWhole_' + i + '" style="width:48px;text-align:center;font-size:15px;font-weight:800;padding:5px 2px;border:1.5px solid rgba(124,232,224,.55);border-radius:8px;background:rgba(124,232,224,.06);color:#7CE8E0;outline:none;">'
+      : '';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 2px;border-bottom:1px solid rgba(255,255,255,.06);">' +
+      '<span style="flex:1;min-width:0;text-align:left;font-size:12px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(x.name || '') +
+      '<small style="display:block;font-size:9px;color:#8FA3AE;margin-top:2px;">' + escapeHtml(goodsName) + ' · ' + escapeHtml(x.date || '') + '</small></span>' +
+      '<span style="display:flex;align-items:center;gap:4px;flex-shrink:0;">' +
+      (isChangWen ? '<span style="font-size:9px;color:#8FA3AE;">整</span>' + wholeInp + '<span style="font-size:9px;color:#8FA3AE;">箱</span>' : '') +
+      '<span style="font-size:9px;color:#8FA3AE;">物流</span>' +
+      '<input type="number" inputmode="numeric" min="0" value="' + (x.qty || 0) + '" id="unregPendingQty_' + i + '" style="width:48px;text-align:center;font-size:15px;font-weight:800;padding:5px 2px;border:1.5px solid rgba(245,166,35,.55);border-radius:8px;background:rgba(245,166,35,.06);color:#F5A623;outline:none;">' +
+      '</span></div>';
+  }).join('');
+}
+function closeUnregPendingModal() {
+  document.getElementById('unregPendingModal').classList.remove('show');
+}
+// 补录入账：读输入框数字 → 直接写当天记录 → 清除已补的暂存项
+function doUnregPendingSave() {
+  try {
+    const arr = loadUnregPending();
+    if (!arr.length) { closeUnregPendingModal(); return; }
+    const cfg = loadStoreConfig();
+    const names = loadGoodsNames();
+    const data = loadData();
+    let saved = 0;
+    const kept = [];
+    arr.forEach((x, i) => {
+      const qtyEl = document.getElementById('unregPendingQty_' + i);
+      const wholeEl = document.getElementById('unregPendingWhole_' + i);
+      const qty = qtyEl ? parseInt(qtyEl.value) || 0 : x.qty || 0;
+      const whole = wholeEl ? parseInt(wholeEl.value) || 0 : x.whole || 0;
+      if (qty <= 0 && whole <= 0) { kept.push(x); return; }
+      const storeIdx = matchStoreIdxByNameOrAlias(x.name || '', x.code || '', cfg);
+      if (storeIdx < 0) { kept.push(x); return; } // 还没录入 → 保留等下次
+      const date = x.date || todayStr();
+      const goodsIdx = x.goodsIdx;
+      const isOut = x.action === 'out';
+      const existing = data.find(r => r.date === date && r.storeIdx === storeIdx && r.goodsIdx === goodsIdx);
+      if (existing) {
+        if (isOut) existing.qtyOut = qty; else existing.qtyIn = qty;
+        if (goodsIdx === 4) existing.qtyWhole = whole;
+        existing.source = 'ocr';
+        existing.updatedAt = new Date().toISOString();
+      } else {
+        data.push({
+          id: Date.now() + '-unreg-' + storeIdx + '-' + goodsIdx,
+          date, storeIdx, storeName: cfg[storeIdx].name,
+          goodsIdx, goodsName: names[goodsIdx] || '',
+          qtyIn: isOut ? 0 : qty,
+          qtyOut: isOut ? qty : 0,
+          qtyWhole: goodsIdx === 4 ? whole : 0,
+          source: 'ocr', createdAt: new Date().toISOString()
+        });
+      }
+      saved++;
+    });
+    saveDataArr(data);
+    saveUnregPending(kept);
+    closeUnregPendingModal();
+    try { reloadRecordInputs(); renderTodayOverview(); initAllStores(); } catch(e) {}
+    showToast(saved > 0 ? '补录成功 ' + saved + ' 家店入账' + (kept.length ? '，还有 ' + kept.length + ' 家未录入' : '') : '暂无可补录的门店');
+  } catch(e) { showToast('补录失败'); }
+}
+
 function confirmOcrResult() {
   if (!ocrCurrentResult || !ocrCurrentResult.rows) { showToast('无识别结果'); return; }
   const goodsIdx = ocrCurrentResult.goodsIdx;
@@ -10124,7 +10262,7 @@ function confirmOcrResult() {
         }
       }
     }
-    if (storeIdx < 0) { unmatched++; return; }
+    if (storeIdx < 0) { stashUnregStore(r, qty, whole, goodsIdx, date); unmatched++; return; }
     // 编号变化自动加别名：识别出的编号不在该门店别名里 → 自动新增，下次识别到新编号也能匹配
     if (r.code) {
       const codeStr = String(r.code).trim();
@@ -11185,6 +11323,7 @@ function addStore() {
   cfg.push({ name: '新店面', aliases: [] });
   saveStoreConfig(cfg);
   renderStoreConfigUI();
+  checkUnregPending(); // #151 暂存里已录入的店 → 自动弹补录
 }
 
 function removeStore(idx) {
@@ -11475,7 +11614,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.7.5'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.7.6'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
