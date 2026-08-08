@@ -58,6 +58,26 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
+
+        <!-- 到店提醒（#144）：前台服务 + 地理围栏触发接收器 -->
+        <service
+            android:name=".ArrivalForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+        <receiver
+            android:name=".ArrivalGeofenceReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.kuanwei.inventory.ARRIVAL_GEOFENCE" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".ArrivalBootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <!-- 核心权限（保留） -->
@@ -70,6 +90,13 @@
     <!-- 门店定位录入（#138）：到店点一下 GPS 定位所需 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- 到店提醒（#144）：后台定位 + 通知权限（Android 13+）+ 前台服务 + 开机自启 -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <!-- APK 自动更新：允许安装未知来源应用（用户首次会收到系统授权弹窗） -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!-- 导出文件下载到 Download 目录：仅 Android 9(API28)及以下需要此存储权限；Android 10+ 用作用域存储无需 -->
