@@ -28,10 +28,15 @@ function ok(name, cond, extra) {
     ok(`弹窗 ${pid} 已删除`, !exists);
   }
 
-  // 2. 关键函数保留（真实功能）
-  for (const fn of ['getEmitOrder', 'saveEmitOrder', 'renderEmitStoreList', 'handlePhoto', 'triggerPhoto', 'emitTriggerPhoto', 'startVoice', 'stopVoice', 'showModal']) {
+  // 2. 关键函数保留（真实功能；语音体系 v7.2.6 已重构为 emitVoiceOverlay 系列，#77/#110）
+  for (const fn of ['getEmitOrder', 'renderEmitStoreList', 'handlePhoto', 'triggerPhoto', 'emitTriggerPhoto', 'showEmitVoiceOverlay', 'hideEmitVoiceOverlay', 'showModal']) {
     const defined = await page.evaluate(name => typeof window[name] === 'function', fn);
     ok(`函数 ${fn} 保留`, defined);
+  }
+  // 旧语音函数应已移除（startVoice/stopVoice 被 emitVoice 流程替代）
+  for (const fn of ['startVoice', 'stopVoice']) {
+    const removed = await page.evaluate(name => typeof window[name] !== 'function', fn);
+    ok(`旧函数 ${fn} 已移除`, removed);
   }
 
   // 3. 已删函数确实不存在（避免幽灵引用）
@@ -53,10 +58,9 @@ function ok(name, cond, extra) {
   });
   ok('closePhotoInputModal 调用无异常', callOk);
 
-  // 6. 录音流程仍可启动（startVoice 定义存在且调用不抛引用错误）
-  // 注意：真实录音需要麦克风权限，只验证函数入口存在且 voiceOverlay 可打开
-  const voiceOverlayExists = await page.evaluate(() => !!document.getElementById('voiceOverlay'));
-  ok('voiceOverlay 录音浮层保留', voiceOverlayExists);
+  // 6. 录音流程仍可启动（新 emitVoiceOverlay 浮层存在，旧 voiceOverlay 已移除）
+  const voiceOverlayExists = await page.evaluate(() => !!document.getElementById('emitVoiceOverlay'));
+  ok('emitVoiceOverlay 录音浮层保留', voiceOverlayExists);
 
   // 7. 回收店序功能保留（recoverStoreOrderModal 真实入口）
   const recoverBtn = await page.evaluate(() => {
@@ -101,7 +105,7 @@ function ok(name, cond, extra) {
     const m = html.match(/APP_VERSION = '([\d.]+)'/);
     return m ? m[1] : null;
   });
-  ok(`版本号 ${ver}`, ver === '6.0.114');
+  ok(`版本号 ${ver}`, ver === '7.7.0');
 
   await browser.close();
   console.log(`\n===== ${passed}/${passed + failed} 通过 =====`);
