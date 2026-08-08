@@ -1,7 +1,7 @@
 {
-  "versionCode": 103,
-  "versionName": "7.7.3",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v7.7.3.apk",
-  "note": "【v7.7.3 更新内容】\n1. 拍照识别结果 = 图片实际内容：图片里识别出几家门店，结果就显示几家（门店名 + 编号 + 物流箱数），图片里没有的门店不再自动补进来\n2. 识别结果里未录入门店管理的门店：保存时跳过并明确提示「N 家店未录入被跳过」\n3. 顺带修复：语音录入确认弹窗的显示逻辑（保证按店面顺序显示）\n4. 历史功能：回收页自动定位、系统通知 8 套模板、启动页、深空蓝晶弹窗",
-  "force": false
+  "versionCode": 104,
+  "versionName": "7.7.4",
+  "apkUrl": "https://raw.githubusercontent.com/xiaokai8237-boop/inventory-app/main/apk/app-v7.7.4.apk",
+  "minVersionCode": 80,
+  "changelog": "原生启动页 splash.png 替换为深空蓝晶新设计（11 个密度目录全部更新）；网页层 bootOverlay 已是新设计"
 }
