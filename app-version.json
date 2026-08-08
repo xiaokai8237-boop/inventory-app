@@ -1,7 +1,7 @@
 {
-  "versionCode": 104,
-  "versionName": "7.7.4",
-  "apkUrl": "https://raw.githubusercontent.com/xiaokai8237-boop/inventory-app/main/apk/app-v7.7.4.apk",
+  "versionCode": 105,
+  "versionName": "7.7.5",
+  "apkUrl": "https://raw.githubusercontent.com/xiaokai8237-boop/inventory-app/main/apk/app-v7.7.5.apk",
   "minVersionCode": 80,
-  "changelog": "原生启动页 splash.png 替换为深空蓝晶新设计（11 个密度目录全部更新）；网页层 bootOverlay 已是新设计"
+  "changelog": "门店未录入弹窗深空蓝晶化（去emoji+SVG图标+红字警示）；识别结果未录门店标黄+未录入小标；保存提示明确已录N家/未录M家"
 }
