@@ -2228,12 +2228,13 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 #page-manage .manage-user-head .muh-arrow { color: rgba(255,255,255,.9); font-size: 26px; }
 #page-manage .manage-user-extra { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.18); }
 #page-manage .manage-vip-btn {
-  display: inline-block; margin-top: 10px; width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; width: 100%;
   padding: 13px 0; border-radius: 44px; border: none; cursor: pointer;
   background: linear-gradient(160deg,#F8E3A6,#C89B4E);
   color: #0B2E38; font-size: 17px; font-weight: 700; font-family: inherit;
   box-shadow: 0 6px 18px rgba(200,155,78,.35);
 }
+#page-manage .manage-vip-btn svg { width: 17px; height: 17px; stroke: #7A4E00; flex-shrink: 0; }
 #page-manage .manage-item {
   background: none; border: none; cursor: pointer; text-align: left;
   width: 100%; padding: 17px 18px; font-family: inherit;
@@ -2518,6 +2519,62 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 .vip-later { font-size: 12px; color: #7E97A1; cursor: pointer; padding: 10px 0 2px; }
 .vip-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border-radius: 8px; padding: 1px 6px; vertical-align: 1px; }
 .vip-tag svg { width: 9px; height: 9px; stroke: #7A4E00; }
+/* ===== 需求5 会员中心 ===== */
+#page-vip { padding-bottom: 30px; }
+.mc-head { display: flex; align-items: center; gap: 8px; padding: 14px 14px 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.mc-back { width: 34px; height: 34px; border: none; background: none; color: #9FD0D6; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.mc-title { flex: 1; font-size: 16px; font-weight: 800; color: #fff; }
+.mc-title small { font-size: 10px; color: #7E97A1; font-weight: 400; margin-left: 6px; }
+.mc-body { padding: 0 14px; }
+.mc-status { margin-top: 12px; padding: 13px 14px; border-radius: 14px; background: linear-gradient(135deg, rgba(248,227,166,.16), rgba(224,166,62,.10)); border: 1.5px solid rgba(245,220,146,.55); }
+.mc-status .row1 { display: flex; align-items: center; gap: 9px; }
+.mc-status .crown-ic { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg,#F8E3A6,#E0A63E); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mc-status .crown-ic svg { width: 17px; height: 17px; stroke: #7A4E00; }
+.mc-status .st-name { font-size: 14px; font-weight: 800; color: #F5DC92; }
+.mc-status .st-sub { font-size: 10px; color: #9FD0D6; margin-top: 1px; }
+.mc-status .st-tag { margin-left: auto; font-size: 10px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border-radius: 10px; padding: 3px 9px; white-space: nowrap; }
+.mc-status .st-note { font-size: 10px; color: #9FD0D6; margin-top: 9px; border-top: 1px dashed rgba(245,220,146,.3); padding-top: 8px; line-height: 1.5; }
+.mc-sec { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: #F5DC92; margin: 14px 2px 8px; }
+.mc-sec-no { font-size: 10px; color: #0B2E38; background: #F5DC92; border-radius: 8px; padding: 1px 6px; font-weight: 800; }
+.mc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.mc-card { position: relative; background: rgba(255,255,255,.04); border-radius: 14px; padding: 12px 12px 11px; text-align: center; border: 1.5px solid rgba(255,255,255,.09); }
+.mc-card.lv1 { border-color: rgba(184,196,202,.35); }
+.mc-card.lv2 { border-color: rgba(232,200,116,.5); background: rgba(232,200,116,.05); }
+.mc-card.lv3 { border-color: rgba(255,217,128,.75); background: rgba(255,217,128,.08); box-shadow: 0 0 14px rgba(255,217,128,.12); }
+.mc-card.lv4 { border-color: rgba(255,157,92,.9); background: linear-gradient(160deg, rgba(255,157,92,.12), rgba(224,166,62,.06)); box-shadow: 0 0 18px rgba(255,157,92,.18); }
+.mc-card .lv-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 800; letter-spacing: .5px; border-radius: 9px; padding: 2px 9px; margin-bottom: 7px; color: #0A1A22; }
+.mc-card.lv1 .lv-badge { background: #B8C4CA; }
+.mc-card.lv2 .lv-badge { background: #E8C874; }
+.mc-card.lv3 .lv-badge { background: #FFD980; }
+.mc-card.lv4 .lv-badge { background: #FF9D5C; color: #3A1200; }
+.mc-card .lv-badge svg { width: 10px; height: 10px; stroke: currentColor; fill: none; }
+.mc-card .pl-name { font-size: 13px; font-weight: 800; color: #fff; }
+.mc-card .pl-price { font-size: 23px; font-weight: 900; margin: 4px 0 2px; }
+.mc-card.lv1 .pl-price { color: #B8C4CA; }
+.mc-card.lv2 .pl-price { color: #E8C874; }
+.mc-card.lv3 .pl-price { color: #FFD980; }
+.mc-card.lv4 .pl-price { color: #FF9D5C; }
+.mc-card .pl-price small { font-size: 10px; font-weight: 600; color: #9FD0D6; }
+.mc-card .pl-sub { font-size: 10px; color: #7E97A1; }
+.mc-card .pl-sub b { color: #4ADE80; }
+.mc-card .pl-save { display: inline-block; margin-top: 3px; font-size: 9px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border-radius: 8px; padding: 1px 8px; }
+.mc-card .pl-save.orange { background: linear-gradient(135deg,#FFB380,#FF8A50); color: #3A1200; }
+.mc-card .pl-tag { position: absolute; top: -7px; right: 8px; font-size: 9px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border-radius: 9px; padding: 2px 8px; box-shadow: 0 2px 6px rgba(224,166,62,.4); }
+.mc-card .pl-tag.hot { background: linear-gradient(135deg,#FFE0A3,#FF9D5C); color: #3A1200; }
+.mc-card .pl-btn { margin-top: 9px; font-size: 12px; font-weight: 800; border-radius: 16px; padding: 7px 0; cursor: pointer; }
+.mc-card.lv1 .pl-btn { background: rgba(184,196,202,.18); color: #B8C4CA; }
+.mc-card.lv2 .pl-btn { background: rgba(232,200,116,.18); color: #E8C874; }
+.mc-card.lv3 .pl-btn { background: linear-gradient(135deg,#F8E3A6,#E0A63E); color: #0B2E38; box-shadow: 0 3px 10px rgba(224,166,62,.35); }
+.mc-card.lv4 .pl-btn { background: linear-gradient(135deg,#FFE0A3,#FF9D5C); color: #3A1200; box-shadow: 0 3px 12px rgba(255,157,92,.4); }
+.mc-benefit { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); border-radius: 12px; padding: 4px 13px; }
+.mc-benefit .b-row { display: flex; align-items: center; gap: 9px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+.mc-benefit .b-row:last-child { border-bottom: none; }
+.mc-benefit .b-check { width: 19px; height: 19px; border-radius: 50%; background: linear-gradient(135deg,#F8E3A6,#E0A63E); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mc-benefit .b-check svg { width: 11px; height: 11px; stroke: #7A4E00; }
+.mc-benefit .b-name { font-size: 12px; font-weight: 700; color: #fff; flex: 1; }
+.mc-benefit .b-desc { font-size: 10px; color: #7E97A1; }
+.mc-test { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(124,232,224,.08); border: 1px solid rgba(124,232,224,.35); font-size: 11px; color: #7CE8E0; line-height: 1.6; }
+.mc-test b { color: #7CE8E0; }
 .ntm-switch { position: relative; width: 44px; height: 25px; border-radius: 14px; background: rgba(255,255,255,.14); cursor: pointer; transition: .2s; flex-shrink: 0; }
 .ntm-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 19px; height: 19px; border-radius: 50%; background: #fff; transition: .2s; }
 .ntm-switch.on { background: linear-gradient(135deg,#8FA9FF,#5B84FF); }
@@ -3363,6 +3420,38 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 </div>
 
 <!-- ========== 汇总页 ========== -->
+<!-- ========== 需求5 会员中心（4 档位 · 尊贵等级 · 测试期默认 VIP） ========== -->
+<div class="page" id="page-vip">
+  <div class="mc-head">
+    <button class="mc-back" onclick="switchPage('manage')" aria-label="返回">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="mc-title">会员中心<small>VIP 权益与续费</small></div>
+  </div>
+  <div class="mc-body">
+    <!-- 当前状态（测试期默认 VIP） -->
+    <div class="mc-status" id="vipStatusCard"></div>
+
+    <!-- 档位选择（尊贵等级递进） -->
+    <div class="mc-sec"><span class="mc-sec-no">1</span>选择档位</div>
+    <div class="mc-grid" id="vipPlanGrid"></div>
+
+    <!-- 会员权益 -->
+    <div class="mc-sec"><span class="mc-sec-no">2</span>VIP 专属权益</div>
+    <div class="mc-benefit">
+      <div class="b-row"><div class="b-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="b-name">极简模式<span class="b-desc"> · 只记 5 筐总数</span></div></div>
+      <div class="b-row"><div class="b-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="b-name">到店通知<span class="b-desc"> · 到店提醒+通知栏</span></div></div>
+      <div class="b-row"><div class="b-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="b-name">语音录入<span class="b-desc"> · 说话记数</span></div></div>
+      <div class="b-row"><div class="b-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="b-name">拍照识别<span class="b-desc"> · 拍照自动判筐</span></div></div>
+      <div class="b-row"><div class="b-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="b-name">汇总报表<span class="b-desc"> · 统计报表</span></div></div>
+      <div class="b-row"><div class="b-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="b-name">对账导出<span class="b-desc"> · Excel 导出明细/汇总</span></div></div>
+    </div>
+
+    <!-- 测试期提示 -->
+    <div class="mc-test"><b>测试期说明</b>：支付功能暂未接入，所有账号默认 VIP。正式上线后在此选择档位购买。</div>
+  </div>
+</div>
+
 <div class="page" id="page-summary">
   <div class="card">
     <div class="form-group">
@@ -8939,6 +9028,7 @@ function switchPage(pageName) {
   if (pageName === 'history') { renderHistory(); updateDailyPhotoInfo(); initGoodsFilter(); }
   if (pageName === 'summary') renderSummary();
   if (pageName === 'settings') { renderSettings(); }
+  if (pageName === 'vip') { renderVipCenter(); }
   if (pageName === 'manage') renderManage();
   if (pageName === 'perm') { renderPermPage(); renderNotifyManage(); }
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
@@ -11593,9 +11683,12 @@ function renderManage() {
       } catch(e) {}
     }
     nameHtml = `${maskPhone(phoneFull)}`;
-    subHtml = `<span style="color:#FFE9A8;font-weight:700;">未开通会员</span> · 云备份 ${timeText}`;
+    subHtml = `<span style="color:#FFE9A8;font-weight:700;">VIP 会员（测试期）</span> · 云备份 ${timeText}`;
     extraBtn = `
-      <button class="manage-vip-btn" onclick="event.stopPropagation();showToast('会员功能开发中，敬请期待');">👑 续费会员</button>`;
+      <button class="manage-vip-btn" onclick="event.stopPropagation();openVipCenter();">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>
+        续费会员
+      </button>`;
   } else {
     nameHtml = `<span style="color:#ffd7d7;font-weight:700;">未登录，请先登录！</span>`;
     subHtml = '';
@@ -12151,7 +12244,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.9.8'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.9.9'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -12807,8 +12900,11 @@ function permGuideLater() {
 // ===== 需求4 功能分档（免费版 / VIP版）=====
 // VIP 到期时间 key（ISO 字符串）；需求5 会员体系开通后写入
 var VIP_KEY = 'kuanwei_vip_until';
+// 需求5：测试期默认所有账号 VIP（支付未接入；正式上线时改 false 开启收费）
+var VIP_TEST_MODE = true;
 function isVip() {
   try {
+    if (VIP_TEST_MODE) return true;
     const until = localStorage.getItem(VIP_KEY);
     if (!until) return false;
     return new Date(until).getTime() > Date.now();
@@ -12828,7 +12924,49 @@ function closeVipLockModal() {
 }
 function openVipCenter() {
   closeVipLockModal();
-  showToast('会员中心即将上线（12.8 元/月），敬请期待');
+  switchPage('vip');
+  renderVipCenter();
+}
+// 需求5：4 档位定价（v3 定稿：月卡 12.8 不动，季/年/终身降价，尊贵等级递进）
+var VIP_PLANS = [
+  { id: 'month',    name: '月卡',   level: '初阶会员', price: '12.8', unit: '元/月',   sub: '日均 0.43 元 · 随时可换',      lv: 'lv1', btn: '开通月卡',   tag: '',      save: '' },
+  { id: 'season',   name: '季卡',   level: '进阶会员', price: '24.8', unit: '元/季',   sub: '日均 0.28 元 · 省 35%',        lv: 'lv2', btn: '开通季卡',   tag: '',      save: '' },
+  { id: 'year',     name: '年卡',   level: '尊享会员', price: '58',   unit: '元/年',   sub: '日均 0.16 元 · 省 62%',        lv: 'lv3', btn: '开通年卡',   tag: '超值推荐', save: '比月卡省 96 元', hot: true },
+  { id: 'lifetime', name: '终身卡', level: '至尊会员', price: '128',  unit: '元/永久', sub: '约 10 个月回本 · 一次买断',    lv: 'lv4', btn: '开通终身卡', tag: '永久尊享', save: '永久使用 · 未来功能全免费' }
+];
+function renderVipCenter() {
+  // 状态卡
+  const st = document.getElementById('vipStatusCard');
+  if (st) {
+    st.innerHTML =
+      '<div class="row1">' +
+        '<div class="crown-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg></div>' +
+        '<div><div class="st-name">VIP 会员</div><div class="st-sub">测试期默认开通 · 全部高级功能可用</div></div>' +
+        '<div class="st-tag">已开通</div>' +
+      '</div>' +
+      '<div class="st-note">当前为测试模式：所有账号默认 VIP，无需购买。正式上线后按所选档位计算到期时间。</div>';
+  }
+  // 档位网格
+  const grid = document.getElementById('vipPlanGrid');
+  if (grid) {
+    grid.innerHTML = VIP_PLANS.map(p =>
+      '<div class="mc-card ' + p.lv + '">' +
+        (p.tag ? '<div class="pl-tag' + (p.hot ? ' hot' : '') + '">' + p.tag + '</div>' : '') +
+        '<div class="lv-badge"><svg viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.3 4.7 5.2.7-3.8 3.7.9 5.2-4.6-2.4-4.6 2.4.9-5.2L4.5 8.4l5.2-.7L12 3z"/></svg>' + p.level + '</div>' +
+        '<div class="pl-name">' + p.name + '</div>' +
+        '<div class="pl-price">' + p.price + '<small> ' + p.unit + '</small></div>' +
+        '<div class="pl-sub">' + p.sub + '</div>' +
+        (p.save ? '<div class="pl-save' + (p.lv === 'lv4' ? ' orange' : '') + '">' + p.save + '</div>' : '') +
+        '<div class="pl-btn" onclick="chooseVipPlan(\'' + p.id + '\')">' + p.btn + '</div>' +
+      '</div>'
+    ).join('');
+  }
+}
+// 选择档位（测试期：支付未接入）
+function chooseVipPlan(id) {
+  const p = VIP_PLANS.find(x => x.id === id);
+  if (!p) return;
+  showToast('「' + p.level + ' · ' + p.name + '」支付功能暂未接入，测试期所有账号默认 VIP');
 }
 // 汇总 / 对账导出入口（VIP 拦截）
 function openSummaryPage() { if (!requireVip('汇总报表')) return; switchPage('summary'); }

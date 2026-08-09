@@ -13,6 +13,9 @@ const path = require('path');
   // ===== 非 VIP 拦截测试 =====
   const nonVip = await page.evaluate(() => {
     const out = {};
+    // 需求5：临时关闭测试期默认 VIP，模拟真实非 VIP 场景验证拦截仍有效
+    VIP_TEST_MODE = false;
+    localStorage.removeItem('kuanwei_vip_until');
     // 预置店面（避免 openPermPage 前置判断干扰；实际 requireVip 在最前）
     out.isVipDefault = isVip();
     // 1. 权限管理（到店通知）
@@ -59,6 +62,8 @@ const path = require('path');
 
   // ===== VIP 放行测试 =====
   const vip = await page.evaluate(() => {
+    // 需求5：关闭测试模式，验证"到期时间放行"逻辑本身仍有效
+    VIP_TEST_MODE = false;
     // 模拟开通 VIP（未来 30 天）
     localStorage.setItem('kuanwei_vip_until', new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString());
     const out = {};
