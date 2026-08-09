@@ -2503,6 +2503,21 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 .ndp-grid .d-opt.sel { color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border-color: transparent; font-weight: 800; }
 .ndp-foot { margin-top: 12px; text-align: center; }
 .ndp-close { font-size: 12px; color: #7E97A1; cursor: pointer; padding: 4px 14px; }
+/* ===== 需求4 VIP 功能锁定弹窗 ===== */
+.vip-modal { position: fixed; inset: 0; z-index: 9100; display: none; align-items: center; justify-content: center; background: rgba(4,24,32,.8); padding: 18px; }
+.vip-modal.show { display: flex; }
+.vip-box { width: 320px; background: #0E3340; border: 1.5px solid rgba(245,220,146,.6); border-radius: 20px; padding: 22px 18px 16px; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+.vip-ico { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 10px; background: linear-gradient(135deg,#F8E3A6,#E0A63E); display: flex; align-items: center; justify-content: center; }
+.vip-ico svg { width: 30px; height: 30px; stroke: #7A4E00; }
+.vip-title { font-size: 17px; font-weight: 800; color: #F5DC92; }
+.vip-feature { font-size: 14px; font-weight: 800; color: #FFFFFF; margin: 8px 0 4px; }
+.vip-feature::before { content: '「'; color: #F5DC92; }
+.vip-feature::after { content: '」'; color: #F5DC92; }
+.vip-desc { font-size: 11px; color: #9FD0D6; line-height: 1.6; margin-bottom: 14px; }
+.vip-btn { background: linear-gradient(135deg,#F8E3A6,#E0A63E); color: #0B2E38; font-size: 14px; font-weight: 800; border-radius: 22px; padding: 11px 0; cursor: pointer; }
+.vip-later { font-size: 12px; color: #7E97A1; cursor: pointer; padding: 10px 0 2px; }
+.vip-tag { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border-radius: 8px; padding: 1px 6px; vertical-align: 1px; }
+.vip-tag svg { width: 9px; height: 9px; stroke: #7A4E00; }
 .ntm-switch { position: relative; width: 44px; height: 25px; border-radius: 14px; background: rgba(255,255,255,.14); cursor: pointer; transition: .2s; flex-shrink: 0; }
 .ntm-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 19px; height: 19px; border-radius: 50%; background: #fff; transition: .2s; }
 .ntm-switch.on { background: linear-gradient(135deg,#8FA9FF,#5B84FF); }
@@ -3171,8 +3186,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <button class="manage-item" onclick="openModeSelect()"><span class="mi-icon" style="background:rgba(124,232,224,.16);color:#7CE8E0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span><span class="mi-title">模式选择<span class="mi-sub">标准模式 · 极简模式切换</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openGoodsPanel()"><span class="mi-icon">📦</span><span class="mi-title">框名设置<span class="mi-sub" id="manageGoodsSub">筐类名称 · 顺序</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openBackupPanel()"><span class="mi-icon">💾</span><span class="mi-title">备份与恢复<span class="mi-sub">云端同步 · 换机不丢</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="switchPage('summary')"><span class="mi-icon">📈</span><span class="mi-title">汇总<span class="mi-sub">统计报表</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="switchPage('reconcile')"><span class="mi-icon">🔄</span><span class="mi-title">对账<span class="mi-sub">导出数据</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openSummaryPage()"><span class="mi-icon">📈</span><span class="mi-title">汇总<span class="mi-sub">统计报表</span><span class="vip-tag"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>VIP</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openReconcilePage()"><span class="mi-icon">🔄</span><span class="mi-title">对账<span class="mi-sub">导出数据</span><span class="vip-tag"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>VIP</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openSuggestionPanel()"><span class="mi-icon">💡</span><span class="mi-title">功能建议<span class="mi-sub">公共建议墙 · 好建议做成新功能</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="showToast('邀请好友功能开发中，敬请期待')"><span class="mi-icon">🎁</span><span class="mi-title">邀请好友<span class="mi-sub">双方各得 7 天会员</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('settings')"><span class="mi-icon">❓</span><span class="mi-title">使用说明<span class="mi-sub">新手教程</span></span><span class="mi-arrow">›</span></button>
@@ -3252,6 +3267,20 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div class="ndp-sub">距门店多少米内触发通知</div>
     <div class="ndp-grid" id="ntmDistPicker"></div>
     <div class="ndp-foot"><span class="ndp-close" onclick="closeNotifyDistPicker()">取消</span></div>
+  </div>
+</div>
+
+<!-- ========== 需求4 VIP 功能锁定弹窗 ========== -->
+<div class="vip-modal" id="vipLockModal" onclick="closeVipLockModal()">
+  <div class="vip-box" onclick="event.stopPropagation()">
+    <div class="vip-ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>
+    </div>
+    <div class="vip-title">VIP 专属功能</div>
+    <div class="vip-feature" id="vipLockFeature">该功能</div>
+    <div class="vip-desc">开通 VIP 会员（12.8 元/月）即可解锁全部高级功能：极简模式 · 到店通知 · 语音录入 · 拍照识别 · 汇总报表 · 对账导出</div>
+    <div class="vip-btn" onclick="openVipCenter()">开通 VIP</div>
+    <div class="vip-later" onclick="closeVipLockModal()">暂时不用</div>
   </div>
 </div>
 
@@ -7167,6 +7196,8 @@ function nativeRecStop() {
 }
 
 function emitStartVoice() {
+  // 需求4：语音录入为 VIP 功能
+  if (!requireVip('语音录入')) return;
   if (emitGoodsIdx < 0) { showToast('请先选择筐类型'); return; }
   // APK 内：优先原生录音（绕开 WebView getUserMedia 兼容问题）
   if (canNativeRecord()) {
@@ -7773,6 +7804,8 @@ function applyEmitVoice() {
   saveEmitRecords();
 }
 function emitTriggerPhoto() {
+  // 需求4：拍照 OCR 识别为 VIP 功能
+  if (!requireVip('拍照识别')) return;
   // 整合版：无需先选筐，AI 自动判断筐类型（鲜食筐除外）
   if (emitGoodsIdx === 0) { showToast('鲜食筐无需拍照识别，请直接录入'); return; }
   // 动态创建全屏可见的 file input 唤起拍照/相册（PWA 需 input 在可视区）
@@ -8919,6 +8952,8 @@ function isSimpleMode() {
   try { return localStorage.getItem('kuanwei_simple_mode') === '1'; } catch(e) { return false; }
 }
 function setSimpleMode(on) {
+  // 需求4：极简模式为 VIP 功能（切到极简拦截；切回标准不限）
+  if (on && !requireVip('极简模式')) return;
   try { localStorage.setItem('kuanwei_simple_mode', on ? '1' : '0'); } catch(e) {}
   document.body.classList.toggle('simple-mode', on);
   // 切到对应首页（极简→极简首页 / 标准→记录首页）
@@ -12116,7 +12151,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.9.7'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.9.8'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -12769,9 +12804,41 @@ function permGuideLater() {
   closePermGuide();
   showToast('可以，需要时随时在权限管理里开启');
 }
+// ===== 需求4 功能分档（免费版 / VIP版）=====
+// VIP 到期时间 key（ISO 字符串）；需求5 会员体系开通后写入
+var VIP_KEY = 'kuanwei_vip_until';
+function isVip() {
+  try {
+    const until = localStorage.getItem(VIP_KEY);
+    if (!until) return false;
+    return new Date(until).getTime() > Date.now();
+  } catch(e) { return false; }
+}
+// 高级功能拦截：非 VIP → 弹锁定提示并阻止进入
+function requireVip(featureName) {
+  if (isVip()) return true;
+  const el = document.getElementById('vipLockFeature');
+  if (el) el.textContent = featureName || '该功能';
+  showModal('vipLockModal');
+  return false;
+}
+function closeVipLockModal() {
+  const m = document.getElementById('vipLockModal');
+  if (m) m.classList.remove('show');
+}
+function openVipCenter() {
+  closeVipLockModal();
+  showToast('会员中心即将上线（12.8 元/月），敬请期待');
+}
+// 汇总 / 对账导出入口（VIP 拦截）
+function openSummaryPage() { if (!requireVip('汇总报表')) return; switchPage('summary'); }
+function openReconcilePage() { if (!requireVip('对账导出')) return; switchPage('reconcile'); }
+
 // ===== #144b 权限管理独立页面 =====
 // 管理页入口 → 独立页面
 function openPermPage() {
+  // 需求4：到店通知为 VIP 功能
+  if (!requireVip('到店通知')) return;
   refreshNotificationState();
   switchPage('perm');
 }
@@ -13011,6 +13078,8 @@ function permRowAction(kind) {
 }
 // 到店监测（前台 60s 轮询）
 function startArrivalMonitor() {
+  // 需求4：到店通知为 VIP 功能（非 VIP 不启动监测）
+  if (!isVip()) return;
   try { localStorage.setItem('kuanwei_arrival_on', '1'); } catch(e) {}
   if (arrivalTimer) return;
   arrivalTimer = setInterval(arrivalTick, ARRIVAL_INTERVAL);
@@ -13018,6 +13087,8 @@ function startArrivalMonitor() {
 }
 // ===== #145 路线同步原生（门店围栏注册）=====
 function syncArrivalRouteToNative() {
+  // 需求4：到店通知为 VIP 功能（非 VIP 不注册门店围栏，原生不触发到店通知）
+  if (!isVip()) return;
   try {
     if (!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ArrivalMonitor)) return;
     const ns = loadNotifySettings();
