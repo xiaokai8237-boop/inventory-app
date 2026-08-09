@@ -2772,7 +2772,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 </style>
 </head>
 <body>
-  <!-- emoji 染色滤镜（全局定义，供额外发收登记弹窗图标着色：鲜食=深青绿/面包=深金/低温=深冰蓝/冷冻=深蓝紫/常温=深橙） -->
+  <!-- emoji 染色滤镜（全局定义，供额外发收登记弹窗图标着色：鲜食=深青绿/面包=深金/冷藏=深冰蓝/冷冻=深蓝紫/常温=深橙） -->
   <svg width="0" height="0" style="position:absolute;width:0;height:0;overflow:hidden;" aria-hidden="true">
     <defs>
       <filter id="tintExtraLeaf"><feColorMatrix type="matrix" values="0 0 0 0 0.09 0 0 0 0 0.65 0 0 0 0 0.54 0 0 0 1 0"/></filter>
@@ -2905,7 +2905,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
           <div class="gi-out"><input type="number" id="giOut1" placeholder="0" min="0" inputmode="numeric" data-idx="1"></div>
         </div>
         <div class="goods-input-item">
-          <div class="gi-name">低温筐</div>
+          <div class="gi-name">冷藏筐</div>
           <div class="gi-in"><input type="number" id="giIn2" placeholder="0" min="0" inputmode="numeric" data-idx="2"></div>
           <div class="gi-out"><input type="number" id="giOut2" placeholder="0" min="0" inputmode="numeric" data-idx="2"></div>
         </div>
@@ -3216,7 +3216,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div style="display:flex;gap:6px;align-items:center;">
       <input type="date" class="form-input" id="filterDate" style="flex:1;padding:8px;font-size:13px;" onchange="renderHistory()">
       <select class="form-select" id="filterStore" style="width:90px;padding:8px;font-size:13px;" onchange="renderHistory()"><option value="">全部店</option></select>
-      <select class="form-select" id="filterGoods" style="width:100px;padding:8px;font-size:13px;" onchange="renderHistory()"><option value="">全部筐</option><option value="0">鲜食筐</option><option value="1">面包筐</option><option value="2">低温筐</option><option value="3">冷冻筐</option><option value="4">常温筐</option></select>
+      <select class="form-select" id="filterGoods" style="width:100px;padding:8px;font-size:13px;" onchange="renderHistory()"><option value="">全部筐</option><option value="0">鲜食筐</option><option value="1">面包筐</option><option value="2">冷藏筐</option><option value="3">冷冻筐</option><option value="4">常温筐</option></select>
     </div>
     <div style="display:flex;gap:6px;margin-top:6px;">
       <button class="btn btn-filter-all" style="flex:1;padding:9px;font-size:13px;border:none;border-radius:10px;" onclick="clearFilter()">全部</button>
@@ -3547,7 +3547,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div class="step-body">
       点首页的 <b>「发出」</b> 或 <b>「回收」</b> 都会先进到同一个录入页，下面 3 种方法都在这里选：<br><br>
       <b>方法一 ✍️ 手动输入（最稳）</b><br>
-      ① 发出页：先选 <b>5 种筐</b>（鲜食/面包/低温/冷冻/常温，颜色各不相同：鲜食=青绿、面包=金黄、低温=冰蓝、冷冻=蓝紫、常温=橙色）中的一种<br>
+      ① 发出页：先选 <b>5 种筐</b>（鲜食/面包/冷藏/冷冻/常温，颜色各不相同：鲜食=青绿、面包=金黄、冷藏=冰蓝、冷冻=蓝紫、常温=橙色）中的一种<br>
       ② 然后每家店填<b>数量</b>，输完点键盘"确定"自动跳下一家<br>
       ③ 填完点 <b>「保存发出」</b> → 弹「保存成功」，可点 <b>「继续录入」</b>（录下一筐）或 <b>「查看记录」</b>（去记录页看刚存的）<br>
       ④ 顶部有 <b>「记录日期」</b>，默认今天；要补录前几天，把日期改掉再录就行<br>
@@ -3759,7 +3759,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     </div>
     <div class="mc-desc">
       <b>按门店明细</b>：一家店一家店记，数字清清楚楚
-      <div class="mc-li"><span class="li-dot"></span><span>选店面 + 5 种筐（鲜食/面包/低温/冷冻/常温）<b>逐店录入</b></span></div>
+      <div class="mc-li"><span class="li-dot"></span><span>选店面 + 5 种筐（鲜食/面包/冷藏/冷冻/常温）<b>逐店录入</b></span></div>
       <div class="mc-li"><span class="li-dot"></span><span>支持<b>语音、拍照识别</b>，一张路单几秒录完</span></div>
       <div class="mc-li"><span class="li-dot"></span><span><b>到店提醒</b>：围栏到店自动通知 + 记录回筐</span></div>
       <div class="mc-li"><span class="li-dot"></span><span>记录/汇总/对账/导出 <b>全功能</b>，云备份</span></div>
@@ -4841,7 +4841,7 @@ const OCR_KEY = 'kuanwei_ocr_keys';
 const DEFAULT_GOODS = [
   { name: '鲜食筐', aliases: ['鲜食', '鲜'] },
   { name: '面包筐', aliases: ['面包', '面'] },
-  { name: '低温筐', aliases: ['低温', '冷藏', '冷藏筐'] },
+  { name: '冷藏筐', aliases: ['低温', '冷藏', '冷藏筐', '低温筐'] },
   { name: '冷冻筐', aliases: ['冷冻'] },
   { name: '常温筐', aliases: ['常温', '常'] },
 ];
@@ -6939,7 +6939,7 @@ function goodsIcon(name) {
   const n = name || '';
   if (n.indexOf('鲜') !== -1 || n.indexOf('冷鲜') !== -1) return GOODS_SVG.fresh;
   if (n.indexOf('面包') !== -1 || n.indexOf('面') !== -1) return GOODS_SVG.bread;
-  if (n.indexOf('低温') !== -1) return GOODS_SVG.low;
+  if (n.indexOf('低温') !== -1 || n.indexOf('冷藏') !== -1) return GOODS_SVG.low;
   if (n.indexOf('冷冻') !== -1) return GOODS_SVG.frozen;
   if (n.indexOf('常温') !== -1) return GOODS_SVG.normal;
   if (n.indexOf('回收') !== -1 || n.indexOf('脏') !== -1) return GOODS_SVG.recycle;
@@ -9066,12 +9066,12 @@ function renderSimpleHome() {
   const list = document.getElementById('simpleGoodsList');
   if (!list) return;
   const names = loadGoodsNames();
-  const defNames = ['鲜食筐', '面包筐', '低温筐', '冷冻筐', '常温筐'];
+  const defNames = ['鲜食筐', '面包筐', '冷藏筐', '冷冻筐', '常温筐'];
   const goods = defNames.map((n, i) => ({ n: names[i] || n, i }));
   const colors = [
     { bg: 'rgba(74,222,128,.15)', c: '#4ADE80' },  // 鲜食 绿
     { bg: 'rgba(245,220,146,.15)', c: '#F5DC92' }, // 面包 金
-    { bg: 'rgba(124,232,224,.15)', c: '#7CE8E0' }, // 低温 青
+    { bg: 'rgba(124,232,224,.15)', c: '#7CE8E0' }, // 冷藏 青
     { bg: 'rgba(129,140,248,.15)', c: '#818CF8' }, // 冷冻 蓝紫
     { bg: 'rgba(245,166,35,.15)', c: '#F5A623' }   // 常温 橙
   ];
@@ -9157,7 +9157,7 @@ function renderSimpleRecords() {
     }
   });
   const names = loadGoodsNames();
-  const defNames = ['鲜食筐', '面包筐', '低温筐', '冷冻筐', '常温筐'];
+  const defNames = ['鲜食筐', '面包筐', '冷藏筐', '冷冻筐', '常温筐'];
   const colors = [
     { bg: 'rgba(74,222,128,.15)', c: '#4ADE80' },
     { bg: 'rgba(245,220,146,.15)', c: '#F5DC92' },
@@ -9380,7 +9380,7 @@ function openPageHelp(e) {
       t = '发出 · 图文帮助';
       h = `<div class="ph-map"><span class="pm-cell pm-main">选 5 种筐</span><span class="pm-arrow">›</span><span class="pm-cell">每家店填数量</span><span class="pm-arrow">›</span><span class="pm-cell pm-main">保存发出</span></div>`
         + steps([
-          `先选 <b>5 种筐</b>：鲜食=青绿、面包=金黄、低温=冰蓝、冷冻=蓝紫、常温=橙色`,
+          `先选 <b>5 种筐</b>：鲜食=青绿、面包=金黄、冷藏=冰蓝、冷冻=蓝紫、常温=橙色`,
           '每家店填<b>数量</b>，输完点键盘"确定"自动跳下一家',
           '填完点 <b>「保存发出」</b>'
         ])
@@ -9598,6 +9598,7 @@ function saveManualRecord() {
 const EXTRA_ICON_MAP = [
   { k: '鲜食', e: GOODS_SVG.fresh },
   { k: '面包', e: GOODS_SVG.bread },
+  { k: '冷藏', e: GOODS_SVG.low },
   { k: '低温', e: GOODS_SVG.low },
   { k: '冷冻', e: GOODS_SVG.frozen },
   { k: '常温', e: GOODS_SVG.normal }
@@ -10328,13 +10329,13 @@ function parseOcrResult(ocrData) {
   const TARGET_COLS = {
     0: ['鲜食筐', '面包筐', '发货', '发出'],     // 鲜食筐（手写单也支持）
     1: ['面包筐', '发货', '发出'],               // 面包筐
-    2: ['物流篮', '物流箱', '物流筐', '发货', '发出'],  // 低温筐
+    2: ['物流篮', '物流箱', '物流筐', '发货', '发出'],  // 冷藏筐
     3: ['物流篮', '物流箱', '物流筐', '发货', '发出'],  // 冷冻筐
     4: ['物流箱', '物流筐', '整箱数量', '整箱', '发货', '发出']  // 常温筐
   };
   const targetCols = TARGET_COLS[goodsIdx] || ['物流箱', '物流筐', '物流篮', '整箱数量'];
   // 数字类列关键词（表头里代表数量的列名）
-  // 注意：剔除「常温/低温/冷冻/鲜食/面包」——它们是抬头筐类型词，不是表头数量列（会误抬列索引）
+  // 注意：剔除「常温/冷藏/冷冻/鲜食/面包」——它们是抬头筐类型词，不是表头数量列（会误抬列索引）
   const NUM_COL_KWS = ['整箱', '物流箱', '物流筐', '物流篮',
     '筐', '箱', '篮', '袋', '笼车', '冰板', '甜品', '纸箱', '信差', '保温', '数量', '发货', '发出', '回收'];
   // 常温筐：除物流箱外，还识别「整箱数量」列（#139 整箱数拍照识别）
@@ -12213,7 +12214,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.8.6'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.8.7'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -12596,7 +12597,7 @@ function notifyPreviewData() {
     goods: [
       { name: '鲜食筐', qty: 8 },
       { name: '面包筐', qty: 8 },
-      { name: '低温筐', qty: 5 },
+      { name: '冷藏筐', qty: 5 },
       { name: '冷冻筐', qty: 10 },
       { name: '常温筐', qty: 12, whole: 3 }
     ],
