@@ -99,7 +99,7 @@ html[data-theme="dark"] {
 html[data-theme="dark"] ::-webkit-scrollbar-thumb { background: rgba(124,155,255,.3); }
 html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover { background: rgba(124,155,255,.5); }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: 'Noto Sans SC','Source Han Sans SC','HarmonyOS Sans SC','MiSans',sans-serif;
   background: var(--bg);
   background-image: radial-gradient(1200px 600px at 80% -10%, rgba(61,90,254,.08), transparent 60%),
                     radial-gradient(900px 500px at 10% 110%, rgba(0,184,148,.06), transparent 60%);
@@ -2688,7 +2688,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 .arr-banner .ab-btn.blue { background: linear-gradient(135deg,#8FA9FF,#5B84FF); color: #fff; }
 
 /* 通知卡预览（模拟通知栏卡片） */
-.ntpv { background: #0E3340; border: 1px solid rgba(124,184,200,.25); border-radius: 13px; padding: 10px; font-family: 'PingFang SC','Microsoft YaHei',sans-serif; }
+.ntpv { background: #0E3340; border: 1px solid rgba(124,184,200,.25); border-radius: 13px; padding: 10px; font-family: 'Noto Sans SC','Source Han Sans SC','HarmonyOS Sans SC','MiSans',sans-serif; }
 .ntpv .ntpv-top { display: flex; gap: 8px; align-items: flex-start; }
 .ntpv .ntpv-ico { width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#F8E3A6,#E0A63E); }
 .ntpv .ntpv-ico svg { width: 22px; height: 22px; stroke: #0B2E38; }
@@ -12224,7 +12224,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.8.8'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.8.9'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
