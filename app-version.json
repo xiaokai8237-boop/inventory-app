@@ -1,7 +1,6 @@
 {
-  "versionCode": 107,
-  "versionName": "7.7.7",
-  "apkUrl": "https://raw.githubusercontent.com/xiaokai8237-boop/inventory-app/main/apk/app-v7.7.7.apk",
-  "minVersionCode": 80,
-  "changelog": "P0合规：全量 emoji 功能图标 → SVG 描边图标（5筐图标+页面/弹窗约 240 处），统一图标风格，修复系统显示不一致"
+  "versionCode": 108,
+  "versionName": "7.8.0",
+  "apkUrl": "apk/app-v7.8.0.apk",
+  "note": "极简模式：只记 5 筐发出/回收总数 + 范围记录差额"
 }
