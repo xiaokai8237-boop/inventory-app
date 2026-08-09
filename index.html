@@ -5357,7 +5357,8 @@ async function backupToCloud(manual) {
         records: records,
         goodsConfig: loadGoodsConfig(),
         storeConfig: storeConfig,
-        uiState: collectUiState()
+        uiState: collectUiState(),
+        simpleRecords: loadSimpleRecords()  // #153 极简模式数据一起云备份
       }
     };
     if (account) payload.account = account;
@@ -6002,6 +6003,10 @@ async function restoreLoggedIn(phone) {
       // 仅当云端店面非空时才覆盖本地，避免云端空 storeConfig 误清用户本地已配置的店面
       if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0) saveStoreConfig(cloud.storeConfig);
       if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
+      // #153 极简模式数据随云备份一起恢复
+      if (cloud.simpleRecords && Array.isArray(cloud.simpleRecords)) {
+        try { localStorage.setItem(scopeKey(SIMPLE_REC_KEY), JSON.stringify(cloud.simpleRecords)); } catch(e) {}
+      }
       // 恢复后校验：店面配置仍为空但日报偏好有店 → 自动导入，避免"店面空"导致后续丢失
       if (loadStoreConfig().length === 0) importStoresFromDailyPref();
       renderAccountStatus();
@@ -6357,6 +6362,10 @@ async function autoSyncFromCloud(phone) {
         saveStoreConfig(cloud.storeConfig);
       }
       if (cloud.uiState) applyUiState(cloud.uiState); // 还原界面偏好/相册
+      // #153 极简模式数据随云备份一起同步（云端较新时覆盖本地极简账）
+      if (cloud.simpleRecords && Array.isArray(cloud.simpleRecords)) {
+        try { localStorage.setItem(scopeKey(SIMPLE_REC_KEY), JSON.stringify(cloud.simpleRecords)); } catch(e) {}
+      }
       // 同步后校验：店面配置为空但日报偏好有店 → 自动导入
       if (loadStoreConfig().length === 0) importStoresFromDailyPref();
     }
@@ -9047,8 +9056,8 @@ function saveSimpleRecord() {
   if (tEl) tEl.value = nowTime();
   simpleTimeChanged = false;
   showToast('已保存 ' + d + ' ' + (t || '') + ' 发出/回收');
-  // 云备份（登录后自动同步，与标准模式同一账号）
-  if (typeof syncSimpleToCloud === 'function') { try { syncSimpleToCloud(); } catch(e) {} }
+  // 云备份（登录后自动同步，与标准模式同一账号；simpleRecords 已包含在 backupToCloud payload 中）
+  if (isLoggedIn() && typeof backupToCloud === 'function') { try { backupToCloud(false); } catch(e) {} }
 }
 // 极简记录：范围统计 + 渲染
 function toLocalDT(d) {
@@ -9349,6 +9358,10 @@ function closePageHelp() {
   if (m) m.classList.remove('show');
 }
 document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => switchPage(tab.dataset.page));
+});
+// #149 极简模式独立底部导航点击绑定（首页/记录/设置）
+document.querySelectorAll('.simple-tabs .st-item').forEach(tab => {
   tab.addEventListener('click', () => switchPage(tab.dataset.page));
 });
 
@@ -12102,7 +12115,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.8.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.8.2'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');

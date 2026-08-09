@@ -26,6 +26,7 @@ function T(name, cond, extra) {
   await page.evaluate(() => {
     try { closeWelcome(false); } catch(e) {}
     localStorage.setItem('kuanwei_welcome_seen', '1');
+    localStorage.setItem('kuanwei_perm_guide_seen', '1'); // 屏蔽首次权限引导弹窗（会拦截底部导航点击）
     localStorage.setItem('kuanwei_phone', '13800000000');
     localStorage.setItem('kuanwei_logged_in', '1');
     localStorage.setItem('kuanwei_goods_names__13800000000', JSON.stringify(['鲜食筐','面包筐','低温筐','冷冻筐','常温筐']));
@@ -219,6 +220,62 @@ function T(name, cond, extra) {
   });
   T('未登录不保存', r10.after === r10.cntBefore, r10.cntBefore + '->' + r10.after);
   T('弹出登录页', r10.authOpen, '');
+
+  // ===== 11. 极简底部导航点击（首页/记录/设置）=====
+  console.log('=== 11. 极简导航点击 ===');
+  await page.evaluate(() => { localStorage.setItem('kuanwei_logged_in', '1'); setSimpleMode(true); });
+  await page.waitForTimeout(300);
+  await page.click('.simple-tabs .st-item[data-page="simple-records"]');
+  await page.waitForTimeout(300);
+  const r11 = await page.evaluate(() => ({
+    recActive: document.querySelector('#page-simple-records')?.classList.contains('active'),
+    recTab: document.querySelector('.simple-tabs .st-item.active')?.dataset.page
+  }));
+  T('点「记录」进入记录页', r11.recActive && r11.recTab === 'simple-records', JSON.stringify(r11));
+  await page.click('.simple-tabs .st-item[data-page="simple-settings"]');
+  await page.waitForTimeout(300);
+  const r11b = await page.evaluate(() => ({
+    setActive: document.querySelector('#page-simple-settings')?.classList.contains('active'),
+    setTab: document.querySelector('.simple-tabs .st-item.active')?.dataset.page
+  }));
+  T('点「设置」进入设置页', r11b.setActive && r11b.setTab === 'simple-settings', JSON.stringify(r11b));
+  await page.click('.simple-tabs .st-item[data-page="simple-home"]');
+  await page.waitForTimeout(300);
+  const r11c = await page.evaluate(() => document.querySelector('#page-simple-home')?.classList.contains('active'));
+  T('点「首页」回首页', r11c, '');
+
+  // ===== 12. 云备份：payload 含 simpleRecords =====
+  console.log('=== 12. 云备份包含极简数据 ===');
+  const r12 = await page.evaluate(() => {
+    // 拦截 fetch：捕获 backupToCloud 发的 payload
+    let captured = null;
+    const origFetch = window.fetch;
+    window.fetch = function(url, opts) {
+      if (String(url).indexOf('/backup') >= 0 && opts && opts.method === 'POST') {
+        try { captured = JSON.parse(opts.body); } catch(e) {}
+      }
+      return origFetch.apply(this, arguments);
+    };
+    // 预置一条极简记录再触发备份
+    localStorage.setItem('kuanwei_simple_records__13800000000', JSON.stringify([{ d: '2026-08-09', t: '14:30', out: [12,0,0,0,0], rec: [10,0,0,0,0] }]));
+    backupToCloud(false).then(() => {
+      window.__captured = captured;
+    });
+    return { started: true };
+  });
+  await page.waitForTimeout(1200);
+  const r12b = await page.evaluate(() => {
+    const c = window.__captured;
+    if (!c || !c.data) return { hasCapture: false };
+    return {
+      hasCapture: true,
+      simpleRecords: c.data.simpleRecords,
+      simpleCount: Array.isArray(c.data.simpleRecords) ? c.data.simpleRecords.length : -1,
+      firstD: c.data.simpleRecords && c.data.simpleRecords[0] ? c.data.simpleRecords[0].d : null
+    };
+  });
+  T('备份请求已发出且 payload 含 simpleRecords', r12b.hasCapture && r12b.simpleCount === 1, JSON.stringify(r12b));
+  T('极简记录内容正确', r12b.firstD === '2026-08-09', String(r12b.firstD));
 
   T('全程 JS 零错误', errs.length === 0, errs.join(';'));
   console.log(`\n=== ${pass} passed, ${fail} failed ===`);
