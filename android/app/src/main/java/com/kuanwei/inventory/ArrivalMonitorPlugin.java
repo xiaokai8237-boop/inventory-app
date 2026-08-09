@@ -207,14 +207,15 @@ public class ArrivalMonitorPlugin extends Plugin {
             nb.addAction(R.drawable.ic_stat_notify, "导航去下一家", navPi);
 
             // 需求3：rich 图文版用自定义大卡（RemoteViews，按 #146 v6 定稿样式）
+            // 方案A（用户拍板）：折叠态也显示大卡，一弹出来就是图文大卡，不用点展开
             if ("rich".equals(template)) {
                 try {
-                    RemoteViews rv = buildRichRemoteViews(storeName, dist, goods, recyclePi, navPi);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        nb.setCustomBigContentView(rv);
+                        nb.setCustomContentView(buildRichCollapsedViews(storeName, dist, goods));
+                        nb.setCustomBigContentView(buildRichRemoteViews(storeName, dist, goods, recyclePi, navPi));
                         nb.setStyle(new Notification.DecoratedCustomViewStyle());
                     } else {
-                        nb.setCustomContentView(rv);
+                        nb.setCustomContentView(buildRichRemoteViews(storeName, dist, goods, recyclePi, navPi));
                     }
                 } catch (Exception ignored) {}
             } else {
@@ -229,6 +230,38 @@ public class ArrivalMonitorPlugin extends Plugin {
         } catch (Exception e) {
             call.reject("notify_error");
         }
+    }
+
+    /** 需求3 方案A：折叠态压缩大卡（一弹出来就显示：头部+标题+距离+5 筐胶囊+打卡条） */
+    private RemoteViews buildRichCollapsedViews(String storeName, int dist, JSONArray goods) {
+        RemoteViews rv = new RemoteViews(getContext().getPackageName(), R.layout.notify_rich_collapsed);
+        rv.setTextViewText(R.id.ntc_title, "即将到达 " + storeName);
+        rv.setTextViewText(R.id.ntc_dist, "距你 " + dist + " 米");
+        int[] capIds = { R.id.ntc_cap1, R.id.ntc_cap2, R.id.ntc_cap3, R.id.ntc_cap4, R.id.ntc_cap5 };
+        int[] nameIds = { R.id.ntc_cap1_name, R.id.ntc_cap2_name, R.id.ntc_cap3_name, R.id.ntc_cap4_name, R.id.ntc_cap5_name };
+        int[] qtyIds = { R.id.ntc_cap1_qty, R.id.ntc_cap2_qty, R.id.ntc_cap3_qty, R.id.ntc_cap4_qty, R.id.ntc_cap5_qty };
+        int[] wholeIds = { R.id.ntc_cap1_whole, R.id.ntc_cap2_whole, R.id.ntc_cap3_whole, R.id.ntc_cap4_whole, R.id.ntc_cap5_whole };
+        for (int i = 0; i < capIds.length; i++) {
+            rv.setViewVisibility(capIds[i], View.GONE);
+        }
+        int idx = 0;
+        for (int i = 0; i < goods.length() && idx < capIds.length; i++) {
+            JSONObject g = goods.optJSONObject(i);
+            if (g == null) continue;
+            int qty = g.optInt("qty", 0);
+            if (qty <= 0) continue;
+            rv.setTextViewText(nameIds[idx], g.optString("name", "筐"));
+            rv.setTextViewText(qtyIds[idx], String.valueOf(qty));
+            int whole = g.optInt("whole", 0);
+            if (whole > 0) {
+                rv.setTextViewText(wholeIds[idx], " · 整箱 " + whole);
+            } else {
+                rv.setTextViewText(wholeIds[idx], "");
+            }
+            rv.setViewVisibility(capIds[idx], View.VISIBLE);
+            idx++;
+        }
+        return rv;
     }
 
     /** 需求3：图文版（rich）自定义大卡 RemoteViews —— 按 #146 v6 定稿样式渲染 5 筐胶囊 + 红色打卡条 + 双按钮 */

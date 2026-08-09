@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ============================================================
+  需求3 方案A：通知折叠态图文大卡（压缩版，一弹出来就显示）
+  折叠态高度受限：头部 + 标题(店名) + 距离 + 5 筐紧凑胶囊 + 红色打卡条
+  按钮与完整间距放在展开态（notify_rich.xml）
+============================================================ -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ntc_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/notify_card_bg"
+    android:padding="10dp">
+
+    <!-- 头部：应用图标 + 应用名 + 时间 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <FrameLayout
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:background="@drawable/notify_app_icon">
+            <ImageView
+                android:id="@+id/ntc_app_icon"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_stat_notify"
+                android:contentDescription="物流筐" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/ntc_app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="7dp"
+            android:text="物流筐"
+            android:textSize="10sp"
+            android:textColor="#9FB0B8"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/ntc_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="现在"
+            android:textSize="9sp"
+            android:textColor="#6B7A82" />
+    </LinearLayout>
+
+    <!-- 标题：即将到达 店名 -->
+    <TextView
+        android:id="@+id/ntc_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="即将到达"
+        android:textSize="14sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- 距离 -->
+    <TextView
+        android:id="@+id/ntc_dist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="距你 500 米"
+        android:textSize="11sp"
+        android:textColor="#7CE8E0"
+        android:textStyle="bold" />
+
+    <!-- 5 筐胶囊（紧凑单行流式：每筐一行，只显示有货的） -->
+    <LinearLayout
+        android:id="@+id/ntc_goods"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="4dp">
+
+        <LinearLayout
+            android:id="@+id/ntc_cap1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/capsule_bg_c1"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp">
+            <TextView
+                android:id="@+id/ntc_cap1_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="11sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/ntc_cap1_qty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#F5A623"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/ntc_cap1_whole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textColor="#DDEBEE" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ntc_cap2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/capsule_bg_c2"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp">
+            <TextView
+                android:id="@+id/ntc_cap2_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="11sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/ntc_cap2_qty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#F5DC92"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/ntc_cap2_whole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textColor="#DDEBEE" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ntc_cap3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/capsule_bg_c3"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp">
+            <TextView
+                android:id="@+id/ntc_cap3_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="11sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/ntc_cap3_qty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#7CE8E0"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/ntc_cap3_whole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textColor="#DDEBEE" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ntc_cap4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/capsule_bg_c4"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp">
+            <TextView
+                android:id="@+id/ntc_cap4_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="11sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/ntc_cap4_qty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#8FA9FF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/ntc_cap4_whole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textColor="#DDEBEE" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ntc_cap5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/capsule_bg_c5"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp">
+            <TextView
+                android:id="@+id/ntc_cap5_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="11sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/ntc_cap5_qty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#4ADE80"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/ntc_cap5_whole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textColor="#4ADE80"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 打卡警示条：红色实底 -->
+    <TextView
+        android:id="@+id/ntc_clock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/notify_red_bar"
+        android:paddingVertical="5dp"
+        android:gravity="center"
+        android:text=" 不要忘记打卡！"
+        android:textSize="13sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+</LinearLayout>
