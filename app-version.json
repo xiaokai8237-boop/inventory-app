@@ -1,6 +1,6 @@
 {
-  "versionCode": 111,
-  "versionName": "7.9.0",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v7.9.0.apk",
-  "note": "修复下载地址：raw.githubusercontent 国内连不上 → 改 Cloudflare Pages 正式域名（测速 1.17MB/s）"
+  "versionCode": 112,
+  "versionName": "7.9.1",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v7.9.1.apk",
+  "note": "需求3方案B：通知文字染色（所有ROM保证显示），去掉距离行"
 }

@@ -11,8 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.view.View;
-import android.widget.RemoteViews;
+import android.text.Html;
 
 import androidx.core.content.ContextCompat;
 
@@ -140,15 +139,12 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
             nb.addAction(R.drawable.ic_stat_notify, "导航去下一家", navPi);
 
-            // rich 大卡（RemoteViews）——方案A：折叠态也显示大卡，一弹出来就是图文大卡
+            // 需求3 方案B（用户拍板）：不用 RemoteViews（小米折叠态不认），用 HTML 染色 + BigTextStyle，所有 ROM 保证显示
+            // 去掉距离行；标题"即将到达 店名"系统显示；5 筐每筐一行染色；打卡红字；双按钮系统级
             try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    nb.setCustomContentView(buildRichCollapsedViews(context, hitName, distM, goods));
-                    nb.setCustomBigContentView(buildRichRemoteViews(context, hitName, distM, goods, recyclePi, navPi));
-                    nb.setStyle(new Notification.DecoratedCustomViewStyle());
-                } else {
-                    nb.setCustomContentView(buildRichRemoteViews(context, hitName, distM, goods, recyclePi, navPi));
-                }
+                CharSequence richText = Html.fromHtml(buildRichHtmlBody(goods), Html.FROM_HTML_MODE_LEGACY);
+                nb.setContentText(richText);
+                nb.setStyle(new Notification.BigTextStyle().bigText(richText));
             } catch (Exception ignored) {}
 
             MainActivity.setPendingArrival(hitName, "open");
@@ -157,75 +153,31 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
         } catch (Exception ignored) {}
     }
 
-    /** 需求3 方案A：折叠态压缩大卡（一弹出来就显示：头部+标题+距离+5 筐胶囊+打卡条） */
-    private RemoteViews buildRichCollapsedViews(Context ctx, String storeName, int dist, JSONArray goods) {
-        RemoteViews rv = new RemoteViews(ctx.getPackageName(), R.layout.notify_rich_collapsed);
-        rv.setTextViewText(R.id.ntc_title, "即将到达 " + storeName);
-        rv.setTextViewText(R.id.ntc_dist, "距你 " + dist + " 米以内");
-        int[] capIds = { R.id.ntc_cap1, R.id.ntc_cap2, R.id.ntc_cap3, R.id.ntc_cap4, R.id.ntc_cap5 };
-        int[] nameIds = { R.id.ntc_cap1_name, R.id.ntc_cap2_name, R.id.ntc_cap3_name, R.id.ntc_cap4_name, R.id.ntc_cap5_name };
-        int[] qtyIds = { R.id.ntc_cap1_qty, R.id.ntc_cap2_qty, R.id.ntc_cap3_qty, R.id.ntc_cap4_qty, R.id.ntc_cap5_qty };
-        int[] wholeIds = { R.id.ntc_cap1_whole, R.id.ntc_cap2_whole, R.id.ntc_cap3_whole, R.id.ntc_cap4_whole, R.id.ntc_cap5_whole };
-        for (int i = 0; i < capIds.length; i++) {
-            rv.setViewVisibility(capIds[i], View.GONE);
-        }
+    /** 需求3 方案B：HTML 染色正文（所有 ROM 保证显示；无距离行；5 筐每筐一行染色 + 打卡红字） */
+    private String buildRichHtmlBody(JSONArray goods) {
+        final String[] COLORS = { "#F5A623", "#F5DC92", "#7CE8E0", "#8FA9FF", "#4ADE80" };
+        StringBuilder sb = new StringBuilder();
         int idx = 0;
         if (goods != null) {
-            for (int i = 0; i < goods.length() && idx < capIds.length; i++) {
+            for (int i = 0; i < goods.length(); i++) {
                 JSONObject g = goods.optJSONObject(i);
                 if (g == null) continue;
                 int qty = g.optInt("qty", 0);
                 if (qty <= 0) continue;
-                rv.setTextViewText(nameIds[idx], g.optString("name", "筐"));
-                rv.setTextViewText(qtyIds[idx], String.valueOf(qty));
+                String c = COLORS[idx % COLORS.length];
+                idx++;
+                String name = g.optString("name", "筐");
+                sb.append("<font color='#FFFFFF'><b>").append(name).append("</b></font> ");
+                sb.append("<font color='").append(c).append("'><b>").append(qty).append("</b></font>");
                 int whole = g.optInt("whole", 0);
                 if (whole > 0) {
-                    rv.setTextViewText(wholeIds[idx], " · 整箱 " + whole);
-                } else {
-                    rv.setTextViewText(wholeIds[idx], "");
+                    sb.append("  <font color='").append(c).append("'><b>整箱 ").append(whole).append("</b></font>");
                 }
-                rv.setViewVisibility(capIds[idx], View.VISIBLE);
-                idx++;
+                sb.append("<br>");
             }
         }
-        return rv;
-    }
-
-    /** 需求3：图文版（rich）自定义大卡 RemoteViews —— 与 ArrivalMonitorPlugin 同款（#146 v6 定稿样式） */
-    private RemoteViews buildRichRemoteViews(Context ctx, String storeName, int dist, JSONArray goods,
-                                             PendingIntent recyclePi, PendingIntent navPi) {
-        RemoteViews rv = new RemoteViews(ctx.getPackageName(), R.layout.notify_rich);
-        rv.setTextViewText(R.id.nt_title, "即将到达 " + storeName);
-        rv.setTextViewText(R.id.nt_dist, "距你 " + dist + " 米以内");
-        rv.setOnClickPendingIntent(R.id.nt_btn_recycle, recyclePi);
-        rv.setOnClickPendingIntent(R.id.nt_btn_nav, navPi);
-        int[] capIds = { R.id.nt_cap1, R.id.nt_cap2, R.id.nt_cap3, R.id.nt_cap4, R.id.nt_cap5 };
-        int[] nameIds = { R.id.nt_cap1_name, R.id.nt_cap2_name, R.id.nt_cap3_name, R.id.nt_cap4_name, R.id.nt_cap5_name };
-        int[] qtyIds = { R.id.nt_cap1_qty, R.id.nt_cap2_qty, R.id.nt_cap3_qty, R.id.nt_cap4_qty, R.id.nt_cap5_qty };
-        int[] wholeIds = { R.id.nt_cap1_whole, R.id.nt_cap2_whole, R.id.nt_cap3_whole, R.id.nt_cap4_whole, R.id.nt_cap5_whole };
-        for (int i = 0; i < capIds.length; i++) {
-            rv.setViewVisibility(capIds[i], View.GONE);
-        }
-        int idx = 0;
-        if (goods != null) {
-            for (int i = 0; i < goods.length() && idx < capIds.length; i++) {
-                JSONObject g = goods.optJSONObject(i);
-                if (g == null) continue;
-                int qty = g.optInt("qty", 0);
-                if (qty <= 0) continue;
-                rv.setTextViewText(nameIds[idx], g.optString("name", "筐"));
-                rv.setTextViewText(qtyIds[idx], String.valueOf(qty));
-                int whole = g.optInt("whole", 0);
-                if (whole > 0) {
-                    rv.setTextViewText(wholeIds[idx], " · 整箱 " + whole);
-                } else {
-                    rv.setTextViewText(wholeIds[idx], "");
-                }
-                rv.setViewVisibility(capIds[idx], View.VISIBLE);
-                idx++;
-            }
-        }
-        return rv;
+        sb.append("<font color='#FF4D4F'><b>【不要忘记打卡！】</b></font>");
+        return sb.toString();
     }
 
     private String findNameByHash(JSONArray route, int hash) {
