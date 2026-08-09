@@ -164,7 +164,8 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
                 String name = g.optString("name", "筐");
                 int c = COLORS[idx % COLORS.length];
                 idx++;
-                wholeTotal += g.optInt("whole", 0);
+                // 整箱数 = 常温筐内的数据（用户录入常温筐发出时填；没填为 0 → 不显示整箱行）
+                if (name.contains("常温")) wholeTotal = g.optInt("whole", 0);
                 // 筐间分隔
                 if (count > 0) sb.append(compact ? " · " : " · ");
                 count++;

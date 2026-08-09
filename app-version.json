@@ -1,6 +1,6 @@
 {
-  "versionCode": 114,
-  "versionName": "7.9.3",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v7.9.3.apk",
-  "note": "需求3方案B+：通知按用户指定格式「此店需要发出：筐名X个·…·整箱X件·不要忘记打卡!」，鲜艳染色+大字"
+  "versionCode": 115,
+  "versionName": "7.9.4",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v7.9.4.apk",
+  "note": "需求3方案B+：整箱数量修正为取常温筐内数据（用户录入常温筐发出时填，没填为0不显示）"
 }
