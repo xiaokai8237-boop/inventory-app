@@ -1,6 +1,6 @@
 {
-  "versionCode": 115,
-  "versionName": "7.9.4",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v7.9.4.apk",
-  "note": "需求3方案B+：整箱数量修正为取常温筐内数据（用户录入常温筐发出时填，没填为0不显示）"
+  "versionCode": 116,
+  "versionName": "7.9.5",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v7.9.5.apk",
+  "note": "需求3 v4定稿：通知删除「此店需要发出：」前缀；配色去黄去白换高亮鲜艳（鲜食亮橙/面包亮玫红/冷藏亮青/冷冻亮蓝/常温亮绿/整箱亮紫/打卡亮红），大字保留"
 }

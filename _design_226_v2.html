@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>需求3 通知折叠态 v2 - 去前缀 + 鲜艳色</title>
+<style>
+  :root {
+    --bg: #0A1A22;
+    --phone-bg: #0E3340;
+    --gold: #F5DC92;
+    --gold-grad: linear-gradient(135deg,#F8E3A6,#E0A63E);
+    --cyan: #7CE8E0;
+    --green: #4ADE80;
+    --red: #FF6B6B;
+    --card-border: rgba(255,255,255,.09);
+    --text-main: #FFFFFF;
+    --text-sub: #7E97A1;
+    --text-body: #DDEBEE;
+    /* 新版鲜艳通知色（高饱和高亮，深色通知栏下醒目） */
+    --c1: #FF6D00;   /* 鲜食筐 亮橙 */
+    --c2: #FFD600;   /* 面包筐 亮黄 */
+    --c3: #18FFFF;   /* 冷藏筐 亮青 */
+    --c4: #448AFF;   /* 冷冻筐 亮蓝 */
+    --c5: #00E676;   /* 常温筐 亮绿 */
+    --whole: #FFC400;/* 整箱 琥珀金 */
+    --clock: #FF1744;/* 打卡 亮红 */
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    font-family: 'Noto Sans SC','Source Han Sans SC','HarmonyOS Sans SC',sans-serif;
+    padding: 24px 32px 40px;
+    color: var(--text-body);
+  }
+  .ver-mark {
+    position: fixed; top: 14px; right: 18px;
+    font-size: 12px; font-weight: 800; color: #0B2E38;
+    background: var(--gold-grad);
+    padding: 5px 14px; border-radius: 16px; z-index: 99;
+  }
+  .canvas { max-width: 760px; margin: 0 auto; }
+  .canvas-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .canvas-title span:first-child { font-size: 18px; font-weight: 800; color: #fff; }
+  .canvas-title .badge { font-size: 12px; font-weight: 700; color: var(--gold); border: 1px solid rgba(245,220,146,.4); border-radius: 14px; padding: 3px 12px; }
+  .canvas-sub { font-size: 12px; color: var(--text-sub); margin-bottom: 18px; }
+
+  /* ========== 手机框 ========== */
+  .phone {
+    width: 380px; margin: 0 auto 16px;
+    background: var(--phone-bg);
+    border: 1.5px solid rgba(245,220,146,.45);
+    border-radius: 26px;
+    padding: 14px 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  }
+  /* 手机状态栏 */
+  .sys-bar { display: flex; align-items: center; justify-content: space-between; padding: 2px 6px 10px; font-size: 11px; color: #EAF3F5; font-weight: 700; }
+  .sys-bar .sig { display: flex; align-items: center; gap: 4px; }
+  .sig-bars { display: flex; align-items: flex-end; gap: 1.5px; }
+  .sig-bars i { display: block; width: 2.5px; background: #EAF3F5; border-radius: 1px; }
+  .sys-bar .batt { display: flex; align-items: center; gap: 3px; }
+  .batt .pill { width: 20px; height: 9px; border: 1px solid #EAF3F5; border-radius: 2px; position: relative; }
+  .batt .pill::after { content: ""; position: absolute; right: -3px; top: 2px; width: 2px; height: 4px; background: #EAF3F5; border-radius: 1px; }
+  .batt .pill i { display: block; height: 5px; width: 60%; background: #4ADE80; margin: 1px; border-radius: 1px; }
+
+  /* 通知卡片 */
+  .notif {
+    background: #1A2C33;
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 16px;
+    padding: 13px 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.35);
+  }
+  .notif.old { opacity: .55; border-style: dashed; }
+  .notif .hd { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+  .notif .app-ic {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg,#F8E3A6,#E0A63E);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 900; color: #7A4E00;
+  }
+  .notif .app-name { flex: 1; font-size: 12px; font-weight: 800; color: #9FD0D6; }
+  .notif .time { font-size: 10px; color: #6E8A95; }
+  .notif .title { font-size: 15px; font-weight: 800; color: #fff; margin-bottom: 7px; }
+  .notif .body { font-size: 13px; line-height: 1.65; color: #fff; }
+  .notif .body b { font-weight: 800; }
+  /* 筐色 span */
+  .c1 { color: var(--c1); } .c2 { color: var(--c2); } .c3 { color: var(--c3); }
+  .c4 { color: var(--c4); } .c5 { color: var(--c5); } .whole { color: var(--whole); } .clock { color: var(--clock); }
+  /* 对比标签 */
+  .cmp-tag { display: inline-block; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px; margin-bottom: 6px; }
+  .cmp-new { color: #0B2E38; background: var(--gold-grad); }
+  .cmp-old { color: #9FB3BC; background: rgba(255,255,255,.08); }
+  .cmp-label { font-size: 10px; color: var(--text-sub); margin: 2px 0 8px; }
+
+  /* 颜色对照表 */
+  .color-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .color-chip { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,.05); border: 1px solid var(--card-border); border-radius: 9px; padding: 5px 9px; font-size: 11px; color: #DDEBEE; }
+  .color-chip i { width: 14px; height: 14px; border-radius: 4px; display: block; }
+
+  /* ========== 底部改动说明区 ========== */
+  .note { background: rgba(255,255,255,.03); border: 1px solid var(--card-border); border-radius: 14px; padding: 16px 18px; margin-top: 20px; }
+  .note h3 { font-size: 13px; color: var(--gold); margin-bottom: 10px; }
+  .note ul { padding-left: 16px; }
+  .note li { font-size: 12px; color: #C9DDE3; line-height: 1.9; }
+  .note li b { color: #fff; }
+  .tag-new { color: #F5A623; font-weight: 800; }
+  .tag-keep { color: var(--text-sub); font-weight: 800; }
+</style>
+</head>
+<body>
+<div class="ver-mark">图1/1 · v1</div>
+<div class="canvas">
+  <div class="canvas-title">
+    <span>需求3 通知折叠态 v2 — 删前缀 + 鲜艳色</span>
+    <span class="badge">设计稿 v2</span>
+  </div>
+  <div class="canvas-sub">折叠态（通知弹出来默认看到的一行）改动：删除「此店需要发出：」前缀，5 筐 + 整箱 + 打卡全部换高亮鲜艳色，大字保留</div>
+
+  <div class="phone">
+    <div class="sys-bar">
+      <span>16:52</span>
+      <div class="sig">
+        <div class="sig-bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></div>
+        <span>5G</span>
+      </div>
+      <div class="batt"><div class="pill"><i></i></div><span>100%</span></div>
+    </div>
+
+    <!-- 新版折叠态（方案） -->
+    <div class="cmp-tag cmp-new">新版（本次改动后）</div>
+    <div class="notif">
+      <div class="hd">
+        <div class="app-ic">筐</div>
+        <div class="app-name">物流筐</div>
+        <div class="time">刚刚</div>
+      </div>
+      <div class="title">即将到达 XXXXX</div>
+      <div class="body">
+        <b class="c1">鲜食筐 3 个</b> · <b class="c2">面包筐 2 个</b> · <b class="c3">冷藏筐 1 个</b> · <b class="c4">冷冻筐 5 个</b> · <b class="c5">常温筐 8 个</b> · <b class="whole">整箱 6 件</b> · <b class="clock">不要忘记打卡!</b>
+      </div>
+    </div>
+
+    <!-- 旧版折叠态（对比） -->
+    <div class="cmp-tag cmp-old">旧版（当前版本）</div>
+    <div class="notif old">
+      <div class="hd">
+        <div class="app-ic">筐</div>
+        <div class="app-name">物流筐</div>
+        <div class="time">刚刚</div>
+      </div>
+      <div class="title">即将到达 XXXXX</div>
+      <div class="body">
+        <b>此店需要发出:</b><span style="color:#F5A623">鲜食筐 3 个</span> · <span style="color:#F5DC92">面包筐 2 个</span> · <span style="color:#7CE8E0">冷藏筐 1 个</span> · <span style="color:#8FA9FF">冷冻筐 5 个</span> · <span style="color:#4ADE80">常温筐 8 个</span> · <span style="color:#FFB300">整箱 6 件</span> · <span style="color:#FF3B30">不要忘记打卡!</span>
+      </div>
+    </div>
+
+    <div class="cmp-label">新旧对比：① 前缀「此店需要发出:」删除 ② 5 筐颜色换高亮鲜艳色（亮橙/亮黄/亮青/亮蓝/亮绿）③ 整箱、打卡色同步加亮</div>
+
+    <!-- 颜色对照表 -->
+    <div class="color-row">
+      <div class="color-chip"><i style="background:#FF6D00"></i>鲜食 亮橙</div>
+      <div class="color-chip"><i style="background:#FFD600"></i>面包 亮黄</div>
+      <div class="color-chip"><i style="background:#18FFFF"></i>冷藏 亮青</div>
+      <div class="color-chip"><i style="background:#448AFF"></i>冷冻 亮蓝</div>
+      <div class="color-chip"><i style="background:#00E676"></i>常温 亮绿</div>
+      <div class="color-chip"><i style="background:#FFC400"></i>整箱 琥珀金</div>
+      <div class="color-chip"><i style="background:#FF1744"></i>打卡 亮红</div>
+    </div>
+  </div>
+
+  <div class="note">
+    <h3>v2 改动说明</h3>
+    <ul>
+      <li><span class="tag-new">删除前缀</span>：折叠态与展开态都去掉「<b>此店需要发出：</b>」，通知直接以第一筐开头（更省空间、更直接）</li>
+      <li><span class="tag-new">颜色全换鲜艳高亮</span>：5 筐（亮橙 FF6D00 / 亮黄 FFD600 / 亮青 18FFFF / 亮蓝 448AFF / 亮绿 00E676）+ 整箱琥珀金 FFC400 + 打卡亮红 FF1744——深色通知栏背景下对比度更高，一眼看清</li>
+      <li><span class="tag-keep">折叠态单行全量保留</span>：不展开也看到全部 5 筐 + 整箱 + 打卡</li>
+      <li><span class="tag-keep">大字保留</span>：筐名 1.2 倍 / 数量 1.4 倍加粗（展开态数量 2.0 倍）</li>
+      <li><span class="tag-keep">整箱数逻辑不变</span>：只取常温筐的整箱数，没填为 0 则不显示</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

@@ -233,21 +233,17 @@ public class ArrivalMonitorPlugin extends Plugin {
         }
     }
 
-    /** 需求3 方案B+（用户指定格式）：「此店需要发出：筐名 X 个 · … · 整箱 X 件 · 不要忘记打卡!」
-     *  鲜艳饱和色 + 大字；筐名/数量同色；整箱合计琥珀色；打卡红字
-     *  @param compact true=折叠态单行全量；false=展开态分行（前缀行/筐行/整箱行/打卡行）
+    /** 需求3 方案B+（用户定稿 v4）：「筐名 X 个 · … · 整箱 X 件 · 不要忘记打卡!」
+     *  v4 色板（去黄去白，深色通知栏下高亮醒目）：鲜食亮橙/面包亮玫红/冷藏亮青/冷冻亮蓝/常温亮绿/整箱亮紫/打卡亮红
+     *  大字；筐名/数量同色；整箱取常温筐 whole；打卡红字
+     *  @param compact true=折叠态单行全量；false=展开态分行（筐行/整箱行/打卡行）
      */
     private CharSequence buildRichSpannable(JSONArray goods, boolean compact) {
-        // 鲜艳饱和色（在浅色/深色通知栏背景下都清晰）
-        final int[] COLORS = { 0xFFFF7A00, 0xFFFFB300, 0xFF00C9C0, 0xFF5B7CFF, 0xFF00C853 };
-        final int CLOCK = 0xFFFF3B30; // 打卡警示红（更鲜艳）
-        final int WHOLE = 0xFFFFB300; // 整箱合计琥珀金
+        // v4 定稿鲜艳色（高饱和高亮；无黄无白；在浅色/深色通知栏背景下都清晰）
+        final int[] COLORS = { 0xFFFF6D00, 0xFFFF4081, 0xFF18FFFF, 0xFF448AFF, 0xFF00E676 };
+        final int CLOCK = 0xFFFF1744; // 打卡亮红
+        final int WHOLE = 0xFFD500F9; // 整箱亮紫
         SpannableStringBuilder sb = new SpannableStringBuilder();
-        // 前缀「此店需要发出：」
-        int s0 = sb.length();
-        sb.append(compact ? "此店需要发出:" : "此店需要发出：");
-        sb.setSpan(new StyleSpan(Typeface.BOLD), s0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        sb.setSpan(new RelativeSizeSpan(compact ? 1.2f : 1.3f), s0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         int wholeTotal = 0;
         int count = 0; // 已显示筐数（用于分隔）
         int idx = 0;   // 颜色索引
@@ -313,7 +309,7 @@ public class ArrivalMonitorPlugin extends Plugin {
     /** 按 8 套模板构建通知正文（方案B+：全部模板去距离行 + 鲜艳染色 + 大字，保证任意模板都清晰）
      *  minimal = 店名+打卡红字；list = 路线列表染色；其余 = 5 筐染色分行 */
     private CharSequence buildTemplateBody(String template, String storeName, int dist, JSONArray goods, String dataStr) {
-        final int CLOCK = 0xFFFF3B30;
+        final int CLOCK = 0xFFFF1744; // v4 打卡亮红
         boolean isMinimal = "minimal".equals(template);
         boolean isList = "list".equals(template);
         if (isMinimal) {
@@ -341,13 +337,13 @@ public class ArrivalMonitorPlugin extends Plugin {
                     if (sb.length() > 0) sb.append("\n");
                     int s0 = sb.length();
                     sb.append(r.optString("name", "店")).append("  ").append(r.optString("dist", ""));
-                    sb.setSpan(new ForegroundColorSpan(0xFF00C9C0), s0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    sb.setSpan(new ForegroundColorSpan(0xFF18FFFF), s0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     sb.setSpan(new StyleSpan(Typeface.BOLD), s0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     int qty = r.optInt("qty", 0);
                     if (qty > 0) {
                         int s1 = sb.length();
                         sb.append("  ").append(String.valueOf(qty));
-                        sb.setSpan(new ForegroundColorSpan(0xFFFFB300), s1, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        sb.setSpan(new ForegroundColorSpan(0xFFD500F9), s1, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                         sb.setSpan(new StyleSpan(Typeface.BOLD), s1, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
                 }

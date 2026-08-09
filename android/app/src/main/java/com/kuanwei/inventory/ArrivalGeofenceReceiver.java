@@ -138,20 +138,15 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
         } catch (Exception ignored) {}
     }
 
-    /** 需求3 方案B+：Spannable 染色放大正文（鲜艳饱和色 + 大字；无距离行；筐名/数量同色；打卡红字）
-     *  @param compact true=折叠态紧凑单行全量（"鲜食12 · 面包8 · 冷藏5"）；false=展开态每筐一行
+    /** 需求3 方案B+（用户定稿 v4）：Spannable 染色放大正文（v4 色板去黄去白；无距离行；筐名/数量同色；打卡红字）
+     *  @param compact true=折叠态紧凑单行全量；false=展开态每筐一行
      */
     private CharSequence buildRichSpannable(JSONArray goods, boolean compact) {
-        // 鲜艳饱和色（在浅色/深色通知栏背景下都清晰）
-        final int[] COLORS = { 0xFFFF7A00, 0xFFFFB300, 0xFF00C9C0, 0xFF5B7CFF, 0xFF00C853 };
-        final int CLOCK = 0xFFFF3B30; // 打卡警示红（更鲜艳）
-        final int WHOLE = 0xFFFFB300; // 整箱合计琥珀金
+        // v4 定稿鲜艳色（高饱和高亮；无黄无白；在浅色/深色通知栏背景下都清晰）
+        final int[] COLORS = { 0xFFFF6D00, 0xFFFF4081, 0xFF18FFFF, 0xFF448AFF, 0xFF00E676 };
+        final int CLOCK = 0xFFFF1744; // 打卡亮红
+        final int WHOLE = 0xFFD500F9; // 整箱亮紫
         SpannableStringBuilder sb = new SpannableStringBuilder();
-        // 前缀「此店需要发出：」
-        int s0 = sb.length();
-        sb.append(compact ? "此店需要发出:" : "此店需要发出：");
-        sb.setSpan(new StyleSpan(Typeface.BOLD), s0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        sb.setSpan(new RelativeSizeSpan(compact ? 1.2f : 1.3f), s0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         int wholeTotal = 0;
         int count = 0; // 已显示筐数（用于分隔）
         int idx = 0;   // 颜色索引
