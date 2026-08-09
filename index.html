@@ -257,9 +257,12 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
 /* 模式互斥：极简模式下隐藏标准底部导航/未登录横条/标准页面（登录整页 auth-page 保留） */
 .simple-tabs { display: none; }
 body.simple-mode .tabs, body.simple-mode .login-notice { display: none !important; }
-body.simple-mode .page:not(.page-simple):not(.auth-page) { display: none !important; }
+body.simple-mode .page:not(.page-simple):not(.auth-page):not(.page-ms) { display: none !important; }
 body.simple-mode .simple-tabs { display: flex; }
 body.auth-mode .simple-tabs { display: none !important; }
+/* 模式选择页（#153）：标准/极简两种模式下都能访问 */
+.page-ms { display: none; padding: 12px 14px; padding-bottom: 78px; }
+.page-ms.active { display: block; animation: pageFadeIn .25s ease; }
 /* 极简页面 */
 .page-simple { display: none; padding: 12px 14px; padding-bottom: 78px; }
 .page-simple.active { display: block; animation: pageFadeIn .25s ease; }
@@ -376,6 +379,42 @@ body.auth-mode .simple-tabs { display: none !important; }
 .sim-exp .e-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--sim-cyan); margin-top: 6px; flex-shrink: 0; }
 .sim-ver { text-align: center; color: var(--text-light); font-size: 11px; padding: 16px 0 8px; }
 .sim-ver b { color: var(--sim-gold); }
+/* ===== #153 模式选择页 ===== */
+.ms-head { display: flex; align-items: center; gap: 10px; padding: 6px 2px 4px; margin-bottom: 12px; }
+.ms-back {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14);
+  display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer; flex-shrink: 0;
+}
+.ms-title { font-size: 17px; font-weight: 800; color: #fff; flex: 1; }
+.ms-sub { font-size: 11px; color: var(--text-light); margin: -6px 2px 12px; }
+.ms-card { border-radius: 18px; padding: 15px 14px; margin-bottom: 13px; border: 1.5px solid; }
+.ms-card.std { background: rgba(124,155,255,.07); border-color: rgba(124,155,255,.45); }
+.ms-card.min { background: rgba(124,232,224,.06); border-color: rgba(124,232,224,.45); }
+.ms-card .mc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.ms-card .mc-ico { width: 36px; height: 36px; border-radius: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.ms-card.std .mc-ico { background: rgba(124,155,255,.18); color: #9FB8FF; }
+.ms-card.min .mc-ico { background: rgba(124,232,224,.18); color: var(--sim-cyan); }
+.ms-card .mc-name { font-size: 15px; font-weight: 800; color: #fff; flex: 1; }
+.ms-card .mc-cur { font-size: 10px; font-weight: 800; border-radius: 10px; padding: 3px 10px; flex-shrink: 0; }
+.ms-card.std .mc-cur { color: #9FB8FF; border: 1px solid rgba(124,155,255,.5); }
+.ms-card.min .mc-cur { color: var(--sim-cyan); border: 1px solid rgba(124,232,224,.5); }
+.ms-card .mc-cur.off { color: var(--text-light); border-color: rgba(127,166,176,.4); }
+.ms-card .mc-desc { font-size: 12px; color: #C6DDE3; line-height: 1.75; }
+.ms-card .mc-desc b { color: #fff; }
+.ms-card .mc-li { display: flex; gap: 7px; align-items: flex-start; margin-top: 5px; }
+.ms-card .mc-li .li-dot { width: 4px; height: 4px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
+.ms-card.std .mc-li .li-dot { background: #9FB8FF; }
+.ms-card.min .mc-li .li-dot { background: var(--sim-cyan); }
+.ms-card .mc-btn {
+  width: 100%; text-align: center; font-size: 14px; font-weight: 800;
+  border-radius: 22px; padding: 11px 0; margin-top: 12px; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.ms-card.std .mc-btn { color: #0B2E38; background: linear-gradient(135deg,#9FB8FF 0%,#6E8BFF 100%); }
+.ms-card.min .mc-btn { color: #0B2E38; background: linear-gradient(135deg,#F8E3A6 0%,#E0A63E 100%); }
+.ms-card .mc-btn.cur { background: rgba(255,255,255,.1); color: #9FD0D6; border: 1px solid rgba(255,255,255,.2); }
+.ms-foot-tip { text-align: center; font-size: 10px; color: var(--text-light); margin-top: 2px; }
 /* 标准设置页：界面风格切换卡（#149） */
 .style-switch-card {
   background: var(--card-bg); border: 1px solid rgba(245,220,146,.3);
@@ -3473,15 +3512,15 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div class="settings-hero-sub">发出 + 回收，每天 2 分钟搞定 · 每一步都写清楚「点哪里、填什么」</div>
   </div>
 
-  <!-- #149 界面风格切换（标准模式 → 极简模式入口） -->
-  <div class="style-switch-card">
+  <!-- #153 模式选择入口（标准模式 → 打开模式选择页） -->
+  <div class="style-switch-card" onclick="openModeSelect()">
     <div class="ssc-info">
-      <div class="ssc-name">界面风格</div>
-      <div class="ssc-desc">当前：标准模式（按门店明细）· 极简模式只记每种筐发出/回收总数</div>
+      <div class="ssc-name">模式选择</div>
+      <div class="ssc-desc">标准模式 · 按门店明细 — 点这里切换 / 查看说明</div>
     </div>
-    <div class="ssc-btn" onclick="setSimpleMode(true)">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.2"/></svg>
-      切换到极简
+    <div class="ssc-btn">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+      模式选择
     </div>
   </div>
 
@@ -3698,11 +3737,10 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     </div>
   </div>
   <!-- 界面风格切换（切回标准的唯一入口） -->
-  <div class="sim-set-card">
+  <div class="sim-set-card" onclick="openModeSelect()" style="cursor:pointer;">
     <div class="ss-title">界面风格</div>
     <div class="sim-seg">
-      <div class="sg" onclick="setSimpleMode(false)">标准</div>
-      <div class="sg on" onclick="setSimpleMode(true)">极简</div>
+      <div class="sg on">极简 · 模式选择 ›</div>
     </div>
   </div>
   <!-- 账号登录（云备份） -->
@@ -3724,6 +3762,57 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     </div>
   </div>
   <div class="sim-ver">物流筐 · 极简模式 <b id="simpleVersion">v7.8.0</b></div>
+</div>
+
+<!-- ===== #153 模式选择页（标准/极简切换 + 双模式说明，两种模式下都可访问） ===== -->
+<div class="page page-ms" id="page-mode-select">
+  <div class="ms-head">
+    <div class="ms-back" onclick="backFromModeSelect()">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div class="ms-title">模式选择</div>
+  </div>
+  <div class="ms-sub">选一个模式，随时可在这里切换 · 数据互不影响</div>
+
+  <!-- 标准模式卡 -->
+  <div class="ms-card std">
+    <div class="mc-head">
+      <div class="mc-ico">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      </div>
+      <div class="mc-name">标准模式</div>
+      <span class="mc-cur" id="msStdCur">当前使用中</span>
+    </div>
+    <div class="mc-desc">
+      <b>按门店明细</b>：一家店一家店记，数字清清楚楚
+      <div class="mc-li"><span class="li-dot"></span><span>选店面 + 5 种筐（鲜食/面包/低温/冷冻/常温）<b>逐店录入</b></span></div>
+      <div class="mc-li"><span class="li-dot"></span><span>支持<b>语音、拍照识别</b>，一张路单几秒录完</span></div>
+      <div class="mc-li"><span class="li-dot"></span><span><b>到店提醒</b>：围栏到店自动通知 + 记录回筐</span></div>
+      <div class="mc-li"><span class="li-dot"></span><span>记录/汇总/对账/导出 <b>全功能</b>，云备份</span></div>
+    </div>
+    <button class="mc-btn" id="msStdBtn" onclick="doModeSwitch(false)">切换到标准</button>
+  </div>
+
+  <!-- 极简模式卡 -->
+  <div class="ms-card min">
+    <div class="mc-head">
+      <div class="mc-ico">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg>
+      </div>
+      <div class="mc-name">极简模式</div>
+      <span class="mc-cur off" id="msMinCur">未使用</span>
+    </div>
+    <div class="mc-desc">
+      <b>只记总数</b>：不选店，5 种筐各记一个数，最快
+      <div class="mc-li"><span class="li-dot"></span><span>只填 5 种筐的<b>发出 / 回收总数</b>，不选店、没有店名</span></div>
+      <div class="mc-li"><span class="li-dot"></span><span>记录按<b>几号几点 到 几号几点</b>范围看每筐发出、回收、差额</span></div>
+      <div class="mc-li"><span class="li-dot"></span><span>独立底部导航（首页/记录/设置），与标准模式<b>数据分开</b></span></div>
+      <div class="mc-li"><span class="li-dot"></span><span>适合只想知道<b>今天发了多少、收了多少</b></span></div>
+    </div>
+    <button class="mc-btn" id="msMinBtn" onclick="doModeSwitch(true)">切换到极简</button>
+  </div>
+
+  <div class="ms-foot-tip">切换后立即生效，数据互不影响，随时可切回</div>
 </div>
 
 <!-- ========== 每页专属帮助弹窗（header 右上角 ❓） ========== -->
@@ -8930,6 +9019,7 @@ function switchPage(pageName) {
   if (pageName === 'simple-home') { renderSimpleHome(); }
   if (pageName === 'simple-records') { renderSimpleRecords(); renderSimpleLogin(); }
   if (pageName === 'simple-settings') { renderSimpleLogin(); }
+  if (pageName === 'mode-select') { renderModeSelect(); }
   // 登录/注册/忘记密码整页：隐藏顶部导航条/底部导航/未登录横条（深空蓝晶整页设计稿无底部导航）
   const AUTH_PAGES = ['login', 'setup', 'forgot'];
   document.body.classList.toggle('auth-mode', AUTH_PAGES.indexOf(pageName) >= 0);
@@ -9137,6 +9227,40 @@ function renderSimpleLogin() {
   // 极简设置页：账号段显示状态
   const seg = document.getElementById('simpleAccountSeg');
   if (seg) seg.textContent = isLoggedIn() ? (phone ? phone + ' · 已登录' : '已登录') : '登录（云备份）';
+}
+
+// ===== #153 模式选择页（标准/极简切换 + 双模式说明） =====
+let modeSelectReturn = 'settings'; // 从哪个页面进入模式选择页（返回用）
+function openModeSelect() {
+  const act = document.querySelector('.page.active');
+  modeSelectReturn = act && act.id ? act.id.replace('page-', '') : (isSimpleMode() ? 'simple-settings' : 'settings');
+  switchPage('mode-select');
+}
+function backFromModeSelect() {
+  // 返回来源页（极简模式返回极简设置页；标准模式返回标准设置页）
+  switchPage(modeSelectReturn === 'simple-settings' || isSimpleMode() ? 'simple-settings' : modeSelectReturn);
+}
+function doModeSwitch(on) {
+  setSimpleMode(on);
+  // 切换后进入对应首页（标准→记录首页 / 极简→极简首页）
+  switchPage(on ? 'simple-home' : 'record');
+}
+function renderModeSelect() {
+  const simple = isSimpleMode();
+  const stdCur = document.getElementById('msStdCur');
+  const minCur = document.getElementById('msMinCur');
+  const stdBtn = document.getElementById('msStdBtn');
+  const minBtn = document.getElementById('msMinBtn');
+  if (stdCur) { stdCur.textContent = simple ? '未使用' : '当前使用中'; stdCur.classList.toggle('off', simple); }
+  if (minCur) { minCur.textContent = simple ? '当前使用中' : '未使用'; minCur.classList.toggle('off', !simple); }
+  if (stdBtn) {
+    if (!simple) { stdBtn.classList.add('cur'); stdBtn.textContent = '当前使用中'; stdBtn.disabled = true; }
+    else { stdBtn.classList.remove('cur'); stdBtn.disabled = false; stdBtn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg> 切换到标准'; }
+  }
+  if (minBtn) {
+    if (simple) { minBtn.classList.add('cur'); minBtn.textContent = '当前使用中'; minBtn.disabled = true; }
+    else { minBtn.classList.remove('cur'); minBtn.disabled = false; minBtn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg> 切换到极简'; }
+  }
 }
 
 // ======== 安卓返回键处理（SPA 页面栈 + 弹窗/面板逐级返回） ========
@@ -12115,7 +12239,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.8.2'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.8.3'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');

@@ -45,8 +45,8 @@ function T(name, cond, extra) {
     hasCard: !!document.querySelector('.style-switch-card'),
     btnText: document.querySelector('.style-switch-card .ssc-btn')?.textContent.replace(/\s+/g, ' ').trim()
   }));
-  T('设置页有界面风格切换卡', r1.hasCard, JSON.stringify(r1));
-  T('切换按钮「切换到极简」', (r1.btnText || '').includes('切换到极简'), r1.btnText);
+  T('设置页有模式选择入口卡', r1.hasCard, JSON.stringify(r1));
+  T('入口按钮「模式选择」（#153 点击进入模式选择页）', (r1.btnText || '').includes('模式选择'), r1.btnText);
 
   // ===== 2. 切换极简 =====
   console.log('=== 2. 切换极简 ===');
@@ -184,8 +184,7 @@ function T(name, cond, extra) {
     expLines: document.querySelectorAll('.sim-exp .e-line').length,
     ver: document.getElementById('simpleVersion')?.textContent.trim()
   }));
-  T('界面风格=标准/极简', JSON.stringify(r8.segs) === JSON.stringify(['标准','极简']), JSON.stringify(r8.segs));
-  T('极简为当前选中', r8.segOn === '极简', r8.segOn);
+  T('极简设置页有模式选择入口（#153）', (r8.segOn || '').includes('模式选择'), r8.segOn);
   T('账号段显示已登录手机号', (r8.loginSeg || '').includes('13800000000'), r8.loginSeg);
   T('极简说明 4 条', r8.expLines === 4, String(r8.expLines));
   T('版本号显示', (r8.ver || '').startsWith('v7.8'), r8.ver);
