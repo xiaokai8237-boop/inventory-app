@@ -1,6 +1,6 @@
 {
   "versionCode": 111,
   "versionName": "7.9.0",
-  "apkUrl": "https://raw.githubusercontent.com/xiaokai8237-boop/inventory-app/main/apk/app-v7.9.0.apk",
-  "note": "需求3方案A：通知折叠态也显示图文大卡（一弹出来就是大卡，不用点展开）"
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v7.9.0.apk",
+  "note": "修复下载地址：raw.githubusercontent 国内连不上 → 改 Cloudflare Pages 正式域名（测速 1.17MB/s）"
 }
