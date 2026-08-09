@@ -11,7 +11,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.text.Html;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
+import android.graphics.Typeface;
 
 import androidx.core.content.ContextCompat;
 
@@ -77,24 +82,11 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
             alarmedMap.put(hitName, now);
             sp.edit().putString(KEY_ALARMED, alarmedMap.toString()).apply();
 
-            // 组装通知内容（店名 + 该店各筐数量 + 打卡）
+            // 组装通知内容（店名 + 该店各筐数量 + 打卡；方案B+：去距离 + 鲜艳染色 + 大字）
             JSONObject storeInfo = findStoreInfo(route, hitName);
             String title = "即将到达 " + hitName;
-            StringBuilder body = new StringBuilder();
-            body.append("距你 ").append(distM).append(" 米以内\n");
             JSONArray goods = storeInfo != null ? storeInfo.optJSONArray("goods") : null;
-            if (goods != null && goods.length() > 0) {
-                for (int i = 0; i < goods.length(); i++) {
-                    JSONObject g = goods.getJSONObject(i);
-                    int qty = g.optInt("qty", 0);
-                    if (qty <= 0) continue;
-                    body.append(g.optString("name", "")).append(" ").append(qty);
-                    int whole = g.optInt("whole", 0);
-                    if (whole > 0) body.append(" / 整箱 ").append(whole);
-                    body.append("\n");
-                }
-            }
-            body.append("\n不要忘记打卡！");
+            CharSequence body = buildRichSpannable(goods != null ? goods : new JSONArray(), false);
 
             // 通知渠道
             NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -113,11 +105,12 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
             PendingIntent pi = PendingIntent.getActivity(context, 0, open,
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
 
-            // 需求3：rich 图文版自定义大卡（RemoteViews，与 ArrivalMonitorPlugin 同款布局）
+            // 需求3 方案B+：折叠态塞满全量 + 展开态分行完整版（鲜艳染色 + 大字，无距离）
             Notification.Builder nb = new Notification.Builder(context, ArrivalMonitorPlugin.CHANNEL_ARRIVAL)
                     .setSmallIcon(R.drawable.ic_stat_notify)
                     .setContentTitle(title)
-                    .setContentText(body.toString().replace('\n', ' '))
+                    .setContentText(buildRichSpannable(goods != null ? goods : new JSONArray(), true))
+                    .setStyle(new Notification.BigTextStyle().bigText(body))
                     .setAutoCancel(true)
                     .setContentIntent(pi)
                     .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
@@ -139,24 +132,20 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
             nb.addAction(R.drawable.ic_stat_notify, "导航去下一家", navPi);
 
-            // 需求3 方案B（用户拍板）：不用 RemoteViews（小米折叠态不认），用 HTML 染色 + BigTextStyle，所有 ROM 保证显示
-            // 去掉距离行；标题"即将到达 店名"系统显示；5 筐每筐一行染色；打卡红字；双按钮系统级
-            try {
-                CharSequence richText = Html.fromHtml(buildRichHtmlBody(goods), Html.FROM_HTML_MODE_LEGACY);
-                nb.setContentText(richText);
-                nb.setStyle(new Notification.BigTextStyle().bigText(richText));
-            } catch (Exception ignored) {}
-
             MainActivity.setPendingArrival(hitName, "open");
 
             nm.notify(7003, nb.build());
         } catch (Exception ignored) {}
     }
 
-    /** 需求3 方案B：HTML 染色正文（所有 ROM 保证显示；无距离行；5 筐每筐一行染色 + 打卡红字） */
-    private String buildRichHtmlBody(JSONArray goods) {
-        final String[] COLORS = { "#F5A623", "#F5DC92", "#7CE8E0", "#8FA9FF", "#4ADE80" };
-        StringBuilder sb = new StringBuilder();
+    /** 需求3 方案B+：Spannable 染色放大正文（鲜艳饱和色 + 大字；无距离行；筐名/数量同色；打卡红字）
+     *  @param compact true=折叠态紧凑单行全量（"鲜食12 · 面包8 · 冷藏5"）；false=展开态每筐一行
+     */
+    private CharSequence buildRichSpannable(JSONArray goods, boolean compact) {
+        // 鲜艳饱和色（在浅色/深色通知栏背景下都清晰）
+        final int[] COLORS = { 0xFFFF7A00, 0xFFFFB300, 0xFF00C9C0, 0xFF5B7CFF, 0xFF00C853 };
+        final int CLOCK = 0xFFFF3B30; // 打卡警示红（更鲜艳）
+        SpannableStringBuilder sb = new SpannableStringBuilder();
         int idx = 0;
         if (goods != null) {
             for (int i = 0; i < goods.length(); i++) {
@@ -164,20 +153,44 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
                 if (g == null) continue;
                 int qty = g.optInt("qty", 0);
                 if (qty <= 0) continue;
-                String c = COLORS[idx % COLORS.length];
-                idx++;
                 String name = g.optString("name", "筐");
-                sb.append("<font color='#FFFFFF'><b>").append(name).append("</b></font> ");
-                sb.append("<font color='").append(c).append("'><b>").append(qty).append("</b></font>");
+                int c = COLORS[idx % COLORS.length];
+                idx++;
+                // 筐名（染色 + 加粗 + 1.25倍）
+                if (sb.length() > 0) sb.append(compact ? " · " : "\n");
+                int start = sb.length();
+                sb.append(name);
+                sb.setSpan(new ForegroundColorSpan(c), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                sb.setSpan(new RelativeSizeSpan(compact ? 1.2f : 1.3f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                // 分隔
+                sb.append(" ");
+                // 数量（染色 + 加粗 + 大字）
+                start = sb.length();
+                sb.append(String.valueOf(qty));
+                sb.setSpan(new ForegroundColorSpan(c), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                sb.setSpan(new RelativeSizeSpan(compact ? 1.4f : 2.0f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                // 整箱（同筐色，稍小）
                 int whole = g.optInt("whole", 0);
                 if (whole > 0) {
-                    sb.append("  <font color='").append(c).append("'><b>整箱 ").append(whole).append("</b></font>");
+                    String w = compact ? "整" + whole : " · 整箱" + whole;
+                    start = sb.length();
+                    sb.append(w);
+                    sb.setSpan(new ForegroundColorSpan(c), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    sb.setSpan(new RelativeSizeSpan(compact ? 1.0f : 1.2f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
-                sb.append("<br>");
             }
         }
-        sb.append("<font color='#FF4D4F'><b>【不要忘记打卡！】</b></font>");
-        return sb.toString();
+        // 打卡红字
+        if (sb.length() > 0) sb.append(compact ? " · " : "\n");
+        int start = sb.length();
+        sb.append(compact ? "打卡!" : "【不要忘记打卡！】");
+        sb.setSpan(new ForegroundColorSpan(CLOCK), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.setSpan(new RelativeSizeSpan(compact ? 1.2f : 1.3f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return sb;
     }
 
     private String findNameByHash(JSONArray route, int hash) {
