@@ -2470,46 +2470,7 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 .auth-close { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border-radius: 50%; background: rgba(10,53,66,.6); border: 1px solid rgba(245,220,146,.4); color: #F5DC92; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; }
 body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body.auth-mode .beta-banner, body.auth-mode .offline-banner { display: none !important; }
 /* ===== #142 通知栏 8 套样式模板 ===== */
-.ntp-modal {
-  position: fixed; inset: 0; z-index: 9000;
-  background: rgba(4,24,32,.78); backdrop-filter: blur(6px);
-  display: none; align-items: center; justify-content: center;
-  padding: 18px 14px;
-}
-.ntp-modal.show { display: flex; }
-.ntp-content {
-  width: 100%; max-width: 660px; max-height: 86vh; overflow-y: auto;
-  background: #0E3340; border: 1.5px solid rgba(245,220,146,.55);
-  border-radius: 22px; padding: 18px 16px;
-}
-.ntp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-.ntp-title { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 800; color: #F5DC92; }
-.ntp-title svg { width: 20px; height: 20px; stroke: #F5DC92; }
-.ntp-close { width: 34px; height: 34px; border-radius: 50%; background: rgba(10,53,66,.6); border: 1px solid rgba(245,220,146,.4); color: #F5DC92; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.ntp-close svg { width: 18px; height: 18px; stroke: #F5DC92; }
-.ntp-sub { font-size: 12px; color: #9FD0D6; margin-bottom: 14px; line-height: 1.6; }
-.ntp-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.ntp-card {
-  background: rgba(255,255,255,.04); border: 1px solid rgba(124,184,200,.25);
-  border-radius: 14px; padding: 10px; cursor: pointer; position: relative;
-  transition: border-color .15s;
-}
-.ntp-card:hover { border-color: rgba(245,220,146,.7); }
-.ntp-card .ntp-meta { display: flex; align-items: center; gap: 6px; margin: 8px 4px 0; }
-.ntp-card .ntp-meta .ntp-no { font-size: 12px; font-weight: 800; color: #F5DC92; }
-.ntp-card .ntp-meta .ntp-name { font-size: 13px; font-weight: 800; color: #FFFFFF; }
-.ntp-card .ntp-meta .ntp-tag { font-size: 10px; color: #7E97A1; font-weight: 600; }
-.ntp-card .ntp-badge {
-  position: absolute; top: 8px; right: 8px;
-  font-size: 10px; font-weight: 800; color: #0B2E38;
-  background: linear-gradient(135deg,#F8E3A6,#E0A63E);
-  border-radius: 10px; padding: 2px 8px; letter-spacing: .5px;
-}
-.ntp-card .ntp-desc { font-size: 10px; color: #7E97A1; margin: 3px 4px 0; }
-.ntp-foot { margin-top: 14px; text-align: center; font-size: 11px; color: #7E97A1; }
-.ntp-foot b { color: #F5DC92; }
-/* ===== #143 通知栏管理独立页面 ===== */
-#page-notify { padding-bottom: 40px; }
+/* ===== #143 通知栏管理独立页面（页面已删除，保留共享 ntm-* 样式供权限管理页使用） ===== */
 .ntm-head { display: flex; align-items: center; gap: 10px; padding: 14px 14px 12px; border-bottom: 1px solid rgba(124,184,200,.12); }
 .ntm-head .ntm-back { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.07); color: #DDEBEE; border: none; cursor: pointer; }
 .ntm-head .ntm-title { flex: 1; font-size: 16px; font-weight: 800; color: #FFFFFF; }
@@ -2519,34 +2480,6 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 .ntm-sec { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: #F5DC92; margin: 16px 2px 9px; }
 .ntm-sec-no { font-size: 10px; color: #0B2E38; background: #F5DC92; border-radius: 8px; padding: 1px 6px; font-weight: 800; }
 .ntm-sec-tip { font-size: 10px; color: #7E97A1; font-weight: 400; }
-/* 当前默认模板卡 */
-.ntm-cur { display: flex; align-items: center; gap: 11px; background: rgba(245,220,146,.08); border: 1.5px solid rgba(245,220,146,.55); border-radius: 14px; padding: 11px 12px; }
-.ntm-cur-thumb { width: 78px; height: 78px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: #123243; border: 1px solid rgba(255,255,255,.1); }
-.ntm-cur .ntm-cur-info { flex: 1; min-width: 0; }
-.ntm-cur .ntm-cur-lbl { font-size: 10px; color: #F5DC92; font-weight: 700; }
-.ntm-cur .ntm-cur-nm { font-size: 15px; font-weight: 800; color: #FFFFFF; margin: 2px 0; }
-.ntm-cur .ntm-cur-ds { font-size: 10px; color: #9FD0D6; line-height: 1.45; }
-.ntm-cur .ntm-cur-btn { font-size: 11px; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); padding: 6px 13px; border-radius: 16px; font-weight: 800; white-space: nowrap; cursor: pointer; }
-/* 迷你通知预览 */
-.ntm-mini { padding: 5px; }
-.ntm-mini .mn-arrive { font-size: 6px; color: #9FD0D6; font-weight: 700; }
-.ntm-mini .mn-store { font-size: 7px; color: #F5DC92; font-weight: 800; margin: 1px 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ntm-mini .mn-grid { display: flex; gap: 2px; }
-.ntm-mini .mn-cell { flex: 1; background: rgba(255,255,255,.06); border-radius: 2px; padding: 2px 1px; text-align: center; }
-.ntm-mini .mn-cell .mn-n { font-size: 6px; font-weight: 900; color: #F5A623; }
-.ntm-mini .mn-cell .mn-c { font-size: 4px; color: #93A7B0; }
-.ntm-mini .mn-row { display: flex; gap: 2px; margin-top: 3px; }
-.ntm-mini .mn-btn { flex: 1; text-align: center; font-size: 5px; font-weight: 800; padding: 2px 0; border-radius: 5px; }
-.ntm-mini .mn-btn.gold { background: linear-gradient(135deg,#F8E3A6,#E0A63E); color: #0B2E38; }
-.ntm-mini .mn-btn.blue { background: linear-gradient(135deg,#8FA9FF,#5B84FF); color: #fff; }
-/* 模板网格 */
-.ntm-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.ntm-tpl { background: rgba(255,255,255,.05); border: 1.5px solid rgba(255,255,255,.08); border-radius: 12px; padding: 8px 6px 7px; text-align: center; position: relative; cursor: pointer; transition: .15s; }
-.ntm-tpl.sel { border-color: rgba(245,220,146,.75); background: rgba(245,220,146,.08); box-shadow: 0 0 0 1px rgba(245,220,146,.35); }
-.ntm-tpl .nt-no { font-size: 9px; font-weight: 800; color: #F5DC92; }
-.ntm-tpl .nt-nm { font-size: 11px; font-weight: 700; color: #FFFFFF; margin: 2px 0 4px; }
-.ntm-tpl .nt-thumb { height: 32px; border-radius: 6px; background: #123243; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #7E97A1; border: 1px solid rgba(255,255,255,.08); overflow: hidden; }
-.ntm-tpl .nt-check { position: absolute; top: -7px; right: -7px; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg,#F8E3A6,#E0A63E); color: #0B2E38; font-size: 11px; font-weight: 900; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(224,166,62,.5); }
 /* 设置卡 */
 .ntm-set { background: rgba(255,255,255,.04); border: 1px solid rgba(124,184,200,.14); border-radius: 12px; padding: 4px 0; }
 .ntm-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.06); }
@@ -2574,8 +2507,6 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 .ntm-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 19px; height: 19px; border-radius: 50%; background: #fff; transition: .2s; }
 .ntm-switch.on { background: linear-gradient(135deg,#8FA9FF,#5B84FF); }
 .ntm-switch.on::after { left: 22px; }
-/* 保存 */
-.ntm-save { width: 100%; margin-top: 18px; text-align: center; font-size: 15px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6 0%,#E0A63E 100%); padding: 13px 0; border-radius: 24px; border: none; box-shadow: 0 6px 16px rgba(224,166,62,.35); letter-spacing: 1px; cursor: pointer; }
 /* ===== #144 权限引导弹窗 ===== */
 .pg-modal { position: fixed; inset: 0; z-index: 9990; display: none; align-items: center; justify-content: center; background: rgba(4,24,32,.78); padding: 18px; }
 .pg-modal.show { display: flex; }
@@ -3236,8 +3167,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="card manage-user-card" id="manageUserCard" style="padding:14px;"></div>
   <div class="card" style="padding:0;overflow:hidden;">
     <button class="manage-item" onclick="openStorePanel()"><span class="mi-icon">🏪</span><span class="mi-title">店面管理<span class="mi-sub" id="manageStoreSub">店面 · 别称 · 到店提醒 · 定位</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="openNotifyManagePage()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span class="mi-title">通知栏管理<span class="mi-sub" id="manageNotifySub">模板 · 距离 · 响铃</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="openPermPage()" style="border:1.5px solid rgba(245,220,146,.45);border-radius:12px;background:rgba(245,220,146,.06);"><span class="mi-icon" style="background:rgba(245,220,146,.16);color:#F5DC92;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span class="mi-title">权限管理<span class="mi-sub" id="managePermSub">位置 · 通知 · 后台运行</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openPermPage()" style="border:1.5px solid rgba(245,220,146,.45);border-radius:12px;background:rgba(245,220,146,.06);"><span class="mi-icon" style="background:rgba(245,220,146,.16);color:#F5DC92;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span class="mi-title">权限管理<span class="mi-sub" id="managePermSub">位置 · 通知 · 后台运行 · 提醒设置</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openModeSelect()"><span class="mi-icon" style="background:rgba(124,232,224,.16);color:#7CE8E0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span><span class="mi-title">模式选择<span class="mi-sub">标准模式 · 极简模式切换</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openGoodsPanel()"><span class="mi-icon">📦</span><span class="mi-title">框名设置<span class="mi-sub" id="manageGoodsSub">筐类名称 · 顺序</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openBackupPanel()"><span class="mi-icon">💾</span><span class="mi-title">备份与恢复<span class="mi-sub">云端同步 · 换机不丢</span></span><span class="mi-arrow">›</span></button>
@@ -3251,32 +3181,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="footer" id="footerVer">物流筐收发管理系统 <span id="footerVerNum"></span></div>
 </div>
 
-<!-- ========== #143 通知栏管理独立页面 ========== -->
-<div class="page" id="page-notify">
-  <div class="ntm-head">
-    <button class="ntm-back" onclick="switchPage('manage')" aria-label="返回">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
-    <div class="ntm-title">通知栏管理<small>提醒样式 · 到店距离 · 响铃</small></div>
-    <div class="ntm-ico">
-      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#F5DC92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-    </div>
-  </div>
-  <div class="ntm-body">
-    <div class="ntm-sec"><span class="ntm-sec-no">1</span>当前默认模板</div>
-    <div class="ntm-cur" id="ntmCurCard"></div>
-
-    <div class="ntm-sec"><span class="ntm-sec-no">2</span>选择模板 <span class="ntm-sec-tip">点选即切换，8 套样式信息一致</span></div>
-    <div class="ntm-grid" id="ntmGrid"></div>
-
-    <div class="ntm-sec"><span class="ntm-sec-no">3</span>提醒设置</div>
-    <div class="ntm-set" id="ntmSetCard"></div>
-
-    <button class="ntm-save" onclick="saveNotifySettings()">保存设置</button>
-  </div>
-</div>
-
-<!-- ========== #144b 权限管理独立页面 ========== -->
+<!-- ========== #144b 权限管理独立页面（含提醒设置，原通知栏管理页已删除） ========== -->
 <div class="page" id="page-perm">
   <div class="ntm-head">
     <button class="ntm-back" onclick="switchPage('manage')" aria-label="返回">
@@ -3298,8 +3203,12 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <div class="mm-switch" id="pmMasterSwitch"></div>
     </div>
 
-    <!-- ② 权限状态 -->
-    <div class="pm-sec"><span class="pm-sec-no">2</span>权限状态 <span style="font-size:10px;color:#7E97A1;font-weight:400;">点「一键开启」自动处理全部，或点单行单独开</span></div>
+    <!-- ② 提醒设置（原通知栏管理页挪入：到店距离 / 响铃 / 震动 / 静默时段） -->
+    <div class="pm-sec"><span class="pm-sec-no">2</span>提醒设置 <span style="font-size:10px;color:#7E97A1;font-weight:400;">到店通知的提醒方式</span></div>
+    <div class="ntm-set" id="ntmSetCard"></div>
+
+    <!-- ③ 权限状态 -->
+    <div class="pm-sec"><span class="pm-sec-no">3</span>权限状态 <span style="font-size:10px;color:#7E97A1;font-weight:400;">点「一键开启」自动处理全部，或点单行单独开</span></div>
     <!-- 一键开启所有权限（#145b） -->
     <div class="pm-opt-all" id="pmOptAll" onclick="runPermAll()">
       <div class="oa-ico">
@@ -3313,8 +3222,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     </div>
     <div class="pm-card" id="permPageRows"></div>
 
-    <!-- ③ 权限说明 -->
-    <div class="pm-sec"><span class="pm-sec-no">3</span>权限说明 <span style="font-size:10px;color:#7E97A1;font-weight:400;">每个权限是干嘛的，说清楚</span></div>
+    <!-- ④ 权限说明 -->
+    <div class="pm-sec"><span class="pm-sec-no">4</span>权限说明 <span style="font-size:10px;color:#7E97A1;font-weight:400;">每个权限是干嘛的，说清楚</span></div>
     <div class="pm-explain">
       <div class="px-name">位置权限</div>
       <div class="px-line">干嘛用：<b>快到店门口时提醒你</b>「到店了，别忘了打卡」<br>什么时候用：<b>只在算「离店还有多远」时用一下，算完就停</b><br>不用会怎样：到店不提醒</div>
@@ -3343,24 +3252,6 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div class="ndp-sub">距门店多少米内触发通知</div>
     <div class="ndp-grid" id="ntmDistPicker"></div>
     <div class="ndp-foot"><span class="ndp-close" onclick="closeNotifyDistPicker()">取消</span></div>
-  </div>
-</div>
-
-<!-- ========== #142 通知栏模板预览弹窗 ========== -->
-<div class="ntp-modal" id="notifyTemplatesModal" onclick="closeNotifyTemplatesPanel()">
-  <div class="ntp-content" onclick="event.stopPropagation()">
-    <div class="ntp-head">
-      <span class="ntp-title">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        通知栏样式模板
-      </span>
-      <button class="ntp-close" onclick="closeNotifyTemplatesPanel()" aria-label="关闭">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div class="ntp-sub">到店提醒通知的 8 套样式，信息统一（店名 · 距离 · 各筐含整箱 · 打卡 · 双按钮）。<b style="color:#F5DC92;">图文版</b>为默认模板。点击模板卡可看完整预览。</div>
-    <div class="ntp-grid" id="notifyTplGrid"></div>
-    <div class="ntp-foot">完整设置（选择模板 · 距离阈值 · 响铃开关）在 <b>提醒设置</b> 页（后续开放）</div>
   </div>
 </div>
 
@@ -9021,8 +8912,7 @@ function switchPage(pageName) {
   if (pageName === 'summary') renderSummary();
   if (pageName === 'settings') { renderSettings(); }
   if (pageName === 'manage') renderManage();
-  if (pageName === 'notify') renderNotifyManage();
-  if (pageName === 'perm') renderPermPage();
+  if (pageName === 'perm') { renderPermPage(); renderNotifyManage(); }
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
 }
 
@@ -11652,12 +11542,6 @@ function updateManageSubs() {
     if (st) st.textContent = '店面 · 别称 · 到店提醒 · 定位 · ' + (loadStoreConfig().length || 0) + ' 家店';
     const gd = document.getElementById('manageGoodsSub');
     if (gd) gd.textContent = (loadGoodsConfig().length || 0) + ' 类筐';
-    const nf = document.getElementById('manageNotifySub');
-    if (nf) {
-      const ns = loadNotifySettings();
-      const miss = permMissingCount();
-      nf.textContent = miss > 0 ? '待开启引导 · ' + miss + ' 项权限未开' : (getNotifyTemplate(ns.template).name + ' · ' + ns.distM + 'm' + (ns.silent ? ' · 静默' : ''));
-    }
   } catch(e) {}
 }
 function renderManage() {
@@ -12237,7 +12121,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.9.5'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.9.6'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -12712,33 +12596,7 @@ function renderNotifyPreview(tplId, data) {
     '</div>';
 }
 
-// 模板面板：渲染 8 套 + 打开/关闭
-function renderNotifyTemplatesPanel() {
-  const grid = document.getElementById('notifyTplGrid');
-  if (!grid) return;
-  grid.innerHTML = NOTIFY_TEMPLATES.map((t, i) =>
-    '<div class="ntp-card" onclick="openNotifyTplDetail(\'' + t.id + '\')">' +
-      (t.isDefault ? '<div class="ntp-badge">默认</div>' : '') +
-      renderNotifyPreview(t.id, notifyPreviewData()) +
-      '<div class="ntp-meta"><span class="ntp-no">' + (i + 1) + '</span><span class="ntp-name">' + t.name + '</span><span class="ntp-tag">' + t.tag + '</span></div>' +
-      '<div class="ntp-desc">' + t.desc + '</div>' +
-    '</div>'
-  ).join('');
-}
-function openNotifyTemplatesPanel() {
-  renderNotifyTemplatesPanel();
-  showModal('notifyTemplatesModal');
-}
-function closeNotifyTemplatesPanel() {
-  const el = document.getElementById('notifyTemplatesModal');
-  if (el) el.classList.remove('show');
-}
-// 点卡片放大预览（小弹窗内嵌完整通知卡）
-function openNotifyTplDetail(id) {
-  const tpl = getNotifyTemplate(id);
-  showToast('模板 ' + (NOTIFY_TEMPLATES.indexOf(tpl) + 1) + ' · ' + tpl.name + '：' + tpl.desc);
-}
-// ===== #143 通知栏管理独立页面 =====
+// ===== #143 通知设置（提醒设置；通知栏管理页已删除，模板固定用当前所选） =====
 var NOTIFY_SETTINGS_KEY = 'kuanwei_notify_settings';
 var NOTIFY_DIST_OPTS = [100, 200, 300, 500, 800];
 var notifyPending = null; // 未保存的修改（保存/离开时落盘）
@@ -12775,72 +12633,10 @@ function saveNotifySettings() {
   }
   switchPage('manage');
 }
-function openNotifyManagePage() {
-  // 从未看过权限引导 → 先进引导（尊重稍后再说）
-  let seen = false;
-  try { seen = localStorage.getItem(PERM_GUIDE_SEEN_KEY) === '1'; } catch(e) {}
-  if (!seen) {
-    openPermGuide();
-    return;
-  }
-  switchPage('notify');
-}
-// 当前模板卡迷你预览（与设计稿一致）
-function notifyMiniThumb(tplId) {
-  if (tplId === 'rich') {
-    return '<div class="ntm-mini">' +
-      '<div class="mn-arrive">即将到达 · 距你500m</div>' +
-      '<div class="mn-store">35-01 上塘下堡店</div>' +
-      '<div class="mn-grid"><div class="mn-cell"><div class="mn-n">8</div><div class="mn-c">鲜食</div></div>' +
-      '<div class="mn-cell"><div class="mn-n">12</div><div class="mn-c">物流</div></div>' +
-      '<div class="mn-cell"><div class="mn-n">3</div><div class="mn-c">整箱</div></div></div>' +
-      '<div class="mn-row"><div class="mn-btn gold">记录回筐</div><div class="mn-btn blue">导航下一家</div></div>' +
-      '</div>';
-  }
-  return '<div style="font-size:9px;color:#9FD0D6;font-weight:700;line-height:1.5;padding:6px 4px;">' +
-    (tplId === 'minimal' ? '店名' : tplId === 'classic' ? '店名 + 距离' : tplId === 'dist' ? '<span style="color:#7CE8E0;font-weight:900;font-size:11px;">距你500m</span>' :
-    tplId === 'detail' ? '逐筐明细' : tplId === 'list' ? '全路线' : tplId === 'alarm' ? '<span style="color:#FF6B6B;font-weight:800;">响铃震动</span>' : '无声') + '</div>';
-}
+// 提醒设置渲染（原通知栏管理页已删除，模板固定用当前所选；提醒设置挪入权限管理页）
 function renderNotifyManage() {
   const s = Object.assign(loadNotifySettings(), notifyPending || {});
-  // 顶部权限横幅（未开全时显示）
-  const body = document.querySelector('#page-notify .ntm-body');
-  if (body) {
-    let bw = body.querySelector('.gd-banner');
-    const html = permBannerHtml();
-    if (html) {
-      if (!bw) {
-        bw = document.createElement('div');
-        body.insertBefore(bw, body.firstChild);
-      }
-      bw.outerHTML = html;
-    } else if (bw) {
-      bw.remove();
-    }
-  }
-  // ① 当前默认模板卡
-  const cur = document.getElementById('ntmCurCard');
-  if (cur) {
-    const tpl = getNotifyTemplate(s.template);
-    cur.innerHTML = '<div class="ntm-cur-thumb">' + notifyMiniThumb(tpl.id) + '</div>' +
-      '<div class="ntm-cur-info"><div class="ntm-cur-lbl">正在使用</div>' +
-      '<div class="ntm-cur-nm">' + tpl.name + '</div>' +
-      '<div class="ntm-cur-ds">' + tpl.desc + '</div></div>' +
-      '<div class="ntm-cur-btn" onclick="openNotifyTemplatesPanel()">预览</div>';
-  }
-  // ② 模板网格
-  const grid = document.getElementById('ntmGrid');
-  if (grid) {
-    grid.innerHTML = NOTIFY_TEMPLATES.map((t, i) =>
-      '<div class="ntm-tpl' + (t.id === s.template ? ' sel' : '') + '" onclick="selectNotifyTemplate(\'' + t.id + '\')">' +
-        '<div class="nt-no">' + String(i + 1).padStart(2, '0') + '</div>' +
-        '<div class="nt-nm">' + t.name + '</div>' +
-        '<div class="nt-thumb">' + notifyMiniThumb(t.id) + '</div>' +
-        (t.id === s.template ? '<div class="nt-check">&#10003;</div>' : '') +
-      '</div>'
-    ).join('');
-  }
-  // ③ 设置卡
+  // 提醒设置卡（权限管理页 ntmSetCard）
   const set = document.getElementById('ntmSetCard');
   if (set) {
     set.innerHTML =
@@ -12852,12 +12648,9 @@ function renderNotifyManage() {
       '<div class="ntm-row"><div class="st-l">震动提醒<small>到店通知震动</small></div>' +
       '<div class="ntm-switch' + (s.vibrate ? ' on' : '') + '" onclick="toggleNotifyVibrate()"></div></div>' +
       '<div class="ntm-row"><div class="st-l">静默时段<small>22:00 – 06:00 不响铃不震动，只显示通知</small></div>' +
-      '<div class="ntm-switch' + (s.silent ? ' on' : '') + '" onclick="toggleNotifySilent()"></div></div>';
+      '<div class="ntm-switch' + (s.silent ? ' on' : '') + '" onclick="toggleNotifySilent()"></div></div>' +
+      '<div class="ntm-row" style="border-bottom:none;"><div class="st-l" style="font-size:11px;color:#7E97A1;font-weight:400;">通知样式固定为当前所选模板，不再提供切换</div></div>';
   }
-}
-function selectNotifyTemplate(id) {
-  notifyPending = Object.assign(loadNotifySettings(), notifyPending || {}, { template: id });
-  renderNotifyManage();
 }
 function setNotifyDist(v) {
   notifyPending = Object.assign(loadNotifySettings(), notifyPending || {}, { distM: v });
