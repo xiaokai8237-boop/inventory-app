@@ -233,15 +233,24 @@ public class ArrivalMonitorPlugin extends Plugin {
         }
     }
 
-    /** 需求3 方案B+：Spannable 染色放大正文（鲜艳饱和色 + 大字；无距离行；筐名/数量同色；打卡红字）
-     *  @param compact true=折叠态紧凑单行全量（"鲜食12 · 面包8 · 冷藏5"）；false=展开态每筐一行
+    /** 需求3 方案B+（用户指定格式）：「此店需要发出：筐名 X 个 · … · 整箱 X 件 · 不要忘记打卡!」
+     *  鲜艳饱和色 + 大字；筐名/数量同色；整箱合计琥珀色；打卡红字
+     *  @param compact true=折叠态单行全量；false=展开态分行（前缀行/筐行/整箱行/打卡行）
      */
     private CharSequence buildRichSpannable(JSONArray goods, boolean compact) {
         // 鲜艳饱和色（在浅色/深色通知栏背景下都清晰）
         final int[] COLORS = { 0xFFFF7A00, 0xFFFFB300, 0xFF00C9C0, 0xFF5B7CFF, 0xFF00C853 };
         final int CLOCK = 0xFFFF3B30; // 打卡警示红（更鲜艳）
+        final int WHOLE = 0xFFFFB300; // 整箱合计琥珀金
         SpannableStringBuilder sb = new SpannableStringBuilder();
-        int idx = 0;
+        // 前缀「此店需要发出：」
+        int s0 = sb.length();
+        sb.append(compact ? "此店需要发出:" : "此店需要发出：");
+        sb.setSpan(new StyleSpan(Typeface.BOLD), s0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.setSpan(new RelativeSizeSpan(compact ? 1.2f : 1.3f), s0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        int wholeTotal = 0;
+        int count = 0; // 已显示筐数（用于分隔）
+        int idx = 0;   // 颜色索引
         for (int i = 0; i < goods.length(); i++) {
             JSONObject g = goods.optJSONObject(i);
             if (g == null) continue;
@@ -250,36 +259,36 @@ public class ArrivalMonitorPlugin extends Plugin {
             String name = g.optString("name", "筐");
             int c = COLORS[idx % COLORS.length];
             idx++;
+            wholeTotal += g.optInt("whole", 0);
+            // 筐间分隔
+            if (count > 0) sb.append(compact ? " · " : " · ");
+            count++;
             // 筐名（染色 + 加粗 + 1.25倍）
-            if (sb.length() > 0) sb.append(compact ? " · " : "\n");
             int start = sb.length();
             sb.append(name);
             sb.setSpan(new ForegroundColorSpan(c), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             sb.setSpan(new RelativeSizeSpan(compact ? 1.2f : 1.3f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            // 分隔
-            sb.append(" ");
-            // 数量（染色 + 加粗 + 大字）
+            // 数量 + 个（染色 + 加粗 + 大字）
             start = sb.length();
-            sb.append(String.valueOf(qty));
+            sb.append(" ").append(String.valueOf(qty)).append(" 个");
             sb.setSpan(new ForegroundColorSpan(c), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             sb.setSpan(new RelativeSizeSpan(compact ? 1.4f : 2.0f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            // 整箱（同筐色，稍小）
-            int whole = g.optInt("whole", 0);
-            if (whole > 0) {
-                String w = compact ? "整" + whole : " · 整箱" + whole;
-                start = sb.length();
-                sb.append(w);
-                sb.setSpan(new ForegroundColorSpan(c), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                sb.setSpan(new RelativeSizeSpan(compact ? 1.0f : 1.2f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
+        }
+        // 整箱合计「整箱 X 件」（琥珀金）
+        if (wholeTotal > 0) {
+            sb.append(compact ? " · " : "\n");
+            int start = sb.length();
+            sb.append("整箱 ").append(String.valueOf(wholeTotal)).append(" 件");
+            sb.setSpan(new ForegroundColorSpan(WHOLE), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sb.setSpan(new RelativeSizeSpan(compact ? 1.2f : 1.5f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
         // 打卡红字
-        if (sb.length() > 0) sb.append(compact ? " · " : "\n");
+        sb.append(compact ? " · " : "\n");
         int start = sb.length();
-        sb.append(compact ? "打卡!" : "【不要忘记打卡！】");
+        sb.append("不要忘记打卡!");
         sb.setSpan(new ForegroundColorSpan(CLOCK), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         sb.setSpan(new StyleSpan(Typeface.BOLD), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         sb.setSpan(new RelativeSizeSpan(compact ? 1.2f : 1.3f), start, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
