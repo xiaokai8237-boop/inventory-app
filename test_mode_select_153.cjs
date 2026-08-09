@@ -34,32 +34,41 @@ function T(name, cond, extra) {
   });
   await page.waitForTimeout(300);
 
-  // ===== 1. 标准设置页模式选择入口 =====
-  console.log('=== 1. 标准设置页模式选择入口按钮 ===');
+  // ===== 1. 管理页模式选择入口（标准模式"设置页面"=管理页） =====
+  console.log('=== 1. 管理页模式选择入口按钮 ===');
   await page.evaluate(() => switchPage('settings'));
   await page.waitForTimeout(300);
+  const r0 = await page.evaluate(() => ({
+    noSettingsCard: !document.querySelector('.settings-mode-card'),
+    noSsc: !document.querySelector('.style-switch-card')
+  }));
+  T('使用说明页无模式选择入口卡', r0.noSettingsCard && r0.noSsc, JSON.stringify(r0));
+
+  await page.evaluate(() => switchPage('manage'));
+  await page.waitForTimeout(300);
   const r1 = await page.evaluate(() => {
-    const card = document.querySelector('.settings-mode-card');
+    const items = [...document.querySelectorAll('#page-manage .manage-item')];
+    const entry = items.find(n => (n.getAttribute('onclick') || '').includes('openModeSelect'));
     return {
-      hasCard: !!card,
-      visible: !!card && getComputedStyle(card).display !== 'none',
-      hasOnclick: !!card && typeof card.onclick === 'function',
-      noEmoji: !(card && card.textContent.match(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}]/u))
+      hasEntry: !!entry,
+      visible: !!entry && getComputedStyle(entry).display !== 'none',
+      noEmoji: !(entry && entry.textContent.match(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}]/u)),
+      hasSvg: !!(entry && entry.querySelector('svg'))
     };
   });
-  T('标准设置页有模式选择入口按钮', r1.hasCard && r1.visible, JSON.stringify(r1));
-  T('入口按钮绑定 openModeSelect', r1.hasOnclick, '');
-  T('入口按钮零 emoji', r1.noEmoji, '');
+  T('管理页有模式选择入口', r1.hasEntry && r1.visible, JSON.stringify(r1));
+  T('入口绑定 openModeSelect', r1.hasEntry, '');
+  T('入口零 emoji + SVG 图标', r1.noEmoji && r1.hasSvg, '');
 
   // 点击入口 → 模式选择页 → 返回（复位）
-  await page.click('.settings-mode-card');
+  await page.evaluate(() => document.querySelector('#page-manage .manage-item[onclick*="openModeSelect"]').click());
   await page.waitForTimeout(300);
   const r1b = await page.evaluate(() => document.querySelector('#page-mode-select')?.classList.contains('active'));
   T('点击入口打开模式选择页', r1b, '');
   await page.evaluate(() => backFromModeSelect());
   await page.waitForTimeout(300);
-  const r1c = await page.evaluate(() => document.querySelector('#page-settings')?.classList.contains('active'));
-  T('入口返回设置页', r1c, '');
+  const r1c = await page.evaluate(() => document.querySelector('#page-manage')?.classList.contains('active'));
+  T('入口返回管理页', r1c, '');
 
   // ===== 2. 标准态模式选择页（直接打开）=====
   console.log('=== 2. 模式选择页（标准态）===');
@@ -138,12 +147,12 @@ function T(name, cond, extra) {
 
   // ===== 7. 标准模式返回入口 =====
   console.log('=== 7. 标准模式返回 ===');
-  await page.evaluate(() => { switchPage('settings'); openModeSelect(); });
+  await page.evaluate(() => { switchPage('manage'); openModeSelect(); });
   await page.waitForTimeout(200);
   await page.evaluate(() => backFromModeSelect());
   await page.waitForTimeout(300);
-  const r7 = await page.evaluate(() => document.querySelector('#page-settings')?.classList.contains('active'));
-  T('返回标准设置页', r7, '');
+  const r7 = await page.evaluate(() => document.querySelector('#page-manage')?.classList.contains('active'));
+  T('返回管理页', r7, '');
 
   T('全程 JS 零错误', errs.length === 0, errs.join(';'));
   console.log(`\n=== ${pass} passed, ${fail} failed ===`);
