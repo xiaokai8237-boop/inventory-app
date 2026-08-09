@@ -415,21 +415,6 @@ body.auth-mode .simple-tabs { display: none !important; }
 .ms-card.min .mc-btn { color: #0B2E38; background: linear-gradient(135deg,#F8E3A6 0%,#E0A63E 100%); }
 .ms-card .mc-btn.cur { background: rgba(255,255,255,.1); color: #9FD0D6; border: 1px solid rgba(255,255,255,.2); }
 .ms-foot-tip { text-align: center; font-size: 10px; color: var(--text-light); margin-top: 2px; }
-/* 标准设置页：界面风格切换卡（#149） */
-.style-switch-card {
-  background: var(--card-bg); border: 1px solid rgba(245,220,146,.3);
-  border-radius: 14px; padding: 13px 14px; margin-bottom: 14px;
-  display: flex; align-items: center; gap: 10px;
-}
-.style-switch-card .ssc-info { flex: 1; min-width: 0; }
-.style-switch-card .ssc-name { font-size: 14px; font-weight: 800; color: #fff; }
-.style-switch-card .ssc-desc { font-size: 11px; color: var(--text-light); margin-top: 2px; }
-.style-switch-card .ssc-btn {
-  display: flex; align-items: center; gap: 5px; flex-shrink: 0;
-  background: rgba(124,232,224,.1); border: 1px solid rgba(124,232,224,.5);
-  color: var(--sim-cyan); font-size: 12px; font-weight: 800;
-  border-radius: 16px; padding: 7px 15px; cursor: pointer;
-}
 
 /* Tab：固定底部，图标+文字，选中高亮 */
 .tabs {
@@ -3510,18 +3495,6 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="settings-hero">
     <div class="settings-hero-title">📋 一分钟看懂这个软件</div>
     <div class="settings-hero-sub">发出 + 回收，每天 2 分钟搞定 · 每一步都写清楚「点哪里、填什么」</div>
-  </div>
-
-  <!-- #153 模式选择入口（标准模式 → 打开模式选择页） -->
-  <div class="style-switch-card" onclick="openModeSelect()">
-    <div class="ssc-info">
-      <div class="ssc-name">模式选择</div>
-      <div class="ssc-desc">标准模式 · 按门店明细 — 点这里切换 / 查看说明</div>
-    </div>
-    <div class="ssc-btn">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
-      模式选择
-    </div>
   </div>
 
   <!-- 第0步：认识页面 -->
@@ -12239,7 +12212,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.8.3'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.8.4'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');

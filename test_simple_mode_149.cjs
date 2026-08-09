@@ -37,16 +37,14 @@ function T(name, cond, extra) {
   });
   await page.waitForTimeout(400);
 
-  // ===== 1. 标准模式：设置页有「界面风格」切换卡 =====
-  console.log('=== 1. 标准模式切换入口 ===');
+  // ===== 1. 标准模式：设置页已无模式选择入口（用户要求删除）=====
+  console.log('=== 1. 标准模式切换入口（已删）===');
   await page.evaluate(() => switchPage('settings'));
   await page.waitForTimeout(300);
   const r1 = await page.evaluate(() => ({
-    hasCard: !!document.querySelector('.style-switch-card'),
-    btnText: document.querySelector('.style-switch-card .ssc-btn')?.textContent.replace(/\s+/g, ' ').trim()
+    hasCard: !!document.querySelector('.style-switch-card')
   }));
-  T('设置页有模式选择入口卡', r1.hasCard, JSON.stringify(r1));
-  T('入口按钮「模式选择」（#153 点击进入模式选择页）', (r1.btnText || '').includes('模式选择'), r1.btnText);
+  T('使用说明页无模式选择入口卡', !r1.hasCard, JSON.stringify(r1));
 
   // ===== 2. 切换极简 =====
   console.log('=== 2. 切换极简 ===');

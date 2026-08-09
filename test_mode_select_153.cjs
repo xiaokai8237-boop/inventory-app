@@ -35,19 +35,18 @@ function T(name, cond, extra) {
   await page.waitForTimeout(300);
 
   // ===== 1. 标准设置页模式选择入口 =====
-  console.log('=== 1. 标准设置页入口 ===');
+  console.log('=== 1. 标准设置页无模式选择入口（已删除）===');
   await page.evaluate(() => switchPage('settings'));
   await page.waitForTimeout(300);
   const r1 = await page.evaluate(() => ({
-    name: document.querySelector('.style-switch-card .ssc-name')?.textContent.trim(),
-    btn: document.querySelector('.style-switch-card .ssc-btn')?.textContent.replace(/\s+/g, ' ').trim()
+    hasCard: !!document.querySelector('.style-switch-card'),
+    hasSsc: !!document.querySelector('.ssc-btn')
   }));
-  T('设置页有「模式选择」入口', r1.name === '模式选择', r1.name);
-  T('按钮文案「模式选择」', (r1.btn || '').includes('模式选择'), r1.btn);
+  T('使用说明页无模式选择入口卡', !r1.hasCard && !r1.hasSsc, JSON.stringify(r1));
 
-  // ===== 2. 标准态模式选择页 =====
+  // ===== 2. 标准态模式选择页（直接打开）=====
   console.log('=== 2. 模式选择页（标准态）===');
-  await page.click('.style-switch-card');
+  await page.evaluate(() => openModeSelect());
   await page.waitForTimeout(300);
   const r2 = await page.evaluate(() => ({
     active: document.querySelector('#page-mode-select')?.classList.contains('active'),
