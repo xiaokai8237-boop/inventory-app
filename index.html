@@ -2575,6 +2575,36 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 .mc-benefit .b-desc { font-size: 10px; color: #7E97A1; }
 .mc-test { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(124,232,224,.08); border: 1px solid rgba(124,232,224,.35); font-size: 11px; color: #7CE8E0; line-height: 1.6; }
 .mc-test b { color: #7CE8E0; }
+/* ===== 需求6 拉新页 ===== */
+#page-invite { padding-bottom: 30px; }
+.inv-head { display: flex; align-items: center; gap: 8px; padding: 14px 14px 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.inv-back { width: 34px; height: 34px; border: none; background: none; color: #9FD0D6; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.inv-title { flex: 1; font-size: 16px; font-weight: 800; color: #fff; }
+.inv-title small { font-size: 10px; color: #7E97A1; font-weight: 400; margin-left: 6px; }
+.inv-body { padding: 0 14px; }
+.inv-login-tip { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.4); font-size: 12px; color: #FFC9C9; display: flex; align-items: center; gap: 8px; }
+.inv-login-btn { margin-left: auto; font-size: 12px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border: none; border-radius: 14px; padding: 6px 14px; cursor: pointer; flex-shrink: 0; }
+.inv-code-card { margin-top: 12px; padding: 15px 14px; border-radius: 14px; background: linear-gradient(160deg, rgba(248,227,166,.16), rgba(224,166,62,.10)); border: 1.5px solid rgba(245,220,146,.55); text-align: center; }
+.inv-code-lbl { font-size: 11px; color: #9FD0D6; }
+.inv-code-val { font-size: 34px; font-weight: 900; letter-spacing: 6px; color: #F5DC92; margin: 6px 0 10px; font-family: 'Consolas','Menlo',monospace; }
+.inv-code-actions { display: flex; gap: 8px; }
+.inv-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 12px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border: none; border-radius: 16px; padding: 9px 0; cursor: pointer; }
+.inv-btn svg { width: 14px; height: 14px; stroke: #7A4E00; }
+.inv-sec { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: #F5DC92; margin: 14px 2px 8px; }
+.inv-sec-no { font-size: 10px; color: #0B2E38; background: #F5DC92; border-radius: 8px; padding: 1px 6px; font-weight: 800; }
+.inv-sec-tip { font-size: 10px; color: #7E97A1; font-weight: 400; }
+.inv-poster-wrap { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,.1); }
+.inv-poster-save { position: absolute; bottom: 12px; right: 12px; display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border: none; border-radius: 16px; padding: 8px 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.35); }
+.inv-poster-save svg { width: 14px; height: 14px; stroke: #7A4E00; }
+.inv-text-list { display: flex; flex-direction: column; gap: 8px; }
+.inv-text-item { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); border-radius: 12px; padding: 10px 12px; cursor: pointer; transition: border-color .15s; }
+.inv-text-item:active { border-color: rgba(245,220,146,.6); }
+.inv-text-item .it-name { font-size: 11px; font-weight: 800; color: #F5DC92; margin-bottom: 3px; }
+.inv-text-item .it-body { font-size: 12px; color: #C9DDE3; line-height: 1.6; }
+.inv-share-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border: none; border-radius: 24px; padding: 13px 0; cursor: pointer; box-shadow: 0 6px 16px rgba(224,166,62,.35); }
+.inv-share-btn svg { width: 18px; height: 18px; stroke: #7A4E00; }
+.inv-rule { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(124,232,224,.08); border: 1px solid rgba(124,232,224,.35); font-size: 11px; color: #7CE8E0; line-height: 1.6; }
+.inv-rule b { color: #7CE8E0; }
 .ntm-switch { position: relative; width: 44px; height: 25px; border-radius: 14px; background: rgba(255,255,255,.14); cursor: pointer; transition: .2s; flex-shrink: 0; }
 .ntm-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 19px; height: 19px; border-radius: 50%; background: #fff; transition: .2s; }
 .ntm-switch.on { background: linear-gradient(135deg,#8FA9FF,#5B84FF); }
@@ -3246,7 +3276,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <button class="manage-item" onclick="openSummaryPage()"><span class="mi-icon">📈</span><span class="mi-title">汇总<span class="mi-sub">统计报表</span><span class="vip-tag"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>VIP</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openReconcilePage()"><span class="mi-icon">🔄</span><span class="mi-title">对账<span class="mi-sub">导出数据</span><span class="vip-tag"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>VIP</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openSuggestionPanel()"><span class="mi-icon">💡</span><span class="mi-title">功能建议<span class="mi-sub">公共建议墙 · 好建议做成新功能</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="showToast('邀请好友功能开发中，敬请期待')"><span class="mi-icon">🎁</span><span class="mi-title">邀请好友<span class="mi-sub">双方各得 7 天会员</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openInvitePage()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg></span><span class="mi-title">邀请好友<span class="mi-sub">邀请得会员 · 海报/文案/转发</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="switchPage('settings')"><span class="mi-icon">❓</span><span class="mi-title">使用说明<span class="mi-sub">新手教程</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="installApp()"><span class="mi-icon" id="installBtnIcon">📱</span><span class="mi-title" id="installBtnLabel">添加到桌面<span class="mi-sub">安装 APP</span></span><span class="mi-arrow">›</span></button>
   </div>
@@ -3495,6 +3525,55 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button class="btn btn-export" style="flex:1;" onclick="exportMyExcel()">📋 导出明细</button>
       <button class="btn btn-export" style="flex:1;" onclick="exportSummaryExcel()">📊 导出汇总</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 需求6 拉新页（邀请好友） ========== -->
+<div class="page" id="page-invite">
+  <div class="inv-head">
+    <button class="inv-back" onclick="switchPage('manage')" aria-label="返回">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="inv-title">邀请好友<small>拉新得会员奖励</small></div>
+  </div>
+  <div class="inv-body">
+    <!-- 未登录引导 -->
+    <div class="inv-login-tip" id="invLoginTip" style="display:none;">
+      邀请需要登录账号（邀请奖励跟账号走）。<button class="inv-login-btn" onclick="authGoTo('login')">去登录</button>
+    </div>
+
+    <!-- 邀请码卡 -->
+    <div class="inv-code-card">
+      <div class="inv-code-lbl">我的专属邀请码</div>
+      <div class="inv-code-val" id="invCodeVal">--</div>
+      <div class="inv-code-actions">
+        <button class="inv-btn" onclick="copyInviteCode()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制邀请码</button>
+        <button class="inv-btn" onclick="copyInviteLink()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>复制邀请链接</button>
+      </div>
+    </div>
+
+    <!-- 海报 -->
+    <div class="inv-sec"><span class="inv-sec-no">1</span>拉新海报</div>
+    <div class="inv-poster-wrap">
+      <canvas id="invPosterCanvas" width="750" height="1200" style="width:100%;height:auto;display:block;border-radius:14px;"></canvas>
+      <button class="inv-poster-save" onclick="downloadPoster()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>保存海报</button>
+    </div>
+
+    <!-- 邀请文案 -->
+    <div class="inv-sec"><span class="inv-sec-no">2</span>邀请文案 <span class="inv-sec-tip">点一下复制，多种风格任选</span></div>
+    <div class="inv-text-list" id="invTextList"></div>
+
+    <!-- 一键转发 -->
+    <div class="inv-sec"><span class="inv-sec-no">3</span>一键转发</div>
+    <button class="inv-share-btn" onclick="shareInvite()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51l-6.82 3.98"/></svg>
+      分享到微信 / 朋友圈
+    </button>
+
+    <!-- 规则说明 -->
+    <div class="inv-rule">
+      <b>邀请规则</b>：好友通过你的邀请码注册并登录，你们双方都将获得会员奖励（详见会员中心）。
     </div>
   </div>
 </div>
@@ -9029,6 +9108,7 @@ function switchPage(pageName) {
   if (pageName === 'summary') renderSummary();
   if (pageName === 'settings') { renderSettings(); }
   if (pageName === 'vip') { renderVipCenter(); }
+  if (pageName === 'invite') { renderInvitePage(); }
   if (pageName === 'manage') renderManage();
   if (pageName === 'perm') { renderPermPage(); renderNotifyManage(); }
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
@@ -12244,7 +12324,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.9.9'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.0.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -12968,6 +13048,237 @@ function chooseVipPlan(id) {
   if (!p) return;
   showToast('「' + p.level + ' · ' + p.name + '」支付功能暂未接入，测试期所有账号默认 VIP');
 }
+// ===== 需求6 拉新功能 =====
+function openInvitePage() {
+  switchPage('invite');
+  renderInvitePage();
+}
+// 内置 5 种风格邀请文案（{code} 会被替换为邀请码）
+var INVITE_TEXTS = [
+  { name: '简洁版', body: '物流筐记账挺好用的，推荐给你！注册时填邀请码 {code}，你我都有会员奖励。' },
+  { name: '热情版', body: '发现一个超好用的物流筐记账工具！记筐超方便，还能到店提醒。输入我的邀请码 {code} 注册，咱们都有会员送！' },
+  { name: '专业版', body: '送货记账效率工具「物流筐」：手动/语音/拍照三种录入 + 到店提醒 + 云端自动备份。邀请码 {code}，注册互赠会员。' },
+  { name: '幽默版', body: '别再用脑子记筐数了！这个 APP 帮你记，报我邀请码 {code} 注册，还有会员送，稳赚不亏。' },
+  { name: '干练版', body: '每天送货记账太麻烦？物流筐：语音说一句就记完，到店自动提醒。邀请码 {code}，注册送会员。' }
+];
+function getInviteCode() {
+  const phone = getCloudPhone() || '';
+  const tail = phone.slice(-6) || '000000';
+  return 'KW' + tail;
+}
+function getInviteLink() {
+  return 'https://inventory-app-9ql.pages.dev/?invite=' + getInviteCode();
+}
+function renderInvitePage() {
+  const phone = getCloudPhone();
+  const logged = isLoggedIn();
+  const tip = document.getElementById('invLoginTip');
+  if (tip) tip.style.display = (logged && phone) ? 'none' : 'flex';
+  if (!logged || !phone) {
+    const codeEl = document.getElementById('invCodeVal');
+    if (codeEl) codeEl.textContent = '请先登录';
+    return;
+  }
+  // 邀请码
+  const codeEl = document.getElementById('invCodeVal');
+  if (codeEl) codeEl.textContent = getInviteCode();
+  // 文案列表
+  const list = document.getElementById('invTextList');
+  if (list) {
+    list.innerHTML = INVITE_TEXTS.map((t, i) =>
+      '<div class="inv-text-item" onclick="copyInviteText(' + i + ')">' +
+        '<div class="it-name">' + t.name + '</div>' +
+        '<div class="it-body">' + t.body.replace('{code}', getInviteCode()) + '</div>' +
+      '</div>'
+    ).join('');
+  }
+  // 海报
+  genInvitePoster();
+}
+function copyInviteCode() {
+  const code = getInviteCode();
+  if (!isLoggedIn() || !getCloudPhone()) { showToast('请先登录'); return; }
+  copyText(code);
+  showToast('邀请码已复制：' + code);
+}
+function copyInviteLink() {
+  if (!isLoggedIn() || !getCloudPhone()) { showToast('请先登录'); return; }
+  copyText(getInviteLink());
+  showToast('邀请链接已复制，去微信粘贴发给好友吧');
+}
+function copyInviteText(i) {
+  const t = INVITE_TEXTS[i];
+  if (!t) return;
+  const body = t.body.replace('{code}', getInviteCode());
+  copyText(body);
+  showToast('「' + t.name + '」文案已复制');
+}
+// 复制工具（兼容旧环境）
+function copyText(txt) {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function() {}, function() { fallbackCopy(txt); });
+    } else {
+      fallbackCopy(txt);
+    }
+  } catch(e) { fallbackCopy(txt); }
+}
+function fallbackCopy(txt) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  } catch(e) {}
+}
+// Canvas 生成拉新海报（750×1200，深蓝金主题）
+function genInvitePoster() {
+  const canvas = document.getElementById('invPosterCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = 750, H = 1200;
+  // 背景：深蓝渐变
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, '#0A1A22');
+  bg.addColorStop(0.55, '#0E3340');
+  bg.addColorStop(1, '#08151C');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+  // 装饰圆环（右上）
+  ctx.strokeStyle = 'rgba(245,220,146,.14)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(660, 130, 110, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(660, 130, 82, 0, Math.PI * 2);
+  ctx.stroke();
+  // 装饰圆环（左下）
+  ctx.beginPath();
+  ctx.arc(90, 1050, 90, 0, Math.PI * 2);
+  ctx.stroke();
+  // 顶部品牌区
+  const gold = '#F5DC92';
+  const goldGrad = ctx.createLinearGradient(0, 90, 0, 150);
+  goldGrad.addColorStop(0, '#F8E3A6');
+  goldGrad.addColorStop(1, '#E0A63E');
+  ctx.fillStyle = goldGrad;
+  ctx.fillRect(0, 0, W, 8);
+  // 皇冠图标（居中）
+  ctx.fillStyle = gold;
+  ctx.save();
+  ctx.translate(W / 2, 118);
+  drawCrown(ctx, 0, 0, 46);
+  ctx.restore();
+  // APP 名
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 52px "Noto Sans SC","Source Han Sans SC",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('物流筐', W / 2, 240);
+  ctx.fillStyle = '#9FD0D6';
+  ctx.font = '24px "Noto Sans SC",sans-serif';
+  ctx.fillText('送货记账 · 到店提醒 · 云端备份', W / 2, 290);
+  // 邀请码卡
+  ctx.fillStyle = 'rgba(245,220,146,.08)';
+  roundRect(ctx, 90, 360, 570, 250, 24);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(245,220,146,.55)';
+  ctx.lineWidth = 2.5;
+  roundRect(ctx, 90, 360, 570, 250, 24);
+  ctx.stroke();
+  ctx.fillStyle = '#9FD0D6';
+  ctx.font = '26px "Noto Sans SC",sans-serif';
+  ctx.fillText('我的专属邀请码', W / 2, 420);
+  ctx.fillStyle = gold;
+  ctx.font = 'bold 88px "Consolas","Menlo",monospace';
+  ctx.fillText(getInviteCode(), W / 2, 530);
+  ctx.fillStyle = '#4ADE80';
+  ctx.font = 'bold 26px "Noto Sans SC",sans-serif';
+  ctx.fillText('输入邀请码注册，双方都有会员奖励', W / 2, 578);
+  // 中部说明
+  ctx.fillStyle = '#C9DDE3';
+  ctx.font = '26px "Noto Sans SC",sans-serif';
+  ctx.fillText('扫一扫 / 点链接打开，注册时填邀请码', W / 2, 700);
+  // 底部链接条
+  ctx.fillStyle = 'rgba(255,255,255,.06)';
+  roundRect(ctx, 70, 940, 610, 90, 18);
+  ctx.fill();
+  ctx.fillStyle = '#7E97A1';
+  ctx.font = '20px "Consolas",monospace';
+  ctx.fillText(getInviteLink(), W / 2, 995, 570);
+  // 底部品牌落款
+  ctx.fillStyle = 'rgba(255,255,255,.45)';
+  ctx.font = '22px "Noto Sans SC",sans-serif';
+  ctx.fillText('物流筐 · 让每一次送货都清清楚楚', W / 2, 1100);
+}
+function drawCrown(ctx, x, y, s) {
+  ctx.beginPath();
+  ctx.moveTo(x, y + s * 0.85);
+  ctx.lineTo(x - s * 0.75, y - s * 0.4);
+  ctx.lineTo(x - s * 0.42, y + s * 0.05);
+  ctx.lineTo(x, y - s * 0.62);
+  ctx.lineTo(x + s * 0.42, y + s * 0.05);
+  ctx.lineTo(x + s * 0.75, y - s * 0.4);
+  ctx.lineTo(x, y + s * 0.85);
+  ctx.closePath();
+  ctx.fill();
+}
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function downloadPoster() {
+  const canvas = document.getElementById('invPosterCanvas');
+  if (!canvas) return;
+  try {
+    const link = document.createElement('a');
+    link.download = '物流筐邀请海报_' + getInviteCode() + '.png';
+    link.href = canvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('海报已保存，去相册/下载里查看');
+  } catch(e) {
+    showToast('保存失败，可长按海报图片保存');
+  }
+}
+// 一键转发（微信/朋友圈）：原生分享面板 + 复制兜底
+function shareInvite() {
+  if (!isLoggedIn() || !getCloudPhone()) { showToast('请先登录'); return; }
+  const link = getInviteLink();
+  const text = '物流筐记账挺好用的，推荐给你！注册时填邀请码 ' + getInviteCode() + '，你我都有会员奖励。 ' + link;
+  if (navigator.share) {
+    navigator.share({ title: '物流筐 · 邀请好友', text: text, url: link })
+      .then(function() {})
+      .catch(function(err) {
+        if (err && err.name !== 'AbortError') { copyText(link); showToast('已复制链接，去微信粘贴吧'); }
+      });
+  } else {
+    copyText(text);
+    showToast('已复制邀请文案+链接，去微信粘贴发给好友吧');
+  }
+}
+// 启动检测：URL 带 invite 参数 → 记录邀请关系（需求7 奖励用）
+function saveInvitedBy() {
+  try {
+    const m = (location.search || '').match(/[?&]invite=([A-Za-z0-9]+)/);
+    if (m && m[1]) {
+      const inv = m[1].toUpperCase();
+      if (!localStorage.getItem('kuanwei_invited_by')) {
+        localStorage.setItem('kuanwei_invited_by', JSON.stringify({ code: inv, time: new Date().toISOString() }));
+      }
+    }
+  } catch(e) {}
+}
+saveInvitedBy();
 // 汇总 / 对账导出入口（VIP 拦截）
 function openSummaryPage() { if (!requireVip('汇总报表')) return; switchPage('summary'); }
 function openReconcilePage() { if (!requireVip('对账导出')) return; switchPage('reconcile'); }
