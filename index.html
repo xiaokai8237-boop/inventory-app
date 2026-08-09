@@ -6558,12 +6558,9 @@ async function restoreFromCloud() {
       }
       const cloudNewer = !localStorage.getItem('kuanwei_last_save') ||
         (cloud.backupTime && cloud.backupTime > localStorage.getItem('kuanwei_last_save'));
-      // 本地为空 或 云端比本地新 → 从云端恢复（仅作为兜底，不打扰手动恢复流程）
+      // 本地为空 或 云端比本地新 → 从云端恢复记录（仅作为兜底，不打扰手动恢复流程）
       if (localEmpty || cloudNewer) {
         saveDataArr(cloud.records || []);
-        if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
-        // 仅当云端店面非空时才覆盖本地，避免云端空 storeConfig 误清用户本地已配置的店面
-        if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0) saveStoreConfig(cloud.storeConfig);
         // 还原界面偏好（含极简模式等）——与手动恢复路径一致
         try { if (cloud.uiState && typeof applyUiState === 'function') applyUiState(cloud.uiState); } catch(e) {}
         // 还原极简模式数据（#223：启动兜底恢复此前漏了 simpleRecords）
@@ -6577,6 +6574,22 @@ async function restoreFromCloud() {
           renderTodayOverview();
           if (typeof renderSimpleRecords === 'function') renderSimpleRecords();
         } catch(e) {}
+      }
+      // 筐配置（goodsConfig）：独立覆盖判断，不跟 records 的 localEmpty 走
+      // —— 本地已有配置且比云端新 → 不覆盖（防止自定义筐名/别名被云端旧数据覆盖）
+      const localGoodsCfg = loadGoodsConfig();
+      const localGoodsEmpty = !localGoodsCfg || localGoodsCfg.length === 0;
+      if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig) && cloud.goodsConfig.length > 0 &&
+          (localGoodsEmpty || cloudNewer)) {
+        saveGoodsConfig(cloud.goodsConfig);
+      }
+      // 店面+定位（storeConfig）：独立覆盖判断，不跟 records 的 localEmpty 走
+      // —— 本地已有店面且比云端新 → 坚决不覆盖（修复：刚保存的定位被云端旧数据覆盖的问题）
+      const localStoresCfg = loadStoreConfig();
+      const localStoresEmpty = !localStoresCfg || localStoresCfg.length === 0;
+      if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0 &&
+          (localStoresEmpty || cloudNewer)) {
+        saveStoreConfig(cloud.storeConfig);
       }
     }
   } catch (e) {
@@ -12224,7 +12237,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.8.9'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.9.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
