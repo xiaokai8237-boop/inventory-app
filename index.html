@@ -6564,6 +6564,10 @@ async function restoreFromCloud() {
         if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig)) saveGoodsConfig(cloud.goodsConfig);
         // 仅当云端店面非空时才覆盖本地，避免云端空 storeConfig 误清用户本地已配置的店面
         if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0) saveStoreConfig(cloud.storeConfig);
+        // 还原界面偏好（含极简模式等）——与手动恢复路径一致
+        try { if (cloud.uiState && typeof applyUiState === 'function') applyUiState(cloud.uiState); } catch(e) {}
+        // 还原极简模式数据（#223：启动兜底恢复此前漏了 simpleRecords）
+        try { if (cloud.simpleRecords && Array.isArray(cloud.simpleRecords)) saveSimpleRecords(cloud.simpleRecords); } catch(e) {}
         // 刷新界面
         try {
           initStoreSelect('recordStore');
@@ -6571,6 +6575,7 @@ async function restoreFromCloud() {
           renderGoodsInputList();
           initGoodsFilter();
           renderTodayOverview();
+          if (typeof renderSimpleRecords === 'function') renderSimpleRecords();
         } catch(e) {}
       }
     }
@@ -12127,6 +12132,7 @@ function exportData() {
     goodsConfig: loadGoodsConfig(),      // 完整筐配置（含别名）
     storeConfig: loadStoreConfig(),      // 店面配置（含 sort 顺序）
     uiState: (typeof collectUiState === 'function') ? collectUiState() : undefined,
+    simpleRecords: loadSimpleRecords(),  // 极简模式记录（#223：导出文件此前漏了极简数据）
     records: data
   };
   const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
@@ -12205,6 +12211,10 @@ function finishImport(obj, overwrite) {
   if (obj.uiState && typeof obj.uiState === 'object' && typeof applyUiState === 'function') {
     try { applyUiState(obj.uiState); } catch(e) {}
   }
+  // 导入极简模式数据（#223：导入文件此前漏了极简数据；合并模式沿用整组覆盖，与云恢复语义一致）
+  if (obj.simpleRecords && Array.isArray(obj.simpleRecords)) {
+    try { saveSimpleRecords(obj.simpleRecords); } catch(e) {}
+  }
   initGoodsFilter();
   renderGoodsInputList();
   renderTodayOverview();
@@ -12214,7 +12224,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.8.7'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.8.8'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
