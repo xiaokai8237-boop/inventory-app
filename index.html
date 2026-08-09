@@ -8173,9 +8173,16 @@ var IS_STANDALONE = !!(typeof window !== 'undefined' && window.matchMedia && win
 })();
 // APK 下载地址：启动时从 app-version.json 读取最新版（网页版引导下载用；App 内走 AppUpdatePlugin 不依赖此值）
 var APK_DOWNLOAD_URL = '';
+// 更新包 URL 绝对化：apkUrl 可能是相对路径（"apk/app-vX.apk"），DownloadManager 只接受 http/https，
+// 相对路径会导致下载异常——统一补全为 pages.dev 绝对地址（双保险，防再次写相对路径）
+function absUrl(u) {
+  if (!u) return u;
+  if (/^https?:\/\//i.test(u)) return u;
+  return 'https://inventory-app-9ql.pages.dev/' + String(u).replace(/^\/+/, '');
+}
 try {
   fetch('/app-version.json').then(function(r){ return r.json(); }).then(function(d){
-    if (d && d.apkUrl) APK_DOWNLOAD_URL = d.apkUrl;
+    if (d && d.apkUrl) APK_DOWNLOAD_URL = absUrl(d.apkUrl);
   }).catch(function(){});
 } catch(e) {}
 
@@ -12095,7 +12102,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.8.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.8.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -12407,13 +12414,15 @@ function doApkUpdate() {
   if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.AppUpdate) {
     // 注：不再直接安装本地缓存包（apkDownloadedCache）——缓存可能是损坏文件（解析失败33）。
     // 统一重新下载最新包，下载完成自动拉起安装器。
+    // apkUrl 绝对化（防相对路径 → DownloadManager 异常/闪退）
+    var dlUrl = absUrl(apkUpdateInfo.apkUrl);
     // 切换为进度条视图（弹窗不关闭，全程在 APP 内完成，不跳浏览器）
     var row = document.getElementById('apkUpdateBtnRow');
     var prog = document.getElementById('apkUpdateProgressWrap');
     if (row) row.style.display = 'none';
     if (prog) prog.style.display = 'block';
     setApkProgress(0, '正在下载 v' + (apkUpdateInfo.versionName || '') + ' 更新包… 0%');
-    window.Capacitor.Plugins.AppUpdate.downloadAndInstall({ url: apkUpdateInfo.apkUrl })
+    window.Capacitor.Plugins.AppUpdate.downloadAndInstall({ url: dlUrl })
       .then(function() { startApkProgressPolling(); })
       .catch(function(e) {
         stopApkProgressPolling();
@@ -12423,7 +12432,7 @@ function doApkUpdate() {
   } else {
     // 非 APK 环境（浏览器/PWA）：跳转下载
     dismissApkUpdate();
-    window.open(apkUpdateInfo.apkUrl, '_blank');
+    window.open(absUrl(apkUpdateInfo.apkUrl), '_blank');
   }
 }
 // 用户确认：强制重启，加载新版本

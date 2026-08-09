@@ -1,6 +1,6 @@
 {
-  "versionCode": 108,
-  "versionName": "7.8.0",
-  "apkUrl": "apk/app-v7.8.0.apk",
-  "note": "极简模式：只记 5 筐发出/回收总数 + 范围记录差额"
+  "versionCode": 109,
+  "versionName": "7.8.1",
+  "apkUrl": "https://raw.githubusercontent.com/xiaokai8237-boop/inventory-app/main/apk/app-v7.8.1.apk",
+  "note": "修复：点击立即更新闪退（apkUrl 相对路径导致下载异常）"
 }

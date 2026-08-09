@@ -98,6 +98,14 @@ public class AppUpdatePlugin extends Plugin {
             call.reject("url required");
             return;
         }
+        // URL 必须 http/https：DownloadManager.Request 构造函数对无 scheme / 非 http(s) 的 URI
+        // 直接抛 IllegalArgumentException（相对路径如 "apk/app-vX.apk" 会导致下载异常甚至崩溃）
+        Uri uri = Uri.parse(url);
+        String scheme = uri.getScheme();
+        if (scheme == null || (!"http".equals(scheme) && !"https".equals(scheme))) {
+            call.reject("invalid_url:" + url);
+            return;
+        }
         // Android 8+ 需要"安装未知来源应用"授权；未授权则引导用户去系统设置开启
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (!getActivity().getPackageManager().canRequestPackageInstalls()) {
@@ -120,7 +128,7 @@ public class AppUpdatePlugin extends Plugin {
         File dest = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), APK_FILE);
         if (dest.exists()) dest.delete();
 
-        DownloadManager.Request req = new DownloadManager.Request(Uri.parse(url));
+        DownloadManager.Request req = new DownloadManager.Request(uri);
         req.setDestinationUri(Uri.fromFile(dest));
         req.setTitle("物流筐更新包");
         req.setDescription("正在下载新版本…");
