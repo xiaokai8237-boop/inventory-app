@@ -11,6 +11,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.view.View;
+import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
@@ -173,7 +175,6 @@ public class ArrivalMonitorPlugin extends Plugin {
                     .setSmallIcon(R.drawable.ic_stat_notify)
                     .setContentTitle(title)
                     .setContentText(body.replace('\n', ' '))
-                    .setStyle(new Notification.BigTextStyle().bigText(body))
                     .setAutoCancel(true)
                     .setContentIntent(pi);
             // 模板差异：颜色条（alarm 红 / silent 灰 / rich 金 / dist 青）
@@ -205,6 +206,21 @@ public class ArrivalMonitorPlugin extends Plugin {
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
             nb.addAction(R.drawable.ic_stat_notify, "导航去下一家", navPi);
 
+            // 需求3：rich 图文版用自定义大卡（RemoteViews，按 #146 v6 定稿样式）
+            if ("rich".equals(template)) {
+                try {
+                    RemoteViews rv = buildRichRemoteViews(storeName, dist, goods, recyclePi, navPi);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        nb.setCustomBigContentView(rv);
+                        nb.setStyle(new Notification.DecoratedCustomViewStyle());
+                    } else {
+                        nb.setCustomContentView(rv);
+                    }
+                } catch (Exception ignored) {}
+            } else {
+                nb.setStyle(new Notification.BigTextStyle().bigText(body));
+            }
+
             // 记录待处理到店（供 MainActivity 转发给网页；冷启动时网页加载完再取）
             MainActivity.setPendingArrival(storeName, "open");
 
@@ -213,6 +229,43 @@ public class ArrivalMonitorPlugin extends Plugin {
         } catch (Exception e) {
             call.reject("notify_error");
         }
+    }
+
+    /** 需求3：图文版（rich）自定义大卡 RemoteViews —— 按 #146 v6 定稿样式渲染 5 筐胶囊 + 红色打卡条 + 双按钮 */
+    private RemoteViews buildRichRemoteViews(String storeName, int dist, JSONArray goods,
+                                             PendingIntent recyclePi, PendingIntent navPi) {
+        RemoteViews rv = new RemoteViews(getContext().getPackageName(), R.layout.notify_rich);
+        rv.setTextViewText(R.id.nt_title, "即将到达 " + storeName);
+        rv.setTextViewText(R.id.nt_dist, "距你 " + dist + " 米");
+        rv.setOnClickPendingIntent(R.id.nt_btn_recycle, recyclePi);
+        rv.setOnClickPendingIntent(R.id.nt_btn_nav, navPi);
+        // 5 个胶囊：id 数组对应布局 cap1..cap5（鲜食/面包/冷藏/冷冻/常温）
+        int[] capIds = { R.id.nt_cap1, R.id.nt_cap2, R.id.nt_cap3, R.id.nt_cap4, R.id.nt_cap5 };
+        int[] nameIds = { R.id.nt_cap1_name, R.id.nt_cap2_name, R.id.nt_cap3_name, R.id.nt_cap4_name, R.id.nt_cap5_name };
+        int[] qtyIds = { R.id.nt_cap1_qty, R.id.nt_cap2_qty, R.id.nt_cap3_qty, R.id.nt_cap4_qty, R.id.nt_cap5_qty };
+        int[] wholeIds = { R.id.nt_cap1_whole, R.id.nt_cap2_whole, R.id.nt_cap3_whole, R.id.nt_cap4_whole, R.id.nt_cap5_whole };
+        // 先把所有胶囊隐藏，有货的逐个显示
+        for (int i = 0; i < capIds.length; i++) {
+            rv.setViewVisibility(capIds[i], View.GONE);
+        }
+        int idx = 0;
+        for (int i = 0; i < goods.length() && idx < capIds.length; i++) {
+            JSONObject g = goods.optJSONObject(i);
+            if (g == null) continue;
+            int qty = g.optInt("qty", 0);
+            if (qty <= 0) continue;
+            rv.setTextViewText(nameIds[idx], g.optString("name", "筐"));
+            rv.setTextViewText(qtyIds[idx], String.valueOf(qty));
+            int whole = g.optInt("whole", 0);
+            if (whole > 0) {
+                rv.setTextViewText(wholeIds[idx], " · 整箱 " + whole);
+            } else {
+                rv.setTextViewText(wholeIds[idx], "");
+            }
+            rv.setViewVisibility(capIds[idx], View.VISIBLE);
+            idx++;
+        }
+        return rv;
     }
 
     /** 前端取未处理的到店跳转（通知点击带过来的店名/动作；取后清空） */

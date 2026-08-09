@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ============================================================
+  需求3 系统通知栏图文大卡（rich 图文版模板，按 #146 v6 定稿样式）
+  结构：头部(图标+应用名+时间) / 标题(即将到达 店名) / 距离
+        / 金色标题(此店需要发出的各筐整箱数量) / 5 筐胶囊区
+        / 红色打卡条 / 双按钮(记录回筐·导航去下一家)
+  配色：#146 v6 定稿（鲜食橙 F5A623 / 面包金 F5DC92 / 冷藏青 7CE8E0
+        / 冷冻蓝 8FA9FF / 常温绿 4ADE80 / 红条 FF4D4F）
+============================================================ -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/nt_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/notify_card_bg"
+    android:padding="12dp">
+
+    <!-- 头部：应用图标 + 应用名 + 时间 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <FrameLayout
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:background="@drawable/notify_app_icon">
+            <ImageView
+                android:id="@+id/nt_app_icon"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_stat_notify"
+                android:contentDescription="物流筐" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/nt_app_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="物流筐"
+            android:textSize="11sp"
+            android:textColor="#9FB0B8"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/nt_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:text="现在"
+            android:textSize="10sp"
+            android:textColor="#6B7A82" />
+    </LinearLayout>
+
+    <!-- 标题：即将到达 店名 -->
+    <TextView
+        android:id="@+id/nt_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="即将到达"
+        android:textSize="15sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+
+    <!-- 距离 -->
+    <TextView
+        android:id="@+id/nt_dist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:text="距你 500 米"
+        android:textSize="12sp"
+        android:textColor="#7CE8E0"
+        android:textStyle="bold" />
+
+    <!-- 金色标题 -->
+    <TextView
+        android:id="@+id/nt_goods_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="9dp"
+        android:text="此店需要发出的各筐整箱数量"
+        android:textSize="12sp"
+        android:textColor="#F5DC92"
+        android:textStyle="bold" />
+
+    <!-- 5 筐胶囊区（每筐一行：筐名 + 物流数 + 整箱数） -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="6dp">
+
+        <!-- 鲜食筐 -->
+        <LinearLayout
+            android:id="@+id/nt_cap1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/capsule_bg_c1"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp">
+            <TextView
+                android:id="@+id/nt_cap1_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="鲜食筐"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/nt_cap1_qty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="17sp"
+                android:textColor="#F5A623"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" 物流 "
+                android:textSize="11sp"
+                android:textColor="#DDEBEE" />
+            <TextView
+                android:id="@+id/nt_cap1_whole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="11sp"
+                android:textColor="#DDEBEE" />
+        </LinearLayout>
+
+        <!-- 面包筐 -->
+        <LinearLayout
+            android:id="@+id/nt_cap2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/capsule_bg_c2"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp">
+            <TextView
+                android:id="@+id/nt_cap2_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="面包筐"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/nt_cap2_qty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="17sp"
+                android:textColor="#F5DC92"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" 物流 "
+                android:textSize="11sp"
+                android:textColor="#DDEBEE" />
+            <TextView
+                android:id="@+id/nt_cap2_whole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="11sp"
+                android:textColor="#DDEBEE" />
+        </LinearLayout>
+
+        <!-- 冷藏筐 -->
+        <LinearLayout
+            android:id="@+id/nt_cap3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/capsule_bg_c3"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp">
+            <TextView
+                android:id="@+id/nt_cap3_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="冷藏筐"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/nt_cap3_qty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="17sp"
+                android:textColor="#7CE8E0"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" 物流 "
+                android:textSize="11sp"
+                android:textColor="#DDEBEE" />
+            <TextView
+                android:id="@+id/nt_cap3_whole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="11sp"
+                android:textColor="#DDEBEE" />
+        </LinearLayout>
+
+        <!-- 冷冻筐 -->
+        <LinearLayout
+            android:id="@+id/nt_cap4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/capsule_bg_c4"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp">
+            <TextView
+                android:id="@+id/nt_cap4_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="冷冻筐"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/nt_cap4_qty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="17sp"
+                android:textColor="#8FA9FF"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" 物流 "
+                android:textSize="11sp"
+                android:textColor="#DDEBEE" />
+            <TextView
+                android:id="@+id/nt_cap4_whole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="11sp"
+                android:textColor="#DDEBEE" />
+        </LinearLayout>
+
+        <!-- 常温筐 -->
+        <LinearLayout
+            android:id="@+id/nt_cap5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/capsule_bg_c5"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp">
+            <TextView
+                android:id="@+id/nt_cap5_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="常温筐"
+                android:textSize="12sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/nt_cap5_qty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="17sp"
+                android:textColor="#4ADE80"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" 物流 "
+                android:textSize="11sp"
+                android:textColor="#DDEBEE" />
+            <TextView
+                android:id="@+id/nt_cap5_whole"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="11sp"
+                android:textColor="#4ADE80"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 打卡警示条：红色实底 -->
+    <TextView
+        android:id="@+id/nt_clock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/notify_red_bar"
+        android:paddingVertical="8dp"
+        android:gravity="center"
+        android:text=" 不要忘记打卡！"
+        android:textSize="15sp"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+
+    <!-- 双按钮 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="9dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/nt_btn_recycle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/notify_btn_gold"
+            android:text="记录回筐"
+            android:textSize="11sp"
+            android:textColor="#0B2E38"
+            android:textStyle="bold"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingVertical="8dp"
+            android:stateListAnimator="@null" />
+
+        <Button
+            android:id="@+id/nt_btn_nav"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:background="@drawable/notify_btn_nav"
+            android:text="导航去下一家"
+            android:textSize="11sp"
+            android:textColor="#7CE8E0"
+            android:textStyle="bold"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingVertical="8dp"
+            android:stateListAnimator="@null" />
+    </LinearLayout>
+</LinearLayout>

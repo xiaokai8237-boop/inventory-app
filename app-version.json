@@ -1,6 +1,6 @@
 {
-  "versionCode": 109,
-  "versionName": "7.8.1",
-  "apkUrl": "https://raw.githubusercontent.com/xiaokai8237-boop/inventory-app/main/apk/app-v7.8.1.apk",
-  "note": "修复：点击立即更新闪退（apkUrl 相对路径导致下载异常）"
+  "versionCode": 110,
+  "versionName": "7.8.9",
+  "apkUrl": "https://raw.githubusercontent.com/xiaokai8237-boop/inventory-app/main/apk/app-v7.8.9.apk",
+  "note": "需求3：系统通知栏图文大卡（rich 模板 RemoteViews 自定义布局，5 筐胶囊+红色打卡条+双按钮，按 #146 v6 定稿）"
 }

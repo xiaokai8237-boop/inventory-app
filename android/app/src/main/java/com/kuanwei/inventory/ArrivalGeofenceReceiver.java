@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.view.View;
+import android.widget.RemoteViews;
 
 import androidx.core.content.ContextCompat;
 
@@ -112,11 +114,11 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
             PendingIntent pi = PendingIntent.getActivity(context, 0, open,
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
 
+            // 需求3：rich 图文版自定义大卡（RemoteViews，与 ArrivalMonitorPlugin 同款布局）
             Notification.Builder nb = new Notification.Builder(context, ArrivalMonitorPlugin.CHANNEL_ARRIVAL)
                     .setSmallIcon(R.drawable.ic_stat_notify)
                     .setContentTitle(title)
                     .setContentText(body.toString().replace('\n', ' '))
-                    .setStyle(new Notification.BigTextStyle().bigText(body.toString()))
                     .setAutoCancel(true)
                     .setContentIntent(pi)
                     .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
@@ -138,10 +140,58 @@ public class ArrivalGeofenceReceiver extends BroadcastReceiver {
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
             nb.addAction(R.drawable.ic_stat_notify, "导航去下一家", navPi);
 
+            // rich 大卡（RemoteViews）
+            try {
+                RemoteViews rv = buildRichRemoteViews(context, hitName, distM, goods, recyclePi, navPi);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    nb.setCustomBigContentView(rv);
+                    nb.setStyle(new Notification.DecoratedCustomViewStyle());
+                } else {
+                    nb.setCustomContentView(rv);
+                }
+            } catch (Exception ignored) {}
+
             MainActivity.setPendingArrival(hitName, "open");
 
             nm.notify(7003, nb.build());
         } catch (Exception ignored) {}
+    }
+
+    /** 需求3：图文版（rich）自定义大卡 RemoteViews —— 与 ArrivalMonitorPlugin 同款（#146 v6 定稿样式） */
+    private RemoteViews buildRichRemoteViews(Context ctx, String storeName, int dist, JSONArray goods,
+                                             PendingIntent recyclePi, PendingIntent navPi) {
+        RemoteViews rv = new RemoteViews(ctx.getPackageName(), R.layout.notify_rich);
+        rv.setTextViewText(R.id.nt_title, "即将到达 " + storeName);
+        rv.setTextViewText(R.id.nt_dist, "距你 " + dist + " 米以内");
+        rv.setOnClickPendingIntent(R.id.nt_btn_recycle, recyclePi);
+        rv.setOnClickPendingIntent(R.id.nt_btn_nav, navPi);
+        int[] capIds = { R.id.nt_cap1, R.id.nt_cap2, R.id.nt_cap3, R.id.nt_cap4, R.id.nt_cap5 };
+        int[] nameIds = { R.id.nt_cap1_name, R.id.nt_cap2_name, R.id.nt_cap3_name, R.id.nt_cap4_name, R.id.nt_cap5_name };
+        int[] qtyIds = { R.id.nt_cap1_qty, R.id.nt_cap2_qty, R.id.nt_cap3_qty, R.id.nt_cap4_qty, R.id.nt_cap5_qty };
+        int[] wholeIds = { R.id.nt_cap1_whole, R.id.nt_cap2_whole, R.id.nt_cap3_whole, R.id.nt_cap4_whole, R.id.nt_cap5_whole };
+        for (int i = 0; i < capIds.length; i++) {
+            rv.setViewVisibility(capIds[i], View.GONE);
+        }
+        int idx = 0;
+        if (goods != null) {
+            for (int i = 0; i < goods.length() && idx < capIds.length; i++) {
+                JSONObject g = goods.optJSONObject(i);
+                if (g == null) continue;
+                int qty = g.optInt("qty", 0);
+                if (qty <= 0) continue;
+                rv.setTextViewText(nameIds[idx], g.optString("name", "筐"));
+                rv.setTextViewText(qtyIds[idx], String.valueOf(qty));
+                int whole = g.optInt("whole", 0);
+                if (whole > 0) {
+                    rv.setTextViewText(wholeIds[idx], " · 整箱 " + whole);
+                } else {
+                    rv.setTextViewText(wholeIds[idx], "");
+                }
+                rv.setViewVisibility(capIds[idx], View.VISIBLE);
+                idx++;
+            }
+        }
+        return rv;
     }
 
     private String findNameByHash(JSONArray route, int hash) {
