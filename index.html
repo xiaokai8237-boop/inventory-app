@@ -5272,6 +5272,9 @@ function retryPendingBackup() {
 
 async function backupToCloud(manual) {
   if (manual) showLoading('正在备份…');
+  // 上传时的删除标记快照：成功后仅当标记未变（期间无新删除）才清除，
+  // 防止多条快速删除时旧备份成功误清新删除的标记，导致删除保护失效
+  const delMarkAtUpload = localStorage.getItem('kuanwei_last_delete');
   try {
     const deviceId = getDeviceId();
     const account = localStorage.getItem('kuanwei_phone') || '';
@@ -5324,8 +5327,9 @@ async function backupToCloud(manual) {
     const result = await resp.json();
     if (result && result.ok) {
       localStorage.setItem('kuanwei_last_backup', new Date().toISOString());
-      // 删除状态已同步到云端 → 清除删除标记，防止后续空备份（带 userDeleted）误清其他设备录入的新数据
-      try { localStorage.removeItem('kuanwei_last_delete'); } catch(e) {}
+      // 删除状态已同步到云端 → 清除删除标记（仅当期间无新删除：标记与上传时快照一致才清），
+      // 防止后续空备份（带 userDeleted）误清其他设备录入的新数据
+      try { if (localStorage.getItem('kuanwei_last_delete') === delMarkAtUpload) localStorage.removeItem('kuanwei_last_delete'); } catch(e) {}
       // 备份成功 → 清除待重试标记
       try { localStorage.removeItem('kuanwei_pending_backup'); } catch(e) {}
       if (manual) {
@@ -6436,21 +6440,16 @@ async function restoreFromCloud() {
       const cloud = result.data;
       const localRecords = loadData();
       const localEmpty = localRecords.length === 0;
-      // 用户主动删除过数据 → 不自动从云端恢复（尊重删除意图，防止"删了又复活"）
-      if (localStorage.getItem('kuanwei_last_delete')) {
-        if (!localEmpty) return; // 本地有数据 → 完全不动
-        // 本地空 + 用户删过 → 说明用户删光了：仅当云端也比本地"删除时间"旧才恢复；否则保持空
-        const delTime = localStorage.getItem('kuanwei_last_delete');
-        if (cloud.backupTime && delTime && cloud.backupTime > delTime) {
-          // 云端备份晚于用户删除 → 云端可能是别处的新数据，可恢复
-        } else {
-          return; // 云端是删除前的旧数据 → 不恢复，保持已删除状态
-        }
-      }
-      const cloudNewer = !localStorage.getItem('kuanwei_last_save') ||
-        (cloud.backupTime && cloud.backupTime > localStorage.getItem('kuanwei_last_save'));
-      // 本地为空 或 云端比本地新 → 从云端恢复记录（仅作为兜底，不打扰手动恢复流程）
-      if (localEmpty || cloudNewer) {
+      // 【删除复活终极修复】自动恢复仅限"本地从未保存过任何数据"（首次使用/换机/清缓存）：
+      // 只要本机保存/删除/改配置过（saveDataArr/saveGoodsConfig/saveStoreConfig 都会写 kuanwei_last_save），
+      // 就绝不在启动时自动从云端覆盖本地 —— 删除意图永远优先于云端旧数据，防止"删了又复活"。
+      // 云端数据（可能来自删除前备份/其他设备/device 级残留）一律视为不可信旧数据。
+      const everSaved = !!localStorage.getItem('kuanwei_last_save');
+      if (everSaved) return; // 本机操作过数据 → 完全不自动恢复（需要恢复时用户走手动恢复，意图明确）
+
+      // ===== 以下仅首次使用（无本地数据）时执行 =====
+      // 首次使用：本地为空（无 last_save）→ 从云端恢复（换机/清缓存兜底）
+      if (localEmpty) {
         saveDataArr(cloud.records || []);
         // 还原界面偏好（含极简模式等）——与手动恢复路径一致
         try { if (cloud.uiState && typeof applyUiState === 'function') applyUiState(cloud.uiState); } catch(e) {}
@@ -6466,20 +6465,16 @@ async function restoreFromCloud() {
           if (typeof renderSimpleRecords === 'function') renderSimpleRecords();
         } catch(e) {}
       }
-      // 筐配置（goodsConfig）：独立覆盖判断，不跟 records 的 localEmpty 走
-      // —— 本地已有配置且比云端新 → 不覆盖（防止自定义筐名/别名被云端旧数据覆盖）
+      // 筐配置（goodsConfig）：仅首次使用时从云端恢复（本机改过配置 → 绝不覆盖）
       const localGoodsCfg = loadGoodsConfig();
       const localGoodsEmpty = !localGoodsCfg || localGoodsCfg.length === 0;
-      if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig) && cloud.goodsConfig.length > 0 &&
-          (localGoodsEmpty || cloudNewer)) {
+      if (cloud.goodsConfig && Array.isArray(cloud.goodsConfig) && cloud.goodsConfig.length > 0 && localGoodsEmpty) {
         saveGoodsConfig(cloud.goodsConfig);
       }
-      // 店面+定位（storeConfig）：独立覆盖判断，不跟 records 的 localEmpty 走
-      // —— 本地已有店面且比云端新 → 坚决不覆盖（修复：刚保存的定位被云端旧数据覆盖的问题）
+      // 店面+定位（storeConfig）：仅首次使用时从云端恢复（本机改过定位 → 绝不覆盖）
       const localStoresCfg = loadStoreConfig();
       const localStoresEmpty = !localStoresCfg || localStoresCfg.length === 0;
-      if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0 &&
-          (localStoresEmpty || cloudNewer)) {
+      if (cloud.storeConfig && Array.isArray(cloud.storeConfig) && cloud.storeConfig.length > 0 && localStoresEmpty) {
         saveStoreConfig(cloud.storeConfig);
       }
     }
@@ -12121,7 +12116,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '7.9.6'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '7.9.7'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
