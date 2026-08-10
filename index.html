@@ -3628,7 +3628,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 
 <!-- ========== 对账页 ========== -->
 <div class="page" id="page-reconcile">
-  <div class="card">
+  <div class="card" style="position:relative;">
+    <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助" style="position:absolute;right:10px;top:10px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
     <div class="form-label" style="margin-bottom:10px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 15V3"/></svg> 导出我的数据</div>
     <div class="form-group">
       <label class="form-label" style="font-size:13px;">导出日期范围</label>
@@ -4624,7 +4625,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div class="emit-vbar"></div><div class="emit-vbar"></div><div class="emit-vbar"></div><div class="emit-vbar"></div>
   </div>
   <div class="emit-voice-text" id="evStateText">正在录音… 说完数字后点「结束」</div>
-  <button class="emit-voice-stop" id="evStopBtn" onclick="emitStopVoice()">⏹ 结束</button>
+  <button class="emit-voice-stop" id="evStopBtn" onclick="emitStopVoice()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>结束</button>
 </div>
 
 <div class="store-ocr-modal" id="avatarModal">
@@ -6932,8 +6933,8 @@ let toastTimer = null;
 let __toastShownAt = 0;
 function showToast(msg) {
   const t = document.getElementById('toast');
-  // 清理 emoji 前缀（P0：emoji 不作为功能图标；语义完整保留）
-  msg = String(msg || '').replace(/^\s*[√!⏳?⭐]+\s*/g, '');
+  // 清理 emoji 前缀（P0：emoji 不作为功能图标；语义完整保留）——历史遗留时钟/星形 emoji 已全清，保留 √! 等符号清理
+  msg = String(msg || '').replace(/^\s*[√!?]+\s*/g, '');
   t.textContent = msg;
   t.classList.add('show');
   __toastShownAt = Date.now();
@@ -8434,6 +8435,8 @@ function typeMismatchSwitch() {
 
 function manualEntry(type) {
   if (!type) { showToast('请选择操作类型'); return; }
+  // 走查修复（F-01）：未登录统一拦截，与「发出」按钮行为一致
+  if (!isLoggedIn()) { showToast('请先登录后再录入'); openLoginModal(); return; }
   currentActionType = type;
   const label = type === 'in' ? '发出' : '回收';
   document.getElementById('manualHeaderLabel').textContent = label + ' - 手动录入';
@@ -10220,7 +10223,7 @@ function renderTodayStatus() {
 
   // 待录入提醒
   if (pendingStores.length > 0) {
-    html += `<div style="font-size:11px;color:var(--warning);margin-top:8px;">⏳ 还有 ${pendingStores.length} 家店未录入：${pendingStores.map(s=>escapeHtml(s.s.name)).join('、')}</div>`;
+    html += `<div style="font-size:11px;color:var(--warning);margin-top:8px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>还有 ${pendingStores.length} 家店未录入：${pendingStores.map(s=>escapeHtml(s.s.name)).join('、')}</div>`;
   } else if (todayRecords.length > 0) {
     html += `<div style="font-size:11px;color:var(--success);margin-top:8px;"> 今日所有店面均已录入！</div>`;
   } else {
@@ -12630,11 +12633,13 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.6'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.7'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
 if (appVerEl) appVerEl.textContent = 'v' + APP_VERSION;
+const simpleVerEl = document.getElementById('simpleVersion');
+if (simpleVerEl) simpleVerEl.textContent = 'v' + APP_VERSION; // 走查修复（F-91）：极简版本号动态同步，不再写死
 const bootVerEl = document.getElementById('bootVer');
 if (bootVerEl) bootVerEl.textContent = '版本 v' + APP_VERSION;
 // 核弹级 sw 缓存清理：检测 sw 缓存版本，过期则强制清空+注销+刷新（解决旧 sw 缓存导致页面异常问题）
