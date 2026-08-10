@@ -2643,7 +2643,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 .poster-title { font-size: 13px; font-weight: 800; color: #F5DC92; }
 .poster-shuffle { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #7CE8E0; background: none; border: none; cursor: pointer; padding: 4px 8px; }
 .poster-shuffle svg { width: 14px; height: 14px; }
-.poster-img-wrap { flex: 1; overflow: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); -webkit-overflow-scrolling: touch; }
+.poster-img-wrap { position: relative; flex: 1; overflow: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); -webkit-overflow-scrolling: touch; }
+.poster-loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #7CE8E0; background: rgba(10,36,48,.4); }
 .poster-img-wrap img { display: block; width: 100%; height: auto; }
 .poster-actions { display: flex; gap: 10px; margin-top: 12px; }
 .poster-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: 800; border: none; border-radius: 22px; padding: 12px 0; cursor: pointer; }
@@ -3444,7 +3445,10 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
         换一张
       </button>
     </div>
-    <div class="poster-img-wrap"><img id="posterModalImg" alt="拉新海报"></div>
+    <div class="poster-img-wrap">
+      <div class="poster-loading" id="posterLoading">海报生成中…</div>
+      <img id="posterModalImg" alt="拉新海报" style="display:none;">
+    </div>
     <div class="poster-actions">
       <button class="poster-btn poster-btn-dl" onclick="downloadPosterNew()">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
@@ -12473,7 +12477,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -13323,6 +13327,7 @@ function renderInvitePage() {
   const codeEl = document.getElementById('invCodeVal');
   if (codeEl) codeEl.textContent = getInviteCode();
   // 需求8：邀请文案列表已移除（改为一键复制链接随机附文案；海报改为按钮+弹窗随机 7 款）
+  preloadInvitePosters(); // 预加载 7 款海报 → 点击生成时秒开
 }
 function copyInviteCode() {
   const code = getInviteCode();
@@ -13346,16 +13351,23 @@ function copyInviteText(i) {
   showToast('「' + t.name + '」文案已复制');
 }
 // ===== 需求8：生成邀请海报（7 款随机，一次一张） =====
-// 7 款候选海报（启动图风格，左上角二维码区会在下载/转发时覆盖为个人邀请码）
+// 7 款候选海报（JPEG 压缩版，单张 ~120KB 加载快；左上角二维码区会在下载/转发时覆盖为个人邀请码）
 var INVITE_POSTERS = [
-  '_splash_v3_deepblue.png',
-  '_splash_v3_teal.png',
-  '_splash_v3_forest.png',
-  '_splash_v3_navy.png',
-  '_splash_v3_onyx.png',
-  'splash_1080x1882_qr.png',
-  '_splash_new_v2_qr.png'
+  '_splash_v3_deepblue.jpg',
+  '_splash_v3_teal.jpg',
+  '_splash_v3_forest.jpg',
+  '_splash_v3_navy.jpg',
+  '_splash_v3_onyx.jpg',
+  'splash_1080x1882_qr.jpg',
+  '_splash_new_v2_qr.jpg'
 ];
+// 预加载 7 张海报（进入邀请页即后台缓存，点击生成时秒开）
+function preloadInvitePosters() {
+  for (var i = 0; i < INVITE_POSTERS.length; i++) {
+    var im = new Image();
+    im.src = INVITE_POSTERS[i];
+  }
+}
 var curPosterIdx = -1;
 function openPosterModal() {
   if (!isLoggedIn() || !getCloudPhone()) { showToast('请先登录'); return; }
@@ -13368,7 +13380,17 @@ function shufflePoster() {
   do { idx = Math.floor(Math.random() * INVITE_POSTERS.length); } while (INVITE_POSTERS.length > 1 && idx === curPosterIdx);
   curPosterIdx = idx;
   var img = document.getElementById('posterModalImg');
-  if (img) img.src = INVITE_POSTERS[idx];
+  var ld = document.getElementById('posterLoading');
+  if (img) {
+    img.style.display = 'none'; // 加载中先隐藏
+    if (ld) ld.style.display = 'flex';
+    img.onload = function() {
+      img.style.display = 'block';
+      if (ld) ld.style.display = 'none';
+    };
+    img.onerror = function() { if (ld) ld.textContent = '海报加载失败，点「换一张」重试'; };
+    img.src = INVITE_POSTERS[idx];
+  }
 }
 function closePosterModal() {
   var m = document.getElementById('posterModal');
@@ -13422,8 +13444,8 @@ function downloadPosterNew() {
     if (!cv) { showToast('海报加载失败，请重试'); return; }
     try {
       var link = document.createElement('a');
-      link.download = '物流筐邀请海报_' + getInviteCode() + '.png';
-      link.href = cv.toDataURL('image/png');
+      link.download = '物流筐邀请海报_' + getInviteCode() + '.jpg';
+      link.href = cv.toDataURL('image/jpeg', 0.9); // JPEG 导出更快更小
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -13437,8 +13459,8 @@ function sharePosterNew() {
     if (!cv) { showToast('海报加载失败，请重试'); return; }
     cv.toBlob(function(blob) {
       if (blob) {
-        var fileName = '物流筐邀请海报_' + getInviteCode() + '.png';
-        var file = new File([blob], fileName, { type: 'image/png' });
+        var fileName = '物流筐邀请海报_' + getInviteCode() + '.jpg';
+        var file = new File([blob], fileName, { type: 'image/jpeg' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           navigator.share({ files: [file], title: '物流筐 · 邀请好友' }).catch(function() {});
           return;
@@ -13449,7 +13471,7 @@ function sharePosterNew() {
       var body = t.body.replace('{code}', getInviteCode());
       copyText(body + ' ' + getInviteLink());
       showToast('当前环境不支持分享图片，已复制文案+链接');
-    }, 'image/png');
+    }, 'image/jpeg', 0.9);
   });
 }
 // 复制工具（兼容旧环境）
