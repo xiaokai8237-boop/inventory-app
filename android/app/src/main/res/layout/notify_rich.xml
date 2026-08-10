@@ -32,7 +32,7 @@
                 android:layout_height="14dp"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_stat_notify"
-                android:contentDescription="物流筐" />
+                android:contentDescription="物流筐收发管理系统" />
         </FrameLayout>
 
         <TextView
@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="物流筐"
+            android:text="物流筐收发管理系统"
             android:textSize="11sp"
             android:textColor="#9FB0B8"
             android:textStyle="bold" />

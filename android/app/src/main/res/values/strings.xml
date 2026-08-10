@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">物流筐</string>
-    <string name="title_activity_main">物流筐</string>
+    <string name="app_name">物流筐收发管理系统</string>
+    <string name="title_activity_main">物流筐收发管理系统</string>
     <string name="package_name">com.kuanwei.inventory</string>
     <string name="custom_url_scheme">com.kuanwei.inventory</string>
 </resources>
