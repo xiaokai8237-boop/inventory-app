@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>需求9 横版 - 物流筐</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1920px; height: 1080px;
+    background: radial-gradient(ellipse at 30% 50%, #0E3340 0%, #082E38 60%, #051F26 100%);
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+    color: #fff;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+  }
+  /* 星空点 */
+  body::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 100px 150px, rgba(255,255,255,.4), transparent),
+      radial-gradient(1px 1px at 300px 380px, rgba(245,220,146,.3), transparent),
+      radial-gradient(1.5px 1.5px at 450px 100px, rgba(255,255,255,.5), transparent),
+      radial-gradient(1px 1px at 200px 800px, rgba(124,232,224,.3), transparent),
+      radial-gradient(1.5px 1.5px at 100px 950px, rgba(245,220,146,.4), transparent),
+      radial-gradient(1px 1px at 1700px 200px, rgba(255,255,255,.35), transparent),
+      radial-gradient(1.5px 1.5px at 1850px 700px, rgba(124,232,224,.3), transparent);
+  }
+  .left {
+    position: relative; z-index: 2;
+    width: 660px;
+    padding: 70px 60px;
+    display: flex; flex-direction: column;
+  }
+  .logo {
+    width: 130px; height: 130px;
+    background: linear-gradient(135deg, #F5DC92 0%, #E0A63E 100%);
+    border-radius: 30px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 36px rgba(245,220,146,.45), inset 0 -4px 12px rgba(0,0,0,.18);
+    margin-bottom: 36px;
+  }
+  .logo svg { width: 72px; height: 72px; }
+  .title {
+    font-size: 76px; font-weight: 900; color: #fff; line-height: 1.15;
+    text-shadow: 0 4px 24px rgba(245,220,146,.35);
+    letter-spacing: 2px; margin-bottom: 18px;
+  }
+  .sub {
+    font-size: 28px; color: #F5DC92; font-weight: 700;
+    letter-spacing: 4px; margin-bottom: 18px;
+  }
+  .tagline {
+    font-size: 26px; color: rgba(255,255,255,.82); font-weight: 400;
+    margin-bottom: 42px;
+  }
+  .feat-list {
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .feat {
+    display: flex; align-items: center; gap: 20px;
+    background: rgba(245,220,146,.06);
+    border: 1.5px solid rgba(245,220,146,.25);
+    border-radius: 18px;
+    padding: 16px 20px;
+  }
+  .feat-icon {
+    width: 50px; height: 50px; flex-shrink: 0;
+    background: linear-gradient(135deg, #F5DC92 0%, #E0A63E 100%);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 3px 12px rgba(245,220,146,.3);
+  }
+  .feat-icon svg { width: 28px; height: 28px; stroke: #1A2730; }
+  .feat-title {
+    font-size: 22px; font-weight: 700; color: #F5DC92;
+  }
+  .feat-desc {
+    font-size: 17px; color: rgba(255,255,255,.68); margin-top: 2px;
+  }
+  .right {
+    position: relative; z-index: 2;
+    flex: 1;
+    display: flex; gap: 24px;
+    align-items: center; justify-content: center;
+    padding-right: 40px;
+  }
+  .phone {
+    width: 380px; height: 824px;
+    border-radius: 40px;
+    overflow: hidden;
+    border: 3px solid rgba(255,255,255,.16);
+    box-shadow: 0 22px 60px rgba(0,0,0,.6), 0 0 0 8px rgba(245,220,146,.08);
+    background: #051F26;
+    flex-shrink: 0;
+  }
+  .phone img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: top; }
+  .ver {
+    position: absolute; bottom: 28px; left: 60px;
+    font-size: 18px; color: rgba(255,255,255,.4);
+    z-index: 2;
+  }
+</style>
+</head>
+<body>
+  <div class="left">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1A2730" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+    </div>
+    <div class="title">物流筐<br>收发管理系统</div>
+    <div class="sub">送货记账 · 到店提醒 · 云端备份</div>
+    <div class="tagline">专为送货司机设计，<br>把记账这件事变得又快又准</div>
+
+    <div class="feat-list">
+      <div class="feat">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </div>
+        <div>
+          <div class="feat-title">语音/拍照/手动 三种录入</div>
+          <div class="feat-desc">说一句 / 拍一张 / 手动填，总有一款顺手</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 15V3"/></svg>
+        </div>
+        <div>
+          <div class="feat-title">离线可用 云端自动备份</div>
+          <div class="feat-desc">没信号也能录，联网自动同步换机不丢</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>
+        </div>
+        <div>
+          <div class="feat-title">会员体系 · 邀请送 VIP</div>
+          <div class="feat-desc">邀请好友双方各 +15 天，新用户注册即送 1 月</div>
+        </div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <div class="feat-title">数据加密 · 隐私保护</div>
+          <div class="feat-desc">手机号登录、密码哈希存储，本机数据可控</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ver">v8.2.7</div>
+  </div>
+
+  <div class="right">
+    <div class="phone">
+      <img src="_shot_req9_s1_home.png" alt="首页">
+    </div>
+    <div class="phone">
+      <img src="_shot_req9_s2_emit.png" alt="录入">
+    </div>
+    <div class="phone">
+      <img src="_shot_req9_s5_invite.png" alt="邀请">
+    </div>
+  </div>
+</body>
+</html>
