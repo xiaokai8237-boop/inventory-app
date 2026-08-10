@@ -1,0 +1,22 @@
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  await page.goto('http://127.0.0.1:8899/index.html', { waitUntil: 'load' });
+  await page.waitForTimeout(600);
+  await page.evaluate(() => { localStorage.setItem('kuanwei_phone','13800138000'); localStorage.setItem('kuanwei_logged_in','1'); });
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForTimeout(800);
+  await page.evaluate(() => { document.querySelectorAll('.show').forEach(m => m.classList.remove('show')); });
+  await page.evaluate(() => switchPage('manage'));
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: '_shot_req8_clean_manage.png' });
+  await page.evaluate(() => switchPage('history'));
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: '_shot_req8_clean_history.png' });
+  await page.evaluate(() => switchPage('record'));
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: '_shot_req8_clean_home.png' });
+  await browser.close();
+  console.log('OK');
+})();

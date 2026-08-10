@@ -2970,7 +2970,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 
     <div class="card">
       <div class="form-group">
-        <label class="form-label">🏪 店面（点击切换）</label>
+        <label class="form-label"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9v11h18V9"/><path d="M3 9h18"/><path d="M9 20v-6h6v6"/></svg> 店面（点击切换）</label>
         <div class="store-chip-list" id="recordStoreChips"></div>
         <select class="form-select" id="recordStore" onchange="onRecordStoreChange()" style="display:none;"></select>
       </div>
@@ -2978,13 +2978,13 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 
     <div class="card">
       <div class="form-group">
-        <label class="form-label">📅 日期</label>
+        <label class="form-label"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 日期</label>
         <input type="date" class="form-input" id="recordDate" onchange="reloadRecordInputs()">
       </div>
     </div>
 
     <div class="card">
-      <div class="form-label" style="margin-bottom:10px;">✍️ 手动录入</div>
+      <div class="form-label" style="margin-bottom:10px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> 手动录入</div>
       <div class="goods-input-list" id="goodsInputList"><div class="goods-input-item" style="font-size:11px;color:var(--text-light);border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:6px;"><div class="gi-name">筐名</div><div style="flex:1;text-align:center;">发出</div><div style="flex:1;text-align:center;">回收</div></div>
         <div class="goods-input-item">
           <div class="gi-name">鲜食筐</div>
@@ -3019,11 +3019,11 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="manage-panel" id="emitPanel" style="display:none;">
     <div class="card panel-header">
       <button class="back-btn" onclick="closeEmitPanel()">← 返回</button>
-      <span style="flex:1;text-align:center;font-weight:700;color:var(--text);">📤 发出</span>
+      <span style="flex:1;text-align:center;font-weight:700;color:var(--text);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 15V3"/></svg> 发出</span>
     </div>
 
     <div class="card" style="padding:10px 12px;display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-size:13px;color:var(--text-light);">📅 记录日期</span>
+      <span style="font-size:13px;color:var(--text-light);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> 记录日期</span>
       <input type="date" id="emitRecordDate" class="form-input" style="flex:1;max-width:190px;margin-left:10px;padding:6px 10px;font-size:14px;" onchange="renderEmitStoreList()">
       <span style="font-size:11px;color:var(--text-light);margin-left:8px;">默认今天，可改历史日期补录</span>
     </div>
@@ -3032,22 +3032,22 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div id="emitEntryArea">
       <div class="card" style="padding:12px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-          <span style="font-size:22px;">📸</span>
+          <span style="font-size:22px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><line x1="8" y1="6" x2="10" y2="3"/><line x1="16" y1="6" x2="14" y2="3"/></svg></span>
           <span style="font-size:16px;font-weight:800;color:var(--primary);">智能识别 · 自动判断筐类型</span>
         </div>
         <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">拍路单自动识别筐类型和数量，识别结果可修改</div>
         <div style="display:flex;gap:10px;">
-          <button class="btn btn-primary" style="flex:1;font-size:15px;padding:12px;" onclick="emitTriggerPhoto()">📷 拍照识别</button>
-          <button class="btn btn-primary" style="flex:1;font-size:15px;padding:12px;background:linear-gradient(135deg,#7CE8E0,#2BB8A8);border-color:transparent;color:#04242C;" onclick="emitTriggerPhoto()">🖼️ 从相册选</button>
+          <button class="btn btn-primary" style="flex:1;font-size:15px;padding:12px;" onclick="emitTriggerPhoto()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><line x1="8" y1="6" x2="10" y2="3"/><line x1="16" y1="6" x2="14" y2="3"/></svg> 拍照识别</button>
+          <button class="btn btn-primary" style="flex:1;font-size:15px;padding:12px;background:linear-gradient(135deg,#7CE8E0,#2BB8A8);border-color:transparent;color:#04242C;" onclick="emitTriggerPhoto()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> 从相册选</button>
         </div>
       </div>
 
       <div class="card" style="padding:12px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-          <span style="font-size:22px;">✍️</span>
+          <span style="font-size:22px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg></span>
           <span style="font-size:16px;font-weight:800;color:var(--primary);">手动录入</span>
         </div>
-        <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">点某个筐进入填写页（每页顶部有📅记录日期）</div>
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">点某个筐进入填写页（每页顶部有<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>记录日期）</div>
         <div id="emitGoodsButtons" style="display:flex;flex-direction:column;gap:8px;"></div>
       </div>
     </div>
@@ -3064,7 +3064,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 
       <div class="card" style="padding:10px 12px;">
         <div style="display:flex;gap:10px;">
-          <button class="btn btn-primary" style="flex:1;" onclick="emitStartVoice()">🎤 语音录入</button>
+          <button class="btn btn-primary" style="flex:1;" onclick="emitStartVoice()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg> 语音录入</button>
         </div>
         <div style="font-size:11px;color:var(--text-light);">语音：间隔说数字（如 3 6 2…），按店面从上到下自动填入</div>
       </div>
@@ -3076,7 +3076,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       </div>
 
       <div class="card" style="text-align:center;">
-        <button class="btn btn-primary" style="width:100%;font-size:15px;padding:12px;" onclick="saveEmitRecords()">💾 保存发出</button>
+        <button class="btn btn-primary" style="width:100%;font-size:15px;padding:12px;" onclick="saveEmitRecords()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> 保存发出</button>
         <div style="font-size:11px;color:var(--text-light);margin-top:6px;">保存后自动返回主页</div>
       </div>
     </div>
@@ -3086,7 +3086,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="store-ocr-modal" id="emitGoodsSelectModal">
     <div class="store-ocr-content" style="max-width:320px;" onclick="event.stopPropagation()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <span style="font-weight:700;font-size:16px;color:var(--text);">📦 选择发出的筐类型</span>
+        <span style="font-weight:700;font-size:16px;color:var(--text);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 8v8l-9 5-9-5V8l9-5 9 5z"/><line x1="3" y1="8" x2="12" y2="13"/><line x1="12" y1="13" x2="21" y2="8"/><line x1="12" y1="13" x2="12" y2="21"/></svg> 选择发出的筐类型</span>
         <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeEmitGoodsSelect()">×</span>
       </div>
       <div id="emitGoodsSelectButtons" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -3097,12 +3097,12 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="store-ocr-modal" id="recoverStoreOrderModal">
     <div class="store-ocr-content" style="max-width:330px;" onclick="event.stopPropagation()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <span style="font-weight:700;font-size:16px;color:var(--text);">✏️ 调整回收店序</span>
+        <span style="font-weight:700;font-size:16px;color:var(--text);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> 调整回收店序</span>
         <span style="cursor:pointer;font-size:20px;color:var(--text-light);" onclick="closeRecoverStoreOrderModal()">×</span>
       </div>
-      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 ☰ 拖动，或点 ▲▼ 调整（仅影响回收页顺序）</div>
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">按住 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg> 拖动，或点 ▲▼ 调整（仅影响回收页顺序）</div>
       <div id="recoverStoreOrderList" style="max-height:50vh;overflow-y:auto;background:var(--soft-bg);border-radius:10px;padding:6px;"></div>
-      <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="saveRecoverStoreOrder()">💾 保存店序</button>
+      <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="saveRecoverStoreOrder()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> 保存店序</button>
     </div>
   </div>
 
@@ -3167,12 +3167,12 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="store-ocr-modal" id="emitVoiceConfirmModal">
     <div class="store-ocr-content" style="max-width:520px;max-height:88vh;overflow-y:auto;" onclick="event.stopPropagation()">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <span class="ecv-title">🤖 AI 识图结果 · 请核对</span>
+        <span class="ecv-title">AI AI 识图结果 · 请核对</span>
         <span style="cursor:pointer;font-size:22px;color:rgba(255,255,255,.9);" onclick="closeEmitVoiceConfirm()">×</span>
       </div>
       <!-- 记录日期 -->
       <div class="ecv-date-row">
-        <span style="font-size:15px;">📅</span>
+        <span style="font-size:15px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
         <span style="font-size:13px;color:rgba(255,255,255,.85);white-space:nowrap;">记录日期</span>
         <input type="date" id="emitConfirmDate" onchange="syncEmitConfirmDate(this.value)">
         <span style="font-size:11px;color:rgba(255,255,255,.6);white-space:nowrap;">可改历史日期补录</span>
@@ -3192,10 +3192,10 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
         <span>语音录入</span>
       </button>
       <div class="ecv-total"><span>合计</span><span id="emitTotalLabelWhole" style="color:#7CE8E0;font-size:12px;display:none;margin-left:8px;">整箱</span><span id="emitConfirmTotalWhole" style="color:#7CE8E0;display:none;margin-left:4px;">0</span><span id="emitTotalLabelLog" style="color:#F5A623;font-size:12px;display:none;margin-left:10px;">物流箱</span><span id="emitConfirmTotal" style="color:#F5A623;margin-left:4px;">0</span></div>
-      <div class="ecv-warn">⚠️ 请核对好每行数据后再点「确定保存」，保存后直接入账</div>
+      <div class="ecv-warn">! 请核对好每行数据后再点「确定保存」，保存后直接入账</div>
       <div style="display:flex;gap:10px;margin-top:12px;">
-        <button class="btn btn-outline" style="flex:1;padding:12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.95);font-size:15px;font-weight:700;" onclick="closeEmitVoiceConfirm()">✕ 取消</button>
-        <button class="btn-save-emit" onclick="applyEmitVoice()">✅ 确定保存</button>
+        <button class="btn btn-outline" style="flex:1;padding:12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.95);font-size:15px;font-weight:700;" onclick="closeEmitVoiceConfirm()">× 取消</button>
+        <button class="btn-save-emit" onclick="applyEmitVoice()">√ 确定保存</button>
       </div>
     </div>
   </div>
@@ -3212,8 +3212,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       </div>
       <div class="save-title">保存成功</div>
       <div id="emitSaveSummary" class="save-summary"></div>
-      <button class="btn-continue" onclick="emitSaveContinue()">📸 继续录入</button>
-      <button class="btn-view-records" onclick="emitSaveViewRecords()">📋 查看记录</button>
+      <button class="btn-continue" onclick="emitSaveContinue()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><line x1="8" y1="6" x2="10" y2="3"/><line x1="16" y1="6" x2="14" y2="3"/></svg> 继续录入</button>
+      <button class="btn-view-records" onclick="emitSaveViewRecords()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg> 查看记录</button>
     </div>
   </div>
 
@@ -3221,13 +3221,13 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="manage-panel" id="suggestionPanel">
     <div class="card panel-header" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);">
       <button class="back-btn" onclick="backFromSuggestionPanel()" style="color:#7CE8E0;">← 返回</button>
-      <span class="panel-title" style="color:#fff;">💡 功能建议</span>
+      <span class="panel-title" style="color:#fff;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg> 功能建议</span>
     </div>
     <div class="card" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-left:4px solid #B89248;">
       <div style="font-size:14px;line-height:1.8;color:rgba(255,255,255,.75);margin-bottom:10px;">你的每一条建议，所有用户都能看到；好建议会做成新功能</div>
       <div id="suggestionList" style="margin-top:6px;max-height:42vh;overflow-y:auto;"></div>
       <textarea id="suggestionText" placeholder="写下你的建议，例如：希望支持按日期导出更多格式…" style="width:100%;box-sizing:border-box;min-height:76px;padding:10px;border:1.5px solid rgba(124,232,224,.3);border-radius:8px;font-size:14px;resize:vertical;background:rgba(255,255,255,.07);color:#fff;margin-top:10px;"></textarea>
-      <button class="btn" style="margin-top:10px;width:100%;padding:12px;font-size:16px;background:linear-gradient(160deg,#F8E3A6,#C89B4E);color:#0B2E38;font-weight:700;border:none;border-radius:10px;" onclick="submitSuggestion()">📨 提交建议</button>
+      <button class="btn" style="margin-top:10px;width:100%;padding:12px;font-size:16px;background:linear-gradient(160deg,#F8E3A6,#C89B4E);color:#0B2E38;font-weight:700;border:none;border-radius:10px;" onclick="submitSuggestion()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg> 提交建议</button>
       <div id="suggestionTip" style="font-size:12px;color:rgba(255,255,255,.7);margin-top:8px;text-align:center;"></div>
     </div>
   </div>
@@ -3265,13 +3265,13 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="manage-panel" id="goodsManagePanel">
     <div class="card panel-header">
       <button class="back-btn" onclick="backFromGoodsPanel()">← 返回</button>
-      <span class="panel-title">📦 框名设置</span>
+      <span class="panel-title"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 8v8l-9 5-9-5V8l9-5 9 5z"/><line x1="3" y1="8" x2="12" y2="13"/><line x1="12" y1="13" x2="21" y2="8"/><line x1="12" y1="13" x2="12" y2="21"/></svg> 框名设置</span>
     </div>
     <div class="card">
       <div id="goodsListPanel"></div>
       <div style="display:flex;gap:8px;margin-top:8px;">
-        <button class="btn btn-outline" style="flex:1;" onclick="showAddGoodsModal()">➕ 新增框类型</button>
-        <button class="btn btn-outline" style="flex:1;color:var(--danger);" onclick="showDeleteGoodsModal()">🗑️ 删除框类型</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="showAddGoodsModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增框类型</button>
+        <button class="btn btn-outline" style="flex:1;color:var(--danger);" onclick="showDeleteGoodsModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> 删除框类型</button>
       </div>
     </div>
   </div>
@@ -3280,22 +3280,22 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="manage-panel" id="backupPanel">
     <div class="card panel-header">
       <button class="back-btn" onclick="backFromBackupPanel()">← 返回</button>
-      <span class="panel-title">💾 数据备份与恢复</span>
+      <span class="panel-title"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> 数据备份与恢复</span>
     </div>
     <div class="card">
       <div id="cloudBackupStatus"></div>
-      <button class="btn btn-primary" style="margin-bottom:6px;" onclick="backupToCloud(true)">☁️ 立即备份到云端</button>
-      <button class="btn btn-outline" style="margin-bottom:6px;" onclick="openVerifyModal()">📥 恢复云端数据</button>
+      <button class="btn btn-primary" style="margin-bottom:6px;" onclick="backupToCloud(true)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg> 立即备份到云端</button>
+      <button class="btn btn-outline" style="margin-bottom:6px;" onclick="openVerifyModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 14l5 5 5-5"/><path d="M12 4v15"/></svg> 恢复云端数据</button>
       <div class="backup-step">
-        <div class="step-title"><span class="step-num">1</span>📤 导出备份</div>
+        <div class="step-title"><span class="step-num">1</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 15V3"/></svg> 导出备份</div>
         <div class="step-detail">点击下方「导出备份」→ 保存到手机 → 可发送到微信「文件传输助手」留存</div>
       </div>
       <div class="backup-step">
-        <div class="step-title"><span class="step-num">2</span>📥 恢复/换手机</div>
+        <div class="step-title"><span class="step-num">2</span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 14l5 5 5-5"/><path d="M12 4v15"/></svg> 恢复/换手机</div>
         <div class="step-detail">点击下方「选择文件导入」→ 选中之前备份的 .json 文件 → 自动恢复</div>
       </div>
-      <button class="btn btn-primary" style="margin-bottom:6px;" onclick="exportData()">📤 导出备份</button>
-      <button class="btn btn-outline" onclick="document.getElementById('backupImportFile').click()">📥 选择文件导入</button>
+      <button class="btn btn-primary" style="margin-bottom:6px;" onclick="exportData()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 15V3"/></svg> 导出备份</button>
+      <button class="btn btn-outline" onclick="document.getElementById('backupImportFile').click()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 14l5 5 5-5"/><path d="M12 4v15"/></svg> 选择文件导入</button>
       <input type="file" id="backupImportFile" accept=".json" style="display:none" onchange="importData(event)">
     </div>
   </div>
@@ -3317,8 +3317,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     </div>
   </div>
   <div class="card" style="padding:10px;">
-    <button class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;border:none;border-radius:12px;" onclick="openDailyReport()">📋 生成日报</button>
-    <button class="btn btn-extra" style="width:100%;padding:11px;font-size:14px;margin-top:6px;border:none;border-radius:12px;" onclick="openExtraModal()">➕ 额外发收登记</button>
+    <button class="btn btn-primary" style="width:100%;padding:11px;font-size:14px;border:none;border-radius:12px;" onclick="openDailyReport()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg> 生成日报</button>
+    <button class="btn btn-extra" style="width:100%;padding:11px;font-size:14px;margin-top:6px;border:none;border-radius:12px;" onclick="openExtraModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 额外发收登记</button>
     <div id="dailyPhotoInfo" style="font-size:11px;color:var(--text-light);margin-top:6px;"></div>
   </div>
   <div id="historyList"></div>
@@ -3329,17 +3329,17 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助" style="position:absolute;right:14px;top:20px;z-index:5;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
   <div class="card manage-user-card" id="manageUserCard" style="padding:14px;"></div>
   <div class="card" style="padding:0;overflow:hidden;">
-    <button class="manage-item" onclick="openStorePanel()"><span class="mi-icon">🏪</span><span class="mi-title">店面管理<span class="mi-sub" id="manageStoreSub">店面 · 别称 · 到店提醒 · 定位</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openStorePanel()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9v11h18V9"/><path d="M3 9h18"/><path d="M9 20v-6h6v6"/></svg></span><span class="mi-title">店面管理<span class="mi-sub" id="manageStoreSub">店面 · 别称 · 到店提醒 · 定位</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openPermPage()" style="border:1.5px solid rgba(245,220,146,.45);border-radius:12px;background:rgba(245,220,146,.06);"><span class="mi-icon" style="background:rgba(245,220,146,.16);color:#F5DC92;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span class="mi-title">权限管理<span class="mi-sub" id="managePermSub">位置 · 通知 · 后台运行 · 提醒设置</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openModeSelect()"><span class="mi-icon" style="background:rgba(124,232,224,.16);color:#7CE8E0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span><span class="mi-title">模式选择<span class="mi-sub">标准模式 · 极简模式切换</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="openGoodsPanel()"><span class="mi-icon">📦</span><span class="mi-title">框名设置<span class="mi-sub" id="manageGoodsSub">筐类名称 · 顺序</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="openBackupPanel()"><span class="mi-icon">💾</span><span class="mi-title">备份与恢复<span class="mi-sub">云端同步 · 换机不丢</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="openSummaryPage()"><span class="mi-icon">📈</span><span class="mi-title">汇总<span class="mi-sub">统计报表</span><span class="vip-tag"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>VIP</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="openReconcilePage()"><span class="mi-icon">🔄</span><span class="mi-title">对账<span class="mi-sub">导出数据</span><span class="vip-tag"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>VIP</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="openSuggestionPanel()"><span class="mi-icon">💡</span><span class="mi-title">功能建议<span class="mi-sub">公共建议墙 · 好建议做成新功能</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openGoodsPanel()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v8l-9 5-9-5V8l9-5 9 5z"/><line x1="3" y1="8" x2="12" y2="13"/><line x1="12" y1="13" x2="21" y2="8"/><line x1="12" y1="13" x2="12" y2="21"/></svg></span><span class="mi-title">框名设置<span class="mi-sub" id="manageGoodsSub">筐类名称 · 顺序</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openBackupPanel()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></span><span class="mi-title">备份与恢复<span class="mi-sub">云端同步 · 换机不丢</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openSummaryPage()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/></svg></span><span class="mi-title">汇总<span class="mi-sub">统计报表</span><span class="vip-tag"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>VIP</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openReconcilePage()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></span><span class="mi-title">对账<span class="mi-sub">导出数据</span><span class="vip-tag"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>VIP</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="openSuggestionPanel()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg></span><span class="mi-title">功能建议<span class="mi-sub">公共建议墙 · 好建议做成新功能</span></span><span class="mi-arrow">›</span></button>
     <button class="manage-item" onclick="openInvitePage()"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg></span><span class="mi-title">邀请好友<span class="mi-sub">邀请得会员 · 海报/文案/转发</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="switchPage('settings')"><span class="mi-icon">❓</span><span class="mi-title">使用说明<span class="mi-sub">新手教程</span></span><span class="mi-arrow">›</span></button>
-    <button class="manage-item" onclick="installApp()"><span class="mi-icon" id="installBtnIcon">📱</span><span class="mi-title" id="installBtnLabel">添加到桌面<span class="mi-sub">安装 APP</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="switchPage('settings')"><span class="mi-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span class="mi-title">使用说明<span class="mi-sub">新手教程</span></span><span class="mi-arrow">›</span></button>
+    <button class="manage-item" onclick="installApp()"><span class="mi-icon" id="installBtnIcon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span><span class="mi-title" id="installBtnLabel">添加到桌面<span class="mi-sub">安装 APP</span></span><span class="mi-arrow">›</span></button>
   </div>
   <div class="footer" id="footerVer">物流筐收发管理系统 <span id="footerVerNum"></span></div>
 </div>
@@ -3611,7 +3611,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
         <input type="date" class="form-input" id="summaryEnd" style="flex:1;padding:8px;font-size:13px;" onchange="renderSummary()">
       </div>
       <div style="margin-top:10px;">
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text);">🏪 单店汇总（选店后只统计该店，选「全部店」看总数）</div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9v11h18V9"/><path d="M3 9h18"/><path d="M9 20v-6h6v6"/></svg> 单店汇总（选店后只统计该店，选「全部店」看总数）</div>
         <select class="form-select" id="summaryStore" style="width:100%;padding:8px;font-size:13px;" onchange="renderSummary()"><option value="">全部店</option></select>
       </div>
     </div>
@@ -3629,7 +3629,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <!-- ========== 对账页 ========== -->
 <div class="page" id="page-reconcile">
   <div class="card">
-    <div class="form-label" style="margin-bottom:10px;">📤 导出我的数据</div>
+    <div class="form-label" style="margin-bottom:10px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5-5 5 5"/><path d="M12 15V3"/></svg> 导出我的数据</div>
     <div class="form-group">
       <label class="form-label" style="font-size:13px;">导出日期范围</label>
       <div style="display:flex;gap:6px;align-items:center;">
@@ -3642,8 +3642,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:4px;">
-      <button class="btn btn-export" style="flex:1;" onclick="exportMyExcel()">📋 导出明细</button>
-      <button class="btn btn-export" style="flex:1;" onclick="exportSummaryExcel()">📊 导出汇总</button>
+      <button class="btn btn-export" style="flex:1;" onclick="exportMyExcel()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg> 导出明细</button>
+      <button class="btn btn-export" style="flex:1;" onclick="exportSummaryExcel()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/></svg> 导出汇总</button>
     </div>
   </div>
 </div>
@@ -3913,7 +3913,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div class="faq-a">打开过一次后，页面会缓存，<b>没网也能打开看数据</b>；但登录、语音、拍照识别需要联网。</div>
   </div>
   <div class="settings-faq">
-    <div class="faq-q"><span id="adminTapZone" onclick="adminTap()" style="cursor:default;user-select:none;">❓</span> 每天要录很多店怎么办？</div>
+    <div class="faq-q"><span id="adminTapZone" onclick="adminTap()" style="cursor:default;user-select:none;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> 每天要录很多店怎么办？</div>
     <div class="faq-a">发出页填完一家店会自动跳到下一家，一路填完不用选店；配合语音或拍照更快。</div>
   </div>
 </div>
@@ -4070,7 +4070,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="ms-foot-tip">切换后立即生效，数据互不影响，随时可切回</div>
 </div>
 
-<!-- ========== 每页专属帮助弹窗（header 右上角 ❓） ========== -->
+<!-- ========== 每页专属帮助弹窗（header 右上角 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>） ========== -->
 <div class="store-ocr-modal" id="pageHelpModal" onclick="closePageHelp()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
     <div class="ph-head">
@@ -4238,7 +4238,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <!-- 店面拍照识别弹窗 -->
 <div class="store-ocr-modal" id="storeOcrModal">
   <div class="store-ocr-content">
-    <div class="form-label" style="margin-bottom:8px;">📸 识别结果（可直接修改）</div>
+    <div class="form-label" style="margin-bottom:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><line x1="8" y1="6" x2="10" y2="3"/><line x1="16" y1="6" x2="14" y2="3"/></svg> 识别结果（可直接修改）</div>
     <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">识别到 <span id="storeOcrCount">0</span> 条，可编辑/删除/新增</div>
     <div id="storeOcrTable"></div>
     <div style="display:flex;gap:8px;margin-top:10px;">
@@ -4378,7 +4378,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
         <div class="bt-step-h">⑤ 线下备份（双保险）</div>
         <div class="bt-step-b">点「导出备份」→ 手机弹出"保存到文件" → 存好后发到微信「文件传输助手」。<br>以后换手机，也可以用「选择文件导入」把这文件恢复。</div>
       </div>
-      <div class="bt-warn">⚠️ 记住：千万别清浏览器缓存！清了数据就没了（不过有密码的话还能从云端恢复）。</div>
+      <div class="bt-warn">! 记住：千万别清浏览器缓存！清了数据就没了（不过有密码的话还能从云端恢复）。</div>
     </div>
   </div>
 </div>
@@ -4387,7 +4387,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <div class="store-ocr-modal" id="ocrResultModal" onclick="closeOcrResultModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:540px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-      <span class="ocr-title">📸 AI 识别结果 · 请核对</span>
+      <span class="ocr-title"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><line x1="8" y1="6" x2="10" y2="3"/><line x1="16" y1="6" x2="14" y2="3"/></svg> AI 识别结果 · 请核对</span>
       <button class="ocr-modal-close" onclick="closeOcrResultModal()">×</button>
     </div>
     <div class="ocr-sub" style="margin-bottom:10px;">
@@ -4399,11 +4399,11 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     </div>
     <div id="ocrEditFields"></div>
     <div class="ocr-warn-box">
-      ⚠️ 请核对好每行数据后再点「确认录入」
+      ! 请核对好每行数据后再点「确认录入」
     </div>
     <div style="display:flex;gap:8px;margin-top:10px;">
       <button class="btn btn-cancel-ocr" style="flex:1;" onclick="closeOcrResultModal()">取 消</button>
-      <button class="btn btn-confirm-ocr" style="flex:1;" onclick="confirmOcrResult()">✅ 确认录入</button>
+      <button class="btn btn-confirm-ocr" style="flex:1;" onclick="confirmOcrResult()">√ 确认录入</button>
     </div>
   </div>
 </div>
@@ -4614,7 +4614,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <!-- 发出页语音录音浮层（录音中：波形动画；识别中：转圈） -->
 <div class="emit-voice-overlay" id="emitVoiceOverlay" style="display:none;">
   <div class="ev-mic-wrap" id="evMicWrap">
-    <div class="emit-voice-mic" id="evMicIcon">🎤</div>
+    <div class="emit-voice-mic" id="evMicIcon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg></div>
   </div>
   <div class="ev-spinner-wrap" id="evSpinnerWrap" style="display:none;">
     <div class="ev-spinner"></div>
@@ -4708,7 +4708,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <div class="store-ocr-modal" id="typeMismatchModal">
   <div class="store-ocr-content" style="max-width:360px;" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:700;font-size:16px;color:var(--text);">⚠️ 单据类型不一致</span>
+      <span style="font-weight:700;font-size:16px;color:var(--text);">! 单据类型不一致</span>
       <button onclick="closeTypeMismatchModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
     </div>
     <div style="font-size:14px;line-height:1.9;color:var(--text);" id="typeMismatchDesc"></div>
@@ -4794,19 +4794,19 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <div class="store-ocr-modal ocr-form-modal" id="installModal" onclick="closeInstallModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span class="ocr-form-title" id="installModalTitle">📱 添加到桌面</span>
+      <span class="ocr-form-title" id="installModalTitle"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> 添加到桌面</span>
       <button class="ocr-modal-close" onclick="closeInstallModal()">×</button>
     </div>
     <!-- 微信内置浏览器：无法安装/加桌面，先引导用浏览器打开 -->
     <div id="installWechatTip" style="display:none;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.5);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12.5px;color:#F5A623;line-height:1.9;">
-      ⚠️ <b>微信里不能安装/添加到桌面</b>，需要先用浏览器打开：<br>
+      ! <b>微信里不能安装/添加到桌面</b>，需要先用浏览器打开：<br>
       ① 点右上角 <b>「⋯」</b><br>
       ② 点 <b>「在浏览器打开」</b>（选 Chrome / 自带浏览器）<br>
       ③ 打开后再点「管理 → 下载安卓版 / 添加到桌面」
     </div>
     <!-- 安卓浏览器：主推下载 APK -->
     <div id="installAndroidTip" style="display:none;">
-      <div style="text-align:center;font-size:40px;margin-bottom:8px;">📲</div>
+      <div style="text-align:center;font-size:40px;margin-bottom:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M12 8v6"/><path d="M9 11l3 3 3-3"/></svg></div>
       <div style="font-weight:700;font-size:15px;text-align:center;margin-bottom:4px;color:#FFFFFF;">推荐安装安卓版 App</div>
       <div style="font-size:12px;color:#CFECEF;text-align:center;margin-bottom:12px;">比网页版打开更快、可离线用、新版本自动更新</div>
       <div style="font-size:13px;line-height:1.9;color:#EAF9FB;background:rgba(255,255,255,.05);border:1px solid rgba(245,220,146,.2);border-radius:8px;padding:10px;margin-bottom:12px;">
@@ -4814,16 +4814,16 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
         ① 点下方 <b style="color:#F5DC92;">「立即下载」</b>，下载安装包<br>
         ② 下载完成后点安装<br>
         ③ 若提示「未知来源/允许安装」，点允许即可<br>
-        <span style="color:#CFECEF;font-size:12px;">💡 安装后桌面上会出现「物流筐」图标，直接点开就能用</span>
+        <span style="color:#CFECEF;font-size:12px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg> 安装后桌面上会出现「物流筐」图标，直接点开就能用</span>
       </div>
-      <a id="apkDownloadBtn" href="javascript:void(0)" onclick="downloadApk()" style="display:block;text-align:center;background:linear-gradient(160deg,#F8E3A6 0%,#E3BE68 55%,#C89B4E 100%);color:#0B2E38;font-weight:800;font-size:15px;padding:13px 0;border-radius:26px;text-decoration:none;box-shadow:0 6px 20px rgba(245,220,146,.4);">📲 立即下载（安卓版）</a>
+      <a id="apkDownloadBtn" href="javascript:void(0)" onclick="downloadApk()" style="display:block;text-align:center;background:linear-gradient(160deg,#F8E3A6 0%,#E3BE68 55%,#C89B4E 100%);color:#0B2E38;font-weight:800;font-size:15px;padding:13px 0;border-radius:26px;text-decoration:none;box-shadow:0 6px 20px rgba(245,220,146,.4);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M12 8v6"/><path d="M9 11l3 3 3-3"/></svg> 立即下载（安卓版）</a>
       <div style="text-align:center;margin-top:10px;font-size:12px;color:#CFECEF;">
         不想装？<a href="javascript:void(0)" onclick="showIosSteps()" style="color:#7CE8E0;text-decoration:underline;">点这里添加到桌面</a>
       </div>
     </div>
     <!-- 苹果浏览器：添加到主屏幕步骤 -->
     <div id="installIosTip" style="display:none;">
-      <div style="text-align:center;font-size:40px;margin-bottom:8px;">🍎</div>
+      <div style="text-align:center;font-size:40px;margin-bottom:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
       <div style="font-weight:700;font-size:15px;text-align:center;margin-bottom:4px;color:#FFFFFF;">添加到主屏幕</div>
       <div style="font-size:12px;color:#CFECEF;text-align:center;margin-bottom:12px;">苹果手机装不了安卓版，把网页加到桌面，就像 App 一样用</div>
       <div style="font-size:13px;line-height:1.9;color:#EAF9FB;">
@@ -4831,7 +4831,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
         <div><b style="color:#F5DC92;">②</b> 向下滑动，找到 <b>「添加到主屏幕」</b></div>
         <div><b style="color:#F5DC92;">③</b> 点 <b>「添加」</b> → 桌面出现「物流筐」图标，像 App 一样用</div>
         <div style="background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.5);border-radius:8px;padding:10px;margin-top:12px;font-size:12.5px;color:#F5A623;">
-          💡 安卓手机：浏览器菜单里点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b> 也可以。
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg> 安卓手机：浏览器菜单里点 <b>「添加到主屏幕」</b> 或 <b>「安装应用」</b> 也可以。
         </div>
       </div>
     </div>
@@ -4841,19 +4841,19 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <!-- 新用户欢迎引导弹窗（首次打开自动弹出） -->
 <div class="store-ocr-modal ocr-form-modal" id="welcomeModal">
   <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:360px;text-align:center;">
-    <div style="font-size:44px;margin-bottom:8px;">👋</div>
+    <div style="font-size:44px;margin-bottom:8px;"></div>
     <div class="ocr-form-title" style="font-size:18px;margin-bottom:6px;">欢迎使用 物流筐收发管理系统</div>
     <div class="ocr-form-sub" style="margin-bottom:14px;">帮你把每个筐的去向记得清清楚楚</div>
     <div style="font-size:13px;color:#EAF9FB;line-height:1.8;margin-bottom:16px;text-align:left;background:rgba(255,255,255,.05);border:1px solid rgba(245,220,146,.2);border-radius:10px;padding:10px;">
       <b style="color:#F5DC92;">第一次用，建议先做 3 件事：</b><br>
-      <span data-app-hide id="welcomeStep1">① 📱 把软件加到手机桌面（像App一样用）<br></span>
-      ② 🏪 设置你要记的店面<br>
-      ③ 🔑 设置账号密码（数据云端备份）<br>
+      <span data-app-hide id="welcomeStep1">① <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg> 把软件加到手机桌面（像App一样用）<br></span>
+      ② <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9v11h18V9"/><path d="M3 9h18"/><path d="M9 20v-6h6v6"/></svg> 设置你要记的店面<br>
+      ③ <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> 设置账号密码（数据云端备份）<br>
       <span style="color:#CFECEF;font-size:12px;">详细步骤看「使用说明」，每一步都写得清清楚楚</span>
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="btn btn-primary-form" style="flex:1;" onclick="closeWelcome(true)">📖 查看使用说明</button>
-      <button class="btn btn-cancel-form" style="flex:1;" onclick="closeWelcome(false)">🚀 开始使用</button>
+      <button class="btn btn-primary-form" style="flex:1;" onclick="closeWelcome(true)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> 查看使用说明</button>
+      <button class="btn btn-cancel-form" style="flex:1;" onclick="closeWelcome(false)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg> 开始使用</button>
     </div>
   </div>
 </div>
@@ -4948,13 +4948,13 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <div class="store-ocr-modal" id="photoPanelModal">
   <div class="store-ocr-content" onclick="event.stopPropagation()" style="max-width:420px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span style="font-weight:600;font-size:15px;">📷 上交筐照片</span>
+      <span style="font-weight:600;font-size:15px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><line x1="8" y1="6" x2="10" y2="3"/><line x1="16" y1="6" x2="14" y2="3"/></svg> 上交筐照片</span>
       <button onclick="closePhotoPanel()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-light);padding:0 4px;">×</button>
     </div>
     <div style="font-size:13px;color:var(--text);margin-bottom:10px;" id="photoPanelDate"></div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <button class="btn btn-primary" style="flex:1;" onclick="document.getElementById('photoUploadInput').click()">📷 拍/选照片</button>
-      <button class="btn btn-outline" style="flex:1;" onclick="saveDailyPhotos()">💾 保存</button>
+      <button class="btn btn-primary" style="flex:1;" onclick="document.getElementById('photoUploadInput').click()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><line x1="8" y1="6" x2="10" y2="3"/><line x1="16" y1="6" x2="14" y2="3"/></svg> 拍/选照片</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="saveDailyPhotos()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> 保存</button>
     </div>
     <input type="file" id="photoUploadInput" accept="image/*" capture="environment" style="display:none" onchange="handleDailyPhoto(event)">
     <div id="photoPanelList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
@@ -5061,15 +5061,15 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="store-ocr-content" style="max-width:360px;" onclick="event.stopPropagation()">
     <div style="text-align:center;margin-bottom:6px;">
       <div style="width:64px;height:64px;border-radius:50%;background:rgba(245,220,146,.15);border:2.5px solid #F5DC92;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
-        <span style="color:#F5DC92;font-size:30px;font-weight:800;">✓</span>
+        <span style="color:#F5DC92;font-size:30px;font-weight:800;"></span>
       </div>
       <div class="ocr-form-title" style="font-size:19px;">恢复完成</div>
       <div class="ocr-form-sub" style="margin-top:4px;">已从云端恢复到本地，以下内容已更新</div>
     </div>
     <div style="background:rgba(255,255,255,.05);border:1px solid rgba(245,220,146,.18);border-radius:12px;padding:12px 14px;font-size:13px;color:#EAF9FB;line-height:2;">
-      <div>🏪 店面：<b id="restoreStoreCount" style="color:#F5DC92;">0</b> 家</div>
-      <div>📦 筐类：<b id="restoreGoodsCount" style="color:#F5DC92;">0</b> 类</div>
-      <div>📋 记录：<b id="restoreRecordCount" style="color:#F5DC92;">0</b> 条</div>
+      <div><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9v11h18V9"/><path d="M3 9h18"/><path d="M9 20v-6h6v6"/></svg> 店面：<b id="restoreStoreCount" style="color:#F5DC92;">0</b> 家</div>
+      <div><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 8v8l-9 5-9-5V8l9-5 9 5z"/><line x1="3" y1="8" x2="12" y2="13"/><line x1="12" y1="13" x2="21" y2="8"/><line x1="12" y1="13" x2="12" y2="21"/></svg> 筐类：<b id="restoreGoodsCount" style="color:#F5DC92;">0</b> 类</div>
+      <div><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg> 记录：<b id="restoreRecordCount" style="color:#F5DC92;">0</b> 条</div>
       <div style="color:#CFECEF;font-size:12px;">备份时间：<span id="restoreBackupTime" style="color:#F5DC92;">-</span></div>
     </div>
     <button class="btn btn-primary-form" style="width:100%;margin-top:14px;" onclick="closeRestoreResult()">完 成</button>
@@ -5081,7 +5081,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="store-ocr-content" style="max-width:360px;max-height:80vh;display:flex;flex-direction:column;" onclick="event.stopPropagation()">
     <div style="text-align:center;margin-bottom:6px;">
       <div style="width:64px;height:64px;border-radius:50%;background:rgba(124,232,224,.15);border:2.5px solid #7CE8E0;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
-        <span style="color:#7CE8E0;font-size:30px;font-weight:800;">✓</span>
+        <span style="color:#7CE8E0;font-size:30px;font-weight:800;"></span>
       </div>
       <div class="ocr-form-title" style="font-size:19px;">备份成功</div>
       <div class="ocr-form-sub" style="margin-top:4px;">数据已安全上传至云端，可放心更换设备</div>
@@ -5946,15 +5946,15 @@ function toggleAccountMenu(e) {
   const menu = document.createElement('div');
   menu.id = 'accountMenu';
   menu.className = 'account-menu';
-  let html = `<div class="am-head">${phone && logged ? '👤 当前账号：' + maskPhone(phone) : '账号管理'}</div>`;
+  let html = `<div class="am-head">${phone && logged ? ' 当前账号：' + maskPhone(phone) : '账号管理'}</div>`;
   if (!logged) {
-    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()">🔐 登录账号</div>`;
-    html += `<div class="am-item" onclick="closeAccountMenu();openSetupModal()">🔑 设置账号密码</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()"> 登录账号</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openSetupModal()"> 设置账号密码</div>`;
   } else {
-    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()">🔄 切换用户</div>`;
-    html += `<div class="am-item" onclick="openChangePwdModal();closeAccountMenu()">✏️ 更改密码</div>`;
-    html += `<div class="am-item" onclick="logout();closeAccountMenu()">🚪 退出登录</div>`;
-    html += `<div class="am-item danger" onclick="openDeleteAccountModal();closeAccountMenu()">🗑️ 注销账号</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()"> 切换用户</div>`;
+    html += `<div class="am-item" onclick="openChangePwdModal();closeAccountMenu()"> 更改密码</div>`;
+    html += `<div class="am-item" onclick="logout();closeAccountMenu()"> 退出登录</div>`;
+    html += `<div class="am-item danger" onclick="openDeleteAccountModal();closeAccountMenu()"> 注销账号</div>`;
   }
   menu.innerHTML = html;
   menu.style.top = (rect.bottom + 6) + 'px';
@@ -5978,11 +5978,11 @@ function renderAccountStatus() {
     // 从未设置过：显示注册 + 登录入口
     el.innerHTML = `
       <div style="background:var(--amber-soft);border:1.5px solid var(--warning);border-radius:10px;padding:12px;">
-        <div style="font-weight:600;font-size:14px;color:var(--warning);margin-bottom:4px;">🔑 账号（未设置）</div>
+        <div style="font-weight:600;font-size:14px;color:var(--warning);margin-bottom:4px;"> 账号（未设置）</div>
         <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">设置密码后，换手机/清缓存输入手机号+密码即可恢复数据（当前使用设备自动备份）</div>
         <div style="display:flex;gap:8px;">
-          <button class="btn btn-primary" style="flex:1;padding:10px;" onclick="openSetupModal()">🔑 设置账号密码</button>
-          <button class="btn btn-outline" style="flex:1;padding:10px;" onclick="openLoginModal()">🔐 登录</button>
+          <button class="btn btn-primary" style="flex:1;padding:10px;" onclick="openSetupModal()"> 设置账号密码</button>
+          <button class="btn btn-outline" style="flex:1;padding:10px;" onclick="openLoginModal()"> 登录</button>
         </div>
       </div>`;
     return;
@@ -5991,14 +5991,14 @@ function renderAccountStatus() {
   // 退出登录/更改密码已整合到首页登录胶囊菜单，此处只保留核心操作
   el.innerHTML = `
     <div style="background:${logged ? 'var(--green-soft)' : 'var(--amber-soft)'};border:1.5px solid ${logged ? 'var(--success)' : 'var(--warning)'};border-radius:10px;padding:12px;">
-      <div style="font-weight:600;font-size:14px;color:${logged ? 'var(--success)' : 'var(--warning)'};margin-bottom:4px;">🔑 账号${logged ? '（已登录）' : '（未登录）'}</div>
-      <div style="font-size:13px;margin-bottom:8px;">📱 ${maskPhone(phone)}</div>
+      <div style="font-weight:600;font-size:14px;color:${logged ? 'var(--success)' : 'var(--warning)'};margin-bottom:4px;"> 账号${logged ? '（已登录）' : '（未登录）'}</div>
+      <div style="font-size:13px;margin-bottom:8px;"> ${maskPhone(phone)}</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;">
         ${logged
-          ? `<button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openVerifyModal()">📥 恢复数据</button>
-             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openForgotModal()">🔐 切换/登录</button>`
-          : `<button class="btn btn-primary" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openLoginModal()">🔐 登录</button>
-             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openForgotModal()">❓ 忘记密码</button>`}
+          ? `<button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openVerifyModal()"> 恢复数据</button>
+             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openForgotModal()"> 切换/登录</button>`
+          : `<button class="btn btn-primary" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openLoginModal()"> 登录</button>
+             <button class="btn btn-outline" style="flex:1;min-width:100px;padding:9px;font-size:13px;" onclick="openForgotModal()">? 忘记密码</button>`}
       </div>
       <div style="font-size:11px;color:var(--text-light);margin-top:8px;">更改密码 / 退出登录 / 注销账号，请到首页左上角账号菜单操作</div>
     </div>`;
@@ -6015,8 +6015,9 @@ function togglePwd(id) {
     if (el.type === 'password') { el.type = 'text'; btn.innerHTML = AUTH_EYE_OFF; }
     else { el.type = 'password'; btn.innerHTML = AUTH_EYE_OPEN; }
   } else {
-    // 旧弹窗 emoji 模式（保持兼容，待后续替换）
-    if (el.type === 'password') { el.type = 'text'; btn.textContent = '🙈'; } else { el.type = 'password'; btn.textContent = '👁'; }
+    // 旧弹窗模式：用 SVG 眼睛图标替代 emoji（P0-1）
+    if (el.type === 'password') { el.type = 'text'; btn.innerHTML = AUTH_EYE_OFF; }
+    else { el.type = 'password'; btn.innerHTML = AUTH_EYE_OPEN; }
   }
 }
 
@@ -6700,7 +6701,7 @@ async function doAdminReset() {
 }
 
 // 从云账号恢复（换手机时用）
-// 管理员隐藏入口：使用说明页 ❓ 连点5次 → 弹密码验证框
+// 管理员隐藏入口：使用说明页 ? 连点5次 → 弹密码验证框
 let adminTapCount = 0;
 let adminTapTimer = null;
 function adminTap() {
@@ -6778,7 +6779,7 @@ function loadSuggestions() {
         const t = s.time ? fmtSugTime(s.time) : '';
         return '<div style="padding:8px 10px;border:1px solid rgba(255,255,255,.12);border-radius:8px;margin-bottom:6px;background:rgba(255,255,255,.05);">' +
           '<div style="font-size:13px;color:#fff;line-height:1.6;word-break:break-all;">' + escapeHtml(s.text || '') + '</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:4px;">📱 ' + escapeHtml(s.phone || '') + (t ? ' · ' + t : '') + '</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,.55);margin-top:4px;"> ' + escapeHtml(s.phone || '') + (t ? ' · ' + t : '') + '</div>' +
           '</div>';
       }).join('');
     })
@@ -6811,7 +6812,7 @@ function submitSuggestion() {
     .then(data => {
       if (data && data.ok) {
         if (ta) ta.value = '';
-        if (tip) tip.textContent = '✅ 建议已提交，所有人都能看到';
+        if (tip) tip.textContent = '√ 建议已提交，所有人都能看到';
         loadSuggestions();
         showToast('建议已提交');
       } else {
@@ -6840,13 +6841,13 @@ function renderCloudBackupStatus() {
   const account = getCloudPhone() || '';
   el.innerHTML = `
     <div style="background:var(--blue-soft);border:1.5px solid var(--card-border);border-radius:10px;padding:12px;margin-bottom:12px;">
-      <div style="font-weight:600;font-size:14px;color:var(--primary);margin-bottom:6px;">☁️ 云备份状态</div>
+      <div style="font-weight:600;font-size:14px;color:var(--primary);margin-bottom:6px;"> 云备份状态</div>
       <div style="font-size:13px;line-height:1.8;color:var(--text);">
-        <div>🕐 上次备份：<b>${timeText}</b></div>
-        ${account ? `<div>🔗 云账号：<b>${account}</b></div>` : ''}
+        <div> 上次备份：<b>${timeText}</b></div>
+        ${account ? `<div> 云账号：<b>${account}</b></div>` : ''}
         <div style="font-size:11px;color:var(--text-light);margin-top:2px;">设备ID：${deviceId.slice(0,14)}…</div>
       </div>
-      <div style="font-size:11px;color:var(--success);margin-top:6px;">✓ 保存数据后自动备份到云端，清缓存/换手机可恢复</div>
+      <div style="font-size:11px;color:var(--success);margin-top:6px;"> 保存数据后自动备份到云端，清缓存/换手机可恢复</div>
     </div>`;
 }
 
@@ -6932,7 +6933,7 @@ let __toastShownAt = 0;
 function showToast(msg) {
   const t = document.getElementById('toast');
   // 清理 emoji 前缀（P0：emoji 不作为功能图标；语义完整保留）
-  msg = String(msg || '').replace(/^\s*[✅❌⚠️🙏🎉💾📋🔄🔁⏳⚙️❓🎁🔒📡📝👑🔍🗑️✏️📥📤💡🚀🔔🏆⭐🔥💬]+\s*/g, '');
+  msg = String(msg || '').replace(/^\s*[√!⏳?⭐]+\s*/g, '');
   t.textContent = msg;
   t.classList.add('show');
   __toastShownAt = Date.now();
@@ -7007,7 +7008,7 @@ function hideLoading() {
   if (ov) ov.classList.remove('show');
   ocrCancelled = false;
 }
-// 更新加载步骤：如 updateLoadingStep('🔍 定位表格…', 40)
+// 更新加载步骤：如 updateLoadingStep(' 定位表格…', 40)
 function updateLoadingStep(text, pct) {
   const step = document.getElementById('loadingStep');
   if (step) step.textContent = text || '';
@@ -7047,8 +7048,8 @@ function renderStoreChips() {
   if (!view || view.length === 0) {
     container.innerHTML = `
       <div style="background:var(--amber-soft);border:1.5px solid var(--warning);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--warning);">
-        🏪 还没有店面，先去添加吧：<br>
-        回首页 → 点「🏪 店面管理」→「➕ 新增店面」<br>
+         还没有店面，先去添加吧：<br>
+        回首页 → 点「 店面管理」→「 新增店面」<br>
         <span style="font-size:12px;">（或拍照路单批量导入，会自动带上编号别名）</span>
       </div>`;
     // 同步隐藏 select
@@ -7209,9 +7210,9 @@ function renderRecoverStoreOrder() {
     const store = cfg.find(s => s.name === storeName);
     const num = storeNumberLabel(store);
     return `<div style="display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid var(--border);" draggable="true" ondragstart="recoverDragStart(event, ${i})" ondragover="event.preventDefault()" ondrop="recoverDrop(event, ${i})">
-      <span style="cursor:grab;color:var(--text-light);font-size:18px;flex:0 0 auto;">☰</span>
+      <span style="cursor:grab;color:var(--text-light);font-size:18px;flex:0 0 auto;"></span>
       <span style="flex:1;min-width:0;font-size:15px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(storeName)}</span>
-      <span style="flex:0 0 auto;font-size:11px;color:#fff;background:var(--primary);padding:3px 10px;border-radius:12px;line-height:1.4;white-space:nowrap;">🏪 ${num ? escapeHtml(num) : '无编号'}</span>
+      <span style="flex:0 0 auto;font-size:11px;color:#fff;background:var(--primary);padding:3px 10px;border-radius:12px;line-height:1.4;white-space:nowrap;"> ${num ? escapeHtml(num) : '无编号'}</span>
       <button style="padding:2px 8px;font-size:12px;width:auto;flex:0 0 auto;border:1px solid var(--border);background:var(--card-bg);color:var(--text);border-radius:6px;cursor:pointer;" onclick="recoverMoveOrder(${i}, -1)">▲</button>
       <button style="padding:2px 8px;font-size:12px;width:auto;flex:0 0 auto;border:1px solid var(--border);background:var(--card-bg);color:var(--text);border-radius:6px;cursor:pointer;" onclick="recoverMoveOrder(${i}, 1)">▼</button>
     </div>`;
@@ -7662,7 +7663,7 @@ function showEmitVoiceOverlay(mode) {
     if (mic) mic.style.display = 'none';
     if (spin) spin.style.display = '';
     if (bars) bars.style.display = 'none';
-    if (txt) txt.textContent = '🤖 AI 正在识别语音…';
+    if (txt) txt.textContent = 'AI AI 正在识别语音…';
     if (stopBtn) stopBtn.style.display = 'none';
   }
   ov.style.display = 'flex';
@@ -7932,8 +7933,8 @@ function renderEmitVoiceConfirm(nums) {
   const colTag = document.createElement('div');
   colTag.style.cssText = 'font-size:12px;color:#F5DC92;background:rgba(245,220,146,.10);border:1px solid rgba(245,220,146,.35);border-radius:8px;padding:8px 10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;';
   const srcLabel = emitVoiceSource === 'voice'
-    ? '🎤 语音识别'
-    : '📌 AI 取的列：<b>' + escapeHtml(emitCurrentCol || '?') + '</b>';
+    ? ' 语音识别'
+    : ' AI 取的列：<b>' + escapeHtml(emitCurrentCol || '?') + '</b>';
   colTag.innerHTML = '<span>' + srcLabel + '</span><span style="color:#9FD0D6;font-size:11px;">数字可点开直接改</span>';
   container.appendChild(colTag);
   // 拍照识别：按识别行渲染（图片里识别几行就显示几行：编号+店名+物流箱数；不含图片外的门店）
@@ -8297,7 +8298,7 @@ function matchStoreIdxByNameOrAlias(name, code, cfgAll) {
 }
 
 async function emitDoOcr(imageDataUrl) {
-  showLoading('🤖 AI 识别路单中…');
+  showLoading('AI AI 识别路单中…');
   try {
     const compressed = await compressImage(imageDataUrl, 1600);
     // 全自动表格区域裁剪（检测失败自动回退原图，用户无感知）
@@ -8603,8 +8604,8 @@ try {
             const inner = wm.querySelector('div[style*="text-align:left"]');
             if (inner) inner.innerHTML = inner.innerHTML
               .replace('建议先做 3 件事', '建议先做 2 件事')
-              .replace('② 🏪', '① 🏪')
-              .replace('③ 🔑', '② 🔑');
+              .replace('② 店面', '① 店面')
+              .replace('③ 账号', '② 账号');
           }
         }
       } catch (e) {}
@@ -8625,9 +8626,9 @@ function showInstallTip(which) {
   if (ios) ios.style.display = (which === 'ios') ? 'block' : 'none';
   const title = document.getElementById('installModalTitle');
   if (title) {
-    if (which === 'android') title.textContent = '📲 下载安卓版';
-    else if (which === 'ios') title.textContent = '🍎 添加到主屏幕';
-    else title.textContent = '⚠️ 请用浏览器打开';
+    if (which === 'android') title.textContent = '下载安卓版';
+    else if (which === 'ios') title.textContent = '添加到主屏幕';
+    else title.textContent = '请用浏览器打开';
   }
 }
 function installApp() {
@@ -8668,16 +8669,16 @@ function closeInstallModal() {
   const icn = document.getElementById('installBtnIcon');
   if (IS_ANDROID) {
     if (lbl) lbl.textContent = '下载安卓版';
-    if (icn) icn.textContent = '📲';
+    if (icn) icn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M12 8v6"/><path d="M9 11l3 3 3-3"/></svg>';
   } else if (IS_IOS) {
     if (lbl) lbl.textContent = '添加到桌面';
-    if (icn) icn.textContent = '🍎';
+    if (icn) icn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M12 8v6"/><path d="M9 11l3 3 3-3"/></svg>';
   }
   // 欢迎弹窗第①步：安卓浏览器 → "下载安卓版"；苹果 → "加到桌面"
   const ws1 = document.getElementById('welcomeStep1');
   if (ws1) {
-    if (IS_ANDROID) ws1.innerHTML = '① <b>📲 下载安卓版 App</b>（点「管理 → 下载安卓版」，更快更省心）<br>';
-    else ws1.innerHTML = '① <b>🍎 把软件加到手机桌面</b>（点「管理 → 添加到桌面」，像App一样用）<br>';
+    if (IS_ANDROID) ws1.innerHTML = '① <b>下载安卓版 App</b>（点「管理 → 下载安卓版」，更快更省心）<br>';
+    else ws1.innerHTML = '① <b>把软件加到手机桌面</b>（点「管理 → 添加到桌面」，像App一样用）<br>';
   }
 })();
 
@@ -8712,7 +8713,7 @@ function showBackupResult(stores, goodsCount, recordCount) {
     const sorted = stores.slice().sort((a, b) => (a.sort === undefined ? 0 : a.sort) - (b.sort === undefined ? 0 : b.sort));
     listEl.innerHTML = sorted.map((s, i) => {
       const alias = (Array.isArray(s.aliases) && s.aliases.length) ? ' · <span style="color:#F5DC92;">' + s.aliases.join('、') + '</span>' : '';
-      return '<div style="color:#EAF9FB;">🔸 <b style="color:#FFFFFF;">' + (i + 1) + '.</b> ' + s.name + alias + '</div>';
+      return '<div style="color:#EAF9FB;">· <b style="color:#FFFFFF;">' + (i + 1) + '.</b> ' + s.name + alias + '</div>';
     }).join('') || '<div style="color:rgba(255,255,255,.7);">未备份店面</div>';
   }
   showModal('backupResultModal');
@@ -8889,7 +8890,7 @@ function saveStorePanelChanges() {
   saveStoreConfig(cfg);
   renderStorePanelUI();
   initAllStores();
-  showToast(changed > 0 ? `✅ 已保存 ${changed} 处修改` : '已保存');
+  showToast(changed > 0 ? `√ 已保存 ${changed} 处修改` : '已保存');
 }
 function addStoreAlias(idx) {
   const cfg = loadStoreConfig();
@@ -9634,7 +9635,7 @@ if (typeof window.__handleNativeBack !== 'function') {
   window.__handleNativeBack = __handleNativeBack;
 }
 
-// ======== 每页专属帮助（header 右上角 ❓） ========
+// ======== 每页专属帮助（header 右上角 ?） ========
 function openPageHelp(e) {
   if (e) e.stopPropagation();
   // 判断当前显示的页面
@@ -10117,7 +10118,7 @@ function renderTodayOverview() {
   const todayRecords = data.filter(r => r.date === today);
   const container = document.getElementById('todayStoreDetailCard');
   if (todayRecords.length === 0) {
-    container.innerHTML = '<div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">📋 今日各店明细</div><div class="empty">今日暂无记录</div>';
+    container.innerHTML = '<div style="font-size:12px;color:var(--text-light);margin-bottom:4px;"> 今日各店明细</div><div class="empty">今日暂无记录</div>';
     return;
   }
   // 今日各店明细表（每店一行，各筐发出/回收）
@@ -10134,7 +10135,7 @@ function renderTodayOverview() {
       storeMap[r.storeIdx].rows[r.goodsIdx].out += r.qtyOut || 0;
     }
   });
-  let html = '<div style="font-size:12px;color:var(--text-light);margin-bottom:4px;">📋 今日各店明细</div>';
+  let html = '<div style="font-size:12px;color:var(--text-light);margin-bottom:4px;"> 今日各店明细</div>';
   if (storeKeys.length > 0) {
     html += '<div style="overflow-x:auto;"><table class="summary-table" style="min-width:100%;"><thead><tr><th style="text-align:left;">店面</th>';
     names.forEach((n, i) => { html += `<th>${n}<br><span style="font-weight:400;font-size:10px;">发/回</span></th>`; });
@@ -10189,7 +10190,7 @@ function renderTodayStatus() {
 
   let html = '';
   html += `<div class="today-status-head">
-    <div class="today-status-title">📊 今日状态</div>
+    <div class="today-status-title"> 今日状态</div>
     <div class="today-status-date">${today}</div>
   </div>`;
   // 今日发出：按筐分列（5种筐各显示发出数+回收数，无数据为0）
@@ -10212,7 +10213,7 @@ function renderTodayStatus() {
     html += `<div class="today-store-chips">`;
     stores.forEach(s => {
       const done = doneSet.has(s._idx);
-      html += `<span class="today-store-chip ${done ? 'done' : 'pending'}">${done ? '✓ ' : '○ '}${escapeHtml(s.s.name)}</span>`;
+      html += `<span class="today-store-chip ${done ? 'done' : 'pending'}">${done ? ' ' : '○ '}${escapeHtml(s.s.name)}</span>`;
     });
     html += `</div>`;
   }
@@ -10221,7 +10222,7 @@ function renderTodayStatus() {
   if (pendingStores.length > 0) {
     html += `<div style="font-size:11px;color:var(--warning);margin-top:8px;">⏳ 还有 ${pendingStores.length} 家店未录入：${pendingStores.map(s=>escapeHtml(s.s.name)).join('、')}</div>`;
   } else if (todayRecords.length > 0) {
-    html += `<div style="font-size:11px;color:var(--success);margin-top:8px;">🎉 今日所有店面均已录入！</div>`;
+    html += `<div style="font-size:11px;color:var(--success);margin-top:8px;"> 今日所有店面均已录入！</div>`;
   } else {
     html += `<div style="font-size:11px;color:var(--text-light);margin-top:8px;">今日还没有记录，点击上方「发出/回收」开始录入</div>`;
   }
@@ -10340,13 +10341,13 @@ async function doOCR(imageDataUrl, file) {
 
     // 1.5 并行启动腾讯混元视觉大模型识别（AI 主通道，理解表格结构）
     // 提速优化：先按固定格式模板裁剪表格区域（减少 token 30%+），裁剪失败回退原图
-    updateLoadingStep('🤖 AI 视觉识别启动…', 15);
+    updateLoadingStep('AI AI 视觉识别启动…', 15);
     const hunyuanImg = await cropImageToTable(compressedBase64).catch(function() { return compressedBase64; });
     const hunyuanB64 = String(hunyuanImg).replace(/^data:image\/\w+;base64,/, '');
     const hunyuanPromise = callHunyuanVision(hunyuanB64).catch(() => null);
 
     // 2. 并行调用后端：表格识别（结构化）+ 通用高精度（兜底/交叉验证）
-    updateLoadingStep('🔍 正在定位表格…', 25);
+    updateLoadingStep(' 正在定位表格…', 25);
     let ocrData = null;
     let usedTable = false;
     let generalWords = null;
@@ -10356,7 +10357,7 @@ async function doOCR(imageDataUrl, file) {
         callBaiduOcr(imgBase64, 'accurate_basic')
       ]);
       checkOcrCancel();
-      updateLoadingStep('🔍 正在识别文字…', 55);
+      updateLoadingStep(' 正在识别文字…', 55);
       if (genData.words_result) generalWords = genData.words_result.map(x => x.words);
       // 表格识别成功 → 用表格结构化结果
       if (tblData.tables_result && tblData.tables_result.length > 0) {
@@ -10384,7 +10385,7 @@ async function doOCR(imageDataUrl, file) {
       hcData = await hunyuanPromise;
       if (hcData && hcData.ok && hcData.text) {
         hunyuanRows = parseHunyuanRows(hcData.text);
-        if (hunyuanRows) updateLoadingStep('🤖 AI 识别完成，正在整理…', 70);
+        if (hunyuanRows) updateLoadingStep('AI AI 识别完成，正在整理…', 70);
       }
     } catch(e) {}
     // 4.6 保险：裁剪可能漏底部行（店多时），识别行数 < 店面配置数 → 用原图重试一次
@@ -10392,7 +10393,7 @@ async function doOCR(imageDataUrl, file) {
       try {
         const storeCfgCount = loadStoreConfig().length;
         if (storeCfgCount > 0 && hunyuanRows.length < storeCfgCount) {
-          updateLoadingStep('🤖 店数较多，用全图复核…', 68);
+          updateLoadingStep('AI 店数较多，用全图复核…', 68);
           const retryData = await callHunyuanVision(imgBase64);
           if (retryData && retryData.ok && retryData.text) {
             const retryRows = parseHunyuanRows(retryData.text);
@@ -10405,7 +10406,7 @@ async function doOCR(imageDataUrl, file) {
     }
     if (!hunyuanRows) {
       // 混元失败/超时 → 标记需要回退，不报错（老流程兜底）
-      updateLoadingStep('🤖 AI 识别不可用，走双引擎兜底…', 45);
+      updateLoadingStep('AI AI 识别不可用，走双引擎兜底…', 45);
     }
     checkOcrCancel();
 
@@ -10415,7 +10416,7 @@ async function doOCR(imageDataUrl, file) {
       const blob = (ocrData.words_result || []).map(x => x.words).join(' ');
       if (/(鲜食|手写|顶汇|当日出框)/.test(blob)) {
         try {
-          updateLoadingStep('✍️ 检测到手写单，增强识别…', 70);
+          updateLoadingStep(' 检测到手写单，增强识别…', 70);
           const hwData = await callBaiduOcr(imgBase64, 'handwriting');
           if (hwData.words_result) handwritingWords = hwData.words_result.map(x => x.words);
         } catch(e) {}
@@ -10429,7 +10430,7 @@ async function doOCR(imageDataUrl, file) {
     // 5.5 并行调用腾讯云 OCR（交叉验证：两引擎结果对比）
     let tcloudWords = null;
     try {
-      updateLoadingStep('🔄 双引擎交叉验证…', 80);
+      updateLoadingStep(' 双引擎交叉验证…', 80);
       const tcResp = await fetch(API_BASE + '/tcloud', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -11634,7 +11635,7 @@ function renderDailyPhotoList() {
   const all = existing.concat(pendingDailyPhotos);
   const box = document.getElementById('photoPanelList');
   if (all.length === 0) {
-    box.innerHTML = '<div style="font-size:12px;color:var(--text-light);">还没有照片，点「📷 拍/选照片」添加</div>';
+    box.innerHTML = '<div style="font-size:12px;color:var(--text-light);">还没有照片，点「 拍/选照片」添加</div>';
     return;
   }
   box.innerHTML = all.map((p, i) => {
@@ -11672,7 +11673,7 @@ function updateDailyPhotoInfo() {
   const today = todayStr();
   const n = loadDailyPhotos(today).length;
   const el = document.getElementById('dailyPhotoInfo');
-  if (el) el.textContent = n > 0 ? `📷 今天已存 ${n} 张上交筐照片` : '';
+  if (el) el.textContent = n > 0 ? ` 今天已存 ${n} 张上交筐照片` : '';
 }
 
 function renderHistory() {
@@ -11713,8 +11714,8 @@ function renderHistory() {
     html += `<div class="card" style="padding:10px;">`;
     html += `<div style="font-size:14px;font-weight:700;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px;">${date}</div>`;
     grouped[date].forEach(r => {
-      const sourceIcon = r.source === 'ocr' ? '📸' : (r.source === 'voice' ? '🎤' : '✍️');
-      const storeTag = r.storeName ? `<span style="font-size:11px;color:var(--primary);margin-left:6px;">🏪${r.storeName}</span>` : '';
+      const sourceIcon = r.source === 'ocr' ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><line x1="8" y1="6" x2="10" y2="3"/><line x1="16" y1="6" x2="14" y2="3"/></svg>' : (r.source === 'voice' ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/></svg>' : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>');
+      const storeTag = r.storeName ? `<span style="font-size:11px;color:var(--primary);margin-left:6px;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:2px;"><path d="M3 9l1.5-5h15L21 9"/><path d="M3 9v11h18V9"/><path d="M3 9h18"/><path d="M9 20v-6h6v6"/></svg>${r.storeName}</span>` : '';
       html += `
         <div class="record-item" style="box-shadow:none;border:1px solid var(--card-border);margin-bottom:6px;">
           <div class="record-top">
@@ -11746,7 +11747,7 @@ function openEditRecord(id) {
   pendingEditRecordId = id;
   const storeName = r.storeName || '未知店';
   document.getElementById('editRecordInfo').innerHTML =
-    `📅 ${r.date} · 🏪 ${storeName} · ${r.goodsName || ''}`;
+    ` ${r.date} ·  ${storeName} · ${r.goodsName || ''}`;
   document.getElementById('editQtyIn').value = r.qtyIn || 0;
   document.getElementById('editQtyOut').value = r.qtyOut || 0;
   showModal('editRecordModal');
@@ -11864,7 +11865,7 @@ function renderSummary() {
     }
   });
   let html = '';
-  if (storeName) html += '<div style="font-size:16px;font-weight:700;color:var(--primary);padding-bottom:8px;border-bottom:2px solid var(--primary);margin-bottom:10px;">🏪 ' + escapeHtml(storeName) + ' 汇总</div>';
+  if (storeName) html += '<div style="font-size:16px;font-weight:700;color:var(--primary);padding-bottom:8px;border-bottom:2px solid var(--primary);margin-bottom:10px;"> ' + escapeHtml(storeName) + ' 汇总</div>';
   html += `    <thead><tr>
       <th>筐类型</th><th>发出</th><th>回收</th><th>差异</th>
     </tr></thead><tbody>`;
@@ -12104,16 +12105,16 @@ function toggleManageAccountMenu(e) {
   const menu = document.createElement('div');
   menu.id = 'accountMenu';
   menu.className = 'account-menu';
-  let html = `<div class="am-head">${phone && logged ? '👤 当前账号：' + maskPhone(phone) : '账号管理'}</div>`;
+  let html = `<div class="am-head">${phone && logged ? ' 当前账号：' + maskPhone(phone) : '账号管理'}</div>`;
   if (!logged) {
-    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()">🔐 登录账号</div>`;
-    html += `<div class="am-item" onclick="closeAccountMenu();openSetupModal()">🔑 设置账号密码</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()"> 登录账号</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openSetupModal()"> 设置账号密码</div>`;
   } else {
-    html += `<div class="am-item" onclick="openAvatarModal();closeAccountMenu()">🖼️ 设置头像</div>`;
-    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()">🔄 切换用户</div>`;
-    html += `<div class="am-item" onclick="openChangePwdModal();closeAccountMenu()">✏️ 更改密码</div>`;
-    html += `<div class="am-item" onclick="logout();closeAccountMenu()">🚪 退出登录</div>`;
-    html += `<div class="am-item danger" onclick="openDeleteAccountModal();closeAccountMenu()">🗑️ 注销账号</div>`;
+    html += `<div class="am-item" onclick="openAvatarModal();closeAccountMenu()"> 设置头像</div>`;
+    html += `<div class="am-item" onclick="closeAccountMenu();openLoginModal()"> 切换用户</div>`;
+    html += `<div class="am-item" onclick="openChangePwdModal();closeAccountMenu()"> 更改密码</div>`;
+    html += `<div class="am-item" onclick="logout();closeAccountMenu()"> 退出登录</div>`;
+    html += `<div class="am-item danger" onclick="openDeleteAccountModal();closeAccountMenu()"> 注销账号</div>`;
   }
   menu.innerHTML = html;
   const rect = e.currentTarget.getBoundingClientRect();
@@ -12193,7 +12194,7 @@ function initAvatarCrop(natImg) {
   document.getElementById('avatarCropHint').textContent = '拖动调整位置，滑块缩放，点「保存」完成';
   const saveBtn = document.getElementById('avatarSaveBtn');
   saveBtn.disabled = false;
-  saveBtn.textContent = '💾 保存';
+  saveBtn.textContent = ' 保存';
   bindAvatarDrag();
 }
 function applyAvatarTransform() {
@@ -12281,7 +12282,7 @@ function renderStoreConfigUI() {
       </div>
     </div>`;
   });
-  html += `<button class="btn btn-outline" style="margin-top:4px;" onclick="addStore()">➕ 新增店面</button>`;
+  html += `<button class="btn btn-outline" style="margin-top:4px;" onclick="addStore()"> 新增店面</button>`;
   container.innerHTML = html;
 }
 
@@ -12459,7 +12460,7 @@ function renderStoreOcrTable() {
       <button class="del-btn" onclick="removeStoreOcrRow(${i})" style="font-size:18px;color:var(--danger);">×</button>
     </div>`;
   });
-  html += `<button class="btn btn-outline" style="margin-top:4px;font-size:12px;padding:7px;" onclick="addStoreOcrRow()">➕ 新增一行</button>`;
+  html += `<button class="btn btn-outline" style="margin-top:4px;font-size:12px;padding:7px;" onclick="addStoreOcrRow()"> 新增一行</button>`;
   container.innerHTML = html;
   container.querySelectorAll('input').forEach(inp => {
     inp.addEventListener('input', e => {
@@ -12629,7 +12630,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.5'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.6'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -14547,12 +14548,12 @@ function permBannerHtml() {
 <div class="store-ocr-modal" id="extraModal" onclick="closeExtraModal()">
   <div class="store-ocr-content" onclick="event.stopPropagation()">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <span class="extra-title">➕ 额外发收登记</span>
+      <span class="extra-title"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 额外发收登记</span>
       <button class="extra-modal-close" onclick="closeExtraModal()">×</button>
     </div>
     <div class="extra-sub" style="margin-bottom:12px;">针对所有门店的额外发出/回收，填对应筐的数量后点保存</div>
     <div class="goods-input-list" id="extraGoodsList" style="margin-bottom:12px;"></div>
-    <button class="btn-save-extra" onclick="saveExtraRecord()">💾 保存登记</button>
+    <button class="btn-save-extra" onclick="saveExtraRecord()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> 保存登记</button>
     <button class="btn-cancel-extra" onclick="closeExtraModal()">取消</button>
   </div>
 </div>
@@ -14570,67 +14571,67 @@ function permBannerHtml() {
 // 优点：一处代码覆盖全文件 240+ 处 emoji，不逐处改，符合"少即是多"。
 // 说明：UGC 例外（用户输入内容）不替换；这里全是 UI 文案，无用户输入。
 const EMOJI_SVG = {
-  '❓': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>',
-  '🏪': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/><path d="M3 9h18"/></svg>',
-  '🔑': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
-  '📋': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>',
-  '💡': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/></svg>',
-  '💾': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>',
-  '⚠️': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
-  '🤖': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4"/><circle cx="12" cy="3" r="1.5"/><path d="M9 13h.01"/><path d="M15 13h.01"/><path d="M9 17h6"/></svg>',
-  '✅': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>',
-  '📸': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
-  '➕': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>',
-  '📦': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
-  '📅': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>',
-  '✍️': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
-  '📤': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 8l5-5 5 5"/><path d="M12 3v12"/></svg>',
-  '📷': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
-  '🎤': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>',
-  '📥': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>',
-  '🔄': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/></svg>',
-  '📱': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>',
-  '📲': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><path d="M18 2l4 4-9 9-4 1 1-4z"/></svg>',
-  '🔐': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><path d="M12 15v3"/></svg>',
-  '✏️': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>',
-  '🗑️': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>',
-  '🍎': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>',
-  '✓': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
-  '🔍': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
-  '🖼️': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
-  '📊': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15v3"/><path d="M12 11v7"/><path d="M17 7v11"/></svg>',
-  '👤': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
-  '📡': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.86a10 10 0 0 1 14 0"/><path d="M8.5 16.43a5 5 0 0 1 7 0"/><circle cx="12" cy="20" r="1.5"/></svg>',
-  '🔒': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-  '☰': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>',
-  '☁️': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>',
-  '🎁': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>',
-  '🚀': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>',
-  '🚪': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561z"/></svg>',
-  '🎉': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.12.12-8.55 8.55a1.5 1.5 0 0 0 0 2.12l4.53 4.53a1.5 1.5 0 0 0 2.12 0l8.55-8.55.12-.12a5.4 5.4 0 0 0 0-7.65z"/><path d="M8.5 15.5l7-7"/><path d="M2 22s1.5-1.5 4-1.5 4 1.5 4 1.5"/></svg>',
-  '👑': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 16v4h14v-4"/></svg>',
-  '📨': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
-  '📈': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>',
-  '👋': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11L4.5 9.5a2 2 0 0 1 3-3L9 8"/><path d="M9 5.5a2 2 0 0 1 3-3L13.5 4"/><path d="M13 8l1.5-1.5a2 2 0 0 1 3 3L16 11"/><path d="M16 8.5a2 2 0 0 1 3 3L17.5 13"/><path d="M18 12l.5 5.5a2 2 0 0 1-4 .5L14 14"/><path d="M14 16l-.5 5a2 2 0 0 1-4-.5L9 15"/></svg>',
-  '📖': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
-  '🙈': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8s-4-3-10-3-10 3-10 3"/><path d="M12 11v3"/><circle cx="12" cy="16" r="1.5"/><path d="M7 10.5 5 8"/><path d="M17 10.5 19 8"/></svg>',
-  '👁️': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>',
-  '🕐': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
-  '🔗': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
-  '❌': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg>',
-  '🙏': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V7a5 5 0 0 1 10 0v4"/><path d="M17 11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4v-1"/><path d="M3 14v-2"/><path d="M21 14v-2"/></svg>',
-  '🔁': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>',
-  '⚙️': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
-  '📝': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>',
-  '🔔': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
-  '🏆': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
-  '🔥': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
-  '💬': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
-  '📌': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5V4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v.5"/><path d="M12 6v14"/><path d="M8 22h8"/></svg>',
-  '🔸': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l10 10-10 10L2 12z"/></svg>',
-  '✕': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>'
+  '?': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/><path d="M3 9h18"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5.76.76 1.23 1.52 1.41 2.5"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>',
+  '!': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+  'AI': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4"/><circle cx="12" cy="3" r="1.5"/><path d="M9 13h.01"/><path d="M15 13h.01"/><path d="M9 17h6"/></svg>',
+  '√': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 8l5-5 5 5"/><path d="M12 3v12"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8"/><path d="M21 3v5h-5"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/><path d="M18 2l4 4-9 9-4 1 1-4z"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><path d="M12 15v3"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15v3"/><path d="M12 11v7"/><path d="M17 7v11"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.86a10 10 0 0 1 14 0"/><path d="M8.5 16.43a5 5 0 0 1 7 0"/><circle cx="12" cy="20" r="1.5"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 4h3a2 2 0 0 1 2 2v14"/><path d="M2 20h3"/><path d="M13 20h9"/><path d="M10 12v.01"/><path d="M13 4.562v16.157a1 1 0 0 1-1.242.97L5 20V5.562a2 2 0 0 1 1.515-1.94l4-1A2 2 0 0 1 13 4.561z"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.12.12-8.55 8.55a1.5 1.5 0 0 0 0 2.12l4.53 4.53a1.5 1.5 0 0 0 2.12 0l8.55-8.55.12-.12a5.4 5.4 0 0 0 0-7.65z"/><path d="M8.5 15.5l7-7"/><path d="M2 22s1.5-1.5 4-1.5 4 1.5 4 1.5"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 16v4h14v-4"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7l-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11L4.5 9.5a2 2 0 0 1 3-3L9 8"/><path d="M9 5.5a2 2 0 0 1 3-3L13.5 4"/><path d="M13 8l1.5-1.5a2 2 0 0 1 3 3L16 11"/><path d="M16 8.5a2 2 0 0 1 3 3L17.5 13"/><path d="M18 12l.5 5.5a2 2 0 0 1-4 .5L14 14"/><path d="M14 16l-.5 5a2 2 0 0 1-4-.5L9 15"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 8s-4-3-10-3-10 3-10 3"/><path d="M12 11v3"/><circle cx="12" cy="16" r="1.5"/><path d="M7 10.5 5 8"/><path d="M17 10.5 19 8"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6"/><path d="M9 9l6 6"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11V7a5 5 0 0 1 10 0v4"/><path d="M17 11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4v-1"/><path d="M3 14v-2"/><path d="M21 14v-2"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  '': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5V4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v.5"/><path d="M12 6v14"/><path d="M8 22h8"/></svg>',
+  '·': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l10 10-10 10L2 12z"/></svg>',
+  '×': '<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>'
 };
-// 特殊：带 emoji 的文本（如 "📤 导出备份"）整段替换为 svg + 文字（保持原结构）
+// 特殊：带 emoji 的文本（如 " 导出备份"）整段替换为 svg + 文字（保持原结构）
 function emojiToSvgString(text) {
   if (!text) return text;
   let out = '';
