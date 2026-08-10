@@ -2632,6 +2632,28 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 .inv-share-btn svg { width: 18px; height: 18px; stroke: #7A4E00; }
 .inv-rule { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(124,232,224,.08); border: 1px solid rgba(124,232,224,.35); font-size: 11px; color: #7CE8E0; line-height: 1.6; }
 .inv-rule b { color: #7CE8E0; }
+/* ===== 需求8：生成邀请海报按钮（居中）+ 海报弹窗 ===== */
+.inv-poster-btn { width: 86%; max-width: 320px; margin: 10px auto 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border: none; border-radius: 24px; padding: 13px 0; cursor: pointer; box-shadow: 0 6px 16px rgba(224,166,62,.35); }
+.inv-poster-btn svg { width: 18px; height: 18px; stroke: #7A4E00; }
+.inv-poster-tip { text-align: center; font-size: 10px; color: #7E97A1; margin-top: 7px; }
+.poster-modal { position: fixed; inset: 0; z-index: 9150; display: none; align-items: center; justify-content: center; background: rgba(4,24,32,.85); padding: 18px; }
+.poster-modal.show { display: flex; }
+.poster-box { width: min(360px, 92vw); background: #0A2430; border: 1.5px solid rgba(245,220,146,.6); border-radius: 20px; padding: 13px 13px 8px; box-shadow: 0 12px 40px rgba(0,0,0,.55); display: flex; flex-direction: column; max-height: 92vh; }
+.poster-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.poster-title { font-size: 13px; font-weight: 800; color: #F5DC92; }
+.poster-shuffle { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #7CE8E0; background: none; border: none; cursor: pointer; padding: 4px 8px; }
+.poster-shuffle svg { width: 14px; height: 14px; }
+.poster-img-wrap { flex: 1; overflow: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); -webkit-overflow-scrolling: touch; }
+.poster-img-wrap img { display: block; width: 100%; height: auto; }
+.poster-actions { display: flex; gap: 10px; margin-top: 12px; }
+.poster-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: 800; border: none; border-radius: 22px; padding: 12px 0; cursor: pointer; }
+.poster-btn svg { width: 16px; height: 16px; }
+.poster-btn-dl { color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); box-shadow: 0 6px 16px rgba(224,166,62,.35); }
+.poster-btn-dl svg { stroke: #7A4E00; }
+.poster-btn-sh { color: #7CE8E0; background: rgba(124,232,224,.1); border: 1px solid rgba(124,232,224,.45); }
+.poster-btn-sh svg { stroke: #7CE8E0; }
+.poster-close { text-align: center; margin-top: 6px; padding-bottom: 4px; }
+.poster-close button { font-size: 12px; color: #7E97A1; background: none; border: none; cursor: pointer; padding: 4px 16px; }
 .ntm-switch { position: relative; width: 44px; height: 25px; border-radius: 14px; background: rgba(255,255,255,.14); cursor: pointer; transition: .2s; flex-shrink: 0; }
 .ntm-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 19px; height: 19px; border-radius: 50%; background: #fff; transition: .2s; }
 .ntm-switch.on { background: linear-gradient(135deg,#8FA9FF,#5B84FF); }
@@ -3412,6 +3434,31 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   </div>
 </div>
 
+<!-- ========== 需求8：邀请海报弹窗（7 款随机，一次一张） ========== -->
+<div class="poster-modal" id="posterModal" onclick="closePosterModal()">
+  <div class="poster-box" onclick="event.stopPropagation()">
+    <div class="poster-head">
+      <div class="poster-title">拉新海报 · 随机一款</div>
+      <button class="poster-shuffle" onclick="shufflePoster()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+        换一张
+      </button>
+    </div>
+    <div class="poster-img-wrap"><img id="posterModalImg" alt="拉新海报"></div>
+    <div class="poster-actions">
+      <button class="poster-btn poster-btn-dl" onclick="downloadPosterNew()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        下载海报
+      </button>
+      <button class="poster-btn poster-btn-sh" onclick="sharePosterNew()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51l-6.82 3.98"/></svg>
+        转发
+      </button>
+    </div>
+    <div class="poster-close"><button onclick="closePosterModal()">关闭</button></div>
+  </div>
+</div>
+
 <!-- ========== #144 权限引导弹窗（首次/重看） ========== -->
 <div class="pg-modal" id="permGuideModal">
   <div class="pg-content" onclick="event.stopPropagation()">
@@ -3590,7 +3637,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <div class="inv-code-val" id="invCodeVal">--</div>
       <div class="inv-code-actions">
         <button class="inv-btn" onclick="copyInviteCode()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>复制邀请码</button>
-        <button class="inv-btn" onclick="copyInviteLink()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>复制邀请链接</button>
+        <button class="inv-btn" onclick="copyInviteLink()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>复制链接+文案</button>
       </div>
     </div>
 
@@ -3605,19 +3652,16 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <svg class="inv-rec-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
     </div>
 
-    <!-- 海报 -->
+    <!-- 需求8：生成邀请海报（7 款随机，一次一张） -->
     <div class="inv-sec"><span class="inv-sec-no">1</span>拉新海报</div>
-    <div class="inv-poster-wrap">
-      <canvas id="invPosterCanvas" width="750" height="1200" style="width:100%;height:auto;display:block;border-radius:14px;"></canvas>
-      <button class="inv-poster-save" onclick="downloadPoster()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>保存海报</button>
-    </div>
-
-    <!-- 邀请文案 -->
-    <div class="inv-sec"><span class="inv-sec-no">2</span>邀请文案 <span class="inv-sec-tip">点一下复制，多种风格任选</span></div>
-    <div class="inv-text-list" id="invTextList"></div>
+    <button class="inv-poster-btn" onclick="openPosterModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      生成邀请海报
+    </button>
+    <div class="inv-poster-tip">点一下随机生成一款海报（共 7 款），可下载或转发给好友</div>
 
     <!-- 一键转发 -->
-    <div class="inv-sec"><span class="inv-sec-no">3</span>一键转发</div>
+    <div class="inv-sec"><span class="inv-sec-no">2</span>一键转发</div>
     <button class="inv-share-btn" onclick="shareInvite()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98"/><path d="M15.41 6.51l-6.82 3.98"/></svg>
       分享到微信 / 朋友圈
@@ -12429,7 +12473,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.1.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -13278,18 +13322,7 @@ function renderInvitePage() {
   // 邀请码
   const codeEl = document.getElementById('invCodeVal');
   if (codeEl) codeEl.textContent = getInviteCode();
-  // 文案列表
-  const list = document.getElementById('invTextList');
-  if (list) {
-    list.innerHTML = INVITE_TEXTS.map((t, i) =>
-      '<div class="inv-text-item" onclick="copyInviteText(' + i + ')">' +
-        '<div class="it-name">' + t.name + '</div>' +
-        '<div class="it-body">' + t.body.replace('{code}', getInviteCode()) + '</div>' +
-      '</div>'
-    ).join('');
-  }
-  // 海报
-  genInvitePoster();
+  // 需求8：邀请文案列表已移除（改为一键复制链接随机附文案；海报改为按钮+弹窗随机 7 款）
 }
 function copyInviteCode() {
   const code = getInviteCode();
@@ -13299,8 +13332,11 @@ function copyInviteCode() {
 }
 function copyInviteLink() {
   if (!isLoggedIn() || !getCloudPhone()) { showToast('请先登录'); return; }
-  copyText(getInviteLink());
-  showToast('邀请链接已复制，去微信粘贴发给好友吧');
+  // 需求8：复制链接时随机附一条邀请文案
+  const t = INVITE_TEXTS[Math.floor(Math.random() * INVITE_TEXTS.length)];
+  const body = t.body.replace('{code}', getInviteCode());
+  copyText(body + ' ' + getInviteLink());
+  showToast('已复制「' + t.name + '」文案+链接，去微信粘贴发给好友吧');
 }
 function copyInviteText(i) {
   const t = INVITE_TEXTS[i];
@@ -13308,6 +13344,113 @@ function copyInviteText(i) {
   const body = t.body.replace('{code}', getInviteCode());
   copyText(body);
   showToast('「' + t.name + '」文案已复制');
+}
+// ===== 需求8：生成邀请海报（7 款随机，一次一张） =====
+// 7 款候选海报（启动图风格，左上角二维码区会在下载/转发时覆盖为个人邀请码）
+var INVITE_POSTERS = [
+  '_splash_v3_deepblue.png',
+  '_splash_v3_teal.png',
+  '_splash_v3_forest.png',
+  '_splash_v3_navy.png',
+  '_splash_v3_onyx.png',
+  'splash_1080x1882_qr.png',
+  '_splash_new_v2_qr.png'
+];
+var curPosterIdx = -1;
+function openPosterModal() {
+  if (!isLoggedIn() || !getCloudPhone()) { showToast('请先登录'); return; }
+  shufflePoster();
+  showModal('posterModal');
+}
+function shufflePoster() {
+  if (!INVITE_POSTERS.length) return;
+  var idx;
+  do { idx = Math.floor(Math.random() * INVITE_POSTERS.length); } while (INVITE_POSTERS.length > 1 && idx === curPosterIdx);
+  curPosterIdx = idx;
+  var img = document.getElementById('posterModalImg');
+  if (img) img.src = INVITE_POSTERS[idx];
+}
+function closePosterModal() {
+  var m = document.getElementById('posterModal');
+  if (m) m.classList.remove('show');
+}
+// 合成海报：底图 + 左上角覆盖个人邀请码二维码（7 款底图该区域均为白卡主页码，需换成个人码）
+function renderPosterCanvas(src, cb) {
+  var img = new Image();
+  img.onload = function() {
+    var W = img.width || 1080, H = img.height || 1882;
+    var cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    var ctx = cv.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    try {
+      var mat = qrBuildMatrix(getInviteLink()); // 个人邀请码链接二维码
+      if (mat) {
+        var m = mat.length;
+        var cell = Math.floor(W * 0.27 / m);
+        var qrSize = cell * m;
+        var pad = Math.round(qrSize * 0.09);
+        var textH = Math.round(qrSize * 0.15);
+        var cardW = qrSize + pad * 2, cardH = qrSize + pad * 2 + textH;
+        var x = Math.round(W * 0.032), y = Math.round(H * 0.028);
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.30)';
+        ctx.shadowBlur = 14;
+        ctx.shadowOffsetY = 4;
+        ctx.fillStyle = '#FFFFFF';
+        roundRect(ctx, x, y, cardW, cardH, Math.round(cardW * 0.04));
+        ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = '#000000';
+        for (var r = 0; r < m; r++) for (var c = 0; c < m; c++) {
+          if (mat[r][c]) ctx.fillRect(x + pad + c * cell, y + pad + r * cell, cell, cell);
+        }
+        ctx.fillStyle = '#1E3A5F';
+        ctx.font = 'bold ' + Math.round(qrSize * 0.075) + 'px "Microsoft YaHei","PingFang SC",sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('扫码注册 领会员', x + cardW / 2, y + cardH - Math.round(textH * 0.38));
+      }
+    } catch (e) {}
+    cb(cv);
+  };
+  img.onerror = function() { cb(null); };
+  img.src = src;
+}
+function downloadPosterNew() {
+  if (curPosterIdx < 0) return;
+  renderPosterCanvas(INVITE_POSTERS[curPosterIdx], function(cv) {
+    if (!cv) { showToast('海报加载失败，请重试'); return; }
+    try {
+      var link = document.createElement('a');
+      link.download = '物流筐邀请海报_' + getInviteCode() + '.png';
+      link.href = cv.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('海报已保存，去相册/下载里查看');
+    } catch (e) { showToast('保存失败，可长按海报图片保存'); }
+  });
+}
+function sharePosterNew() {
+  if (curPosterIdx < 0) return;
+  renderPosterCanvas(INVITE_POSTERS[curPosterIdx], function(cv) {
+    if (!cv) { showToast('海报加载失败，请重试'); return; }
+    cv.toBlob(function(blob) {
+      if (blob) {
+        var fileName = '物流筐邀请海报_' + getInviteCode() + '.png';
+        var file = new File([blob], fileName, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: '物流筐 · 邀请好友' }).catch(function() {});
+          return;
+        }
+      }
+      // 兜底：复制邀请文案+链接
+      var t = INVITE_TEXTS[Math.floor(Math.random() * INVITE_TEXTS.length)];
+      var body = t.body.replace('{code}', getInviteCode());
+      copyText(body + ' ' + getInviteLink());
+      showToast('当前环境不支持分享图片，已复制文案+链接');
+    }, 'image/png');
+  });
 }
 // 复制工具（兼容旧环境）
 function copyText(txt) {
