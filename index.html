@@ -176,6 +176,16 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
   z-index: 101;
 }
 .header-help:active { transform: scale(.92); background: rgba(245,220,146,.25); }
+/* 需求8：每页专属帮助按钮（右上角 34px 金色描边圆钮，全站统一） */
+.page-help-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid rgba(245,220,146,.45); background: rgba(255,255,255,.08);
+  color: #F5DC92; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  flex-shrink: 0; padding: 0;
+}
+.page-help-btn:active { transform: scale(.92); background: rgba(245,220,146,.25); }
 /* 帮助弹窗：深空蓝晶定稿壳（与 ocrResultModal 一致） */
 #pageHelpModal.store-ocr-modal { background: rgba(4,24,32,.78); }
 #pageHelpModal .store-ocr-content {
@@ -310,14 +320,14 @@ body.auth-mode .simple-tabs { display: none !important; }
   color: var(--sim-cyan); border-radius: 9px; padding: 4px 10px;
   font-size: 13px; font-weight: 900;
 }
-.sim-bar .sb-auto { font-size: 10px; color: var(--text-light); font-weight: 600; }
+.sim-bar .sb-auto { font-size: 11px; color: var(--text-light); font-weight: 600; }
 /* 极简录入：5 筐行 */
 .sim-goods { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 4px 14px; margin-bottom: 12px; }
 .sim-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
 .sim-row:last-child { border-bottom: none; }
 .sim-row .sr-name { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #fff; }
 .sim-row .sr-name .sr-ico { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0; }
-.sim-row .sr-lab { font-size: 10px; color: var(--text-light); font-weight: 600; text-align: center; }
+.sim-row .sr-lab { font-size: 11px; color: var(--text-light); font-weight: 600; text-align: center; }
 .sim-row .sr-out {
   width: 60px; text-align: center; font-size: 16px; font-weight: 800;
   padding: 7px 4px; border: 1.5px solid rgba(124,232,224,.5); border-radius: 10px;
@@ -2884,14 +2894,14 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <style>@keyframes bootspin{to{transform:rotate(360deg)}}</style>
 
 <div class="header">
-  <h1>📦 物流筐收发管理系统</h1>
+  <h1>物流筐收发管理系统</h1>
   <div class="date-today" id="todayLabel"></div>
   <button class="header-help" onclick="openPageHelp(event)" aria-label="帮助"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
 </div>
 
 <div class="beta-banner" onclick="switchPage('manage')"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><path d="M10 2v6L4.5 18a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="7" y1="14" x2="17" y2="14"/></svg>当前为测试版，数据不会丢失，请放心使用</div>
 
-<div class="offline-banner" id="offlineBanner">📡 当前离线，已切换为离线模式，数据保存在本机，联网后自动同步</div>
+<div class="offline-banner" id="offlineBanner"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>当前离线，已切换为离线模式，数据保存在本机，联网后自动同步</div>
 
 <div class="tabs">
   <div class="tab active" data-page="record"><span class="tab-icon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 L12 3 L21 11"/><path d="M5 9.5 V20 H19 V9.5"/><path d="M10 20 V14 H14 V20"/></svg></span>首页</div>
@@ -2908,7 +2918,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 
 <!-- 未登录提醒横条（登录后隐藏） -->
 <div class="login-notice" id="loginNotice" onclick="openLoginModal()">
-  🔒 未登录：当前仅可查看。点击 <b>右上角登录</b> 后即可录入和保存
+  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>未登录：当前仅可查看。点击 <b>右上角登录</b> 后即可录入和保存
 </div>
 
 <!-- ========== 录入页（首页向导 + 手动录入） ========== -->
@@ -2918,7 +2928,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div id="homeWizard">
     <div id="appVersion" style="text-align:right;font-size:10px;color:rgba(255,255,255,.85);opacity:1;margin-bottom:4px;"></div>
     <!-- 账号登录状态（原"数据账号"徽标位置） -->
-    <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)" style="position:static;max-width:none;width:100%;justify-content:center;margin-bottom:8px;">🔑 登录</button>
+    <button class="login-pill" id="loginPill" onclick="toggleAccountMenu(event)" style="position:static;max-width:none;width:100%;justify-content:center;margin-bottom:8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><circle cx="12" cy="7" r="4"/><path d="M4 21v-1a7 7 0 0 1 14 0v1"/></svg>登录</button>
     <div class="card" style="text-align:center;padding:16px 14px;">
       <!-- 第一行：发出/回收（主操作，突出） -->
       <div class="home-grid-row" style="margin-bottom:0;">
@@ -2928,10 +2938,10 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     </div>
 
     <!-- 今日状态（主页面下方） -->
-    <div class="card" id="todayStatusCard" style="padding:14px;"><div style="font-size:12px;color:var(--text-light);">📊 今日状态加载中…</div></div>
+    <div class="card" id="todayStatusCard" style="padding:14px;"><div style="font-size:12px;color:var(--text-light);">今日状态加载中…</div></div>
 
     <!-- 今日各店明细（主页最下方） -->
-    <div class="card" id="todayStoreDetailCard" style="padding:14px;"><div style="font-size:12px;color:var(--text-light);">📋 今日各店明细加载中…</div></div>
+    <div class="card" id="todayStoreDetailCard" style="padding:14px;"><div style="font-size:12px;color:var(--text-light);">今日各店明细加载中…</div></div>
   </div>
 
   <!-- === 手动录入表单（点击手动录入后显示） === -->
@@ -3294,7 +3304,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 
 <!-- ========== 历史记录页 ========== -->
 <div class="page" id="page-history">
-  <div class="card" style="padding:10px 10px 6px;">
+  <div class="card" style="padding:10px 10px 6px;position:relative;">
+    <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助" style="position:absolute;right:8px;top:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
     <div style="display:flex;gap:6px;align-items:center;">
       <input type="date" class="form-input" id="filterDate" style="flex:1;padding:8px;font-size:13px;" onchange="renderHistory()">
       <select class="form-select" id="filterStore" style="width:90px;padding:8px;font-size:13px;" onchange="renderHistory()"><option value="">全部店</option></select>
@@ -3314,7 +3325,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 </div>
 
 <!-- ========== 管理页 ========== -->
-<div class="page" id="page-manage">
+<div class="page" id="page-manage" style="position:relative;">
+  <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助" style="position:absolute;right:14px;top:20px;z-index:5;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
   <div class="card manage-user-card" id="manageUserCard" style="padding:14px;"></div>
   <div class="card" style="padding:0;overflow:hidden;">
     <button class="manage-item" onclick="openStorePanel()"><span class="mi-icon">🏪</span><span class="mi-title">店面管理<span class="mi-sub" id="manageStoreSub">店面 · 别称 · 到店提醒 · 定位</span></span><span class="mi-arrow">›</span></button>
@@ -3339,6 +3351,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <div class="ntm-title">权限管理<small>到店提醒权限 · 随时可看可关</small></div>
+    <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
     <div class="ntm-ico">
       <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="#F5DC92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     </div>
@@ -3561,6 +3574,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <div class="mc-title">会员中心<small>VIP 权益与续费</small></div>
+    <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
   </div>
   <div class="mc-body">
     <!-- 当前状态（测试期默认 VIP） -->
@@ -3587,7 +3601,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 </div>
 
 <div class="page" id="page-summary">
-  <div class="card">
+  <div class="card" style="position:relative;">
+    <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助" style="position:absolute;right:10px;top:10px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
     <div class="form-group">
       <label class="form-label">汇总日期范围</label>
       <div style="display:flex;gap:6px;align-items:center;">
@@ -3640,6 +3655,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <div class="inv-title">邀请好友<small>拉新得会员奖励</small></div>
+    <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
   </div>
   <div class="inv-body">
     <!-- 未登录引导 -->
@@ -3697,6 +3713,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <div class="inv-title">邀请记录<small>本月 X/20 人 · 每成功 1 人 +15 天 VIP</small></div>
+    <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
   </div>
   <div class="inv-body">
     <!-- 未登录引导 -->
@@ -3717,8 +3734,9 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <!-- ========== 设置页 ========== -->
 <div class="page" id="page-settings">
   <!-- 顶部导言 hero -->
-  <div class="settings-hero">
-    <div class="settings-hero-title">📋 一分钟看懂这个软件</div>
+  <div class="settings-hero" style="position:relative;">
+    <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助" style="position:absolute;right:12px;top:12px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
+    <div class="settings-hero-title">一分钟看懂这个软件</div>
     <div class="settings-hero-sub">发出 + 回收，每天 2 分钟搞定 · 每一步都写清楚「点哪里、填什么」</div>
   </div>
 
@@ -3729,7 +3747,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       ① 最上面一排 = <b>首页</b>（主操作）、<b>记录</b>（看以前的数据）、<b>管理</b>（店面/备份/汇总等）<br>
       ② 首页两个大按钮 = <b>发出</b> 和 <b>回收</b> —— 你<b>每天都要点</b>的两个按钮，点哪个就记哪个<br>
       ③ 首页往下 = <b>今日状态</b>（今天每家店录没录、各筐发出回收数）+ <b>今日各店明细</b>（每家店每个筐的数字）<br>
-      <span class="step-hint">💡 第一次用：先去「管理」→「店面管理」加你的店（第 1 步），再设账号密码（第 2 步）</span>
+      <span class="step-hint">第一次用：先去「管理」→「店面管理」加你的店（第 1 步），再设账号密码（第 2 步）</span>
     </div>
   </div>
 
@@ -3740,7 +3758,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <b>我要记的店还没在列表里，怎么办？</b><br>
       ① 点底部 <b>「管理」</b> → 点 <b>「店面管理」</b><br>
       ② 点 <b>「新增店面」</b> → 输入店名（比如"北区店"）→ 点 <b>「保存修改」</b><br>
-      <span class="step-hint">✅ 完成！以后选店面就能看到它了</span><br>
+      <span class="step-hint">完成！以后选店面就能看到它了</span><br>
       <b>「别名」是干嘛的？</b> 店全名叫"北区总店"，你想叫它"北区"，就把"北区"填进别名。以后语音、拍照识别时叫"北区"也能找到这家店。
     </div>
   </div>
@@ -3757,7 +3775,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       ④ 再输入一遍同样的密码（两次必须一模一样）<br>
       ⑤ 选一个密保问题 + 填答案（<b>这个答案一定要记住！</b>忘了密码靠它找回）<br>
       ⑥ 点 <b>「设置密码」</b><br>
-      <span class="step-hint">✅ 完成！以后每次保存数据，都会自动备份到云端（约 3 秒）</span><br><br>
+      <span class="step-hint">完成！以后每次保存数据，都会自动备份到云端（约 3 秒）</span><br><br>
       <b>下次怎么登录？</b><br>
       首页顶部点 <b>「登录」</b> → 输入手机号 + 密码 → 自动同步云端数据<br><br>
       <b>忘了密码怎么办？</b><br>
@@ -3770,23 +3788,23 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <div class="step-head"><span class="step-badge">3</span><span class="step-title step-title-cyan">每天怎么录数据（3 种方法，随便选）</span></div>
     <div class="step-body">
       点首页的 <b>「发出」</b> 或 <b>「回收」</b> 都会先进到同一个录入页，下面 3 种方法都在这里选：<br><br>
-      <b>方法一 ✍️ 手动输入（最稳）</b><br>
+      <b>方法一 · 手动输入（最稳）</b><br>
       ① 发出页：先选 <b>5 种筐</b>（鲜食/面包/冷藏/冷冻/常温，颜色各不相同：鲜食=青绿、面包=金黄、冷藏=冰蓝、冷冻=蓝紫、常温=橙色）中的一种<br>
       ② 然后每家店填<b>数量</b>，输完点键盘"确定"自动跳下一家<br>
       ③ 填完点 <b>「保存发出」</b> → 弹「保存成功」，可点 <b>「继续录入」</b>（录下一筐）或 <b>「查看记录」</b>（去记录页看刚存的）<br>
       ④ 顶部有 <b>「记录日期」</b>，默认今天；要补录前几天，把日期改掉再录就行<br>
-      <span class="step-hint">💡 没填的留空就行，不会出错</span><br><br>
-      <b>方法二 🎤 用嘴说（最快，AI 听得懂）</b><br>
+      <span class="step-hint">没填的留空就行，不会出错</span><br><br>
+      <b>方法二 · 用嘴说（最快，AI 听得懂）</b><br>
       ① 在录入页点 <b>「语音录入」</b><br>
       ② 对着手机说：<span class="step-hint">"3 6 2 5 8"</span>（按店面从上到下的顺序说数字，停顿一下说下一个）<br>
       ③ 说完点「结束」→ 数字自动填进各店面 → 检查没问题点保存<br>
-      <span class="step-hint">💡 AI 听得懂中文数字和口语：说"三、六、二"也行，说"来十二个"也认</span><br><br>
-      <b>方法三 📸 拍照识别（最省事，AI 智能识别）</b><br>
+      <span class="step-hint">AI 听得懂中文数字和口语：说"三、六、二"也行，说"来十二个"也认</span><br><br>
+      <b>方法三 · 拍照识别（最省事，AI 智能识别）</b><br>
       ① 在录入页点 <b>「拍照识别」</b>（现拍）或 <b>「从相册选」</b>（用已有照片）<br>
       ② 对准路单拍照，等一两秒 → AI 自动看懂整张表：每家店一行、数字自动填好，筐类型也自动判断<br>
       ③ 弹出核对框（绿色=有把握，黄色=建议核对），<b>不对的直接点数字改掉</b>，漏了的点 <b>「新增一行」</b> 补上<br>
       ④ 全对了点 <b>「确定保存」</b> → 直接入账，一步完成<br>
-      <span class="step-hint">💡 保存成功后会弹「继续录入」，同一张路单换一筐接着拍，不用重新进</span>
+      <span class="step-hint">保存成功后会弹「继续录入」，同一张路单换一筐接着拍，不用重新进</span>
     </div>
   </div>
 
@@ -3809,7 +3827,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="settings-step">
     <div class="step-head"><span class="step-badge">5</span><span class="step-title step-title-gold">数据安全（一定要看）</span></div>
     <div class="step-body">
-      <span class="step-warn">⚠️ 最重要的一句话：数据默认存在手机里，千万别清浏览器缓存，清了记录就没了！</span><br><br>
+      <span class="step-warn">最重要的一句话：数据默认存在手机里，千万别清浏览器缓存，清了记录就没了！</span><br><br>
       <b>已经设置了密码？</b><br>
       什么都不用做。每次保存数据，约 3 秒后自动备份到云端。<br><br>
       <b>换了新手机怎么办？</b><br>
@@ -3821,41 +3839,77 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     </div>
   </div>
 
+  <!-- 第6步：会员中心（需求5 新增） -->
+  <div class="settings-step">
+    <div class="step-head"><span class="step-badge">6</span><span class="step-title step-title-cyan">会员中心（VIP 权益）</span></div>
+    <div class="step-body">
+      <b>哪些功能是 VIP 专属？</b><br>
+      ① <b>极简模式</b>（只记 5 筐总数，界面更简单）<br>
+      ② <b>到店提醒</b>（到店自动弹提醒）<br>
+      ③ <b>语音录入 / 拍照识别</b>（AI 快速录入）<br>
+      ④ <b>汇总报表 / 对账导出</b>（统计和 Excel 导出）<br><br>
+      <b>现在收费吗？</b><br>
+      现在是<b>测试期</b>：所有人都是 VIP，上面这些功能<b>全部免费</b>，不用花钱。<br><br>
+      <b>正式收费后有几个档位？</b><br>
+      月卡 12.8 / 季卡 24.8（省 35%）/ 年卡 58（省 62%）/ 终身卡 128——<b>测试期不收费，别担心</b>。<br><br>
+      <b>怎么进会员中心？</b><br>
+      点底部 <b>「管理」</b> → 顶部会员卡（VIP 会员）→ 点进去看权益和档位。
+    </div>
+  </div>
+
+  <!-- 第7步：邀请拉新（需求6/7 新增） -->
+  <div class="settings-step">
+    <div class="step-head"><span class="step-badge">7</span><span class="step-title step-title-gold">邀请拉新（推荐给朋友，双方都得会员）</span></div>
+    <div class="step-body">
+      <b>怎么邀请？</b><br>
+      ① 点底部 <b>「管理」</b> → <b>「邀请好友」</b><br>
+      ② 看到你的<b>专属邀请码</b>（如 KW138000）→ 点「复制链接+文案」发给朋友，或点「<b>生成邀请海报</b>」出一张带二维码的海报，微信扫码就能打开<br><br>
+      <b>朋友怎么操作？</b><br>
+      点你发的链接 / 扫海报二维码 → 注册（手机号+密码）→ <b>自动带上你的邀请码</b>；直接下载 APP 的朋友，在注册页填「邀请码（选填）」框就行<br><br>
+      <b>能得到什么奖励？</b><br>
+      ① 朋友注册成功：他得 <b>30 天</b>（注册送）+ <b>15 天</b>（被邀请奖励）= <b>45 天</b><br>
+      ② 你得 <b>+15 天 VIP</b>（邀请奖励）<br><br>
+      <b>在哪看谁注册了？</b><br>
+      邀请好友页点「<b>邀请记录</b>」→ 看到脱敏手机号 + 注册时间 + 奖励状态（已发放/待发放）<br><br>
+      <span class="step-hint">防作弊：每月最多 20 人；同一设备注册多个账号不计数。</span>
+    </div>
+  </div>
+
   <!-- 常见问题 FAQ -->
   <div class="settings-faq">
-    <div class="faq-q">❓ 登录时提示密码不对怎么办？</div>
+    <div class="faq-q">登录时提示密码不对怎么办？</div>
     <div class="faq-a">① 先点密码框右边的 <b>眼睛</b> 按钮看看有没有打错（大小写/空格/符号）；② 还是不对就点「忘记密码」→ 答密保问题重置新密码。</div>
   </div>
   <div class="settings-faq">
-    <div class="faq-q">❓ 拍照识别出来的数字不准怎么办？</div>
+    <div class="faq-q">拍照识别出来的数字不准怎么办？</div>
     <div class="faq-a">识别结果每个数字都可以<b>直接点进去改</b>，改成对的再点「确定保存」。绿色=高置信，黄色=建议核对。拍照时尽量拍正、光线亮一点，识别更准。</div>
   </div>
   <div class="settings-faq">
-    <div class="faq-q">❓ 识别漏了一家店怎么办？</div>
+    <div class="faq-q">识别漏了一家店怎么办？</div>
     <div class="faq-a">点核对框下面的 <b>「新增一行」</b>，自己把店名、数量填进去。</div>
   </div>
   <div class="settings-faq">
-    <div class="faq-q">❓ 填错了已经保存了，怎么改？</div>
+    <div class="faq-q">填错了已经保存了，怎么改？</div>
     <div class="faq-a">点顶部 <b>「记录」</b> → 找到那条 → 点<b>「编辑」</b> → 直接改数量 → 保存。</div>
   </div>
   <div class="settings-faq">
-    <div class="faq-q">❓ 语音识别不准怎么办？</div>
+    <div class="faq-q">语音识别不准怎么办？</div>
     <div class="faq-a">说的时候稍微慢一点、清楚一点，数字之间停一下；识别后数字会填进各店，看到不对直接点数字改掉再保存。</div>
   </div>
   <div class="settings-faq">
-    <div class="faq-q">❓ 手写单据能识别吗？</div>
+    <div class="faq-q">手写单据能识别吗？</div>
     <div class="faq-a">手写单会走「手写增强识别」，尽量拍清晰；如果个别数字识别不到，在核对框里手动改或补填。</div>
   </div>
   <div class="settings-faq">
-    <div class="faq-q">❓ 识别要等好几秒，是卡住了吗？</div>
+    <div class="faq-q">识别要等好几秒，是卡住了吗？</div>
     <div class="faq-a">不是，AI 识别会先看懂整张表格再填数，一般 1-3 秒出结果；没网或识别繁忙时会退回普通识别稍慢一点。急的话可以点「取消识别」重拍。</div>
   </div>
   <div class="settings-faq">
-    <div class="faq-q">❓ 两台手机的数据能合并吗？</div>
+    <div class="faq-q">两台手机的数据能合并吗？</div>
     <div class="faq-a">能。点「管理」→「备份与恢复」→「选择文件导入」时，导入会<b>合并</b>（不覆盖），两台手机数据合到一起。</div>
   </div>
   <div class="settings-faq">
-    <div class="faq-q">❓ 没网络能用吗？</div>
+    <div class="faq-q">没网络能用吗？</div>
     <div class="faq-a">打开过一次后，页面会缓存，<b>没网也能打开看数据</b>；但登录、语音、拍照识别需要联网。</div>
   </div>
   <div class="settings-faq">
@@ -3868,6 +3922,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <div class="page page-simple" id="page-simple-home">
   <div class="simple-head">
     <div class="simple-title">极简录入</div>
+    <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助" style="margin-left:auto;margin-right:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
     <div class="simple-login" id="simpleLoginPill" onclick="openLoginModal()">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
       <span id="simpleLoginText">登录</span>
@@ -3900,6 +3955,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <div class="page page-simple" id="page-simple-records">
   <div class="simple-head">
     <div class="simple-title">极简记录</div>
+    <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助" style="margin-left:auto;margin-right:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
     <div class="simple-login" id="simpleRecLoginPill" onclick="openLoginModal()">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
       <span id="simpleRecLoginText">登录</span>
@@ -3929,6 +3985,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 <div class="page page-simple" id="page-simple-settings">
   <div class="simple-head">
     <div class="simple-title">极简设置</div>
+    <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助" style="margin-left:auto;margin-right:8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
     <div class="simple-login" id="simpleSetLoginPill" onclick="openLoginModal()">
       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
       <span id="simpleSetLoginText">登录</span>
@@ -5840,10 +5897,10 @@ function renderAccountBadge() {
     const phone = getCloudPhone();
     const logged = isLoggedIn();
     if (phone && logged) {
-      pill.textContent = '👤 ' + maskPhone(phone);
+      pill.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><circle cx="12" cy="7" r="4"/><path d="M4 21v-1a7 7 0 0 1 14 0v1"/></svg>' + maskPhone(phone);
       pill.classList.add('logged-in');
     } else {
-      pill.textContent = '🔑 登录';
+      pill.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><circle cx="12" cy="7" r="4"/><path d="M4 21v-1a7 7 0 0 1 14 0v1"/></svg>登录';
       pill.classList.remove('logged-in');
     }
   }
@@ -9654,6 +9711,14 @@ function openPageHelp(e) {
     const summaryPage = document.getElementById('page-summary');
     const reconcilePage = document.getElementById('page-reconcile');
     const managePage = document.getElementById('page-manage');
+    const invitePage = document.getElementById('page-invite');
+    const inviteRecPage = document.getElementById('page-invite-records');
+    const vipPage = document.getElementById('page-vip');
+    const settingsPage = document.getElementById('page-settings');
+    const permPage = document.getElementById('page-perm');
+    const simpleHomePage = document.getElementById('page-simple-home');
+    const simpleRecPage = document.getElementById('page-simple-records');
+    const simpleSetPage = document.getElementById('page-simple-settings');
     if (emitPanel && emitPanel.style.display !== 'none') {
       t = '发出 · 图文帮助';
       h = `<div class="ph-map"><span class="pm-cell pm-main">选 5 种筐</span><span class="pm-arrow">›</span><span class="pm-cell">每家店填数量</span><span class="pm-arrow">›</span><span class="pm-cell pm-main">保存发出</span></div>`
@@ -9718,8 +9783,78 @@ function openPageHelp(e) {
         '<b>框名设置</b>：改 5 种筐的名字和顺序',
         '<b>备份与恢复</b>：云端同步、导出/导入备份文件',
         '<b>汇总 / 对账</b>：统计报表、导出 Excel',
-        '<b>功能建议</b>：提建议，好建议做成新功能'
+        '<b>功能建议</b>：提建议，好建议做成新功能',
+        '<b>邀请好友</b>：邀请得会员，海报/文案一键转发',
+        '<b>使用说明</b>：一分钟看懂全部功能'
       ]) + tip('账号密码在首页顶部「登录」里设置/修改');
+    } else if (invitePage && invitePage.classList.contains('active')) {
+      t = '邀请好友 · 图文帮助';
+      h = `<div class="ph-map"><span class="pm-cell pm-main">邀请码</span><span class="pm-arrow">›</span><span class="pm-cell">好友注册</span><span class="pm-arrow">›</span><span class="pm-cell pm-main">双方 +15 天 VIP</span></div>`
+        + steps([
+          '复制你的<b>邀请码</b>或点「<b>生成邀请海报</b>」出一张海报，发给好友（微信/朋友圈/扫码）',
+          '好友点链接或<b>扫码</b>打开 → 注册时自动带上你的码（直接下载 APP 的，可在注册页填「邀请码（选填）」）',
+          '好友注册成功：他得 <b>30 天 + 15 天</b>，你得 <b>+15 天 VIP</b>',
+          '点「<b>邀请记录</b>」看谁通过你注册了、奖励发没发'
+        ])
+        + tip('每月最多 20 人 · 同一设备多个账号不计数（防作弊）');
+    } else if (inviteRecPage && inviteRecPage.classList.contains('active')) {
+      t = '邀请记录 · 图文帮助';
+      h = steps([
+        '这里列出<b>通过你的邀请码注册</b>的好友',
+        '手机号已脱敏（如 138****8000），保护隐私',
+        '<b>已发放</b> = 奖励已到账（+15 天）；<b>待发放</b> = 还没生效',
+        '顶部进度条：本月 <b>X/20 人</b>，满 20 人当月不能再邀请（防作弊）'
+      ]) + tip('奖励发放后你的 VIP 到期时间会自动 +15 天');
+    } else if (vipPage && vipPage.classList.contains('active')) {
+      t = '会员中心 · 图文帮助';
+      h = `<div class="ph-map"><span class="pm-cell">测试期</span><span class="pm-arrow">›</span><span class="pm-cell pm-main">默认 VIP</span><span class="pm-arrow">›</span><span class="pm-cell">全部功能免费用</span></div>`
+        + steps([
+          '当前是<b>测试期</b>：所有人都是 VIP，高级功能免费体验（极简模式/到店提醒/语音/拍照/汇总/对账）',
+          '正式收费后：<b>4 个档位</b>（月卡 12.8 / 季卡 24.8 / 年卡 58 / 终身卡 128）',
+          '测试期邀请好友/注册送的天数会累加到你的 VIP 到期时间',
+          '正式上线时已开通的奖励天数<b>仍然有效</b>'
+        ])
+        + tip('VIP 到期不影响已录入的数据，只影响高级功能入口');
+    } else if (settingsPage && settingsPage.classList.contains('active')) {
+      t = '使用说明 · 图文帮助';
+      h = steps([
+        '往下翻，<b>第 0~7 步</b>从认识页面到邀请拉新全部讲清楚',
+        '第 0~2 步：认识页面、加店面、设账号（新用户必看）',
+        '第 3~5 步：怎么录入、怎么核对、数据怎么备份',
+        '第 6~7 步：会员中心、邀请拉新（新功能）',
+        '每步都写清「点哪里、填什么」，照做就行'
+      ]) + tip('右上角每个页面都有「？」帮助，随时点开看当前页怎么用');
+    } else if (permPage && permPage.classList.contains('active')) {
+      t = '权限管理 · 图文帮助';
+      h = steps([
+        '<b>位置权限</b>：到店提醒靠它定位你在哪家店',
+        '<b>通知权限</b>：到店后弹提醒、后台运行不杀',
+        '每一项都能<b>单独开关</b>，随时回来看/关',
+        '权限没开时：到店提醒不生效，其他功能不受影响'
+      ]) + tip('换手机后需重新授权一次');
+    } else if (simpleHomePage && simpleHomePage.classList.contains('active')) {
+      t = '极简录入 · 图文帮助';
+      h = steps([
+        '极简模式只记 <b>5 种筐</b>的发出/回收总数，不细分店',
+        '选<b>记录日期</b>（默认今天，可补录前几天）',
+        '每种筐填<b>发出</b>和<b>回收</b>数量，没填的留空',
+        '点<b>保存当日记录</b>即可'
+      ]) + tip('切回标准模式：极简设置页 → 模式选择 → 标准模式');
+    } else if (simpleRecPage && simpleRecPage.classList.contains('active')) {
+      t = '极简记录 · 图文帮助';
+      h = steps([
+        '按日期范围看 <b>5 种筐</b>的发出/回收记录',
+        '选「几号几点 到 几号几点」筛选',
+        '每天一行，可<b>编辑</b>或<b>删除</b>',
+        '要点开看更细的？切回标准模式看「记录」页'
+      ]) + tip('极简记录只汇总总数，明细在标准模式「记录」页');
+    } else if (simpleSetPage && simpleSetPage.classList.contains('active')) {
+      t = '极简设置 · 图文帮助';
+      h = steps([
+        '<b>模式选择</b>：切回标准模式（功能全）的唯一入口',
+        '<b>账号密码</b>：登录后数据云端备份',
+        '极简模式为 VIP 功能，测试期免费'
+      ]) + tip('极简模式数据与标准模式分开，互不影响');
     } else {
       t = '帮助';
       h = '<span class="ph-tip">点下面的「查看完整使用说明」，每一步都写清楚「点哪里、填什么」。</span>';
@@ -12494,7 +12629,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.4'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.5'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');

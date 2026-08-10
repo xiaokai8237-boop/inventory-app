@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>需求8 使用说明+每页帮助 设计稿 v1</title>
+<style>
+  :root {
+    --bg: #0A1A22; --phone-bg: #0E3340; --gold: #F5DC92;
+    --gold-grad: linear-gradient(135deg,#F8E3A6,#E0A63E);
+    --cyan: #7CE8E0; --green: #4ADE80; --red: #FF6B6B;
+    --card-border: rgba(255,255,255,.09); --text-main: #FFFFFF;
+    --text-sub: #7E97A1; --text-body: #DDEBEE;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); font-family: 'Noto Sans SC','HarmonyOS Sans SC',sans-serif; padding: 24px 32px 40px; color: var(--text-body); }
+  .ver-mark { position: fixed; top: 14px; right: 18px; font-size: 12px; font-weight: 800; color: #0B2E38; background: var(--gold-grad); padding: 5px 14px; border-radius: 16px; z-index: 99; }
+  .canvas { max-width: 780px; margin: 0 auto; }
+  .canvas-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .canvas-title span:first-child { font-size: 18px; font-weight: 800; color: #fff; }
+  .canvas-title .badge { font-size: 12px; font-weight: 700; color: var(--gold); border: 1px solid rgba(245,220,146,.4); border-radius: 14px; padding: 3px 12px; }
+  .canvas-sub { font-size: 12px; color: var(--text-sub); margin-bottom: 18px; }
+  .obj-title { font-size: 15px; font-weight: 800; color: var(--gold); margin: 22px 2px 10px; }
+  .obj-title em { font-size: 11px; color: var(--text-sub); font-weight: 400; margin-left: 6px; }
+  .note { margin-top: 20px; background: rgba(255,255,255,.03); border: 1px solid var(--card-border); border-radius: 14px; padding: 14px 16px; }
+  .note h3 { font-size: 13px; color: var(--gold); margin-bottom: 8px; }
+  .note li { font-size: 12px; line-height: 1.9; color: var(--text-body); margin-left: 18px; }
+  .tag-new { display: inline-block; font-size: 10px; font-weight: 800; color: #0B2E38; background: var(--gold-grad); border-radius: 8px; padding: 1px 7px; margin-right: 4px; }
+  .tag-keep { display: inline-block; font-size: 10px; font-weight: 800; color: #06222A; background: var(--cyan); border-radius: 8px; padding: 1px 7px; margin-right: 4px; }
+  .phone { width: 345px; margin: 0 auto 16px; background: var(--phone-bg); border: 1.5px solid rgba(245,220,146,.45); border-radius: 26px; padding: 14px 12px; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+  .ph-flex { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+  .pg-head { display: flex; align-items: center; gap: 8px; padding: 4px 4px 10px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 10px; position: relative; }
+  .pg-head .pg-title { flex: 1; font-size: 15px; font-weight: 800; color: #fff; }
+  /* 帮助按钮（每页右上角） */
+  .help-btn {
+    position: absolute; right: 4px; top: 0;
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid rgba(245,220,146,.45); background: rgba(255,255,255,.08);
+    color: #F5DC92; display: flex; align-items: center; justify-content: center;
+  }
+  .pm-card { background: rgba(255,255,255,.04); border: 1px solid var(--card-border); border-radius: 12px; padding: 11px 13px; margin-top: 8px; }
+  .pm-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 12px; color: var(--text-body); }
+  .pm-row:last-child { border-bottom: none; }
+  .pm-row .pm-name { flex: 1; font-weight: 700; color: #fff; }
+  .pm-row .pm-sub { font-size: 10px; color: #8FA3AE; }
+  .pm-row .pm-arrow { color: #9FD0D6; }
+  .help-tag { position: absolute; right: 44px; top: 6px; font-size: 9px; color: #F5DC92; background: rgba(245,220,146,.12); border: 1px dashed rgba(245,220,146,.5); padding: 1px 6px; border-radius: 8px; }
+  /* 弹窗模拟 */
+  .modal-sim { background: rgba(6,20,28,.96); border: 1px solid rgba(245,220,146,.35); border-radius: 16px; padding: 12px 13px; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
+  .ph-title2 { font-size: 14px; font-weight: 800; color: var(--gold); text-align: center; padding-bottom: 9px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .ph-map { display: flex; align-items: center; gap: 4px; background: rgba(124,232,224,.08); border: 1px solid rgba(124,232,224,.25); border-radius: 10px; padding: 8px 9px; margin: 10px 0 9px; }
+  .pm-cell { font-size: 10px; color: var(--text-body); background: rgba(255,255,255,.05); border-radius: 7px; padding: 4px 7px; flex: 1; text-align: center; }
+  .pm-cell.pm-main { background: rgba(245,220,146,.15); color: var(--gold); font-weight: 800; }
+  .pm-arrow { color: #9FD0D6; font-size: 12px; }
+  .ph-step { display: flex; gap: 8px; align-items: flex-start; margin-top: 8px; font-size: 11px; line-height: 1.55; color: var(--text-body); }
+  .ph-step-num { width: 18px; height: 18px; border-radius: 50%; background: var(--gold-grad); color: #0B2E38; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .ph-tip { display: block; margin-top: 9px; font-size: 10px; color: var(--cyan); line-height: 1.5; background: rgba(124,232,224,.07); border-radius: 8px; padding: 6px 9px; }
+  /* 使用说明页结构 */
+  .steps-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .step-item { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,.04); border: 1px solid var(--card-border); border-radius: 10px; padding: 8px 10px; }
+  .step-no { width: 22px; height: 22px; border-radius: 50%; background: var(--gold-grad); color: #0B2E38; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-no.new { background: var(--cyan); color: #06222A; }
+  .step-name { flex: 1; font-size: 12px; font-weight: 700; color: #fff; }
+  .step-desc { font-size: 10px; color: #8FA3AE; margin-top: 1px; }
+  .step-tag { font-size: 9px; color: #06222A; background: var(--gold-grad); border-radius: 7px; padding: 1px 7px; font-weight: 800; flex-shrink: 0; }
+  .step-tag.cy { background: var(--cyan); }
+  .bar-svg { width: 16px; height: 16px; color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="ver-mark">图3/3 · v1</div>
+<div class="canvas">
+  <div class="canvas-title">
+    <span>需求8 使用说明 + 每页专属帮助 — 设计稿（图1/3 帮助按钮位置 · 图2/3 帮助弹窗 · 图3/3 使用说明页结构）</span>
+    <span class="badge">设计稿 v1</span>
+  </div>
+  <div class="canvas-sub">三件事一起：① 使用说明重写（补会员/拉新/邀请 + 清 emoji）② 每页专属帮助按钮 ③ 文字检查修复</div>
+
+  <!-- ============ 图1/3 每页帮助按钮位置 ============ -->
+  <div class="obj-title">图1/3 · 每页帮助按钮位置<em>（金色小圆钮，右上角，全页统一 34px）</em></div>
+  <div class="ph-flex">
+    <!-- 记录页 -->
+    <div class="phone">
+      <div class="pg-head">
+        <span class="pg-title">记录</span>
+        <span class="help-tag">新增帮助按钮</span>
+        <span class="help-btn"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+      </div>
+      <div class="pm-card">
+        <div class="pm-row"><span class="pm-name">日期筛选</span><span class="pm-sub">点开选日期</span></div>
+        <div class="pm-row"><span class="pm-name">按店 / 按筐筛选</span><span class="pm-sub">全部店 · 全部筐</span></div>
+        <div class="pm-row"><span class="pm-name">记录列表</span><span class="pm-sub">编辑 / 删除 / 生成日报</span></div>
+      </div>
+      <div class="pm-card">
+        <div class="pm-row"><span class="pm-name">今天 08:00 发出</span><span class="pm-sub">鲜食筐 12 个</span></div>
+        <div class="pm-row"><span class="pm-name">昨天 09:30 回收</span><span class="pm-sub">面包筐 8 个</span></div>
+      </div>
+    </div>
+    <!-- 管理页 -->
+    <div class="phone">
+      <div class="pg-head">
+        <span class="pg-title">管理</span>
+        <span class="help-tag">新增帮助按钮</span>
+        <span class="help-btn"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+      </div>
+      <div class="pm-card" style="display:flex;align-items:center;gap:9px;">
+        <svg class="bar-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>
+        <span style="flex:1;font-size:12px;font-weight:800;color:#fff;">VIP 会员</span>
+        <span style="font-size:9px;color:#06222A;background:var(--gold-grad);border-radius:7px;padding:1px 7px;font-weight:800;">测试期免费</span>
+      </div>
+      <div class="pm-card">
+        <div class="pm-row"><span class="pm-name">店面管理</span><span class="pm-sub">店面 · 别名 · 到店提醒</span><span class="pm-arrow">›</span></div>
+        <div class="pm-row"><span class="pm-name">权限管理</span><span class="pm-sub">位置 · 通知 · 提醒设置</span><span class="pm-arrow">›</span></div>
+        <div class="pm-row"><span class="pm-name">模式选择</span><span class="pm-sub">标准 / 极简切换</span><span class="pm-arrow">›</span></div>
+        <div class="pm-row"><span class="pm-name">邀请好友</span><span class="pm-sub">邀请得会员 · 海报/文案</span><span class="pm-arrow">›</span></div>
+      </div>
+    </div>
+    <!-- 邀请页 -->
+    <div class="phone">
+      <div class="pg-head">
+        <span class="pg-title">邀请好友</span>
+        <span class="help-tag">新增帮助按钮</span>
+        <span class="help-btn"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+      </div>
+      <div class="pm-card" style="text-align:center;">
+        <div style="font-size:10px;color:#8FA3AE;">我的专属邀请码</div>
+        <div style="font-size:20px;font-weight:900;color:var(--gold);letter-spacing:2px;">KW138000</div>
+        <div style="display:flex;gap:6px;margin-top:7px;">
+          <span style="flex:1;font-size:10px;font-weight:700;color:#0B2E38;background:var(--gold-grad);border-radius:10px;padding:6px 0;">复制链接+文案</span>
+        </div>
+      </div>
+      <div class="pm-card" style="text-align:center;">
+        <div style="font-size:12px;font-weight:800;color:#fff;">生成邀请海报</div>
+        <div style="font-size:9px;color:#8FA3AE;margin-top:2px;">随机一款 · 下载 / 转发</div>
+      </div>
+      <div class="pm-card" style="text-align:center;font-size:10px;color:#8FA3AE;">本月已邀请 13/20 人<br><span style="color:var(--cyan);">每成功 1 人 +15 天 VIP</span></div>
+    </div>
+  </div>
+  <div class="note">
+    <ul>
+      <li><span class="tag-new">每页帮助按钮</span>：记录/管理/邀请/邀请记录/会员中心/汇总/对账/权限/使用说明 + 极简 3 页，<b>全部右上角加 34px 金色描边圆形帮助钮</b>（SVG 问号，非 emoji）</li>
+      <li><span class="tag-keep">首页</span>：header 右上角 ❓ 按钮已存在（需求9 后 header 只首页显示，首页入口保留）</li>
+    </ul>
+  </div>
+
+  <!-- ============ 图2/3 帮助弹窗 ============ -->
+  <div class="obj-title">图2/3 · 帮助弹窗<em>（复用现有 pageHelpModal 样式：地图 + 步骤 + 提示 三块）</em></div>
+  <div class="phone">
+    <div class="modal-sim">
+      <div class="ph-title2">邀请好友 · 图文帮助</div>
+      <div class="ph-map">
+        <span class="pm-cell pm-main">邀请码 KW138000</span>
+        <span class="pm-arrow">›</span>
+        <span class="pm-cell">好友注册</span>
+        <span class="pm-arrow">›</span>
+        <span class="pm-cell pm-main">双方 +15 天 VIP</span>
+      </div>
+      <div class="ph-step"><span class="ph-step-num">1</span><span>复制你的<b>邀请码</b>或<b>海报</b>发给好友（微信/朋友圈）</span></div>
+      <div class="ph-step"><span class="ph-step-num">2</span><span>好友点链接或<b>扫码</b>打开 → 注册时<b>自动带上你的码</b>（直接下载的可在注册页填「邀请码（选填）」）</span></div>
+      <div class="ph-step"><span class="ph-step-num">3</span><span>好友注册成功：他得 <b>30 天 + 15 天</b>，你得 <b>+15 天</b></span></div>
+      <div class="ph-step"><span class="ph-step-num">4</span><span><b>记录页</b>看谁通过你注册了、奖励发没发</span></div>
+      <span class="ph-tip">每月最多 20 人 · 同一设备多个账号不计数（防作弊）</span>
+    </div>
+  </div>
+  <div class="note">
+    <ul>
+      <li><span class="tag-new">弹窗三块</span>：标题（这页叫什么）+ 流程地图 + 步骤（这页干嘛/怎么用）+ 提示（常见问题/注意）</li>
+      <li><span class="tag-new">新增页面帮助内容</span>：邀请 / 邀请记录 / 会员中心 / 使用说明 / 权限 + 极简 3 页（现有已覆盖：首页/发出/手动/记录/汇总/对账/管理/登录/注册/忘记密码）</li>
+      <li><span class="tag-keep">样式不变</span>：复用现有 store-ocr-modal 深空蓝晶弹窗壳，全 SVG 图标</li>
+    </ul>
+  </div>
+
+  <!-- ============ 图3/3 使用说明页结构 ============ -->
+  <div class="obj-title">图3/3 · 使用说明页新版结构<em>（page-settings 重写：现有第0-5步 + 新增第6步会员 + 第7步邀请）</em></div>
+  <div class="phone">
+    <div class="pg-head"><span class="pg-title">使用说明</span><span class="help-tag">新增帮助按钮</span><span class="help-btn"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span></div>
+    <div class="steps-list">
+      <div class="step-item"><span class="step-no">0</span><span class="step-name">认识页面<span class="step-desc">首页/记录/管理 · 发出回收 · 今日状态</span></span><span class="step-tag">更新</span></div>
+      <div class="step-item"><span class="step-no">1</span><span class="step-name">设置店面<span class="step-desc">新增 · 别名 · 排序</span></span><span class="step-tag">保留</span></div>
+      <div class="step-item"><span class="step-no">2</span><span class="step-name">设置账号密码<span class="step-desc">手机号+密码 · 云端备份 · 找回</span></span><span class="step-tag">保留</span></div>
+      <div class="step-item"><span class="step-no">3</span><span class="step-name">每天怎么录入<span class="step-desc">手动 / 语音 / 拍照 · 记录日期 · 5筐染色</span></span><span class="step-tag">更新</span></div>
+      <div class="step-item"><span class="step-no">4</span><span class="step-name">查看和核对数据<span class="step-desc">筛选 · 编辑 · 生成日报 · 额外发收</span></span><span class="step-tag">更新</span></div>
+      <div class="step-item"><span class="step-no">5</span><span class="step-name">数据安全<span class="step-desc">云备份 · 恢复 · 离线可用</span></span><span class="step-tag">保留</span></div>
+      <div class="step-item"><span class="step-no new">6</span><span class="step-name">会员中心（新增）<span class="step-desc">VIP 权益 · 4 档位 · 测试期免费</span></span><span class="step-tag cy">新增</span></div>
+      <div class="step-item"><span class="step-no new">7</span><span class="step-name">邀请拉新（新增）<span class="step-desc">邀请码 · 海报 · 奖励规则 · 防作弊</span></span><span class="step-tag cy">新增</span></div>
+    </div>
+  </div>
+  <div class="note">
+    <h3>v1 改动说明</h3>
+    <ul>
+      <li><span class="tag-new">第6步 会员中心（新增）</span>：进入入口（管理→会员卡）、VIP 权益 6 项、4 档位定价、测试期免费说明</li>
+      <li><span class="tag-new">第7步 邀请拉新（新增）</span>：邀请码在哪、海报怎么生成、奖励规则（注册送30天+双方各15天）、记录页、防作弊（每月20人）</li>
+      <li><span class="tag-keep">第0-5步</span>：文字保留 + 补最新变化（发出页已整合/保存成功新按钮/主页按钮改小）</li>
+      <li><span class="tag-new">清 emoji</span>：使用说明页 💡📋 全部换 SVG 图标 / 纯文字序号（P0-1）</li>
+      <li><span class="tag-new">文字检查同步</span>：首页 🧪👤📊📅+5筐 emoji → SVG；极简 10px 小字 → 11px</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>
