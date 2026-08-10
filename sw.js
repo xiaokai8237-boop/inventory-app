@@ -1,7 +1,10 @@
 // 物流筐收发管理系统 - Service Worker（离线完整可用）
-const CACHE = 'kuanwei-v276';
+const CACHE = 'kuanwei-v277';
 const ASSETS = [
   '/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png', '/splash-v10-vision.png',
+  // 需求8：预缓存 7 张邀请海报 jpg（点击生成海报秒开，不依赖网络）
+  '/_splash_v3_deepblue.jpg', '/_splash_v3_teal.jpg', '/_splash_v3_forest.jpg',
+  '/_splash_v3_navy.jpg', '/_splash_v3_onyx.jpg', '/splash_1080x1882_qr.jpg', '/_splash_new_v2_qr.jpg',
   // 预缓存 xlsx 库，保证离线时对账/导出可用
   'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
 ];
