@@ -136,8 +136,7 @@ html[data-theme="dark"] body {
   color: var(--text);
   padding: 18px 16px 12px;
   text-align: center;
-  position: sticky;
-  top: 0; z-index: 100;
+  /* #229 需求9：header 随页面滚动而消失（不再 sticky 固定顶部） */
   box-shadow: 0 1px 3px rgba(0,0,0,.05);
   border-bottom: 1px solid var(--card-border);
 }
@@ -9278,6 +9277,11 @@ function switchPage(pageName) {
   if (pageName === 'manage') renderManage();
   if (pageName === 'perm') { renderPermPage(); renderNotifyManage(); }
   if (pageName === 'reconcile') populateStoreFilter('exportStore');
+  // #229 需求9：header（物流筐收发管理系统）只在首页出现——标准模式仅 record，极简模式仅 simple-home
+  const isSim = document.body.classList.contains('simple-mode');
+  const showHeader = (!isSim && pageName === 'record') || (isSim && pageName === 'simple-home');
+  const headerEl = document.querySelector('.header');
+  if (headerEl) headerEl.style.display = showHeader ? '' : 'none';
 }
 
 // ===== #149 极简模式（视觉独立 + 功能独立：只记 5 筐发出/回收总数） =====
@@ -12490,7 +12494,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.3'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.4'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
