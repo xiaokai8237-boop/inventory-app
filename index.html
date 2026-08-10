@@ -3463,6 +3463,19 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   </div>
 </div>
 
+<!-- ========== 需求8b：生成海报未登录引导弹窗 ========== -->
+<div class="vip-modal" id="posterLoginModal" onclick="closePosterLoginModal()">
+  <div class="vip-box" onclick="event.stopPropagation()">
+    <div class="vip-ico">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <div class="vip-title">请先登录</div>
+    <div class="vip-desc">登录后才能生成你的专属邀请海报（海报带你的邀请码，奖励才算你的）。</div>
+    <div class="vip-btn" onclick="closePosterLoginModal();authGoTo('login')">去登录</div>
+    <div class="vip-later" onclick="closePosterLoginModal()">稍后再说</div>
+  </div>
+</div>
+
 <!-- ========== #144 权限引导弹窗（首次/重看） ========== -->
 <div class="pg-modal" id="permGuideModal">
   <div class="pg-content" onclick="event.stopPropagation()">
@@ -12477,7 +12490,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.1'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.2'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -13370,9 +13383,19 @@ function preloadInvitePosters() {
 }
 var curPosterIdx = -1;
 function openPosterModal() {
-  if (!isLoggedIn() || !getCloudPhone()) { showToast('请先登录'); return; }
+  if (!isLoggedIn() || !getCloudPhone()) {
+    // 未登录：弹明确登录引导（不只是一闪而过的 toast，避免用户以为没反应）
+    var lm = document.getElementById('posterLoginModal');
+    if (lm) { showModal('posterLoginModal'); return; }
+    showToast('请先登录');
+    return;
+  }
   shufflePoster();
   showModal('posterModal');
+}
+function closePosterLoginModal() {
+  var m = document.getElementById('posterLoginModal');
+  if (m) m.classList.remove('show');
 }
 function shufflePoster() {
   if (!INVITE_POSTERS.length) return;
