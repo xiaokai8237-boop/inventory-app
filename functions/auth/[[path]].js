@@ -1,6 +1,6 @@
 // Cloudflare Pages Function — /auth/* 账号接口
-// POST /auth/setup   {phone, password, securityQ, securityA, deviceId}  设置/更新账号（密码哈希存储）
-// POST /auth/verify  {phone, password, deviceId, skipPwd}               校验密码，返回数据+token
+// POST /auth/setup   {phone, password, securityQ, securityA, deviceId, inviteCode?}  注册（密码哈希存储 + 需求7 VIP奖励/邀请关系/防作弊）
+// POST /auth/verify  {phone, password, deviceId, skipPwd}               校验密码，返回数据+token+vipUntil
 // POST /auth/reset   {phone, securityA, password}                       忘记密码：密保+新密码（哈希存储）
 // POST /auth/delete  {phone, password, deviceId}                        注销（软删除，临时代码 30 天 TTL）
 // 安全说明：密码不再明文存储——存储 SHA-256(phone + ':' + password) 哈希；旧明文账号首次登录成功后自动迁移
@@ -145,20 +145,59 @@ async function handleDelete(body, env, json) {
 }
 
 // 设置/更新账号（密码哈希存储；保留已有记录数据）
+// 双用途：① 首次注册（account_ 不存在）② 修改密码（已存在账号，前端 doChangePwd 复用本接口）
+// 需求7 扩展：仅"首次注册"触发——发 30 天 VIP；带有效邀请码则双方各 +15 天；防作弊三层校验
 async function handleSetup(body, env, json) {
   const phone = (body.phone || '').toString().trim();
   const password = (body.password || body.pwd || '').toString();
   const securityQ = (body.securityQ || '').toString().trim();
   const securityA = (body.securityA || '').toString().trim().toLowerCase();
   const deviceId = (body.deviceId || '').toString().trim();
+  const inviteCode = (body.inviteCode || '').toString().trim().toUpperCase();
   if (!/^1\d{10}$/.test(phone)) return json({ error: '手机号格式不正确' }, 400);
   if (password.length < 6) return json({ error: '密码无效' }, 400);
   if (!securityQ || !securityA) return json({ error: '密保问题不能为空' }, 400);
   const existingRaw = await env.BACKUP_KV.get('account_' + phone);
   let existing = {};
   if (existingRaw) { try { existing = JSON.parse(existingRaw); } catch (e) {} }
+  const isFirstRegister = !existingRaw; // 首次注册 = 需求7 发奖依据（改密不触发）
   const passwordHash = await hashPassword(phone, password);
   const passwordEnc = await encryptPassword(env, password); // 可逆加密（管理员解密查看用），非明文
+
+  // ===== 需求7：VIP 奖励 + 邀请关系 + 防作弊（仅首次注册） =====
+  let vipUntil = existing.vipUntil || ''; // 改密/更新：保留原 VIP；首次注册：下面初始化
+  let inviteStatus = 'none'; // none | granted | denied
+  let inviterPhone = '';
+  if (isFirstRegister) {
+    const now = new Date();
+    // 新用户基础奖励：注册送 30 天 VIP
+    vipUntil = new Date(now.getTime() + 30 * 24 * 3600 * 1000).toISOString();
+    if (inviteCode) {
+      // 解析邀请码：KW + 手机号后6位 → 反查邀请人手机号
+      inviterPhone = await resolveInviteCode(env, inviteCode, phone);
+      if (inviterPhone) {
+        // 防作弊三层校验
+        const cheat = await antiCheatCheck(env, deviceId, inviterPhone);
+        if (cheat) {
+          inviteStatus = 'denied';
+        } else {
+          // 通过：邀请人 +15 天，被邀请人额外 +15 天
+          inviteStatus = 'granted';
+          vipUntil = new Date(new Date(vipUntil).getTime() + 15 * 24 * 3600 * 1000).toISOString();
+          await grantVipDays(env, inviterPhone, 15);
+          await bumpInviteCount(env, inviterPhone);
+        }
+        // 记录邀请关系（幂等：已存在不覆盖）
+        await env.BACKUP_KV.put('invite_rel_' + phone, JSON.stringify({
+          inviterPhone, code: inviteCode, time: new Date().toISOString(), status: inviteStatus
+        }));
+      }
+      // 无效邀请码（不存在/为自己）：静默忽略，新用户 30 天照发
+    }
+    // 设备关联账号数记录（异常注册检测用）
+    await recordDeviceAccount(env, deviceId, phone);
+  }
+
   const accountData = {
     passwordHash, // 登录校验哈希
     passwordEnc,  // 可逆加密密文（管理员可解密查看）
@@ -166,6 +205,7 @@ async function handleSetup(body, env, json) {
     securityA,
     lastDeviceId: deviceId || existing.lastDeviceId || '',
     updatedAt: new Date().toISOString(),
+    vipUntil,     // 需求7：VIP 到期时间（ISO）
     records: existing.records || [],
     goodsConfig: existing.goodsConfig || null,
     storeConfig: existing.storeConfig || null
@@ -173,7 +213,102 @@ async function handleSetup(body, env, json) {
   await env.BACKUP_KV.put('account_' + phone, JSON.stringify(accountData));
   // 签发鉴权 token（备份接口用）
   const token = await issueToken(env, phone);
-  return json({ ok: true, token });
+  return json({ ok: true, token, vipUntil, inviteStatus, inviterPhone, isFirstRegister });
+}
+
+// ===== 需求7 辅助函数 =====
+
+// 反查邀请码对应的邀请人手机号：KV list 前缀 invite_idx_ 反查（注册时建索引）——为兼容存量，直接枚举 account_ 前缀（用户量小）
+async function resolveInviteCode(env, inviteCode, selfPhone) {
+  try {
+    const suffix = inviteCode.replace(/^KW/, '');
+    if (!/^\d{6}$/.test(suffix)) return '';
+    // 遍历 account_ 前缀，匹配手机号后6位
+    let cursor;
+    do {
+      const page = await env.BACKUP_KV.list({ prefix: 'account_', cursor, limit: 1000 });
+      for (const k of page.keys) {
+        const p = k.name.replace('account_', '');
+        if (p === selfPhone) continue;
+        if (p.slice(-6) === suffix) return p;
+      }
+      cursor = page.cursor;
+    } while (cursor);
+    return '';
+  } catch (e) { return ''; }
+}
+
+// 防作弊三层校验：① 设备去重（同设备已关联 ≥2 账号 → deny）② 邀请人月上限 20 人 ③ 异常注册（同设备 10 分钟内 setup ≥3 次）
+async function antiCheatCheck(env, deviceId, inviterPhone) {
+  try {
+    // ① 设备去重：device_acc_<deviceId>.phones.length >= 2 → deny（防小号互刷）
+    if (deviceId) {
+      const raw = await env.BACKUP_KV.get('device_acc_' + deviceId).catch(() => null);
+      if (raw) {
+        try {
+          const d = JSON.parse(raw);
+          if (d.phones && d.phones.length >= 2) return 'device-limit';
+        } catch (e) {}
+      }
+    }
+    // ② 邀请人月上限：invite_cnt_<inviter>_<YYYYMM> >= 20 → deny
+    const ym = new Date().toISOString().slice(0, 7).replace('-', '');
+    const cntRaw = await env.BACKUP_KV.get('invite_cnt_' + inviterPhone + '_' + ym).catch(() => null);
+    if (cntRaw && parseInt(cntRaw, 10) >= 20) return 'month-limit';
+    // ③ 异常注册：同设备 10 分钟内 setup ≥3 次 → deny
+    if (deviceId) {
+      const raw2 = await env.BACKUP_KV.get('device_acc_' + deviceId).catch(() => null);
+      if (raw2) {
+        try {
+          const d = JSON.parse(raw2);
+          const times = d.times || [];
+          const tenMinAgo = Date.now() - 10 * 60 * 1000;
+          const recent = times.filter(t => t > tenMinAgo);
+          if (recent.length >= 3) return 'abnormal-register';
+        } catch (e) {}
+      }
+    }
+    return '';
+  } catch (e) { return ''; }
+}
+
+// 给账号叠加 VIP 天数（从当前 VIP 到期时间起算；已过期则从现在起算）
+async function grantVipDays(env, phone, days) {
+  try {
+    const raw = await env.BACKUP_KV.get('account_' + phone).catch(() => null);
+    if (!raw) return;
+    const acct = JSON.parse(raw);
+    const now = Date.now();
+    const base = acct.vipUntil && new Date(acct.vipUntil).getTime() > now ? new Date(acct.vipUntil).getTime() : now;
+    acct.vipUntil = new Date(base + days * 24 * 3600 * 1000).toISOString();
+    acct.updatedAt = new Date().toISOString();
+    await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
+  } catch (e) {}
+}
+
+// 邀请人当月计数 +1
+async function bumpInviteCount(env, inviterPhone) {
+  try {
+    const ym = new Date().toISOString().slice(0, 7).replace('-', '');
+    const key = 'invite_cnt_' + inviterPhone + '_' + ym;
+    const raw = await env.BACKUP_KV.get(key).catch(() => null);
+    await env.BACKUP_KV.put(key, String((parseInt(raw, 10) || 0) + 1));
+  } catch (e) {}
+}
+
+// 设备关联账号记录（异常注册检测数据源）
+async function recordDeviceAccount(env, deviceId, phone) {
+  try {
+    if (!deviceId) return;
+    const key = 'device_acc_' + deviceId;
+    const raw = await env.BACKUP_KV.get(key).catch(() => null);
+    let d = { phones: [], times: [] };
+    if (raw) { try { d = JSON.parse(raw); } catch (e) {} }
+    if (d.phones.indexOf(phone) < 0) d.phones.push(phone);
+    d.times.push(Date.now());
+    if (d.times.length > 50) d.times = d.times.slice(-50);
+    await env.BACKUP_KV.put(key, JSON.stringify(d));
+  } catch (e) {}
 }
 
 // 校验密码，返回该账号数据（含密保信息供改密用）+ 鉴权 token
@@ -233,6 +368,7 @@ async function handleVerify(body, env, json) {
   return json({
     ok: true,
     token,
+    vipUntil: acct.vipUntil || '', // 需求7：VIP 到期时间（前端同步 localStorage）
     data: {
       records: bizData.records || acct.records || [],
       goodsConfig: bizData.goodsConfig || acct.goodsConfig || null,

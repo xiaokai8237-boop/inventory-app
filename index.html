@@ -2585,6 +2585,33 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 .inv-login-tip { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.4); font-size: 12px; color: #FFC9C9; display: flex; align-items: center; gap: 8px; }
 .inv-login-btn { margin-left: auto; font-size: 12px; font-weight: 800; color: #0B2E38; background: linear-gradient(135deg,#F8E3A6,#E0A63E); border: none; border-radius: 14px; padding: 6px 14px; cursor: pointer; flex-shrink: 0; }
 .inv-code-card { margin-top: 12px; padding: 15px 14px; border-radius: 14px; background: linear-gradient(160deg, rgba(248,227,166,.16), rgba(224,166,62,.10)); border: 1.5px solid rgba(245,220,146,.55); text-align: center; }
+/* 需求7：本月邀请进度条 */
+.inv-prog { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); }
+.inv-prog-hd { display: flex; align-items: baseline; gap: 4px; font-size: 11px; color: #8FA3AE; }
+.inv-prog-hd b { color: #F5DC92; font-size: 13px; }
+.inv-prog-bar { height: 8px; border-radius: 5px; background: rgba(255,255,255,.10); margin-top: 6px; overflow: hidden; }
+.inv-prog-bar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg,#F8E3A6,#E0A63E); transition: width .4s; }
+/* 需求7：邀请记录入口 */
+.inv-rec-entry { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 12px 13px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(245,220,146,.35); cursor: pointer; }
+.inv-rec-entry > svg { width: 20px; height: 20px; color: #F5DC92; flex-shrink: 0; }
+.inv-rec-txt { flex: 1; }
+.inv-rec-name { font-size: 13px; font-weight: 800; color: #FFFFFF; }
+.inv-rec-desc { font-size: 10px; color: #8FA3AE; margin-top: 1px; }
+.inv-rec-arrow { width: 16px; height: 16px; color: #9FD0D6; flex-shrink: 0; }
+/* 需求7：邀请记录列表 */
+.inv-rec-item { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 11px 12px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); }
+.inv-rec-ava { width: 34px; height: 34px; border-radius: 50%; background: rgba(124,232,224,.12); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.inv-rec-ava svg { width: 20px; height: 20px; color: #7CE8E0; }
+.inv-rec-phone { font-size: 14px; font-weight: 800; color: #FFFFFF; }
+.inv-rec-time { font-size: 10px; color: #8FA3AE; margin-top: 2px; }
+.inv-rec-badge { font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 11px; flex-shrink: 0; }
+.inv-rec-badge-grant { color: #05250F; background: #4ADE80; }
+.inv-rec-badge-pend { color: #FFE3E3; background: rgba(255,107,107,.28); border: 1px solid rgba(255,107,107,.6); }
+.inv-rec-empty { text-align: center; padding: 34px 0 24px; }
+.inv-rec-empty > svg { width: 44px; height: 44px; color: #7CE8E0; opacity: .5; margin: 0 auto 8px; display: block; }
+.inv-rec-empty p { font-size: 12px; color: #8FA3AE; }
+/* 需求7：奖励弹窗天数大字 */
+.vip-days { font-size: 34px; font-weight: 900; color: #F5DC92; margin: 8px 0 2px; }
 .inv-code-lbl { font-size: 11px; color: #9FD0D6; }
 .inv-code-val { font-size: 34px; font-weight: 900; letter-spacing: 6px; color: #F5DC92; margin: 6px 0 10px; font-family: 'Consolas','Menlo',monospace; }
 .inv-code-actions { display: flex; gap: 8px; }
@@ -3371,6 +3398,20 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   </div>
 </div>
 
+<!-- ========== 需求7：VIP 奖励到账弹窗 ========== -->
+<div class="vip-modal" id="vipRewardModal" onclick="closeVipRewardModal()">
+  <div class="vip-box" onclick="event.stopPropagation()">
+    <div class="vip-ico" style="background:linear-gradient(135deg,#F8E3A6,#E0A63E);">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l4 3 6-5 6 5 4-3v6c0 2-1.5 4-4 5.5V18H6v-2.5C3.5 14 2 12 2 10z"/><path d="M6 21h12"/></svg>
+    </div>
+    <div class="vip-title">恭喜！VIP 会员已到账</div>
+    <div class="vip-days" id="vipRewardDays">+30 天</div>
+    <div class="vip-desc" id="vipRewardSrc">新用户注册奖励</div>
+    <div class="vip-desc" id="vipRewardUntil" style="color:#7E97A1;margin-top:2px;">会员有效期至 --</div>
+    <div class="vip-btn" onclick="closeVipRewardModal()">好 的</div>
+  </div>
+</div>
+
 <!-- ========== #144 权限引导弹窗（首次/重看） ========== -->
 <div class="pg-modal" id="permGuideModal">
   <div class="pg-content" onclick="event.stopPropagation()">
@@ -3553,6 +3594,17 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       </div>
     </div>
 
+    <!-- 需求7：本月邀请进度 + 邀请记录入口 -->
+    <div class="inv-prog" id="invProgWrap" style="display:none;">
+      <div class="inv-prog-hd"><span>本月已邀请</span><b id="invMonthCount">0 / 20</b><span>人</span></div>
+      <div class="inv-prog-bar"><i id="invMonthBar" style="width:0%"></i></div>
+    </div>
+    <div class="inv-rec-entry" onclick="openInviteRecords()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <div class="inv-rec-txt"><div class="inv-rec-name">邀请记录</div><div class="inv-rec-desc" id="invRecDesc">查看谁通过你的邀请码注册了</div></div>
+      <svg class="inv-rec-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </div>
+
     <!-- 海报 -->
     <div class="inv-sec"><span class="inv-sec-no">1</span>拉新海报</div>
     <div class="inv-poster-wrap">
@@ -3574,6 +3626,30 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <!-- 规则说明 -->
     <div class="inv-rule">
       <b>邀请规则</b>：好友通过你的邀请码注册并登录，你们双方都将获得会员奖励（详见会员中心）。
+    </div>
+  </div>
+</div>
+
+<!-- ========== 需求7：邀请记录页 ========== -->
+<div class="page" id="page-invite-records">
+  <div class="inv-head">
+    <button class="inv-back" onclick="switchPage('invite')" aria-label="返回">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="inv-title">邀请记录<small>本月 X/20 人 · 每成功 1 人 +15 天 VIP</small></div>
+  </div>
+  <div class="inv-body">
+    <!-- 未登录引导 -->
+    <div class="inv-login-tip" id="invRecLoginTip" style="display:none;">
+      邀请记录跟着账号走，请先登录。<button class="inv-login-btn" onclick="authGoTo('login')">去登录</button>
+    </div>
+    <!-- 记录列表 -->
+    <div id="invRecList"></div>
+    <!-- 空状态 -->
+    <div class="inv-rec-empty" id="invRecEmpty" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <p>还没有好友通过你的邀请码注册</p>
+      <button class="inv-share-btn" style="max-width:220px;margin:12px auto 0;" onclick="switchPage('invite')">去邀请好友</button>
     </div>
   </div>
 </div>
@@ -3980,6 +4056,12 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
         <svg class="ai-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         <input type="text" id="setupSecA" placeholder="请输入密保答案" autocapitalize="off" autocorrect="off" spellcheck="false">
       </div>
+      <label class="auth-label">邀请码 <span style="color:#7E97A1;font-size:11px;">（选填，朋友推荐注册时填，双方都有会员送）</span></label>
+      <div class="auth-input-row" style="border-color:rgba(245,220,146,.45);">
+        <svg class="ai-icon" style="color:#F5DC92;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <input type="text" id="setupInviteCode" placeholder="如 KW138000" autocapitalize="characters" autocomplete="off" spellcheck="false" maxlength="10">
+      </div>
+      <div style="font-size:11px;color:#6E8A95;margin:2px 0 8px 4px;">扫码/点链接打开会自动带邀请码，无需手填</div>
       <button class="auth-btn" style="margin-top:4px;" onclick="doSetupAccount()">立 即 注 册</button>
       <div class="auth-switch">已有账号？<span class="auth-switch-link" onclick="switchPage('login')">去登录</span></div>
     </div>
@@ -5935,6 +6017,10 @@ async function doLogin() {
       if (result.token) setAuthToken(result.token); // 保存鉴权 token（备份接口用）
       setCloudPhone(phone);
       migrateDataToScope(); // 首次登录：旧全局数据迁入该账号作用域
+      // 需求7：登录同步云端 VIP 到期时间到本地（换设备/清缓存也能恢复 VIP 状态）
+      if (result.vipUntil) {
+        try { localStorage.setItem('kuanwei_vip_until', result.vipUntil); } catch (e) {}
+      }
       setLoggedIn(true);
       authRememberPhone(phone); // 记住账号（勾选状态）
       closeLoginModal();
@@ -6060,8 +6146,20 @@ async function doSetupAccount() {
   if (!validatePassword(pwd)) { showToast('密码需≥8位，含字母+数字+符号'); return; }
   if (pwd !== pwd2) { showToast('两次密码不一致'); return; }
   if (!secA) { showToast('请填写密保答案'); return; }
+  // 需求7：邀请码来源优先级 = 手动填 > URL 参数带（kuanwei_invited_by）
+  let inviteCode = '';
+  try {
+    const manual = (document.getElementById('setupInviteCode').value || '').trim().toUpperCase();
+    if (manual) {
+      inviteCode = manual;
+    } else {
+      const saved = localStorage.getItem('kuanwei_invited_by');
+      if (saved) { try { inviteCode = (JSON.parse(saved).code || '').toString(); } catch (e) {} }
+    }
+  } catch (e) {}
   showLoading('正在设置…');
   const setupBody = { phone, password: pwd, securityQ: secQ, securityA: secA, deviceId: getDeviceId() };
+  if (inviteCode) setupBody.inviteCode = inviteCode;
   try {
     const resp = await fetchWithTimeout(API_BASE + '/auth/setup', {
       method: 'POST',
@@ -6080,7 +6178,14 @@ async function doSetupAccount() {
       renderAccountBadge();
       setLoggedIn(true);
       refreshRecordViews(); // 设置账号后刷新数据视图
-      showToast('密码设置成功');
+      // 需求7：注册成功 VIP 到账 → 同步本地 + 弹窗提示
+      if (result.vipUntil) {
+        try { localStorage.setItem('kuanwei_vip_until', result.vipUntil); } catch (e) {}
+        const days = result.inviteStatus === 'granted' ? 45 : 30;
+        showVipRewardModal(days, result.vipUntil, result.inviteStatus === 'granted' ? '好友邀请 · 注册奖励' : '新用户注册奖励');
+      } else {
+        showToast('密码设置成功');
+      }
       // 新账号首次备份本地数据到云端；不再自动同步（恢复需用户手动点「恢复云端数据」）
       backupToCloud(true);
     } else {
@@ -12324,7 +12429,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.0.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.1.0'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -13052,6 +13157,97 @@ function chooseVipPlan(id) {
 function openInvitePage() {
   switchPage('invite');
   renderInvitePage();
+  loadInviteStats(); // 需求7：加载本月邀请进度
+}
+// ===== 需求7：VIP 奖励到账弹窗 =====
+function showVipRewardModal(days, untilIso, srcText) {
+  const elDays = document.getElementById('vipRewardDays');
+  const elSrc = document.getElementById('vipRewardSrc');
+  const elUntil = document.getElementById('vipRewardUntil');
+  if (elDays) elDays.textContent = '+' + days + ' 天';
+  if (elSrc) elSrc.textContent = srcText || 'VIP 奖励';
+  if (elUntil) {
+    try {
+      const d = new Date(untilIso);
+      elUntil.textContent = '会员有效期至 ' + d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    } catch (e) { elUntil.textContent = ''; }
+  }
+  showModal('vipRewardModal');
+}
+function closeVipRewardModal() {
+  const m = document.getElementById('vipRewardModal');
+  if (m) m.classList.remove('show');
+}
+// ===== 需求7：本月邀请进度（拉新页） =====
+async function loadInviteStats() {
+  const wrap = document.getElementById('invProgWrap');
+  const cntEl = document.getElementById('invMonthCount');
+  const barEl = document.getElementById('invMonthBar');
+  const descEl = document.getElementById('invRecDesc');
+  if (!wrap || !isLoggedIn() || !getCloudPhone()) { if (wrap) wrap.style.display = 'none'; return; }
+  try {
+    const resp = await fetchWithTimeout(API_BASE + '/api/invite/stats?token=' + encodeURIComponent(getAuthToken() || ''), { headers: { 'Authorization': 'Bearer ' + (getAuthToken() || '') } });
+    const r = await resp.json();
+    if (r && r.ok) {
+      const cnt = r.monthCount || 0, limit = r.limit || 20;
+      wrap.style.display = '';
+      if (cntEl) cntEl.textContent = cnt + ' / ' + limit;
+      if (barEl) barEl.style.width = Math.min(100, cnt / limit * 100) + '%';
+      if (descEl) descEl.textContent = '已成功 ' + cnt + ' 人 · 每成功 1 人 +15 天 VIP';
+    }
+  } catch (e) {}
+}
+// ===== 需求7：邀请记录页 =====
+function openInviteRecords() {
+  switchPage('invite-records');
+  renderInviteRecords();
+}
+async function renderInviteRecords() {
+  const listEl = document.getElementById('invRecList');
+  const emptyEl = document.getElementById('invRecEmpty');
+  const loginTip = document.getElementById('invRecLoginTip');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  if (loginTip) loginTip.style.display = 'none';
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (!isLoggedIn() || !getCloudPhone()) {
+    if (loginTip) loginTip.style.display = '';
+    return;
+  }
+  // 加载进度（更新头部小字）
+  loadInviteStats();
+  try {
+    const resp = await fetchWithTimeout(API_BASE + '/api/invite/records?token=' + encodeURIComponent(getAuthToken() || ''), { headers: { 'Authorization': 'Bearer ' + (getAuthToken() || '') } });
+    const r = await resp.json();
+    if (!(r && r.ok)) {
+      if (loginTip) loginTip.style.display = '';
+      return;
+    }
+    const list = r.list || [];
+    if (!list.length) {
+      if (emptyEl) emptyEl.style.display = '';
+      return;
+    }
+    list.forEach(function(item) {
+      const div = document.createElement('div');
+      div.className = 'inv-rec-item';
+      const isGranted = item.status === 'granted';
+      const phoneTxt = String(item.phone || '').replace(/[<>&"']/g, function(c) { return { '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#39;' }[c]; });
+      div.innerHTML =
+        '<div class="inv-rec-ava"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>' +
+        '<div style="flex:1;"><div class="inv-rec-phone">' + phoneTxt + '</div><div class="inv-rec-time">' + formatInviteTime(item.time) + '</div></div>' +
+        '<span class="inv-rec-badge ' + (isGranted ? 'inv-rec-badge-grant' : 'inv-rec-badge-pend') + '">' + (isGranted ? '已发放 +15天' : '待发放') + '</span>';
+      listEl.appendChild(div);
+    });
+  } catch (e) {}
+}
+function formatInviteTime(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    const pad = function(n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' 注册';
+  } catch (e) { return iso; }
 }
 // 内置 5 种风格邀请文案（{code} 会被替换为邀请码）
 var INVITE_TEXTS = [
@@ -13197,22 +13393,238 @@ function genInvitePoster() {
   ctx.fillText(getInviteCode(), W / 2, 530);
   ctx.fillStyle = '#4ADE80';
   ctx.font = 'bold 26px "Noto Sans SC",sans-serif';
-  ctx.fillText('输入邀请码注册，双方都有会员奖励', W / 2, 578);
+  ctx.fillText('扫码注册，自动领会员', W / 2, 578);
   // 中部说明
   ctx.fillStyle = '#C9DDE3';
   ctx.font = '26px "Noto Sans SC",sans-serif';
-  ctx.fillText('扫一扫 / 点链接打开，注册时填邀请码', W / 2, 700);
-  // 底部链接条
-  ctx.fillStyle = 'rgba(255,255,255,.06)';
-  roundRect(ctx, 70, 940, 610, 90, 18);
+  ctx.fillText('扫一扫 / 点链接打开，注册即送 VIP', W / 2, 700);
+  // 底部二维码区（需求7：链接条 → 二维码）
+  const qrSize = 250;
+  const qrX = 80, qrY = 880;
+  // 二维码白底
+  ctx.fillStyle = '#FFFFFF';
+  roundRect(ctx, qrX, qrY, qrSize, qrSize, 16);
   ctx.fill();
-  ctx.fillStyle = '#7E97A1';
-  ctx.font = '20px "Consolas",monospace';
-  ctx.fillText(getInviteLink(), W / 2, 995, 570);
+  // 绘制二维码（内嵌轻量 QR 生成器；失败时降级为链接文字）
+  const qrData = drawQrCode(ctx, qrX + 12, qrY + 12, qrSize - 24, getInviteLink());
+  // 右侧说明
+  const labelX = qrX + qrSize + 24;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 30px "Noto Sans SC",sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('扫码打开注册', labelX, qrY + 70);
+  ctx.fillStyle = '#8FA3AE';
+  ctx.font = '20px "Noto Sans SC",sans-serif';
+  ctx.fillText('微信/相机扫一扫', labelX, qrY + 110);
+  ctx.fillText('自动带邀请码', labelX, qrY + 140);
+  ctx.fillText('无需手输', labelX, qrY + 170);
+  ctx.textAlign = 'center';
+  // 二维码下方小字链接兜底（未登录/QR 生成失败时也可见）
+  ctx.fillStyle = 'rgba(255,255,255,.5)';
+  ctx.font = '18px "Consolas",monospace';
+  ctx.fillText(getInviteLink(), W / 2, qrY + qrSize + 40, 630);
   // 底部品牌落款
   ctx.fillStyle = 'rgba(255,255,255,.45)';
   ctx.font = '22px "Noto Sans SC",sans-serif';
-  ctx.fillText('物流筐 · 让每一次送货都清清楚楚', W / 2, 1100);
+  ctx.fillText('物流筐 · 让每一次送货都清清楚楚', W / 2, 1140);
+}
+// ===== 需求7：内嵌轻量 QR 生成器（QR Code 标准，byte 模式 + 纠错 L，版本 1-6） =====
+// 无外部依赖，弱网/离线可用；用于海报二维码（内容=邀请链接）
+var QR_GF_EXP = [], QR_GF_LOG = [];
+(function() {
+  var x = 1;
+  for (var i = 0; i < 255; i++) { QR_GF_EXP[i] = x; QR_GF_LOG[x] = i; x = x * 2; if (x >= 256) x = x ^ 0x11d; }
+})();
+function qrGfMul(a, b) { if (a === 0 || b === 0) return 0; return QR_GF_EXP[(QR_GF_LOG[a] + QR_GF_LOG[b]) % 255]; }
+function qrGfDiv(a, b) { if (b === 0) throw new Error('qr: div0'); if (a === 0) return 0; return QR_GF_EXP[(QR_GF_LOG[a] + 255 - QR_GF_LOG[b]) % 255]; }
+// 版本信息：{ver, dataCodewords, ecCodewords, totalModules}
+// 纠错级别 L 的版本 1-6（byte 模式容量足够 52 字符链接）
+var QR_VERSIONS = [
+  { ver: 1, total: 26, ec: 7 },   // byte L 容量 17
+  { ver: 2, total: 44, ec: 10 },  // 32
+  { ver: 3, total: 70, ec: 15 },  // 53
+  { ver: 4, total: 100, ec: 20 }, // 78
+  { ver: 5, total: 134, ec: 26 }, // 106
+  { ver: 6, total: 172, ec: 36 }  // 134
+];
+// 每块数据码字数的 RS 生成多项式系数（纠错 L，版本 1-6 单块）
+// 生成多项式 = (x - α^0)(x - α^1)...(x - α^(ecLen-1))，α=2
+function qrRsGenPoly(ecLen) {
+  var cur = [1];
+  for (var m = 0; m < ecLen; m++) {
+    var tmp = new Array(cur.length + 1).fill(0);
+    for (var a = 0; a < cur.length; a++) {
+      tmp[a] ^= cur[a];
+      tmp[a + 1] ^= qrGfMul(cur[a], QR_GF_EXP[m]);
+    }
+    cur = tmp;
+  }
+  return cur;
+}
+function qrComputeEC(data, ecLen) {
+  var gen = qrRsGenPoly(ecLen);
+  var rem = new Array(ecLen).fill(0);
+  for (var i = 0; i < data.length; i++) {
+    var factor = data[i] ^ rem[0];
+    rem.shift();
+    rem.push(0);
+    if (factor !== 0) {
+      for (var j = 0; j < ecLen; j++) rem[j] ^= qrGfMul(gen[j + 1], factor);
+    }
+  }
+  return rem;
+}
+function qrBuildMatrix(text) {
+  var data = [];
+  var bytes = [];
+  for (var i = 0; i < text.length; i++) bytes.push(text.charCodeAt(i) & 0xff);
+  // byte 模式：0100 + 8bit 长度 + 数据
+  var lenBits = bytes.length < 128 ? 8 : 16;
+  var v = 0;
+  for (var vi = 0; vi < QR_VERSIONS.length; vi++) {
+    var cap = QR_VERSIONS[vi].total - QR_VERSIONS[vi].ec;
+    var capBits = lenBits === 8 ? 4 + 8 : 4 + 16;
+    var avail = cap * 8 - capBits;
+    if (bytes.length * 8 <= avail) { v = vi; break; }
+  }
+  if (QR_VERSIONS[v].ver < 4 && lenBits === 16) { for (var v2 = 0; v2 < QR_VERSIONS.length; v2++) if (QR_VERSIONS[v2].total - QR_VERSIONS[v2].ec >= bytes.length + 3 && QR_VERSIONS[v2].ver >= 4) { v = v2; break; } }
+  var ver = QR_VERSIONS[v].ver;
+  var totalCodewords = QR_VERSIONS[v].total;
+  var ecLen = QR_VERSIONS[v].ec;
+  // 编码数据位
+  var bits = [];
+  function pushBits(val, n) { for (var b = n - 1; b >= 0; b--) bits.push((val >> b) & 1); }
+  pushBits(4, 4); // byte mode
+  pushBits(bytes.length, lenBits);
+  for (var bi = 0; bi < bytes.length; bi++) pushBits(bytes[bi], 8);
+  // 终止符 + 填充到字节 + 填充码字
+  pushBits(0, Math.min(4, (totalCodewords * 8) - bits.length));
+  while (bits.length % 8 !== 0) bits.push(0);
+  var dataWords = [];
+  for (var dw = 0; dw < bits.length; dw += 8) {
+    var byte = 0;
+    for (var db = 0; db < 8; db++) byte = (byte << 1) | bits[dw + db];
+    dataWords.push(byte);
+  }
+  // 填充到数据码字容量
+  var dataCapacity = totalCodewords - ecLen;
+  var pad = [0xEC, 0x11];
+  var pi = 0;
+  while (dataWords.length < dataCapacity) { dataWords.push(pad[pi % 2]); pi++; }
+  // 纠错码
+  var ecWords = qrComputeEC(dataWords, ecLen);
+  var allCodewords = dataWords.concat(ecWords);
+  // 构建模块矩阵
+  var size = ver * 4 + 17;
+  var mod = [];
+  for (var r = 0; r < size; r++) { mod[r] = []; for (var c = 0; c < size; c++) mod[r][c] = null; }
+  function setMod(r, c, val) { if (r >= 0 && r < size && c >= 0 && c < size) mod[r][c] = val; }
+  function getMod(r, c) { return mod[r][c] === null ? false : mod[r][c]; }
+  // Finder patterns (3 角)
+  function drawFinder(r0, c0) {
+    for (var r = -1; r <= 7; r++) for (var c = -1; c <= 7; c++) {
+      var rr = r0 + r, cc = c0 + c;
+      if (rr < 0 || rr >= size || cc < 0 || cc >= size) continue;
+      var dark = (r >= 0 && r <= 6 && (c === 0 || c === 6)) || (c >= 0 && c <= 6 && (r === 0 || r === 6)) || (r >= 2 && r <= 4 && c >= 2 && c <= 4);
+      setMod(rr, cc, dark);
+    }
+  }
+  drawFinder(0, 0); drawFinder(0, size - 7); drawFinder(size - 7, 0);
+  // Timing patterns
+  for (var t = 8; t < size - 8; t++) {
+    if (mod[6][t] === null) mod[6][t] = t % 2 === 0;
+    if (mod[t][6] === null) mod[t][6] = t % 2 === 0;
+  }
+  // Alignment pattern（版本 >= 2，中心位置）
+  var alignPos = ver === 1 ? [] : (ver === 2 ? [6, 18] : (ver === 3 ? [6, 22] : (ver === 4 ? [6, 26] : (ver === 5 ? [6, 30] : [6, 34]))));
+  if (alignPos.length) {
+    var positions = [];
+    for (var ap = 0; ap < alignPos.length; ap++) for (var ap2 = 0; ap2 < alignPos.length; ap2++) {
+      if (!((ap === 0 && ap2 === 0) || (ap === 0 && ap2 === alignPos.length - 1) || (ap === alignPos.length - 1 && ap2 === 0))) positions.push([alignPos[ap], alignPos[ap2]]);
+    }
+    for (var pi2 = 0; pi2 < positions.length; pi2++) {
+      var cr = positions[pi2][0], cc = positions[pi2][1];
+      for (var rr2 = -2; rr2 <= 2; rr2++) for (var cc2 = -2; cc2 <= 2; cc2++) {
+        if (mod[cr + rr2][cc + cc2] !== null) continue;
+        var dark2 = Math.max(Math.abs(rr2), Math.abs(cc2)) !== 1;
+        setMod(cr + rr2, cc + cc2, dark2);
+      }
+    }
+  }
+  // 数据放置（从右下角蛇形，跳过功能图形）
+  var bitIdx = 0;
+  var codewordBits = [];
+  for (var cw = 0; cw < allCodewords.length; cw++) for (var cb = 7; cb >= 0; cb--) codewordBits.push((allCodewords[cw] >> cb) & 1);
+  var col = size - 1;
+  var upward = true;
+  while (col > 0) {
+    if (col === 6) col--;
+    for (var i2 = 0; i2 < size; i2++) {
+      var row = upward ? size - 1 - i2 : i2;
+      for (var cc3 = 0; cc3 < 2; cc3++) {
+        var col2 = col - cc3;
+        if (col2 < 0) continue;
+        if (mod[row][col2] === null && bitIdx < codewordBits.length) {
+          mod[row][col2] = codewordBits[bitIdx++];
+        }
+      }
+    }
+    col -= 2;
+    upward = !upward;
+  }
+  // 掩码（mask 0: (row+col)%2==0），跳过功能模块
+  for (var r3 = 0; r3 < size; r3++) for (var c4 = 0; c4 < size; c4++) {
+    if (mod[r3][c4] !== null && !isFunctionModule(r3, c4, size, ver)) {
+      if ((r3 + c4) % 2 === 0) mod[r3][c4] = !mod[r3][c4];
+    }
+  }
+  // 格式信息（纠错L + 掩码0 → 标准 15 位码 0x77C4 = 111011111000100，bit0=LSB）
+  var fmt = [0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1];
+  // 副本1（左上角旁）
+  var fRow1 = [8, 8, 8, 8, 8, 8, 8, 8, 7, 5, 4, 3, 2, 1, 0];
+  var fCol1 = [0, 1, 2, 3, 4, 5, 7, 8, 8, 8, 8, 8, 8, 8, 8];
+  // 副本2（右上 + 左下旁）
+  var fRow2 = [size - 1, size - 2, size - 3, size - 4, size - 5, size - 6, size - 7, size - 8, 8, 8, 8, 8, 8, 8, 8];
+  var fCol2 = [8, 8, 8, 8, 8, 8, 8, 8, size - 8, size - 7, size - 6, size - 5, size - 4, size - 3, size - 2];
+  for (var fi = 0; fi < 15; fi++) {
+    setMod(fRow1[fi], fCol1[fi], !!fmt[fi]);
+    setMod(fRow2[fi], fCol2[fi], !!fmt[fi]);
+  }
+  setMod(size - 8, 8, true); // 暗模块
+  // 收尾：残留 null 模块填 false（防止未覆盖区域）
+  for (var rr = 0; rr < size; rr++) for (var cc = 0; cc < size; cc++) if (mod[rr][cc] === null) mod[rr][cc] = false;
+  return mod;
+}
+function isFunctionModule(r, c, size, ver) {
+  // finder + separator + timing
+  if (r <= 8 && c <= 8) return true;
+  if (r <= 8 && c >= size - 8) return true;
+  if (r >= size - 8 && c <= 8) return true;
+  if (r === 6 || c === 6) return true;
+  // alignment
+  if (ver >= 2) {
+    var alignPos = ver === 2 ? [6, 18] : (ver === 3 ? [6, 22] : (ver === 4 ? [6, 26] : (ver === 5 ? [6, 30] : [6, 34])));
+    for (var a = 0; a < alignPos.length; a++) for (var b = 0; b < alignPos.length; b++) {
+      if ((a === 0 && b === 0) || (a === 0 && b === alignPos.length - 1) || (a === alignPos.length - 1 && b === 0)) continue;
+      if (Math.abs(r - alignPos[a]) <= 2 && Math.abs(c - alignPos[b]) <= 2) return true;
+    }
+  }
+  return false;
+}
+// 在 Canvas 上绘制二维码（白色背景 + 黑色模块），返回 true 表示成功
+function drawQrCode(ctx, x, y, size, text) {
+  try {
+    var mod = qrBuildMatrix(text);
+    var n = mod.length;
+    var cell = size / n;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(x, y, size, size);
+    ctx.fillStyle = '#0A1A22';
+    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) {
+      if (mod[r][c]) ctx.fillRect(x + c * cell, y + r * cell, Math.ceil(cell), Math.ceil(cell));
+    }
+    return true;
+  } catch (e) { return false; }
 }
 function drawCrown(ctx, x, y, s) {
   ctx.beginPath();
