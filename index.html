@@ -9578,7 +9578,24 @@ function renderModeSelect() {
 
 // ======== 安卓返回键处理（SPA 页面栈 + 弹窗/面板逐级返回） ========
 // 原生 MainActivity.onBackPressed → 壳页 __handleNativeBack() → iframe postMessage __backReq
-// → 本函数执行：先关弹窗 → 再关面板 → 再退页面 → 首页则返回 false（壳页显示"再按一次退出"）
+// → 本函数执行：先关弹窗 → 再关面板 → 再按层级退页面 → 首页则返回 false（壳页显示"再按一次退出"）
+// #235 需求：所有页面/弹窗按系统返回只能返回上一级，不能退出软件
+// 页面层级返回表（逐级返回，非直接跳回首页）：
+const _PAGE_BACK_MAP = {
+  'history': 'record',            // 记录页(底部tab) → 首页
+  'manage': 'record',             // 管理页(底部tab) → 首页
+  'settings': 'manage',           // 使用说明 ← 管理页
+  'invite': 'manage',             // 邀请好友 ← 管理页
+  'invite-records': 'invite',     // 邀请记录 ← 邀请页
+  'vip': 'manage',                // 会员中心 ← 管理页
+  'summary': 'manage',            // 汇总 ← 管理页
+  'reconcile': 'manage',          // 对账 ← 管理页
+  'perm': 'manage',               // 权限管理 ← 管理页
+  'simple-records': 'simple-home',// 极简记录(底部tab) → 极简首页
+  'simple-settings': 'simple-home'// 极简设置(底部tab) → 极简首页
+  // mode-select：用现有 backFromModeSelect() 回来源页
+  // login/setup/forgot：回当前模式首页（标准 record / 极简 simple-home）
+};
 let _backReqSeq = 0;
 function __handleNativeBack() {
   try {
@@ -9624,14 +9641,30 @@ function __handleNativeBack() {
         return true;
       }
     }
-    // 3) 非首页 → 回首页（首页 = page-record，底部第一个 tab）
+    // 3) 非首页 → 按页面层级返回上一级（逐级返回，不是直接跳回首页）
     const activePage = document.querySelector('.page.active');
-    if (activePage && activePage.id !== 'page-record') {
-      switchPage('record');
-      return true;
+    if (activePage) {
+      const name = activePage.id.replace('page-', '');
+      const isSim = document.body.classList.contains('simple-mode');
+      // mode-select：复用现有 backFromModeSelect（回来源页，含极简/标准区分）
+      if (name === 'mode-select' && typeof backFromModeSelect === 'function') {
+        backFromModeSelect();
+        return true;
+      }
+      // 登录/注册/忘记密码整页：回当前模式的首页
+      if (name === 'login' || name === 'setup' || name === 'forgot') {
+        switchPage(isSim ? 'simple-home' : 'record');
+        return true;
+      }
+      // 层级映射表：返回上一级
+      const target = _PAGE_BACK_MAP[name];
+      if (target) {
+        switchPage(target);
+        return true;
+      }
     }
   } catch (e) {}
-  return false; // 首页 + 无弹窗 → 未处理（交给原生"再按一次退出"）
+  return false; // 首页（record/simple-home）+ 无弹窗 → 未处理（交给原生"再按一次退出"）
 }
 // 网页直开（非 iframe，浏览器地址栏）场景：也响应原生返回（若容器注入了 __handleNativeBack 调用）
 if (typeof window.__handleNativeBack !== 'function') {
@@ -12633,7 +12666,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.8'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.9'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');

@@ -36,7 +36,7 @@ const { chromium } = require('playwright');
   await page.evaluate(() => switchPage('simple-settings'));
   await page.waitForTimeout(300);
   const ver = await page.evaluate(() => document.getElementById('simpleVersion')?.textContent);
-  check('极简版本号 = v8.2.7', ver === 'v8.2.7', 'got=' + ver);
+  check('极简版本号 = v8.2.9', ver === 'v8.2.9', 'got=' + ver);
   await page.evaluate(() => { localStorage.setItem('kuanwei_simple_mode','0'); localStorage.removeItem('kuanwei_simple_mode'); });
 
   console.log('=== 4. 对账页帮助按钮 ===');
