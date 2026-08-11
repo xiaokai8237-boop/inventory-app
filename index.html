@@ -3935,7 +3935,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <b>现在收费吗？</b><br>
       现在是<b>测试期</b>：所有人都是 VIP，上面这些功能<b>全部免费</b>，不用花钱。<br><br>
       <b>正式收费后有几个档位？</b><br>
-      月卡 12.8 / 季卡 24.8（省 35%）/ 年卡 58（省 62%）/ 终身卡 128——<b>测试期不收费，别担心</b>。<br><br>
+      月卡 12.8 / 季卡 28.8（省 25%）/ 年卡 88（省 43%）/ 终身卡 158——<b>测试期不收费，别担心</b>。<br><br>
       <b>怎么进会员中心？</b><br>
       点底部 <b>「管理」</b> → 顶部会员卡（VIP 会员）→ 点进去看权益和档位。
     </div>
@@ -10104,7 +10104,7 @@ function openPageHelp(e) {
       h = `<div class="ph-map"><span class="pm-cell">测试期</span><span class="pm-arrow">›</span><span class="pm-cell pm-main">默认 VIP</span><span class="pm-arrow">›</span><span class="pm-cell">全部功能免费用</span></div>`
         + steps([
           '当前是<b>测试期</b>：所有人都是 VIP，高级功能免费体验（极简模式/到店提醒/语音/拍照/汇总/对账）',
-          '正式收费后：<b>4 个档位</b>（月卡 12.8 / 季卡 24.8 / 年卡 58 / 终身卡 128）',
+          '正式收费后：<b>4 个档位</b>（月卡 12.8 / 季卡 28.8 / 年卡 88 / 终身卡 158）',
           '测试期邀请好友/注册送的天数会累加到你的 VIP 到期时间',
           '正式上线时已开通的奖励天数<b>仍然有效</b>'
         ])
@@ -12923,7 +12923,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.14'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.15'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -13608,12 +13608,12 @@ function openVipCenter() {
   switchPage('vip');
   renderVipCenter();
 }
-// 需求5：4 档位定价（v3 定稿：月卡 12.8 不动，季/年/终身降价，尊贵等级递进）
+// 需求5：4 档位定价（2026-08-11 用户拍板：月卡 12.8 / 季卡 28.8 / 年卡 88 / 终身卡 158）
 var VIP_PLANS = [
   { id: 'month',    name: '月卡',   level: '初阶会员', price: '12.8', unit: '元/月',   sub: '日均 0.43 元 · 随时可换',      lv: 'lv1', btn: '开通月卡',   tag: '',      save: '' },
-  { id: 'season',   name: '季卡',   level: '进阶会员', price: '24.8', unit: '元/季',   sub: '日均 0.28 元 · 省 35%',        lv: 'lv2', btn: '开通季卡',   tag: '',      save: '' },
-  { id: 'year',     name: '年卡',   level: '尊享会员', price: '58',   unit: '元/年',   sub: '日均 0.16 元 · 省 62%',        lv: 'lv3', btn: '开通年卡',   tag: '超值推荐', save: '比月卡省 96 元', hot: true },
-  { id: 'lifetime', name: '终身卡', level: '至尊会员', price: '128',  unit: '元/永久', sub: '约 10 个月回本 · 一次买断',    lv: 'lv4', btn: '开通终身卡', tag: '永久尊享', save: '永久使用 · 未来功能全免费' }
+  { id: 'season',   name: '季卡',   level: '进阶会员', price: '28.8', unit: '元/季',   sub: '日均 0.32 元 · 省 25%',        lv: 'lv2', btn: '开通季卡',   tag: '',      save: '' },
+  { id: 'year',     name: '年卡',   level: '尊享会员', price: '88',   unit: '元/年',   sub: '日均 0.24 元 · 省 43%',        lv: 'lv3', btn: '开通年卡',   tag: '超值推荐', save: '比月卡省 66 元', hot: true },
+  { id: 'lifetime', name: '终身卡', level: '至尊会员', price: '158',  unit: '元/永久', sub: '约 12 个月回本 · 一次买断',    lv: 'lv4', btn: '开通终身卡', tag: '永久尊享', save: '永久使用 · 未来功能全免费' }
 ];
 function renderVipCenter() {
   // 状态卡

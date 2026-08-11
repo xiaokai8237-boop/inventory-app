@@ -44,16 +44,16 @@ const path = require('path');
     return {
       ok: true,
       hasMonth: t.includes('初阶会员') && t.includes('12.8') && t.includes('月卡'),
-      hasSeason: t.includes('进阶会员') && t.includes('24.8') && t.includes('季卡'),
-      hasYear: t.includes('尊享会员') && t.includes('58') && t.includes('年卡') && t.includes('超值推荐') && t.includes('比月卡省 96 元'),
-      hasLife: t.includes('至尊会员') && t.includes('128') && t.includes('终身卡') && t.includes('永久尊享') && t.includes('约 10 个月回本'),
+      hasSeason: t.includes('进阶会员') && t.includes('28.8') && t.includes('季卡'),
+      hasYear: t.includes('尊享会员') && t.includes('88') && t.includes('年卡') && t.includes('超值推荐') && t.includes('比月卡省 66 元'),
+      hasLife: t.includes('至尊会员') && t.includes('158') && t.includes('终身卡') && t.includes('永久尊享') && t.includes('约 12 个月回本'),
       noEmoji: !/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u.test(grid.innerHTML)
     };
   });
   check('月卡 12.8 初阶', v3.ok && v3.hasMonth === true, v3.txt);
-  check('季卡 24.8 进阶', v3.hasSeason === true);
-  check('年卡 58 尊享+超值推荐+省96', v3.hasYear === true);
-  check('终身卡 128 至尊+永久尊享+10个月回本', v3.hasLife === true);
+  check('季卡 28.8 进阶', v3.hasSeason === true);
+  check('年卡 88 尊享+超值推荐+省66', v3.hasYear === true);
+  check('终身卡 158 至尊+永久尊享+12个月回本', v3.hasLife === true);
   check('档位网格零 emoji', v3.noEmoji === true);
 
   // ④ chooseVipPlan 提示支付未接入（不报错）
