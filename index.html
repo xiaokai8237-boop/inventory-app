@@ -25,6 +25,7 @@
 <meta name="apple-mobile-web-app-title" content="物流筐">
 <meta name="theme-color" content="#065A82">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="assets/qrcode.min.js"></script>
 <style>
 /* 主题：深空蓝晶定稿为深色系。默认激活深色模式（页面元素均为深青蓝硬编码，
    深色变量与定稿一致，避免浅色变量(--text深蓝字)在深底上看不清） */
@@ -12923,7 +12924,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.16'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.17'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -13910,35 +13911,41 @@ function renderPosterCanvas(src, cb) {
     cv.width = W; cv.height = H;
     var ctx = cv.getContext('2d');
     ctx.drawImage(img, 0, 0);
+    var done = function() { cb(cv); };
+    // 官方库不可用（加载失败/离线未缓存）时：保留原底图直接输出，不画自研码（自研码微信扫不出，宁缺毋滥）
+    if (typeof QRCode === 'undefined' || !QRCode.toCanvas) { done(); return; }
     try {
-      var mat = qrBuildMatrix(getInviteLink()); // 个人邀请码链接二维码
-      if (mat) {
-        var m = mat.length;
-        var cell = Math.floor(W * 0.27 / m);
-        var qrSize = cell * m;
-        var pad = Math.round(qrSize * 0.09);
-        var textH = Math.round(qrSize * 0.15);
-        var cardW = qrSize + pad * 2, cardH = qrSize + pad * 2 + textH;
-        var x = Math.round(W * 0.032), y = Math.round(H * 0.028);
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,0.30)';
-        ctx.shadowBlur = 14;
-        ctx.shadowOffsetY = 4;
-        ctx.fillStyle = '#FFFFFF';
-        roundRect(ctx, x, y, cardW, cardH, Math.round(cardW * 0.04));
-        ctx.fill();
-        ctx.restore();
-        ctx.fillStyle = '#000000';
-        for (var r = 0; r < m; r++) for (var c = 0; c < m; c++) {
-          if (mat[r][c]) ctx.fillRect(x + pad + c * cell, y + pad + r * cell, cell, cell);
-        }
+      var qrText = getInviteLink();
+      var qm = QRCode.create(qrText, { errorCorrectionLevel: 'M' });
+      var n = qm.modules.size || 29;                    // 实际模块数（官方库动态版本）
+      var cell = Math.floor(W * 0.27 / n);
+      var qrSize = cell * n;
+      var pad = Math.round(qrSize * 0.09);
+      var textH = Math.round(qrSize * 0.15);
+      var cardW = qrSize + pad * 2, cardH = qrSize + pad * 2 + textH;
+      var x = Math.round(W * 0.032), y = Math.round(H * 0.028);
+      // 白卡（含阴影，与原样式一致）
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.30)';
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 4;
+      ctx.fillStyle = '#FFFFFF';
+      roundRect(ctx, x, y, cardW, cardH, Math.round(cardW * 0.04));
+      ctx.fill();
+      ctx.restore();
+      // 官方二维码（qrcode 库标准生成，微信可扫）
+      var qc = document.createElement('canvas');
+      qc.width = qrSize; qc.height = qrSize;
+      QRCode.toCanvas(qc, qrText, { margin: 0, errorCorrectionLevel: 'M', width: qrSize, color: { dark: '#000000', light: '#FFFFFF' } }, function(err) {
+        if (err) { done(); return; }
+        ctx.drawImage(qc, x + pad, y + pad, qrSize, qrSize);
         ctx.fillStyle = '#1E3A5F';
         ctx.font = 'bold ' + Math.round(qrSize * 0.075) + 'px "Microsoft YaHei","PingFang SC",sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('扫码注册 领会员', x + cardW / 2, y + cardH - Math.round(textH * 0.38));
-      }
-    } catch (e) {}
-    cb(cv);
+        done();
+      });
+    } catch (e) { done(); }
   };
   img.onerror = function() { cb(null); };
   img.src = src;
@@ -14075,8 +14082,8 @@ function genInvitePoster() {
   ctx.fillStyle = '#FFFFFF';
   roundRect(ctx, qrX, qrY, qrSize, qrSize, 16);
   ctx.fill();
-  // 绘制二维码（内嵌轻量 QR 生成器；失败时降级为链接文字）
-  const qrData = drawQrCode(ctx, qrX + 12, qrY + 12, qrSize - 24, getInviteLink());
+  // 绘制二维码（官方 qrcode 库，微信可扫；异步完成，失败时降级为链接文字）
+  drawQrCode(ctx, qrX + 12, qrY + 12, qrSize - 24, getInviteLink(), function() {});
   // 右侧说明
   const labelX = qrX + qrSize + 24;
   ctx.fillStyle = '#FFFFFF';
@@ -14282,19 +14289,18 @@ function isFunctionModule(r, c, size, ver) {
   return false;
 }
 // 在 Canvas 上绘制二维码（白色背景 + 黑色模块），返回 true 表示成功
-function drawQrCode(ctx, x, y, size, text) {
+function drawQrCode(ctx, x, y, size, text, cb) {
+  // 官方 qrcode 库（微信可扫）；库不可用时回调 false（调用方降级为链接文字）
+  if (typeof QRCode === 'undefined' || !QRCode.toCanvas) { if (cb) cb(false); return; }
   try {
-    var mod = qrBuildMatrix(text);
-    var n = mod.length;
-    var cell = size / n;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(x, y, size, size);
-    ctx.fillStyle = '#0A1A22';
-    for (var r = 0; r < n; r++) for (var c = 0; c < n; c++) {
-      if (mod[r][c]) ctx.fillRect(x + c * cell, y + r * cell, Math.ceil(cell), Math.ceil(cell));
-    }
-    return true;
-  } catch (e) { return false; }
+    var qc = document.createElement('canvas');
+    qc.width = size; qc.height = size;
+    QRCode.toCanvas(qc, text, { margin: 0, errorCorrectionLevel: 'M', width: size, color: { dark: '#0A1A22', light: '#FFFFFF' } }, function(err) {
+      if (err) { if (cb) cb(false); return; }
+      ctx.drawImage(qc, x, y, size, size);
+      if (cb) cb(true);
+    });
+  } catch (e) { if (cb) cb(false); }
 }
 function drawCrown(ctx, x, y, s) {
   ctx.beginPath();
