@@ -262,6 +262,83 @@ html[data-theme="dark"] .locked-input { opacity: .45; }
   --sim-gold: #F5DC92;    /* 金色强调 */
   --sim-green: #4ADE80;   /* 差额正 */
   --sim-red: #FF6B6B;     /* 差额负 */
+  --sim-blue: #60A5FA;    /* 冷冻·冰晶蓝（#238 框名设置 5 筐配色） */
+}
+
+/* ===== #238 框名设置页重新设计：卡片升级 / 配色徽章 / 拖拽排序 / 新增弹窗 ===== */
+.goods-drag-hint { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-light); padding:6px 2px 10px; }
+.goods-card {
+  background: linear-gradient(160deg, rgba(124,232,224,.07), rgba(124,232,224,.02));
+  border: 1px solid rgba(124,232,224,.22);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.12);
+  position: relative;
+}
+.goods-card.dragging { opacity: .55; border-style: dashed; border-color: var(--sim-gold); }
+.goods-card.drag-over { border-color: var(--sim-gold); box-shadow: 0 0 0 2px rgba(245,220,146,.35); }
+.goods-main { display:flex; gap:10px; align-items:center; }
+.goods-badge {
+  width: 46px; height: 46px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid;
+}
+.goods-badge svg { width: 24px; height: 24px; }
+.goods-badge.g-b0 { background: rgba(74,222,128,.14); border-color: rgba(74,222,128,.5); color: var(--sim-green); }   /* 鲜食·绿 */
+.goods-badge.g-b1 { background: rgba(245,220,146,.14); border-color: rgba(245,220,146,.5); color: var(--sim-gold); }  /* 面包·金 */
+.goods-badge.g-b2 { background: rgba(124,232,224,.14); border-color: rgba(124,232,224,.5); color: var(--sim-cyan); }  /* 冷藏·青 */
+.goods-badge.g-b3 { background: rgba(96,165,250,.14); border-color: rgba(96,165,250,.5); color: var(--sim-blue); }   /* 冷冻·蓝 */
+.goods-badge.g-b4 { background: rgba(245,166,35,.14); border-color: rgba(245,166,35,.5); color: var(--sim-orange); } /* 常温·橙 */
+.goods-badge.g-bx { background: rgba(124,232,224,.10); border-color: rgba(124,232,224,.32); color: var(--sim-cyan); } /* 自定义·青 */
+.goods-drag {
+  flex-shrink: 0; width: 26px; height: 40px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  color: rgba(126,151,161,.75); cursor: grab; touch-action: none;
+}
+.goods-drag svg { width: 14px; height: 14px; display: block; }
+.goods-alias-chip {
+  font-size: 12px; padding: 3px 9px; border-radius: 12px;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.goods-alias-chip .g-x { cursor: pointer; font-weight: 700; margin-left: 2px; }
+.goods-add-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #F8E3A6, #E0A63E);
+  color: #0B2E38; font-weight: 800; font-size: 14px;
+  border: none; border-radius: 12px; padding: 11px 12px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  box-shadow: 0 3px 10px rgba(224,166,62,.3);
+}
+.goods-add-btn:active { transform: scale(.97); }
+/* 新增框类型弹窗（金色主题，替换原生 prompt） */
+.goods-add-modal { display: none; position: fixed; inset: 0; z-index: 3000; background: rgba(3,17,22,.72); align-items: center; justify-content: center; }
+.goods-add-modal.show { display: flex; }
+.goods-add-box {
+  width: 86%; max-width: 330px;
+  background: linear-gradient(180deg, #0E3340, #0A2530);
+  border: 1.5px solid rgba(245,220,146,.55);
+  border-radius: 18px; padding: 20px 18px 16px;
+  box-shadow: 0 14px 40px rgba(0,0,0,.5);
+}
+.goods-add-head { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; color: var(--sim-gold); font-size: 16px; font-weight: 800; }
+.goods-add-input {
+  width: 100%; padding: 11px 12px; font-size: 15px;
+  background: rgba(255,255,255,.06); color: var(--text);
+  border: 1.5px solid rgba(245,220,146,.4); border-radius: 10px;
+  outline: none; box-sizing: border-box;
+}
+.goods-add-input:focus { border-color: var(--sim-gold); }
+.goods-add-tip { font-size: 11px; color: var(--text-light); margin-top: 8px; line-height: 1.5; }
+.goods-add-btns { display: flex; gap: 8px; margin-top: 14px; }
+.goods-add-ok {
+  flex: 1; background: linear-gradient(135deg, #F8E3A6, #E0A63E); color: #0B2E38;
+  font-weight: 800; border: none; border-radius: 10px; padding: 10px;
+}
+.goods-add-cancel {
+  flex: 1; background: rgba(255,255,255,.08); color: var(--text-light);
+  border: 1px solid rgba(126,151,161,.4); border-radius: 10px; padding: 10px; font-weight: 600;
 }
 /* 模式互斥：极简模式下隐藏标准底部导航/未登录横条/标准页面（登录整页 auth-page 保留） */
 .simple-tabs { display: none; }
@@ -3271,10 +3348,11 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <span class="panel-title"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M21 8v8l-9 5-9-5V8l9-5 9 5z"/><line x1="3" y1="8" x2="12" y2="13"/><line x1="12" y1="13" x2="21" y2="8"/><line x1="12" y1="13" x2="12" y2="21"/></svg> 框名设置</span>
     </div>
     <div class="card">
+      <div class="goods-drag-hint"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>长按拖动可调整筐顺序，名称和别名不受影响</div>
       <div id="goodsListPanel"></div>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <button class="btn btn-outline" style="flex:1;" onclick="showAddGoodsModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 新增框类型</button>
-        <button class="btn btn-outline" style="flex:1;color:var(--danger);" onclick="showDeleteGoodsModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg> 删除框类型</button>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="goods-add-btn" onclick="showAddGoodsModal()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增框类型</button>
+        <button class="btn btn-outline" style="flex:0 0 auto;color:var(--danger);" onclick="showDeleteGoodsModal()"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:3px;"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>删除</button>
       </div>
     </div>
   </div>
@@ -4253,6 +4331,21 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 </div>
 
 <!-- 筐删除弹窗 -->
+<div class="goods-add-modal" id="goodsAddModal" onclick="cancelAddGoods()">
+  <div class="goods-add-box" onclick="event.stopPropagation()">
+    <div class="goods-add-head">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      新增框类型
+    </div>
+    <input type="text" id="goodsAddName" class="goods-add-input" maxlength="20" placeholder="请输入名称，如：甜品筐">
+    <div class="goods-add-tip">新增后会自动排到最后一位，可长按拖动调整顺序。</div>
+    <div class="goods-add-btns">
+      <button class="goods-add-cancel" onclick="cancelAddGoods()">取 消</button>
+      <button class="goods-add-ok" onclick="confirmAddGoods()">确 定</button>
+    </div>
+  </div>
+</div>
+
 <div class="gd-modal goods-del-modal" id="goodsDeleteModal" onclick="closeGoodsDeleteModal()">
   <div class="gd-content goods-del-content" onclick="event.stopPropagation()">
     <div class="gd-head">
@@ -9174,22 +9267,127 @@ function locSave() {
 }
 
 // ======== 框名管理面板 ========
+// ===== #238 框名设置页重新设计：5 筐配色徽章 + SVG 图标 + 拖拽排序 =====
+// 配色映射（引用 :root --sim-* token，零硬编码）：0 鲜食·绿 / 1 面包·金 / 2 冷藏·青 / 3 冷冻·蓝 / 4 常温·橙 / 自定义·青
+var GOODS_BADGE = [
+  { cls: 'g-b0', icon: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>' },
+  { cls: 'g-b1', icon: '<path d="M4 10.5A3.5 3.5 0 0 1 7.5 7a3.5 3.5 0 0 1 3.5 3.5V12H4v-1.5z"/><path d="M16 10.5A3.5 3.5 0 0 0 12.5 7 3.5 3.5 0 0 0 9 10.5V12h7v-1.5z"/><path d="M9 12h6v2a3 3 0 0 1-6 0v-2z"/>' },
+  { cls: 'g-b2', icon: '<line x1="12" y1="2" x2="12" y2="22"/><path d="M20 16 12 10 4 16"/><line x1="20" y1="8" x2="12" y2="14"/><line x1="12" y1="14" x2="4" y2="8"/>' },
+  { cls: 'g-b3', icon: '<path d="M12 2 14.5 9.5 22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5L12 2z"/>' },
+  { cls: 'g-b4', icon: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>' }
+];
+function goodsBadge(idx) {
+  const b = GOODS_BADGE[idx] || { cls: 'g-bx', icon: GOODS_BADGE[2].icon };
+  return '<div class="goods-badge ' + b.cls + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + b.icon + '</svg></div>';
+}
+function goodsAliasColor(idx) {
+  const map = [
+    'background:rgba(74,222,128,.16);color:rgba(74,222,128,.75)',
+    'background:rgba(245,220,146,.16);color:rgba(245,220,146,.78)',
+    'background:rgba(124,232,224,.16);color:rgba(124,232,224,.75)',
+    'background:rgba(96,165,250,.16);color:rgba(96,165,250,.75)',
+    'background:rgba(245,166,35,.16);color:rgba(245,166,35,.75)'
+  ];
+  return map[idx] || map[2];
+}
+// 拖拽排序（桌面 HTML5 drag + 移动端 touch 长按）
+let _goodsDragFrom = -1;
+function goodsDragStart(ev, idx) {
+  _goodsDragFrom = idx;
+  ev.dataTransfer && ev.dataTransfer.setData('text/plain', String(idx));
+  setTimeout(function () { const el = document.getElementById('goodsCard' + idx); if (el) el.classList.add('dragging'); }, 0);
+}
+function goodsDragOver(ev, idx) {
+  ev.preventDefault();
+  document.querySelectorAll('.goods-card').forEach(function (c) { c.classList.remove('drag-over'); });
+  const el = document.getElementById('goodsCard' + idx); if (el) el.classList.add('drag-over');
+}
+function goodsDragDrop(ev, idx) {
+  ev.preventDefault();
+  const from = _goodsDragFrom >= 0 ? _goodsDragFrom : parseInt((ev.dataTransfer && ev.dataTransfer.getData('text/plain')) || '-1', 10);
+  clearGoodsDragState();
+  if (from >= 0 && from !== idx) reorderGoods(from, idx);
+}
+function clearGoodsDragState() {
+  _goodsDragFrom = -1;
+  document.querySelectorAll('.goods-card').forEach(function (c) { c.classList.remove('dragging', 'drag-over'); });
+}
+let _goodsTouch = null;
+function goodsTouchStart(ev, idx) {
+  const t = ev.touches[0];
+  _goodsTouch = { idx: idx, startX: t.clientX, startY: t.clientY, timer: null, active: false };
+  _goodsTouch.timer = setTimeout(function () {
+    if (_goodsTouch && !_goodsTouch.active) {
+      _goodsTouch.active = true;
+      const el = document.getElementById('goodsCard' + idx); if (el) el.classList.add('dragging');
+    }
+  }, 280); // 长按 280ms 进入拖拽
+}
+function goodsTouchMove(ev, idx) {
+  if (!_goodsTouch || !_goodsTouch.active) return;
+  ev.preventDefault();
+  const t = ev.touches[0];
+  const cards = Array.prototype.slice.call(document.querySelectorAll('.goods-card'));
+  cards.forEach(function (c) { c.classList.remove('drag-over'); });
+  // 计算当前手指落在哪张卡片上 → 高亮目标
+  const el = document.getElementById('goodsCard' + idx);
+  if (!el) return;
+  const cardsRects = cards.map(function (c) { return c.getBoundingClientRect(); });
+  for (let i = 0; i < cards.length; i++) {
+    const r = cardsRects[i];
+    if (t.clientY >= r.top && t.clientY <= r.bottom) { cards[i].classList.add('drag-over'); }
+  }
+}
+function goodsTouchEnd(ev, idx) {
+  if (!_goodsTouch) return;
+  clearTimeout(_goodsTouch.timer);
+  const from = _goodsTouch.idx;
+  const active = _goodsTouch.active;
+  _goodsTouch = null;
+  clearGoodsDragState();
+  if (!active) return; // 非长按（普通点击）不排序
+  // 计算落点目标索引
+  const cards = Array.prototype.slice.call(document.querySelectorAll('.goods-card'));
+  const t = ev.changedTouches[0];
+  let to = idx;
+  for (let i = 0; i < cards.length; i++) {
+    const r = cards[i].getBoundingClientRect();
+    if (t.clientY >= r.top && t.clientY <= r.bottom) { to = i; break; }
+  }
+  if (from >= 0 && from !== to) reorderGoods(from, to);
+}
+function reorderGoods(from, to) {
+  const cfg = loadGoodsConfig();
+  if (from < 0 || to < 0 || from >= cfg.length || to >= cfg.length || from === to) return;
+  const item = cfg.splice(from, 1)[0];
+  cfg.splice(to, 0, item);
+  saveGoodsConfig(cfg);
+  renderGoodsPanelUI();
+  renderGoodsInputList();
+  initGoodsFilter();
+  showToast('框顺序已更新（名称和别名不变）');
+}
 function renderGoodsPanelUI() {
   const cfg = loadGoodsConfig();
   const container = document.getElementById('goodsListPanel');
   let html = '';
   cfg.forEach((g, i) => {
-    html += `<div class="config-item" style="border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:8px;">
-      <div style="display:flex;gap:8px;align-items:center;">
-        <div class="idx">${i+1}</div>
-        <input type="text" id="gName${i}" value="${escapeHtml(g.name)}" maxlength="20" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;">
+    const chipCss = goodsAliasColor(i);
+    html += `<div class="goods-card" id="goodsCard${i}" draggable="true" ondragstart="goodsDragStart(event,${i})" ondragover="goodsDragOver(event,${i})" ondragleave="clearGoodsDragState()" ondrop="goodsDragDrop(event,${i})">
+      <div class="goods-main">
+        ${goodsBadge(i)}
+        <input type="text" id="gName${i}" value="${escapeHtml(g.name)}" maxlength="20" style="flex:1;padding:9px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;background:rgba(255,255,255,.05);color:var(--text);font-weight:700;">
+        <div class="goods-drag" ontouchstart="goodsTouchStart(event,${i})" ontouchmove="goodsTouchMove(event,${i})" ontouchend="goodsTouchEnd(event,${i})" title="长按拖动排序">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.8"/><circle cx="15" cy="6" r="1.8"/><circle cx="9" cy="12" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="9" cy="18" r="1.8"/><circle cx="15" cy="18" r="1.8"/></svg>
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.8"/><circle cx="15" cy="6" r="1.8"/><circle cx="9" cy="12" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="9" cy="18" r="1.8"/><circle cx="15" cy="18" r="1.8"/></svg>
+        </div>
       </div>
-      <div class="alias-box" id="gAliases${i}" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:6px;">
-        ${g.aliases.map((a, ai) => `<span class="alias-chip" style="background:var(--blue-soft);color:var(--primary);font-size:12px;padding:3px 8px;border-radius:12px;display:inline-flex;align-items:center;gap:4px;">${escapeHtml(a)}<span style="cursor:pointer;color:var(--danger);font-weight:700;" onclick="removeGoodsAlias(${i},${ai})">×</span></span>`).join('')}
+      <div class="alias-box" id="gAliases${i}" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">
+        ${g.aliases.map((a, ai) => `<span class="goods-alias-chip" style="${chipCss}">${escapeHtml(a)}<span class="g-x" style="color:var(--danger);" onclick="removeGoodsAlias(${i},${ai})">×</span></span>`).join('')}
       </div>
-      <div style="display:flex;gap:6px;margin-top:6px;">
-        <input type="text" id="gAliasInput${i}" placeholder="加别名，如 冷藏" style="flex:1;padding:7px;border:1px solid var(--border);border-radius:6px;font-size:13px;">
-        <button class="btn btn-outline" style="flex:0 0 auto;padding:7px 12px;font-size:12px;" onclick="addGoodsAlias(${i})">添加</button>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+<input type="text" id="gAliasInput${i}" placeholder="加别名，如 冷藏" style="flex:1 1 0;min-width:60px;padding:7px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:rgba(255,255,255,.04);color:var(--text);box-sizing:border-box;">
+<button class="btn btn-outline" style="flex:0 0 auto;padding:7px 12px;font-size:12px;" onclick="addGoodsAlias(${i})">添加</button>
       </div>
     </div>`;
   });
@@ -9212,17 +9410,27 @@ function removeGoodsAlias(idx, ai) {
   saveGoodsConfig(cfg);
   renderGoodsPanelUI();
 }
-// 新增框类型
+// 新增框类型（#238：原生 prompt → 项目金色弹窗；数据结构与保存逻辑不变）
 function showAddGoodsModal() {
-  const name = prompt('请输入新框类型名称（如：甜品筐）：');
-  if (!name || !name.trim()) return;
+  const input = document.getElementById('goodsAddName');
+  if (input) input.value = '';
+  document.getElementById('goodsAddModal').classList.add('show');
+  setTimeout(function () { if (input) input.focus(); }, 60);
+}
+function cancelAddGoods() {
+  document.getElementById('goodsAddModal').classList.remove('show');
+}
+function confirmAddGoods() {
+  const name = (document.getElementById('goodsAddName').value || '').trim();
+  document.getElementById('goodsAddModal').classList.remove('show');
+  if (!name) { showToast('请输入框类型名称'); return; }
   const cfg = loadGoodsConfig();
-  cfg.push({ name: name.trim(), aliases: [] });
+  cfg.push({ name: name, aliases: [] });
   saveGoodsConfig(cfg);
   renderGoodsPanelUI();
   renderGoodsInputList();
   initGoodsFilter();
-  showToast('已新增「' + name.trim() + '」');
+  showToast('已新增「' + name + '」');
 }
 // 删除框类型
 let goodsDeleteIdx = -1;
@@ -12704,7 +12912,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.11'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.12'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
