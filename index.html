@@ -12923,7 +12923,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.15'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.16'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -13643,11 +13643,58 @@ function renderVipCenter() {
     ).join('');
   }
 }
-// 选择档位（测试期：支付未接入）
+// 选择档位 → 支付宝 H5 支付下单（2026-08-11 接入）
 function chooseVipPlan(id) {
   const p = VIP_PLANS.find(x => x.id === id);
   if (!p) return;
-  showToast('「' + p.level + ' · ' + p.name + '」支付功能暂未接入，测试期所有账号默认 VIP');
+  const token = getAuthToken() || '';
+  if (!token) { showToast('请先登录'); authGoTo('login'); return; }
+  showLoading('正在跳转支付…');
+  fetchWithTimeout(API_BASE + '/pay/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ token, planId: id })
+  }).then(r => r.json()).then(res => {
+    hideLoading();
+    if (res && res.ok && res.payUrl) {
+      // 记住待支付订单，支付回跳后轮询结果
+      try { localStorage.setItem('kuanwei_pending_pay', JSON.stringify({ orderNo: res.orderNo, planId: id, at: Date.now() })); } catch(e) {}
+      window.location.href = res.payUrl; // 跳支付宝收银台（WebView 唤起支付宝 APP）
+    } else {
+      showToast((res && res.error) || '下单失败，请重试');
+    }
+  }).catch(() => { hideLoading(); showToast('网络异常，请重试'); });
+}
+// 支付回跳处理：轮询订单状态，成功后刷新 VIP
+function checkPayReturn() {
+  try {
+    const params = new URLSearchParams(location.search);
+    let orderNo = params.get('out_trade_no') || '';
+    if (!orderNo) {
+      const pend = JSON.parse(localStorage.getItem('kuanwei_pending_pay') || 'null');
+      if (pend && pend.orderNo && Date.now() - (pend.at || 0) < 30 * 60 * 1000) orderNo = pend.orderNo;
+      else return;
+    }
+    const token = getAuthToken() || '';
+    if (!token || !orderNo) return;
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries++;
+      fetchWithTimeout(API_BASE + '/pay/status?orderNo=' + encodeURIComponent(orderNo), {
+        headers: { 'Authorization': 'Bearer ' + token }
+      }).then(r => r.json()).then(res => {
+        if (res && res.ok && res.status === 'paid') {
+          clearInterval(timer);
+          try { localStorage.removeItem('kuanwei_pending_pay'); } catch(e) {}
+          if (res.vipUntil) { try { localStorage.setItem('kuanwei_vip_until', res.vipUntil); } catch(e) {} }
+          if (document.getElementById('page-vip') && document.getElementById('page-vip').classList.contains('active')) renderVipCenter();
+          showToast('开通成功，欢迎加入 VIP');
+        } else if (tries > 20) {
+          clearInterval(timer);
+        }
+      }).catch(() => { if (tries > 20) clearInterval(timer); });
+    }, 1500);
+  } catch(e) {}
 }
 // ===== 需求6 拉新功能 =====
 function openInvitePage() {
@@ -14982,9 +15029,13 @@ function applyEmojiSvg(root) {
 if (typeof window !== 'undefined') {
   try {
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() { setTimeout(function() { applyEmojiSvg(document.body); }, 300); });
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() { applyEmojiSvg(document.body); }, 300);
+        setTimeout(function() { checkPayReturn(); }, 1200); // 支付回跳检测
+      });
     } else {
       setTimeout(function() { applyEmojiSvg(document.body); }, 300);
+      setTimeout(function() { checkPayReturn(); }, 1200);
     }
     if (typeof MutationObserver !== 'undefined') {
       var mo = new MutationObserver(function(muts) {
