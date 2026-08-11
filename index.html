@@ -436,6 +436,9 @@ body.auth-mode .simple-tabs { display: none !important; }
   padding-bottom: env(safe-area-inset-bottom);
   box-shadow: 0 -2px 12px rgba(0,0,0,.06);
 }
+/* #236 键盘弹出时底部导航隐藏（不被顶到键盘上方），键盘收起恢复 */
+body.keyboard-open .tabs,
+body.keyboard-open .simple-tabs { display: none !important; }
 .tab {
   flex: 1;
   text-align: center;
@@ -9671,6 +9674,41 @@ if (typeof window.__handleNativeBack !== 'function') {
   window.__handleNativeBack = __handleNativeBack;
 }
 
+// ===== #236 键盘弹出时隐藏底部 Tab（不被顶到键盘上方），键盘收起恢复 =====
+// 原理：Android adjustResize 下键盘压缩布局视口（innerHeight 变小）；iOS/adjustPan 下压缩视觉视口（visualViewport.height 变小）
+// 判定：视口高度比"无键盘基准"矮 100px+ 且输入框聚焦 → 键盘打开 → body.keyboard-open → CSS 隐藏 .tabs/.simple-tabs
+(function() {
+  if (typeof window === 'undefined') return;
+  let _baseH = window.innerHeight; // 无键盘时的布局视口基准高度（只增不减）
+  function isEditableFocused() {
+    const el = document.activeElement;
+    return !!(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable));
+  }
+  function applyKeyboardLayout() {
+    const h = window.innerHeight;
+    const vv = window.visualViewport;
+    const vvH = vv ? vv.height : h;
+    // 键盘弹出：布局视口或视觉视口明显矮于基准（≥100px，规避地址栏/滚动等微小抖动）
+    const kbOpen = (vvH < _baseH - 100) || (h < _baseH - 100);
+    if (kbOpen && isEditableFocused()) {
+      document.body.classList.add('keyboard-open');
+    } else {
+      document.body.classList.remove('keyboard-open');
+      if (h > _baseH) _baseH = h; // 键盘收起/旋转后恢复基准
+    }
+  }
+  const vv = window.visualViewport;
+  if (vv && typeof vv.addEventListener === 'function') {
+    vv.addEventListener('resize', applyKeyboardLayout);
+    vv.addEventListener('scroll', applyKeyboardLayout);
+  }
+  window.addEventListener('resize', applyKeyboardLayout);
+  // 输入框聚焦/失焦兜底（键盘动画期间视口事件可能延迟）
+  document.addEventListener('focusin', function() { setTimeout(applyKeyboardLayout, 120); });
+  document.addEventListener('focusout', function() { setTimeout(applyKeyboardLayout, 300); });
+  window.addEventListener('orientationchange', function() { _baseH = window.innerHeight; });
+})();
+
 // ======== 每页专属帮助（header 右上角 ?） ========
 function openPageHelp(e) {
   if (e) e.stopPropagation();
@@ -12666,7 +12704,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.9'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.10'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
