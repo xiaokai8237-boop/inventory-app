@@ -353,10 +353,17 @@ async function handleVerify(body, env, json) {
     }
   }
   if (!verified) return json({ error: '密码错误' }, 401);
-  // 登录成功，记录该设备为最近登录设备（便于已登录设备免密恢复）
+  // 登录成功，记录最近登录时间（每次登录都更新，供管理员界面查看活跃度）
+  // 同时记录该设备为最近登录设备（便于已登录设备免密恢复）
+  const loginNow = new Date().toISOString();
+  acct.lastLoginAt = loginNow;
   if (deviceId && acct.lastDeviceId !== deviceId) {
     acct.lastDeviceId = deviceId;
-    acct.updatedAt = new Date().toISOString();
+    acct.updatedAt = loginNow;
+    await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
+  } else {
+    // 同一设备重复登录也更新登录时间
+    acct.updatedAt = loginNow;
     await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
   }
   // 签发鉴权 token（每次成功验证刷新，30 天有效）

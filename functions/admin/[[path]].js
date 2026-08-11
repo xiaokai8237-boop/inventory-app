@@ -63,14 +63,17 @@ export async function onRequest(context) {
         const phone = k.name.replace('account_', '');
         const raw = await env.BACKUP_KV.get(k.name);
         let password = '';
+        let lastLoginAt = '';
         if (raw) {
           try {
             const acct = JSON.parse(raw);
             // 可逆密文优先解密显示；旧明文账号兜底（迁移期）
             password = (await decryptPassword(env, acct.passwordEnc)) || acct.password || '';
+            // 最近登录时间（无记录的历史账号显示空 → 前端显示「暂无记录」）
+            lastLoginAt = acct.lastLoginAt || '';
           } catch (e) {}
         }
-        users.push({ phone, password });
+        users.push({ phone, password, lastLoginAt });
       }
       // 列出已注销待恢复的临时代码（tmp_ 前缀）
       const tmpKeys = [];
