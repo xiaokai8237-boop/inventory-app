@@ -360,13 +360,30 @@ public class ArrivalMonitorPlugin extends Plugin {
         return buildRichSpannable(goods, false);
     }
 
-    /** 注册门店地理围栏（#145 真实接入：系统级监测，进程被杀也能触发）route: [{name, lat, lng}] */
+    /** 注册门店地理围栏（#145 系统级监测 + #237 原生 GPS 轮询兜底，不依赖 Google 服务）route: [{name, lat, lng}] */
     @PluginMethod
     public void registerRoute(PluginCall call) {
         try {
             String routeStr = call.getString("route", "[]");
             double radiusM = call.getDouble("radiusM", 500.0);
             JSONArray route = new JSONArray(routeStr);
+            // #237 持久化路线 + 距离（前台服务 GPS 轮询读取；不依赖 Google 服务）
+            getContext().getSharedPreferences("kuanwei_arrival_route", Context.MODE_PRIVATE)
+                    .edit()
+                    .putString("route_json", routeStr)
+                    .putFloat("dist_m", (float) radiusM)
+                    .apply();
+            getContext().getSharedPreferences("kuanwei_arrival", Context.MODE_PRIVATE)
+                    .edit().putBoolean("monitor_on", true).apply();
+            // #237 先启动前台服务（原生 GPS 轮询兜底，无 GMS 也工作；GMS 围栏成败不影响）
+            try {
+                Intent svc = new Intent(getContext(), ArrivalForegroundService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    getContext().startForegroundService(svc);
+                } else {
+                    getContext().startService(svc);
+                }
+            } catch (Exception ignored) {}
             List<Geofence> fences = new ArrayList<>();
             for (int i = 0; i < route.length(); i++) {
                 JSONObject o = route.getJSONObject(i);
@@ -391,16 +408,18 @@ public class ArrivalMonitorPlugin extends Plugin {
             Intent intent = new Intent(getContext(), ArrivalGeofenceReceiver.class);
             PendingIntent pi = PendingIntent.getBroadcast(getContext(), 0, intent,
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+            // #237 GMS 围栏失败（无 Google 服务）→ resolve + gmsError 标记（不再 reject 静默），GPS 轮询已兜底
             LocationServices.getGeofencingClient(getContext())
                     .addGeofences(req, pi)
                     .addOnSuccessListener(aVoid -> call.resolve(new JSObject().put("registered", fences.size())))
-                    .addOnFailureListener(e -> call.reject("geofence_error:" + e.getMessage()));
+                    .addOnFailureListener(e -> call.resolve(new JSObject().put("registered", 0).put("gmsError", String.valueOf(e.getMessage()))));
         } catch (Exception e) {
-            call.reject("register_error:" + e.getMessage());
+            // GMS 异常（无 Google 服务）→ resolve + gmsError，GPS 轮询服务已在跑
+            call.resolve(new JSObject().put("registered", 0).put("gmsError", String.valueOf(e.getMessage())));
         }
     }
 
-    /** 移除围栏 + 停前台服务 */
+    /** 移除围栏 + 停前台服务（#237 同时关 monitor_on 标记，开机自启不再拉起） */
     @PluginMethod
     public void stopMonitor(PluginCall call) {
         try {
@@ -411,6 +430,10 @@ public class ArrivalMonitorPlugin extends Plugin {
         } catch (Exception ignored) {}
         try {
             getContext().stopService(new Intent(getContext(), ArrivalForegroundService.class));
+        } catch (Exception ignored) {}
+        try {
+            getContext().getSharedPreferences("kuanwei_arrival", Context.MODE_PRIVATE)
+                    .edit().putBoolean("monitor_on", false).apply();
         } catch (Exception ignored) {}
         call.resolve();
     }

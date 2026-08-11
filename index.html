@@ -12704,7 +12704,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.10'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.11'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -14377,8 +14377,15 @@ function syncArrivalRouteToNative() {
     window.Capacitor.Plugins.ArrivalMonitor.registerRoute({ route: JSON.stringify(route), radiusM: ns.distM || 500 })
       .then(function(r) {
         try { localStorage.setItem('kuanwei_geofence_n', String((r && r.registered) || route.length)); } catch(e) {}
+        // #237 GMS 围栏不可用（无 Google 服务）→ 已由原生前台服务 GPS 轮询兜底，不再静默
+        if (r && r.gmsError) {
+          try { console.warn('到店监测：谷歌围栏不可用(' + r.gmsError + ')，已启用内置 GPS 轮询'); } catch(e) {}
+        }
       })
-      .catch(function(e) {});
+      .catch(function(e) {
+        // #237 注册异常不再静默：记录到控制台 + 本地标记（页面权限状态可反映）
+        try { console.warn('到店监测注册异常:', e); localStorage.setItem('kuanwei_geofence_err', String(e)); } catch(e2) {}
+      });
   } catch(e) {}
 }
 function stopArrivalMonitor() {
@@ -14386,8 +14393,13 @@ function stopArrivalMonitor() {
   if (arrivalTimer) { clearInterval(arrivalTimer); arrivalTimer = null; }
 }
 function toggleArrivalMonitor() {
-  if (arrivalTimer) { stopArrivalMonitor(); arrivalDismiss(); showToast('到店提醒已关闭（记账等功能不受影响）'); }
-  else { startArrivalMonitor(); syncArrivalRouteToNative(); showToast('到店提醒已开启'); }
+  if (arrivalTimer) {
+    stopArrivalMonitor(); arrivalDismiss();
+    // #237 关闭时同步停原生监测（停前台服务 + 移除围栏 + 关自启标记）
+    const cap = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ArrivalMonitor;
+    if (cap) { try { cap.stopMonitor(); } catch(e) {} }
+    showToast('到店提醒已关闭（记账等功能不受影响）');
+  } else { startArrivalMonitor(); syncArrivalRouteToNative(); showToast('到店提醒已开启'); }
   renderPermManage();
   renderNotifyManage();
   updateManageSubs();

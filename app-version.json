@@ -1,6 +1,6 @@
 {
-  "versionCode": 117,
-  "versionName": "8.2.8",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v8.2.8.apk",
-  "note": "【v8.2.8】APP 名字统一为「物流筐收发管理系统」（桌面图标 + 通知栏）。包含此前全部更新：需求7 拉新奖励（注册送1月VIP、邀请双方各+15天、防作弊）、邀请页重新设计（生成海报7款随机+二维码）、使用说明重写+每页帮助、全站零emoji图标、首页顶部标题调整。"
+  "versionCode": 118,
+  "versionName": "8.2.10",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v8.2.10.apk",
+  "note": "【v8.2.10】到店提醒修复：不依赖谷歌服务，改用内置 GPS 轮询（后台运行也能提醒）。包含此前更新：系统返回键逐级返回、键盘弹出隐藏底部 Tab、APP 名字统一、拉新奖励、邀请海报等。"
 }
