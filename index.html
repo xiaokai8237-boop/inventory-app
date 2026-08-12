@@ -3672,7 +3672,6 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     </div>
   </div>
   <div class="ab-store" id="arrStore"></div>
-  <div class="ab-plan" id="arrPlan" style="display:none;font-size:15px;font-weight:800;color:#F5DC92;margin-bottom:6px;"></div>
   <div class="ab-goods" id="arrGoods"></div>
   <div class="ab-clock">不要忘记打卡</div>
   <div class="ab-actions">
@@ -9055,12 +9054,6 @@ function renderStorePanelUI() {
           ? `<span style="font-size:12px;color:#7CE8E0;flex:1;">已定位 · ${escapeHtml(s.address || (s.lat.toFixed(5) + ', ' + s.lng.toFixed(5)))}</span><button class="btn btn-outline sc-loc-btn" style="padding:4px 8px;font-size:11px;flex-shrink:0;" onclick="openLocEntryModal(${idx})">重录</button>`
           : `<span style="font-size:14px;color:#FF5252;font-weight:700;flex:1;text-align:center;">未录定位</span><button class="btn btn-outline sc-loc-btn" style="padding:4px 8px;font-size:11px;flex-shrink:0;" onclick="openLocEntryModal(${idx})">点此录入</button>`}
       </div>
-      <div class="sc-plan-row" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:7px 10px;background:rgba(245,220,146,.06);border:1px solid rgba(245,220,146,.25);border-radius:8px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5DC92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M21 8v8l-9 5-9-5V8l9-5 9 5z"/><line x1="3" y1="8" x2="12" y2="13"/><line x1="12" y1="13" x2="21" y2="8"/><line x1="12" y1="13" x2="12" y2="21"/></svg>
-        <span style="font-size:12px;color:#F5DC92;flex-shrink:0;">今日应发筐数</span>
-        <input type="number" min="0" max="999" class="sc-plan" id="sPlan${idx}" value="${s.plan || 0}" onchange="saveStorePlan(${idx})" style="flex:1;min-width:0;background:rgba(0,0,0,.25);border:1px solid rgba(245,220,146,.3);border-radius:6px;padding:6px 8px;color:#F5DC92;font-size:15px;font-weight:700;text-align:center;outline:none;">
-        <span style="font-size:11px;color:#8FA3AE;flex-shrink:0;">到店提醒用</span>
-      </div>
       <div class="sc-alias-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> 别名（识别时可替代店名）</div>
       <div class="sc-aliases" id="sAliases${idx}">
         ${s.aliases.length > 0
@@ -9144,17 +9137,6 @@ function saveStorePanelChanges() {
   initAllStores();
   showToast(changed > 0 ? `√ 已保存 ${changed} 处修改` : '已保存');
 }
-function saveStorePlan(idx) {
-  const cfg = loadStoreConfig();
-  if (!cfg[idx]) return;
-  const input = document.getElementById('sPlan' + idx);
-  let v = parseInt(input.value, 10);
-  if (isNaN(v) || v < 0) v = 0;
-  if (v > 999) v = 999;
-  input.value = v;
-  cfg[idx].plan = v;
-  saveStoreConfig(cfg);
-}
 function addStoreAlias(idx) {
   const cfg = loadStoreConfig();
   const input = document.getElementById('sAliasInput' + idx);
@@ -9174,7 +9156,7 @@ function removeStoreAlias(idx, ai) {
 }
 function addStoreFromPanel() {
   const cfg = loadStoreConfig();
-  cfg.push({ name: '新店面', aliases: [], sort: cfg.length, plan: 0 });
+  cfg.push({ name: '新店面', aliases: [], sort: cfg.length });
   saveStoreConfig(cfg);
   renderStorePanelUI();
   initAllStores();
@@ -13076,7 +13058,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.23'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.22'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -14935,7 +14917,7 @@ function syncArrivalRouteToNative() {
     if (!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ArrivalMonitor)) return;
     const ns = loadNotifySettings();
     const cfg = loadStoreConfig();
-    const route = cfg.filter(s => s.lat && s.lng).map(s => ({ name: s.name, lat: s.lat, lng: s.lng, plan: s.plan || 0 }));
+    const route = cfg.filter(s => s.lat && s.lng).map(s => ({ name: s.name, lat: s.lat, lng: s.lng }));
     if (route.length === 0) return;
     // 附上各店当天发出量（整箱数）用于围栏通知内容
     const date = todayStr();
@@ -15041,7 +15023,7 @@ function buildArrivalData(storeIdx, distM) {
   goods.forEach((gn, gi) => {
     if (!map[gi] && gn) goodsArr.push({ name: gn, qty: 0, whole: 0 });
   });
-  return { storeIdx, storeName: s.name, distM: Math.round(distM), goods: goodsArr, curIdx: storeIdx, plan: s.plan || 0 };
+  return { storeIdx, storeName: s.name, distM: Math.round(distM), goods: goodsArr, curIdx: storeIdx };
 }
 // 网页版提醒横幅
 function arrivalShow(storeIdx, distM) {
@@ -15050,9 +15032,6 @@ function arrivalShow(storeIdx, distM) {
   const b = document.getElementById('arrivalBanner');
   document.getElementById('arrDist').textContent = d.distM;
   document.getElementById('arrStore').textContent = '即将到达 ' + d.storeName;
-  const planEl = document.getElementById('arrPlan');
-  if (d.plan > 0) { planEl.style.display = ''; planEl.textContent = '今日应发 ' + d.plan + ' 筐'; }
-  else { planEl.style.display = 'none'; }
   const g = document.getElementById('arrGoods');
   g.innerHTML = d.goods.map(x => {
     let inner = '<b>' + x.qty + '</b> ' + escapeHtml(x.name);
