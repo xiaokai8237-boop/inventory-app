@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0E3340">
+<title>物流筐收发管理系统 - 下载</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: radial-gradient(120% 90% at 85% -10%, #14475A 0%, #0E3340 45%, #09222E 100%);
+    min-height: 100vh; color: #E8F2F5; padding-bottom: 34px;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; }
+  .brand { display: flex; align-items: center; gap: 11px; padding: 34px 24px 0; }
+  .logo {
+    width: 46px; height: 46px; border-radius: 12px; flex: 0 0 auto;
+    background: linear-gradient(150deg, #F8E3A6 0%, #E3BE68 60%, #C89B4E 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(245,220,146,.28);
+  }
+  .logo svg { width: 26px; height: 26px; }
+  .brand-name { font-size: 17px; font-weight: 700; letter-spacing: .5px; }
+  .brand-sub { font-size: 10.5px; color: rgba(232,242,245,.55); letter-spacing: 1.2px; margin-top: 2px; }
+  .hero { padding: 30px 24px 0; }
+  .hero h1 { font-size: 27px; font-weight: 800; line-height: 1.35; letter-spacing: 1px; }
+  .hero h1 em { font-style: normal; color: #F5DC92; }
+  .hero p { margin-top: 10px; font-size: 13.5px; line-height: 1.7; color: rgba(232,242,245,.72); }
+  .dl-card {
+    margin: 26px 20px 0; padding: 22px 18px 18px;
+    background: linear-gradient(165deg, rgba(20,71,90,.55) 0%, rgba(9,34,46,.75) 100%);
+    border: 1px solid rgba(124,232,224,.18); border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  a.dl-btn {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    background: linear-gradient(160deg, #F8E3A6 0%, #E3BE68 55%, #C89B4E 100%);
+    color: #0B2E38; font-size: 17px; font-weight: 800; letter-spacing: 1px;
+    padding: 15px 0; border-radius: 30px; text-align: center; text-decoration: none;
+    box-shadow: 0 8px 22px rgba(245,220,146,.35);
+  }
+  .dl-btn svg { width: 19px; height: 19px; }
+  button.dl-btn-ios {
+    display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%;
+    background: rgba(124,232,224,.08); border: 1.5px solid rgba(124,232,224,.55);
+    color: #7CE8E0; font-size: 15.5px; font-weight: 700; letter-spacing: .5px;
+    padding: 13px 0; border-radius: 30px; margin-top: 12px; cursor: pointer;
+  }
+  .dl-btn-ios svg { width: 18px; height: 18px; }
+  .dl-meta { display: flex; justify-content: center; gap: 14px; margin-top: 13px; font-size: 11.5px; color: rgba(232,242,245,.6); flex-wrap: wrap; }
+  .dl-note { margin-top: 10px; text-align: center; font-size: 11px; color: rgba(232,242,245,.5); }
+  .sec { padding: 26px 24px 0; display: flex; align-items: center; gap: 8px; }
+  .sec-dot { width: 5px; height: 16px; border-radius: 3px; background: linear-gradient(180deg, #F5DC92, #C89B4E); }
+  .sec span { font-size: 15px; font-weight: 700; letter-spacing: .5px; }
+  .plat { padding: 14px 20px 0; }
+  .plat-head { display: flex; align-items: center; gap: 9px; font-size: 14.5px; font-weight: 800; margin: 4px 0 11px; }
+  .plat-head svg { width: 19px; height: 19px; flex: 0 0 auto; }
+  .plat-head .tag { margin-left: auto; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; letter-spacing: .5px; }
+  .tag-android { color: #F5DC92; background: rgba(245,220,146,.12); border: 1px solid rgba(245,220,146,.35); }
+  .tag-ios { color: #7CE8E0; background: rgba(124,232,224,.1); border: 1px solid rgba(124,232,224,.35); }
+  .steps { display: flex; flex-direction: column; gap: 11px; }
+  .step {
+    display: flex; align-items: center; gap: 13px;
+    background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.07);
+    border-radius: 14px; padding: 13px 14px;
+  }
+  .step-num {
+    width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto;
+    background: rgba(124,232,224,.12); border: 1px solid rgba(124,232,224,.4);
+    color: #7CE8E0; font-size: 13px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step b { font-size: 14px; font-weight: 700; display: block; }
+  .step small { font-size: 11.5px; color: rgba(232,242,245,.6); margin-top: 2px; display: block; }
+  .step-icon { margin-left: auto; flex: 0 0 auto; }
+  .step-icon svg { width: 22px; height: 22px; display: block; }
+  .faq { padding: 14px 20px 0; display: flex; flex-direction: column; gap: 11px; }
+  .faq-item {
+    background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.07);
+    border-radius: 14px; padding: 13px 15px;
+  }
+  .faq-item b { font-size: 13.5px; font-weight: 700; display: block; }
+  .faq-item small { font-size: 12px; color: rgba(232,242,245,.62); line-height: 1.65; margin-top: 5px; display: block; }
+  .foot { text-align: center; padding: 26px 0 0; font-size: 11px; color: rgba(232,242,245,.35); letter-spacing: .5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#0B2E38" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="16" height="12" rx="2"/><path d="M12 9V4"/><path d="M9 14h6"/><path d="M9 17h4"/></svg>
+    </div>
+    <div>
+      <div class="brand-name">物流筐收发管理系统</div>
+      <div class="brand-sub">KUANWEI · INVENTORY</div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h1>送货记账 · 到店提醒<br>· <em>云端备份</em></h1>
+    <p>专为送货司机设计，说一句、拍一张就入账，到店自动提醒打卡，账目清清楚楚。</p>
+  </div>
+
+  <div class="dl-card">
+    <a id="apkLink" class="dl-btn" href="https://inventory-app-9ql.pages.dev/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/><path d="M12 8v6"/><path d="M9 11l3 3 3-3"/></svg>
+      立即下载安卓版
+    </a>
+    <button class="dl-btn-ios" onclick="scrollToIos()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8.5c-1.8-2.5-5-2.9-6.7-1.3-2 1.9-1.2 6 .8 8.6 1.5 2 4.4 4.4 5.9 3.9 1.5-.5 4.4-1.9 5.9-3.9 2-2.6 2.8-6.7.8-8.6-1.7-1.6-4.9-1.2-6.7 1.3z"/><path d="M9.5 7.5c-1-1.6-.7-3.6.9-4.8.7 1.7 1 3.5 0 4.8-1.2 0-2.9 0-4.8-1.8"/><path d="M14.5 7.5c1-1.6.7-3.6-.9-4.8-.7 1.7-1 3.5 0 4.8 1.2 0 2.9 0 4.8-1.8"/></svg>
+      苹果手机 · 添加到主屏幕
+    </button>
+    <div class="dl-meta"><span id="apkVer">安卓版</span><span>·</span><span>苹果免安装</span><span>·</span><span>免费</span></div>
+    <div class="dl-note">本页由手机扫码进入 · 按下方对应系统步骤操作</div>
+  </div>
+
+  <div class="sec"><div class="sec-dot"></div><span>安装步骤</span></div>
+
+  <div class="plat" id="platAndroid">
+    <div class="plat-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#F5DC92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+      安卓版
+      <span class="tag tag-android">下载安装包</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div><b>点击上方金色按钮下载</b><small>下载安装包到手机（约 8.8 MB）</small></div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#7CE8E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div><b>打开安装包</b><small>点通知栏提示，或到「文件管理」里打开</small></div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#7CE8E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div><b>允许「未知来源」安装</b><small>提示"不安全"属正常，点「仍要安装」即可</small></div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#F5DC92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="plat" id="platIos">
+    <div class="plat-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#7CE8E0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8.5c-1.8-2.5-5-2.9-6.7-1.3-2 1.9-1.2 6 .8 8.6 1.5 2 4.4 4.4 5.9 3.9 1.5-.5 4.4-1.9 5.9-3.9 2-2.6 2.8-6.7.8-8.6-1.7-1.6-4.9-1.2-6.7 1.3z"/><path d="M9.5 7.5c-1-1.6-.7-3.6.9-4.8.7 1.7 1 3.5 0 4.8-1.2 0-2.9 0-4.8-1.8"/><path d="M14.5 7.5c1-1.6.7-3.6-.9-4.8-.7 1.7-1 3.5 0 4.8 1.2 0 2.9 0 4.8-1.8"/></svg>
+      苹果版
+      <span class="tag tag-ios">免安装 · 添加到主屏幕</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div><b>用 Safari 浏览器打开本页</b><small>复制本页链接到 Safari 打开（微信里点右上角「用浏览器打开」）</small></div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#7CE8E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 0 4 4L7 21l-4 1 1-4Z"/></svg></div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div><b>点底部「分享」按钮</b><small>Safari 底部中间方框箭头图标</small></div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#7CE8E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg></div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div><b>点「添加到主屏幕」</b><small>桌面出现 APP 图标，像正式 APP 一样用，全功能支持</small></div>
+        <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#F5DC92" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec"><div class="sec-dot"></div><span>常见问题</span></div>
+  <div class="faq">
+    <div class="faq-item">
+      <b>为什么提示"此应用不安全"？</b>
+      <small>本 APP 未上架应用商店，使用自行签名的安装包，系统会提示风险。点「仍要安装 / 继续安装」即可，功能不受影响。</small>
+    </div>
+    <div class="faq-item">
+      <b>苹果手机和安卓数据通吗？</b>
+      <small>通。用同一手机号登录，数据云端同步，换手机不丢。</small>
+    </div>
+    <div class="faq-item">
+      <b>装好后需要做什么？</b>
+      <small>打开 APP 用手机号注册登录即可使用。建议在「管理 → 权限管理」里开启通知权限，到店提醒才收得到。</small>
+    </div>
+  </div>
+
+  <div class="foot">物流筐收发管理系统 <span id="footVer">v8.2.17</span> · 2026.08</div>
+</div>
+
+<script>
+// 下载地址与版本：从云端 app-version.json 拉取（保持最新，发新版 APK 只改配置）
+(function () {
+  var HOME = 'https://inventory-app-9ql.pages.dev/';
+  var DEFAULT_VER = 'v8.2.17';
+  var apkLink = document.getElementById('apkLink');
+  var apkVer = document.getElementById('apkVer');
+  var footVer = document.getElementById('footVer');
+
+  fetch('app-version.json', { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d && d.apkUrl) apkLink.href = d.apkUrl;
+      var v = d && d.versionName ? 'v' + d.versionName : DEFAULT_VER;
+      apkVer.textContent = '安卓 ' + v;
+      footVer.textContent = v;
+    })
+    .catch(function () { apkLink.href = HOME; });
+
+  // 设备识别：iOS 用户优先展示苹果步骤
+  var ua = navigator.userAgent || '';
+  var isIOS = /iPhone|iPad|iPod/i.test(ua);
+  if (isIOS) {
+    var android = document.getElementById('platAndroid');
+    var ios = document.getElementById('platIos');
+    if (android && ios) {
+      var parent = ios.parentNode;
+      parent.insertBefore(ios, android);
+    }
+  }
+})();
+
+function scrollToIos() {
+  var el = document.getElementById('platIos');
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
