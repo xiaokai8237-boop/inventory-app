@@ -13004,7 +13004,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.18'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.19'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -13750,32 +13750,47 @@ function chooseVipPlan(id) {
 }
 // 打开收款码支付弹窗
 function openPayQrModal(res) {
-  const cfg = res.config || {};
   if (res.orderNo) payOrderNo = res.orderNo;
   document.getElementById('payAmount').textContent = Number(res.amount || 0).toFixed(2) + ' 元';
   document.getElementById('payOrderNoText').textContent = payOrderNo;
   document.getElementById('kfOrderTail').textContent = payOrderNo.slice(-4);
-  const wxQr = cfg.wxQr || '';
-  const aliQr = cfg.alipayQr || '';
-  const imgWx = document.getElementById('payWxQr');
-  const imgAli = document.getElementById('payAlipayQr');
-  const empty = document.getElementById('payQrEmpty');
-  imgWx.src = wxQr; imgAli.src = aliQr;
-  document.getElementById('payTabWx').style.display = wxQr ? '' : 'none';
-  document.getElementById('payTabAli').style.display = aliQr ? '' : 'none';
-  if (wxQr) switchPayTab('wx');
-  else if (aliQr) switchPayTab('ali');
-  else {
-    imgWx.style.display = 'none'; imgAli.style.display = 'none';
-    empty.style.display = 'block';
-  }
-  // 客服卡片数据
-  document.getElementById('kfQrImg').src = cfg.kfQr || '';
-  document.getElementById('kfWxText').textContent = cfg.kfWx || '';
-  document.getElementById('kfHours').textContent = '客服工作时间：' + (cfg.kfHours || '凌晨 1:00 — 下午 3:00');
-  document.getElementById('kfCard').classList.remove('show');
   showModal('payQrModal');
   startPayPolling();
+  // 收款码/客服信息单独拉取（下单响应已精简，不再携带大 base64）
+  loadPayConfigForModal();
+}
+// 异步拉取收款配置填充支付弹窗（独立请求，不阻塞下单响应）
+function loadPayConfigForModal() {
+  fetch(API_BASE + '/pay/order/config', { method: 'GET' })
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      const cfg = (res && res.config) || {};
+      const wxQr = cfg.wxQr || '';
+      const aliQr = cfg.alipayQr || '';
+      const imgWx = document.getElementById('payWxQr');
+      const imgAli = document.getElementById('payAlipayQr');
+      const empty = document.getElementById('payQrEmpty');
+      imgWx.src = wxQr; imgAli.src = aliQr;
+      document.getElementById('payTabWx').style.display = wxQr ? '' : 'none';
+      document.getElementById('payTabAli').style.display = aliQr ? '' : 'none';
+      if (wxQr) switchPayTab('wx');
+      else if (aliQr) switchPayTab('ali');
+      else {
+        imgWx.style.display = 'none'; imgAli.style.display = 'none';
+        empty.style.display = 'block';
+      }
+      document.getElementById('kfQrImg').src = cfg.kfQr || '';
+      document.getElementById('kfWxText').textContent = cfg.kfWx || '';
+      document.getElementById('kfHours').textContent = '客服工作时间：' + (cfg.kfHours || '凌晨 1:00 — 下午 3:00');
+    })
+    .catch(function () {
+      // 配置拉取失败：显示空态提示，不白屏
+      var imgWx = document.getElementById('payWxQr');
+      var imgAli = document.getElementById('payAlipayQr');
+      var empty = document.getElementById('payQrEmpty');
+      imgWx.style.display = 'none'; imgAli.style.display = 'none';
+      empty.style.display = 'block';
+    });
 }
 // 微信/支付宝 Tab 切换
 function switchPayTab(ch) {

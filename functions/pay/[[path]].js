@@ -57,8 +57,8 @@ async function handleOrderCreate(request, env, json) {
       createdAt: new Date().toISOString(), channel: 'listen'
     };
     await env.BACKUP_KV.put('pay_order_' + orderNo, JSON.stringify(order));
-    const cfg = await loadPayConfig(env);
-    return json({ ok: true, orderNo, amount, config: cfg });
+    // 精简返回：收款码/客服信息体积大（合计约 400KB base64），单独走 /pay/order/config 拉取，避免手机端大响应卡"正在创建订单"
+    return json({ ok: true, orderNo, amount });
   } catch (e) { return json({ error: '下单失败' }, 500); }
 }
 
