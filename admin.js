@@ -65,7 +65,7 @@ function enterMain() {
   document.getElementById('mainPage').style.display = 'block';
   switchTab('overview');
 }
-if (ADMIN_KEY) { enterMain(); }
+if (ADMIN_KEY) { if (window.KWListen) window.KWListen.init(ADMIN_KEY); enterMain(); }
 
 /* ===== Tab 切换 ===== */
 var CUR_TAB = 'overview';
@@ -82,7 +82,7 @@ function switchTab(tab) {
 /* ===== 概览 ===== */
 function renderOverview() {
   var el = document.getElementById('tabContent');
-  el.innerHTML = '<div class="card"><div class="card-title"><span class="ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4v8h10l4-4h4l-4 8H3L1 1z"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg></span>监听状态 <span id="listenPill" class="listen-pill off" style="margin-left:6px;">检测中…</span></div><div id="listenDetail" style="font-size:11px;color:var(--dim);"></div></div>' +
+  el.innerHTML = '<div class="card"><div class="card-title"><span class="ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4v8h10l4-4h4l-4 8H3L1 1z"/><circle cx="7" cy="19" r="2"/><circle cx="17" cy="19" r="2"/></svg></span>监听状态 <span id="listenPill" class="listen-pill off" style="margin-left:6px;cursor:pointer;" onclick="KWListen.selfCheck()" title="点此自检监听">检测中…</span> <span style="font-size:10px;color:var(--dim);">(点状态可自检)</span></div><div id="listenDetail" style="font-size:11px;color:var(--dim);"></div></div>' +
     '<div class="card"><div class="card-title"><span class="ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 15h4"/></svg></span>今日收款（' + today + '）</div><div class="ov-grid" id="ovToday"></div></div>' +
     '<div class="card"><div class="card-title"><span class="ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>快捷操作</div><div class="ov-grid">' +
     '<div class="ov-cell" style="cursor:pointer;" onclick="switchTab(\'grant\')"><div class="ov-num cyan" style="font-size:16px;">补发 VIP</div><div class="ov-lab">兜底第 5 层</div></div>' +

@@ -74,5 +74,39 @@
     window.Capacitor.Plugins.PayListener.openSettings();
   }
 
-  window.KWListen = { init: init, report: report, heartbeat: heartbeat, checkEnabled: checkEnabled, openSettings: openSettings, isNative: isNative };
+  // 自检：环境 / listenKey / 心跳连通 / 通知权限，结果用 toast 展示
+  function selfCheck() {
+    var lines = [];
+    var show = function () { if (window.toast) window.toast(lines.join('\n'), 15000); };
+    // 1. 运行环境
+    if (!isNative()) { lines.push('环境：浏览器，监听仅管理APK生效'); show(); return; }
+    lines.push('环境：管理APK ✓');
+    // 2. listenKey 是否已派生（未登录/未 init 则空）
+    if (!listenKey) {
+      lines.push('暗号：未派生（请重新登录一次管理密码）');
+      // 仍尝试触发一次派生：若当前无 listenKey 且登录页已存 key，可尝试 init
+      var saved = '';
+      try { saved = localStorage.getItem('kuanwei_admin_key') || ''; } catch (e) {}
+      if (saved) { init(saved); lines.push('已自动重新初始化'); }
+      show(); return;
+    }
+    lines.push('暗号：已派生 ✓');
+    // 3. 心跳连通性（立即发一次）
+    post('/listen/heartbeat', { listenKey: listenKey, deviceId: deviceId }).then(function (r) {
+      if (r && r.ok) {
+        lines.push('心跳：上报成功 ✓');
+      } else if (r && r.error) {
+        lines.push('心跳：被拒（' + r.error + '）→ 密码可能已改，请重新登录');
+      } else {
+        lines.push('心跳：网络失败');
+      }
+      // 4. 通知监听权限
+      checkEnabled(function (enabled) {
+        lines.push('通知监听权限：' + (enabled ? '已开启 ✓' : '未开启 → 点下方提示去系统设置开启'));
+        show();
+      });
+    });
+  }
+
+  window.KWListen = { init: init, report: report, heartbeat: heartbeat, checkEnabled: checkEnabled, openSettings: openSettings, selfCheck: selfCheck, isNative: isNative };
 })();
