@@ -163,6 +163,103 @@ export async function onRequest(context) {
     return json({ ok: true, deleted, skipped: errors });
   }
 
+  // POST /admin/grant-vip {adminKey, phone, planId}  补发 VIP（第 5 层兜底，档位锁定）
+  if (url.pathname.endsWith('/admin/grant-vip')) {
+    const phone = (body.phone || '').toString().trim();
+    const planId = (body.planId || '').toString();
+    const PLANS = { month: 30, season: 90, year: 365, lifetime: 0 };
+    if (!/^1\d{10}$/.test(phone)) return json({ error: '手机号格式不正确' }, 400);
+    if (!(planId in PLANS)) return json({ error: '档位不存在' }, 400);
+    const raw = await env.BACKUP_KV.get('account_' + phone);
+    if (!raw) return json({ error: '该手机号未注册' }, 404);
+    let acct;
+    try { acct = JSON.parse(raw); } catch (e) { return json({ error: '账号数据异常' }, 500); }
+    const now = Date.now();
+    if (planId === 'lifetime') {
+      acct.vipUntil = '2100-12-31T00:00:00.000Z';
+    } else {
+      const days = PLANS[planId];
+      const base = acct.vipUntil && new Date(acct.vipUntil).getTime() > now ? new Date(acct.vipUntil).getTime() : now;
+      acct.vipUntil = new Date(base + days * 24 * 3600 * 1000).toISOString();
+    }
+    acct.updatedAt = new Date().toISOString();
+    await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
+    // 操作留痕
+    try {
+      await env.BACKUP_KV.put('admin_log_' + Date.now(), JSON.stringify({
+        action: 'grant-vip', phone, planId, at: new Date(now).toISOString()
+      }));
+    } catch (e) {}
+    return json({ ok: true, vipUntil: acct.vipUntil, message: '已补发 ' + planId });
+  }
+
+  // POST /admin/reconcile {adminKey, date?}  每日对账报告（收到N/匹配M/未匹配K + 明细）
+  if (url.pathname.endsWith('/admin/reconcile')) {
+    try {
+      const date = (body.date || '').toString() || new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+      const flows = [];
+      let cursor;
+      do {
+        const page = await env.BACKUP_KV.list({ prefix: 'pay_flow_' + date + '_', cursor, limit: 500 });
+        for (const k of page.keys) {
+          const raw = await env.BACKUP_KV.get(k.name).catch(() => null);
+          if (raw) { try { flows.push(JSON.parse(raw)); } catch (e) {} }
+        }
+        cursor = page.cursor;
+      } while (cursor);
+      flows.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+      const matched = flows.filter(f => f.status === 'matched');
+      const unmatched = flows.filter(f => f.status !== 'matched');
+      return json({
+        ok: true, date,
+        total: flows.length,
+        totalAmount: +flows.reduce((s, f) => s + (f.amount || 0), 0).toFixed(2),
+        matched: matched.length, matchedAmount: +matched.reduce((s, f) => s + (f.amount || 0), 0).toFixed(2),
+        unmatched: unmatched.length, unmatchedAmount: +unmatched.reduce((s, f) => s + (f.amount || 0), 0).toFixed(2),
+        flows
+      });
+    } catch (e) { return json({ error: '对账失败' }, 500); }
+  }
+
+  // POST /admin/flow {adminKey, date?}  收款流水明细
+  if (url.pathname.endsWith('/admin/flow')) {
+    try {
+      const date = (body.date || '').toString() || new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+      const flows = [];
+      let cursor;
+      do {
+        const page = await env.BACKUP_KV.list({ prefix: 'pay_flow_' + date + '_', cursor, limit: 500 });
+        for (const k of page.keys) {
+          const raw = await env.BACKUP_KV.get(k.name).catch(() => null);
+          if (raw) { try { flows.push(JSON.parse(raw)); } catch (e) {} }
+        }
+        cursor = page.cursor;
+      } while (cursor);
+      flows.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+      return json({ ok: true, date, flows });
+    } catch (e) { return json({ error: '查询失败' }, 500); }
+  }
+
+  // POST /admin/listen-status {adminKey}  监听设备在线状态（15 分钟无心跳 = 离线）
+  if (url.pathname.endsWith('/admin/listen-status')) {
+    try {
+      const hbs = [];
+      let cursor;
+      do {
+        const page = await env.BACKUP_KV.list({ prefix: 'listen_hb_', cursor, limit: 200 });
+        hbs.push(...page.keys);
+        cursor = page.cursor;
+      } while (cursor);
+      const now = Date.now();
+      const devices = [];
+      for (const k of hbs) {
+        const ts = parseInt(await env.BACKUP_KV.get(k.name).catch(() => '0') || '0', 10);
+        devices.push({ deviceId: k.name.replace('listen_hb_', ''), lastBeat: ts, online: now - ts < 15 * 60 * 1000 });
+      }
+      return json({ ok: true, devices });
+    } catch (e) { return json({ error: '查询失败' }, 500); }
+  }
+
   if (!url.pathname.endsWith('/admin/reset')) return json({ error: 'not found' }, 404);
 
   const phone = (body.phone || '').toString().trim();

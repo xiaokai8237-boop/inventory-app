@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>营销图 #154 v2 - 预览</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #0E3340;
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .head {
+    color: #F5DC92;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .sub {
+    color: #7CE8E0;
+    font-size: 12px;
+    margin-bottom: 18px;
+    letter-spacing: 1px;
+  }
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 940px;
+  }
+  .card {
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(245,220,146,.25);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 16px 50px rgba(0,0,0,.45);
+  }
+  .card img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  .verh {
+    color: #A8C0C9;
+    font-size: 13px;
+    margin: 0 8px 4px;
+    font-weight: 700;
+  }
+  .note {
+    color: #9DB6C0;
+    font-size: 12px;
+    margin-top: 14px;
+    text-align: center;
+    line-height: 1.7;
+    max-width: 720px;
+  }
+  .note b { color: #F5DC92; }
+</style>
+</head>
+<body>
+  <div class="head">物流筐 · 营销图 #154 v4</div>
+  <div class="sub">二维码重做：自研 QR 生成器 + 内容正确 + 176px 高清</div>
+  <div class="stack">
+    <div class="verh">v4 改动（修复微信扫不出）</div>
+    <div class="card"><img src="design_154_v4.png" alt="v4"></div>
+    <div class="verh">v3（对照，旧二维码扫不出）</div>
+    <div class="card"><img src="design_154_v3.png" alt="v3"></div>
+    <div class="verh">v2（对照）</div>
+    <div class="card"><img src="design_154_v2.png" alt="v2"></div>
+    <div class="verh">v1（对照）</div>
+    <div class="card"><img src="design_154_v1.png" alt="v1"></div>
+  </div>
+  <div class="note">
+    <b>v4 根因修复</b>：旧二维码是从 splash_1080x1882_qr.png（左下角）裁剪的区域错位（裁到了别处/或链接已失效）。新版用项目<b>自研 QR 生成器 qrBuildMatrix</b>（生产环境已验证可扫）生成 592×592 高清二维码（内容=https://inventory-app-9ql.pages.dev/），渲染到营销图时 176px 显示。
+  </div>
+</body>
+</html>

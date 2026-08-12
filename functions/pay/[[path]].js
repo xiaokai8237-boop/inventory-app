@@ -27,7 +27,70 @@ export async function onRequest(context) {
   if (request.method === 'POST' && path.endsWith('/pay/create')) return handleCreate(request, env, json);
   if (request.method === 'POST' && path.endsWith('/pay/notify')) return handleNotify(request, env, url);
   if (request.method === 'GET' && path.endsWith('/pay/status')) return handleStatus(request, env, url, json);
+  // 监听版（经营码+监听）：下单 / 公共收款配置
+  if (request.method === 'POST' && path.endsWith('/pay/order/create')) return handleOrderCreate(request, env, json);
+  if (request.method === 'GET' && path.endsWith('/pay/order/config')) return handleOrderConfig(env, json);
   return json({ error: 'not found' }, 404);
+}
+
+// ============ 监听版下单（经营码 + 通知监听自动开通） ============
+async function handleOrderCreate(request, env, json) {
+  try {
+    const body = await request.json().catch(() => ({}));
+    const token = (body.token || '').toString();
+    const phone = token ? await env.BACKUP_KV.get('tok_' + token).catch(() => null) : null;
+    if (!phone) return json({ error: '未登录或登录已过期' }, 401);
+    const plan = PLANS[body.planId];
+    if (!plan) return json({ error: '档位不存在' }, 400);
+
+    const baseAmount = getAmount(body.planId);
+    // 尾数防撞单：同金额未支付订单存在则 +0.01，最多 +0.09
+    let amount = baseAmount;
+    for (let i = 1; i <= 9; i++) {
+      if (!(await hasPendingAmount(env, amount))) break;
+      amount = +(baseAmount + i * 0.01).toFixed(2);
+    }
+    const orderNo = 'KW' + Date.now() + String(Math.floor(Math.random() * 900 + 100));
+    const order = {
+      orderNo, phone, planId: body.planId, amount,
+      subject: plan.subject, status: 'created',
+      createdAt: new Date().toISOString(), channel: 'listen'
+    };
+    await env.BACKUP_KV.put('pay_order_' + orderNo, JSON.stringify(order));
+    const cfg = await loadPayConfig(env);
+    return json({ ok: true, orderNo, amount, config: cfg });
+  } catch (e) { return json({ error: '下单失败' }, 500); }
+}
+
+// ============ 公共收款配置（用户下单页展示收款码） ============
+async function handleOrderConfig(env, json) {
+  const cfg = await loadPayConfig(env);
+  return json({ ok: true, config: cfg });
+}
+
+// ============ 工具（监听版） ============
+async function hasPendingAmount(env, amount) {
+  try {
+    let cursor;
+    do {
+      const page = await env.BACKUP_KV.list({ prefix: 'pay_order_', cursor, limit: 200 });
+      for (const k of page.keys) {
+        const raw = await env.BACKUP_KV.get(k.name).catch(() => null);
+        if (!raw) continue;
+        try {
+          const o = JSON.parse(raw);
+          if (o.status === 'created' && Math.abs(o.amount - amount) < 0.001) return true;
+        } catch (e) {}
+      }
+      cursor = page.cursor;
+    } while (cursor);
+  } catch (e) {}
+  return false;
+}
+async function loadPayConfig(env) {
+  const raw = await env.BACKUP_KV.get('pay_config').catch(() => null);
+  if (raw) { try { return JSON.parse(raw); } catch (e) {} }
+  return { wxQr: '', alipayQr: '', kfQr: '', kfWx: '', kfHours: '凌晨 1:00 — 下午 3:00' };
 }
 
 // ============ 下单 ============
