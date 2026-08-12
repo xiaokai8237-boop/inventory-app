@@ -154,7 +154,8 @@ async function handleSetup(body, env, json) {
   const securityA = (body.securityA || '').toString().trim().toLowerCase();
   const deviceId = (body.deviceId || '').toString().trim();
   const inviteCode = (body.inviteCode || '').toString().trim().toUpperCase();
-  if (!/^1\d{10}$/.test(phone)) return json({ error: '手机号格式不正确' }, 400);
+  // 手机号段校验（2026-08-12 用户要求）：1 开头 + 第二位 3-9（真实号段 130-199），拦截乱填
+  if (!/^1[3-9]\d{9}$/.test(phone)) return json({ error: '手机号格式不正确，请检查后重试' }, 400);
   if (password.length < 6) return json({ error: '密码无效' }, 400);
   if (!securityQ || !securityA) return json({ error: '密保问题不能为空' }, 400);
   const existingRaw = await env.BACKUP_KV.get('account_' + phone);
@@ -238,16 +239,16 @@ async function resolveInviteCode(env, inviteCode, selfPhone) {
   } catch (e) { return ''; }
 }
 
-// 防作弊三层校验：① 设备去重（同设备已关联 ≥2 账号 → deny）② 邀请人月上限 20 人 ③ 异常注册（同设备 10 分钟内 setup ≥3 次）
+// 防作弊三层校验：① 设备去重（同设备已关联 ≥3 账号 → deny，允许 2 账号共用一台）② 邀请人月上限 20 人 ③ 异常注册（同设备 10 分钟内 setup ≥3 次）
 async function antiCheatCheck(env, deviceId, inviterPhone) {
   try {
-    // ① 设备去重：device_acc_<deviceId>.phones.length >= 2 → deny（防小号互刷）
+    // ① 设备去重：device_acc_<deviceId>.phones.length >= 3 → deny（2026-08-12 用户拍板：同设备最多 2 个手机号）
     if (deviceId) {
       const raw = await env.BACKUP_KV.get('device_acc_' + deviceId).catch(() => null);
       if (raw) {
         try {
           const d = JSON.parse(raw);
-          if (d.phones && d.phones.length >= 2) return 'device-limit';
+          if (d.phones && d.phones.length >= 3) return 'device-limit';
         } catch (e) {}
       }
     }
