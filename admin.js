@@ -2,10 +2,10 @@
 var ADMIN_KEY = localStorage.getItem('kuanwei_admin_key') || '';
 var today = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
 
-function toast(msg) {
+function toast(msg, ms) {
   var t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._tm); t._tm = setTimeout(function () { t.classList.remove('show'); }, 2200);
+  clearTimeout(t._tm); t._tm = setTimeout(function () { t.classList.remove('show'); }, ms || 2200);
 }
 function api(path, body) {
   return fetch(path, {
@@ -15,7 +15,7 @@ function api(path, body) {
     return r.text().then(function (t) {
       try { return JSON.parse(t); } catch (e) { return { error: '服务响应异常(HTTP ' + r.status + ')' }; }
     });
-  }).catch(function () { return { error: '网络连接失败，请检查网络' }; });
+  }).catch(function (e) { return { error: '网络连接失败（' + (e && e.message ? e.message : '请检查网络') + '）' }; });
 }
 function fmtTime(ts) {
   if (!ts) return '';
@@ -233,13 +233,13 @@ function pickQr(input, key, previewId) {
         cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
         var dataUrl = cv.toDataURL('image/png');
         if (dataUrl.length > 1_050_000) { dataUrl = cv.toDataURL('image/jpeg', 0.88); } // PNG 仍超 → JPEG 兜底
-        if (dataUrl.length > 1_300_000) { toast('图片压缩后仍过大，请换小图'); return; }
+        if (dataUrl.length > 1_300_000) { toast('图片压缩后仍过大，请换小图', 8000); return; }
         cfgDraft[key] = dataUrl;
         document.getElementById(previewId).src = dataUrl;
         toast('已选择，记得点保存');
-      } catch (e) { toast('图片处理失败，请重试'); }
+      } catch (e) { toast('图片处理失败，请重试', 8000); }
     };
-    img.onerror = function () { toast('图片读取失败'); };
+    img.onerror = function () { toast('图片读取失败', 8000); };
     img.src = reader.result;
   };
   reader.readAsDataURL(file);
@@ -247,11 +247,11 @@ function pickQr(input, key, previewId) {
 function saveConfig() {
   cfgDraft.kfWx = document.getElementById('cfWx').value.trim();
   cfgDraft.kfHours = document.getElementById('cfHours').value.trim() || '凌晨 1:00 — 下午 3:00';
-  if (!cfgDraft.wxQr && !cfgDraft.alipayQr) { toast('至少上传一个收款码'); return; }
+  if (!cfgDraft.wxQr && !cfgDraft.alipayQr) { toast('至少上传一个收款码', 8000); return; }
   var totalLen = (cfgDraft.wxQr || '').length + (cfgDraft.alipayQr || '').length + (cfgDraft.kfQr || '').length;
   api('/admin/pay-config/save', cfgDraft).then(function (res) {
-    if (res && res.ok) toast(res.message || '已保存，全局生效');
-    else toast((res && res.error) || '保存失败（未知错误）');
+    if (res && res.ok) toast(res.message || '已保存，全局生效', 3000);
+    else toast((res && res.error) || '保存失败（未知错误）', 8000);
   });
 }
 
