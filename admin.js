@@ -256,7 +256,6 @@ function saveConfig() {
   });
 }
 
-/* ===== 服务自检（排查保存失败：显示每个接口真实 HTTP 状态） ===== */
 function selfCheck() {
   var cs = [['登录验证 /admin/verify', '/admin/verify'], ['读配置 /admin/pay-config', '/admin/pay-config'], ['保存配置 /admin/pay-config/save', '/admin/pay-config/save'], ['今日对账 /admin/reconcile', '/admin/reconcile']];
   var lines = [], seq = Promise.resolve();
