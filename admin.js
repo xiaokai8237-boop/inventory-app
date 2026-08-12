@@ -203,7 +203,8 @@ function renderConfig() {
     '<div class="qr-box"><div class="qr-name">客服二维码</div><img id="pvKf" src="" alt="客服二维码"><label for="fKf">上传图片</label><input type="file" id="fKf" accept="image/*" onchange="pickQr(this, \'kfQr\', \'pvKf\')"></div></div>' +
     '<div class="f-label">客服微信号（用户复制添加）</div><input class="f-input" id="cfWx" placeholder="如 kf_2026">' +
     '<div class="f-label">客服工作时间</div><input class="f-input" id="cfHours" placeholder="如 凌晨 1:00 — 下午 3:00">' +
-    '<button class="f-btn" onclick="saveConfig()">保存收款配置</button></div>';
+    '<button class="f-btn" onclick="saveConfig()">保存收款配置</button>' +
+    '<button class="f-btn ghost" style="margin-top:8px;" onclick="selfCheck()">服务自检（排查保存失败）</button></div>';
   api('/admin/pay-config').then(function (res) {
     if (!res || !res.ok) return;
     var c = res.config || {};
@@ -253,6 +254,20 @@ function saveConfig() {
     if (res && res.ok) toast(res.message || '已保存，全局生效', 3000);
     else toast((res && res.error) || '保存失败（未知错误）', 8000);
   });
+}
+
+/* ===== 服务自检（排查保存失败：显示每个接口真实 HTTP 状态） ===== */
+function selfCheck() {
+  var cs = [['登录验证 /admin/verify', '/admin/verify'], ['读配置 /admin/pay-config', '/admin/pay-config'], ['保存配置 /admin/pay-config/save', '/admin/pay-config/save'], ['今日对账 /admin/reconcile', '/admin/reconcile']];
+  var lines = [], seq = Promise.resolve();
+  cs.forEach(function (c) {
+    seq = seq.then(function () {
+      return fetch(c[1], { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: ADMIN_KEY }) })
+        .then(function (r) { return r.text().then(function (t) { lines.push(c[0] + '\n→ HTTP ' + r.status + ' | ' + t.slice(0, 60)); }); })
+        .catch(function (e) { lines.push(c[0] + '\n→ 请求失败: ' + (e && e.message ? e.message : '网络错误')); });
+    });
+  });
+  seq.then(function () { toast(lines.join('\n'), 15000); });
 }
 
 /* ===== 每日对账 ===== */
