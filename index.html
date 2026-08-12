@@ -13076,7 +13076,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.24'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.23'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -15051,9 +15051,7 @@ function arrivalShow(storeIdx, distM) {
   document.getElementById('arrDist').textContent = d.distM;
   document.getElementById('arrStore').textContent = '即将到达 ' + d.storeName;
   const planEl = document.getElementById('arrPlan');
-  const sentTotal = d.goods.reduce((s, g) => s + (g.qty || 0) + (g.whole || 0), 0);
-  if (sentTotal > 0) { planEl.style.display = ''; planEl.textContent = '今日已发 ' + sentTotal + ' 筐'; }
-  else if (d.plan > 0) { planEl.style.display = ''; planEl.textContent = '今日应发 ' + d.plan + ' 筐'; }
+  if (d.plan > 0) { planEl.style.display = ''; planEl.textContent = '今日应发 ' + d.plan + ' 筐'; }
   else { planEl.style.display = 'none'; }
   const g = document.getElementById('arrGoods');
   g.innerHTML = d.goods.map(x => {
