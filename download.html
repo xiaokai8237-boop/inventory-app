@@ -83,9 +83,72 @@
   .faq-item b { font-size: 13.5px; font-weight: 700; display: block; }
   .faq-item small { font-size: 12px; color: rgba(232,242,245,.62); line-height: 1.65; margin-top: 5px; display: block; }
   .foot { text-align: center; padding: 26px 0 0; font-size: 11px; color: rgba(232,242,245,.35); letter-spacing: .5px; }
+  /* 微信内引导：顶部横幅 */
+  .wx-banner {
+    display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 90;
+    background: linear-gradient(160deg, #F8E3A6 0%, #E3BE68 60%, #C89B4E 100%);
+    color: #0B2E38; font-size: 13.5px; font-weight: 700; letter-spacing: .3px;
+    padding: 12px 44px 12px 16px; text-align: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,.3);
+  }
+  .wx-banner .dots {
+    display: inline-flex; gap: 3px; vertical-align: middle; margin: 0 5px;
+    position: relative; top: -1px;
+  }
+  .wx-banner .dots i { width: 5px; height: 5px; border-radius: 50%; background: #0B2E38; display: block; }
+  /* 微信内引导：首次遮罩（箭头指右上角三点） */
+  .wx-mask {
+    display: none; position: fixed; inset: 0; z-index: 95;
+    background: rgba(4,16,22,.88); cursor: pointer;
+  }
+  .wx-mask .arrow-wrap { position: absolute; top: 0; right: 10px; text-align: center; }
+  .wx-mask .dots-big {
+    display: inline-flex; gap: 6px; margin-top: 16px;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.5);
+    align-items: center; justify-content: center;
+  }
+  .wx-mask .dots-big i { width: 6px; height: 6px; border-radius: 50%; background: #fff; display: block; }
+  .wx-mask .arrow {
+    width: 30px; height: 34px; margin: 6px auto 0;
+    animation: wxArrow 1.6s ease-in-out infinite;
+  }
+  @keyframes wxArrow {
+    0%, 100% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(6px); opacity: .55; }
+  }
+  .wx-mask .txt {
+    position: absolute; left: 24px; right: 24px; top: 120px;
+    text-align: center; font-size: 17px; font-weight: 800; line-height: 1.8;
+    color: #F5DC92; letter-spacing: 1px;
+  }
+  .wx-mask .txt small {
+    display: block; margin-top: 12px; font-size: 12.5px; font-weight: 400;
+    color: rgba(232,242,245,.7); letter-spacing: .3px; line-height: 1.7;
+  }
+  .wx-mask .know { position: absolute; left: 50%; bottom: 88px; transform: translateX(-50%);
+    font-size: 14px; font-weight: 700; color: #0B2E38;
+    background: linear-gradient(160deg, #F8E3A6 0%, #E3BE68 55%, #C89B4E 100%);
+    padding: 12px 44px; border-radius: 26px; box-shadow: 0 8px 22px rgba(245,220,146,.3);
+  }
 </style>
 </head>
 <body>
+<!-- 微信内引导：顶部横幅 -->
+<div class="wx-banner" id="wxBanner">
+  微信内无法下载安装包，点右上角
+  <span class="dots"><i></i><i></i><i></i></span>
+  选择「在浏览器打开」
+</div>
+<!-- 微信内引导：首次遮罩 -->
+<div class="wx-mask" id="wxMask" onclick="closeWxMask()">
+  <div class="arrow-wrap">
+    <div class="dots-big"><i></i><i></i><i></i></div>
+    <svg class="arrow" viewBox="0 0 30 34" fill="none"><path d="M15 0v26" stroke="#F5DC92" stroke-width="3" stroke-linecap="round"/><path d="M5 18l10 10 10-10" stroke="#F5DC92" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="txt">点击右上角 <span class="dots" style="display:inline-flex;gap:4px;vertical-align:middle;"><i style="width:6px;height:6px;border-radius:50%;background:#F5DC92;display:block;"></i><i style="width:6px;height:6px;border-radius:50%;background:#F5DC92;display:block;"></i><i style="width:6px;height:6px;border-radius:50%;background:#F5DC92;display:block;"></i></span><br>选择「在浏览器打开」<small>微信内无法直接下载安装包<br>请在浏览器中打开后再下载</small></div>
+  <div class="know">我知道了</div>
+</div>
 <div class="wrap">
   <div class="brand">
     <div class="logo">
@@ -216,7 +279,32 @@
       parent.insertBefore(ios, android);
     }
   }
+
+  // 微信内置浏览器识别：显示顶部横幅 + 首次遮罩引导（微信内无法下载 APK，必须引导到系统浏览器）
+  var isWeixin = /MicroMessenger/i.test(ua);
+  if (isWeixin) {
+    var banner = document.getElementById('wxBanner');
+    if (banner) banner.style.display = 'block';
+    if (!sessionStorage.getItem('wxMaskShown')) {
+      var mask = document.getElementById('wxMask');
+      if (mask) mask.style.display = 'block';
+      sessionStorage.setItem('wxMaskShown', '1');
+    }
+    // 微信内点下载：拦截并再次提示（按钮 href 已指向 APK，微信会拦截，引导去浏览器）
+    if (apkLink) {
+      apkLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        var mask = document.getElementById('wxMask');
+        if (mask) mask.style.display = 'block';
+      });
+    }
+  }
 })();
+
+function closeWxMask() {
+  var mask = document.getElementById('wxMask');
+  if (mask) mask.style.display = 'none';
+}
 
 function scrollToIos() {
   var el = document.getElementById('platIos');
