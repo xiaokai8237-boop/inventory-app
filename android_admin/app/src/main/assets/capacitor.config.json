@@ -3,7 +3,7 @@
   "appName": "物流筐管理",
   "webDir": "www",
   "server": {
-    "url": "https://inventory-app-9ql.pages.dev/admin.html",
+    "url": "https://inventory-app-9ql.pages.dev/admin-panel.html",
     "androidScheme": "https"
   },
   "android": {
