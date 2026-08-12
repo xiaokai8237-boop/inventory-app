@@ -1,6 +1,6 @@
-// Cloudflare Pages Function — /admin/* 管理员接口
-// POST /admin/reset  {adminKey, phone, newPasswordHash}  管理员重置用户密码
-// POST /admin/stats  {adminKey}                          统计注册人数 + 用户列表（解密显示密码）
+// Cloudflare Pages Function — /admin/*（收款配置走 _payconfig.js 子模块，统一路由避免静态路由边缘 404）
+import { handlePayConfig, handlePayConfigSave } from './_payconfig.js';
+
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -18,7 +18,6 @@ export async function onRequest(context) {
   let body;
   try { body = await request.json(); } catch (e) { return json({ error: 'invalid json' }, 400); }
 
-  // 管理员密钥从环境变量读取（不写死在代码/前端），未配置则拒绝
   const ADMIN_KEY = env.ADMIN_KEY || '';
   const adminKey = (body.adminKey || '').toString();
 
@@ -47,6 +46,9 @@ export async function onRequest(context) {
   }
 
   if (!ADMIN_KEY || adminKey !== ADMIN_KEY) return json({ error: '管理员密钥错误' }, 401);
+  // 收款配置读/存（子模块，统一路由）
+  if (url.pathname.endsWith('/admin/pay-config')) return handlePayConfig(env, json);
+  if (url.pathname.endsWith('/admin/pay-config/save')) return handlePayConfigSave(body, env, json);
 
   if (url.pathname.endsWith('/admin/stats')) {
     // 统计注册人数 + 用户列表（手机号+密码）+ 待恢复的注销账号（临时代码）
