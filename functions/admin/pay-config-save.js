@@ -17,15 +17,15 @@ export async function onRequest(context) {
   if (!ADMIN_KEY || (body.adminKey || '').toString() !== ADMIN_KEY) return json({ error: '管理员密钥错误' }, 401);
 
   const cfg = {
-    wxQr: (body.wxQr || '').toString().slice(0, 1_400_000),
-    alipayQr: (body.alipayQr || '').toString().slice(0, 1_400_000),
-    kfQr: (body.kfQr || '').toString().slice(0, 1_400_000),
+    wxQr: (body.wxQr || '').toString().slice(0, 2_000_000),
+    alipayQr: (body.alipayQr || '').toString().slice(0, 2_000_000),
+    kfQr: (body.kfQr || '').toString().slice(0, 2_000_000),
     kfWx: (body.kfWx || '').toString().slice(0, 100),
     kfHours: (body.kfHours || '凌晨 1:00 — 下午 3:00').toString().slice(0, 100),
     updatedAt: new Date().toISOString()
   };
   for (const k of ['wxQr', 'alipayQr', 'kfQr']) {
-    if (cfg[k] && cfg[k].length > 1_400_000) return json({ error: k + ' 图片过大（≤1MB）' }, 400);
+    if (cfg[k] && cfg[k].length > 2_000_000) return json({ error: k + ' 图片过大' }, 400);
   }
   await env.BACKUP_KV.put('pay_config', JSON.stringify(cfg));
   try {

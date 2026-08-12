@@ -214,12 +214,29 @@ function renderConfig() {
 function pickQr(input, key, previewId) {
   var file = input.files && input.files[0];
   if (!file) return;
-  if (file.size > 1.2 * 1024 * 1024) { toast('图片需 ≤1MB'); input.value = ''; return; }
+  if (file.size > 5 * 1024 * 1024) { toast('图片需 ≤5MB'); input.value = ''; return; }
   var reader = new FileReader();
   reader.onload = function () {
-    cfgDraft[key] = reader.result;
-    document.getElementById(previewId).src = reader.result;
-    toast('已选择，记得点保存');
+    // canvas 压缩：最长边 900px 缩放（二维码保真 PNG），避免 base64 膨胀超后端上限
+    var img = new Image();
+    img.onload = function () {
+      try {
+        var maxSide = 900;
+        var scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        var cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(img.width * scale));
+        cv.height = Math.max(1, Math.round(img.height * scale));
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        var dataUrl = cv.toDataURL('image/png');
+        if (dataUrl.length > 1_050_000) { dataUrl = cv.toDataURL('image/jpeg', 0.88); } // PNG 仍超 → JPEG 兜底
+        if (dataUrl.length > 1_300_000) { toast('图片压缩后仍过大，请换小图'); return; }
+        cfgDraft[key] = dataUrl;
+        document.getElementById(previewId).src = dataUrl;
+        toast('已选择，记得点保存');
+      } catch (e) { toast('图片处理失败，请重试'); }
+    };
+    img.onerror = function () { toast('图片读取失败'); };
+    img.src = reader.result;
   };
   reader.readAsDataURL(file);
 }
