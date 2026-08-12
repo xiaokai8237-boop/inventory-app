@@ -42,6 +42,8 @@ function doLogin() {
     if (res && res.ok) {
       ADMIN_KEY = pwd;
       try { localStorage.setItem('kuanwei_admin_key', pwd); } catch (e) {}
+      // 管理 APK 原生环境：初始化监听端（派生 listenKey + 心跳 + 事件桥）
+      if (window.KWListen) window.KWListen.init(pwd);
       enterMain();
     } else {
       err.textContent = '密码错误，请重试';
@@ -93,6 +95,18 @@ function renderOverview() {
     pill.textContent = online.length ? '监听在线' : '监听离线';
     pill.className = 'listen-pill ' + (online.length ? 'on' : 'off');
     det.textContent = devs.map(function (d) { return '设备 ' + d.deviceId.slice(0, 6) + ' · 最近心跳 ' + fmtTime(d.lastBeat) + (d.online ? ' · 在线' : ' · 已离线'); }).join('<br>');
+    // 原生环境补充通知授权状态（管理 APK）
+    if (window.KWListen && window.KWListen.isNative()) {
+      window.KWListen.checkEnabled(function (enabled) {
+        var pill2 = document.getElementById('listenPill');
+        if (!enabled) {
+          pill2.textContent = '通知监听未授权';
+          pill2.className = 'listen-pill off';
+          var d2 = document.getElementById('listenDetail');
+          d2.innerHTML = d2.innerHTML + '<br><a href="javascript:void(0)" onclick="KWListen.openSettings()" style="color:#7CE8E0;">点此去系统设置开启通知监听</a>';
+        }
+      });
+    }
   });
   // 今日收款
   api('/admin/reconcile', { date: today }).then(function (res) {

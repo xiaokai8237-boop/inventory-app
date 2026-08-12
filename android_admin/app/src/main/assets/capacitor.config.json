@@ -1,0 +1,24 @@
+{
+  "appId": "com.kuanwei.admin",
+  "appName": "物流筐管理",
+  "webDir": "www",
+  "server": {
+    "url": "https://inventory-app-9ql.pages.dev/admin.html",
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "launchAutoHide": true,
+      "backgroundColor": "#082E38",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": true
+    }
+  }
+}
