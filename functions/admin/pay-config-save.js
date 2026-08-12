@@ -16,6 +16,10 @@ export async function onRequest(context) {
   const ADMIN_KEY = env.ADMIN_KEY || '';
   if (!ADMIN_KEY || (body.adminKey || '').toString() !== ADMIN_KEY) return json({ error: '管理员密钥错误' }, 401);
 
+  // 先校验原始大小（防截断后绕过校验），再截断
+  for (const k of ['wxQr', 'alipayQr', 'kfQr']) {
+    if ((body[k] || '').toString().length > 2_000_000) return json({ error: k + ' 图片过大（压缩后仍超限）' }, 400);
+  }
   const cfg = {
     wxQr: (body.wxQr || '').toString().slice(0, 2_000_000),
     alipayQr: (body.alipayQr || '').toString().slice(0, 2_000_000),
@@ -24,14 +28,21 @@ export async function onRequest(context) {
     kfHours: (body.kfHours || '凌晨 1:00 — 下午 3:00').toString().slice(0, 100),
     updatedAt: new Date().toISOString()
   };
-  for (const k of ['wxQr', 'alipayQr', 'kfQr']) {
-    if (cfg[k] && cfg[k].length > 2_000_000) return json({ error: k + ' 图片过大' }, 400);
+  try {
+    await env.BACKUP_KV.put('pay_config', JSON.stringify(cfg));
+  } catch (e) {
+    return json({ error: '云端存储失败，请重试（' + (e && e.message ? e.message : 'KV error') + '）' }, 500);
   }
-  await env.BACKUP_KV.put('pay_config', JSON.stringify(cfg));
+  // 读回验证（确认真正写入）
+  let verified = false;
+  try {
+    const back = await env.BACKUP_KV.get('pay_config').catch(() => null);
+    if (back && back.length > 10) verified = true;
+  } catch (e) {}
   try {
     await env.BACKUP_KV.put('admin_log_' + Date.now(), JSON.stringify({
       action: 'pay-config-save', at: new Date().toISOString()
     }));
   } catch (e) {}
-  return json({ ok: true, message: '收款配置已保存，全局生效' });
+  return json({ ok: true, verified, message: verified ? '收款配置已保存，全局生效' : '已保存（存储验证待确认）' });
 }

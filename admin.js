@@ -11,7 +11,11 @@ function api(path, body) {
   return fetch(path, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(Object.assign({ adminKey: ADMIN_KEY }, body || {}))
-  }).then(function (r) { return r.json(); });
+  }).then(function (r) {
+    return r.text().then(function (t) {
+      try { return JSON.parse(t); } catch (e) { return { error: '服务响应异常(HTTP ' + r.status + ')' }; }
+    });
+  }).catch(function () { return { error: '网络连接失败，请检查网络' }; });
 }
 function fmtTime(ts) {
   if (!ts) return '';
@@ -244,8 +248,10 @@ function saveConfig() {
   cfgDraft.kfWx = document.getElementById('cfWx').value.trim();
   cfgDraft.kfHours = document.getElementById('cfHours').value.trim() || '凌晨 1:00 — 下午 3:00';
   if (!cfgDraft.wxQr && !cfgDraft.alipayQr) { toast('至少上传一个收款码'); return; }
+  var totalLen = (cfgDraft.wxQr || '').length + (cfgDraft.alipayQr || '').length + (cfgDraft.kfQr || '').length;
   api('/admin/pay-config/save', cfgDraft).then(function (res) {
-    toast(res && res.ok ? '已保存，全局生效' : (res && res.error) || '保存失败');
+    if (res && res.ok) toast(res.message || '已保存，全局生效');
+    else toast((res && res.error) || '保存失败（未知错误）');
   });
 }
 
