@@ -90,8 +90,11 @@ async function deriveListenKey(adminKey) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('kuanwei-listen:' + adminKey));
   return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
+const TOLERANCE = 0.05; // 容差兜底：用户实际付款与订单金额差 ≤0.05 视为该订单（防止少付几分钱匹配不上）
 async function findPendingOrder(env, amount, now) {
   let cursor;
+  let exact = null;
+  let tolerant = null; // {order, diff}
   do {
     const page = await env.BACKUP_KV.list({ prefix: 'pay_order_', cursor, limit: 200 });
     for (const k of page.keys) {
@@ -99,15 +102,17 @@ async function findPendingOrder(env, amount, now) {
       if (!raw) continue;
       try {
         const o = JSON.parse(raw);
-        if (o.status === 'created' && Math.abs(o.amount - amount) < 0.001) {
-          const created = new Date(o.createdAt).getTime();
-          if (now - created < ORDER_TTL) return o;
-        }
+        if (o.status !== 'created') continue;
+        const created = new Date(o.createdAt).getTime();
+        if (now - created >= ORDER_TTL) continue;
+        const diff = Math.abs(o.amount - amount);
+        if (diff < 0.001) { exact = o; break; } // 精确匹配优先
+        if (diff <= TOLERANCE && (!tolerant || diff < tolerant.diff)) tolerant = { order: o, diff };
       } catch (e) {}
     }
     cursor = page.cursor;
   } while (cursor);
-  return null;
+  return exact || (tolerant && tolerant.order) || null;
 }
 async function grantVip(env, phone, planId) {
   try {
