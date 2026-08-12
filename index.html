@@ -13022,7 +13022,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.20'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.21'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -13680,8 +13680,8 @@ function permGuideLater() {
 // ===== 需求4 功能分档（免费版 / VIP版）=====
 // VIP 到期时间 key（ISO 字符串）；需求5 会员体系开通后写入
 var VIP_KEY = 'kuanwei_vip_until';
-// 需求5：测试期默认所有账号 VIP（支付未接入；正式上线时改 false 开启收费）
-var VIP_TEST_MODE = true;
+// 需求5：正式收费（2026-08-12 用户拍板，支付链路已测通，老用户已升终身 VIP）
+var VIP_TEST_MODE = false;
 function isVip() {
   try {
     if (VIP_TEST_MODE) return true;
@@ -13715,16 +13715,21 @@ var VIP_PLANS = [
   { id: 'lifetime', name: '终身卡', level: '至尊会员', price: '158',  unit: '元/永久', sub: '约 12 个月回本 · 一次买断',    lv: 'lv4', btn: '开通终身卡', tag: '永久尊享', save: '永久使用 · 未来功能全免费' }
 ];
 function renderVipCenter() {
-  // 状态卡
+  // 状态卡（动态：已开通显示到期时间 / 未开通显示去开通）
   const st = document.getElementById('vipStatusCard');
   if (st) {
+    const vip = isVip();
+    const until = (function(){ try { return localStorage.getItem(VIP_KEY) || ''; } catch(e) { return ''; } })();
+    const isLifetime = until && until.indexOf('2100') === 0;
+    const untilText = isLifetime ? '终身会员' : (until ? ('到期 ' + fmtDate(until)) : '');
     st.innerHTML =
       '<div class="row1">' +
         '<div class="crown-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg></div>' +
-        '<div><div class="st-name">VIP 会员</div><div class="st-sub">测试期默认开通 · 全部高级功能可用</div></div>' +
-        '<div class="st-tag">已开通</div>' +
+        '<div><div class="st-name">VIP 会员</div><div class="st-sub">' + (vip ? (untilText || '已开通') : '开通后解锁全部高级功能') + '</div></div>' +
+        '<div class="st-tag' + (vip ? '' : ' off') + '">' + (vip ? '已开通' : '未开通') + '</div>' +
       '</div>' +
-      '<div class="st-note">当前为测试模式：所有账号默认 VIP，无需购买。正式上线后按所选档位计算到期时间。</div>';
+      (vip ? '<div class="st-note">' + (isLifetime ? '您已是终身会员，全部高级功能可用。' : '会员有效期内全部高级功能可用，到期后可续费。') + '</div>'
+           : '<div class="st-note">当前为免费版。开通 VIP 解锁：极简模式 · 到店通知 · 语音录入 · 拍照识别 · 汇总报表 · 对账导出。</div>');
   }
   // 档位网格
   const grid = document.getElementById('vipPlanGrid');
