@@ -2507,23 +2507,6 @@ html[data-theme="dark"] .table-striped td, html[data-theme="dark"] .table-stripe
 }
 @keyframes ev-spin { to { transform: rotate(360deg); } }
 
-/* 主页测试版横条（点击跳设置页功能建议） */
-.beta-banner {
-  background: #12434E;
-  border: none;
-  color: rgba(255,255,255,.75);
-  font-size: 12px;
-  line-height: 1.5;
-  text-align: center;
-  padding: 0 16px 8px;
-  margin: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-  word-break: break-word;
-  cursor: pointer;
-}
-.beta-banner:active { opacity: .7; }
-
 /* ========== 登录/注册/忘记密码 整页（深空蓝晶定稿 图1/3·图2/3·图3/3） ========== */
 .auth-page { padding: 0 !important; padding-bottom: 0 !important; min-height: 100vh; box-sizing: border-box; background: radial-gradient(circle at 50% 22%, #2A7D8A 0%, #15545F 46%, #082E38 100%); }
 .auth-scene { max-width: 480px; margin: 0 auto; padding: 0 20px calc(env(safe-area-inset-bottom) + 30px); min-height: 100vh; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
@@ -3010,8 +2993,6 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
   <div class="date-today" id="todayLabel"></div>
   <button class="header-help" onclick="openPageHelp(event)" aria-label="帮助"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
 </div>
-
-<div class="beta-banner" onclick="switchPage('manage')"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><path d="M10 2v6L4.5 18a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="7" y1="14" x2="17" y2="14"/></svg>当前为测试版，数据不会丢失，请放心使用</div>
 
 <div class="offline-banner" id="offlineBanner"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px;"><path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>当前离线，已切换为离线模式，数据保存在本机，联网后自动同步</div>
 
@@ -3681,7 +3662,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
 </div>
 
 <!-- ========== 汇总页 ========== -->
-<!-- ========== 需求5 会员中心（4 档位 · 尊贵等级 · 测试期默认 VIP） ========== -->
+<!-- ========== 需求5 会员中心（4 档位 · 尊贵等级 · 正式收费） ========== -->
 <div class="page" id="page-vip">
   <div class="mc-head">
     <button class="mc-back" onclick="switchPage('manage')" aria-label="返回">
@@ -3691,7 +3672,7 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
     <button class="page-help-btn" onclick="openPageHelp(event)" aria-label="帮助"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></button>
   </div>
   <div class="mc-body">
-    <!-- 当前状态（测试期默认 VIP） -->
+    <!-- 当前状态（动态：已开通/未开通） -->
     <div class="mc-status" id="vipStatusCard"></div>
 
     <!-- 档位选择（尊贵等级递进） -->
@@ -3709,8 +3690,8 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       <div class="b-row"><div class="b-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="b-name">对账导出<span class="b-desc"> · Excel 导出明细/汇总</span></div></div>
     </div>
 
-    <!-- 测试期提示 -->
-    <div class="mc-test"><b>购买说明</b>：选择档位后扫码付款（微信/支付宝），付款后会员自动开通。测试期账号默认 VIP，无需购买。</div>
+    <!-- 购买说明 -->
+    <div class="mc-test"><b>购买说明</b>：选择档位后扫码付款（微信/支付宝），付款后会员自动开通，到期后可续费。</div>
   </div>
 </div>
 
@@ -3964,9 +3945,9 @@ body.auth-mode .header, body.auth-mode .tabs, body.auth-mode .login-notice, body
       ③ <b>语音录入 / 拍照识别</b>（AI 快速录入）<br>
       ④ <b>汇总报表 / 对账导出</b>（统计和 Excel 导出）<br><br>
       <b>现在收费吗？</b><br>
-      现在是<b>测试期</b>：所有人都是 VIP，上面这些功能<b>全部免费</b>，不用花钱。<br><br>
-      <b>正式收费后有几个档位？</b><br>
-      月卡 12.8 / 季卡 28.8（省 25%）/ 年卡 88（省 43%）/ 终身卡 158——<b>测试期不收费，别担心</b>。正式收费后选档位 → 扫码付款（微信/支付宝）→ 会员自动开通。<br><br>
+      VIP 功能需要开通会员后使用。选择档位 → 扫码付款（微信/支付宝）→ 会员自动开通。<br><br>
+      <b>有几个档位？</b><br>
+      月卡 12.8 / 季卡 28.8（省 25%）/ 年卡 88（省 43%）/ 终身卡 158（一次买断，未来功能全免费）。
       <b>怎么进会员中心？</b><br>
       点底部 <b>「管理」</b> → 顶部会员卡（VIP 会员）→ 点进去看权益和档位。
     </div>
@@ -10236,12 +10217,13 @@ function openPageHelp(e) {
       ]) + tip('奖励发放后你的 VIP 到期时间会自动 +15 天');
     } else if (vipPage && vipPage.classList.contains('active')) {
       t = '会员中心 · 图文帮助';
-      h = `<div class="ph-map"><span class="pm-cell">测试期</span><span class="pm-arrow">›</span><span class="pm-cell pm-main">默认 VIP</span><span class="pm-arrow">›</span><span class="pm-cell">全部功能免费用</span></div>`
+      h = `<div class="ph-map"><span class="pm-cell">免费版</span><span class="pm-arrow">›</span><span class="pm-cell pm-main">VIP 会员</span><span class="pm-arrow">›</span><span class="pm-cell">高级功能全解锁</span></div>`
         + steps([
-          '当前是<b>测试期</b>：所有人都是 VIP，高级功能免费体验（极简模式/到店提醒/语音/拍照/汇总/对账）',
-          '正式收费后：<b>4 个档位</b>（月卡 12.8 / 季卡 28.8 / 年卡 88 / 终身卡 158）',
-          '测试期邀请好友/注册送的天数会累加到你的 VIP 到期时间',
-          '正式上线时已开通的奖励天数<b>仍然有效</b>'
+          'VIP 专属功能：极简模式/到店提醒/语音/拍照/汇总/对账',
+          '4 个档位：月卡 12.8 / 季卡 28.8 / 年卡 88 / 终身卡 158',
+          '开通方式：选档位 → 扫码付款（微信/支付宝）→ 会员自动开通',
+          '邀请好友/注册送的天数会累加到你的 VIP 到期时间',
+          'VIP 到期不影响已录入的数据，只影响高级功能入口'
         ])
         + tip('VIP 到期不影响已录入的数据，只影响高级功能入口');
     } else if (settingsPage && settingsPage.classList.contains('active')) {
@@ -10282,7 +10264,7 @@ function openPageHelp(e) {
       h = steps([
         '<b>模式选择</b>：切回标准模式（功能全）的唯一入口',
         '<b>账号密码</b>：登录后数据云端备份',
-        '极简模式为 VIP 功能，测试期免费'
+        '极简模式为 VIP 功能，开通后可用'
       ]) + tip('极简模式数据与标准模式分开，互不影响');
     } else {
       t = '帮助';
@@ -12497,7 +12479,7 @@ function renderManage() {
       } catch(e) {}
     }
     nameHtml = `${maskPhone(phoneFull)}`;
-    subHtml = `<span style="color:#FFE9A8;font-weight:700;">VIP 会员（测试期）</span> · 云备份 ${timeText}`;
+    subHtml = `<span style="color:#FFE9A8;font-weight:700;">VIP 会员</span> · 云备份 ${timeText}`;
     extraBtn = `
       <button class="manage-vip-btn" onclick="event.stopPropagation();openVipCenter();">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg>
@@ -13058,7 +13040,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.22'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.23'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -13757,7 +13739,11 @@ function renderVipCenter() {
     const vip = isVip();
     const until = (function(){ try { return localStorage.getItem(VIP_KEY) || ''; } catch(e) { return ''; } })();
     const isLifetime = until && until.indexOf('2100') === 0;
-    const untilText = isLifetime ? '终身会员' : (until ? ('到期 ' + fmtDate(until)) : '');
+    let untilText = isLifetime ? '终身会员' : '';
+    if (!isLifetime && until) {
+      const left = Math.max(0, Math.ceil((new Date(until).getTime() - Date.now()) / 86400000));
+      untilText = '到期 ' + fmtDate(until) + (left > 0 ? (' · 还剩 ' + left + ' 天') : ' · 今日到期');
+    }
     st.innerHTML =
       '<div class="row1">' +
         '<div class="crown-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20l1.1-6.5L2.6 8.8l6.5-.9L12 2z"/></svg></div>' +
