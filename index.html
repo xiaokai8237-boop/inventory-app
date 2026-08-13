@@ -9391,6 +9391,10 @@ function locSave() {
   renderStorePanelUI();
   initAllStores();
   showToast('定位已保存');
+  // 到店提醒：店面坐标变更后立即同步到原生监测层，否则原生围栏仍是旧路线，挂后台到店不提醒
+  try {
+    if (localStorage.getItem('kuanwei_arrival_on') === '1') syncArrivalRouteToNative();
+  } catch(e) {}
 }
 
 // ======== 框名管理面板 ========
@@ -13040,7 +13044,7 @@ function finishImport(obj, overwrite) {
 }
 
 // ======== 初始化 ========
-const APP_VERSION = '8.2.23'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
+const APP_VERSION = '8.2.24'; // 大改动升首位，中改动升中位，小改动升末位；小逢10进中、中逢10进大（每次改这里+同步递增sw缓存版本）
 // 云端 API 基础地址：绝对地址，确保 Capacitor/WebView 中相对路径 fetch 不被拦截，也能跨域稳定访问
 const API_BASE = 'https://inventory-app-9ql.pages.dev';
 const appVerEl = document.getElementById('appVersion');
@@ -13168,9 +13172,13 @@ setTimeout(function() {
       if (!seen && permMissingCount() > 0) {
         setTimeout(openPermGuide, 1200);
       }
-      // 已开启过监测（上次会话开着）→ 恢复前台监测
+      // 已开启过监测（上次会话开着）→ 恢复前台监测 + 同步门店坐标到原生监测
+      // （#274 修复：原来只恢复 JS 前台轮询、不重注册原生围栏，App 重启后原生后台监测失效）
       try {
-        if (localStorage.getItem('kuanwei_arrival_on') === '1') startArrivalMonitor();
+        if (localStorage.getItem('kuanwei_arrival_on') === '1') {
+          startArrivalMonitor();
+          syncArrivalRouteToNative();
+        }
       } catch(e) {}
       // #146 消费通知点击（记录回筐/整卡 → 回收页单店视图；导航 → 高德）
       checkPendingArrival();
