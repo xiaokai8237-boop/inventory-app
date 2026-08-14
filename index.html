@@ -8345,7 +8345,7 @@ function applyEmitVoice() {
     const names = loadGoodsNames();
     const goodsName = names[emitGoodsIdx] || '';
     const data = loadData();
-    let saved = 0, unmatched = 0;
+    let saved = 0, unmatched = 0, totalQty = 0;
     pendingEmitRows.forEach((r, i) => {
       const qty = parseInt(confirmInputs[i]?.value || '0') || 0;
       let whole = 0;
@@ -8374,6 +8374,7 @@ function applyEmitVoice() {
           source: 'ocr', createdAt: new Date().toISOString()
         });
       }
+      totalQty += qty;
       saved++;
     });
     saveDataArr(data);
@@ -8381,7 +8382,11 @@ function applyEmitVoice() {
     renderTodayOverview();
     refreshRecordViews();
     if (saved > 0) {
-      showToast('已录入 ' + saved + ' 家店入账' + (unmatched > 0 ? ' · ' + unmatched + ' 家未录入未保存（请先去店面管理添加）' : ''));
+      // 保存成功弹窗（与手动录入/语音保存一致：继续录入/查看记录）；未录门店在摘要里提醒
+      document.getElementById('emitSaveSummary').textContent =
+        '已录入 ' + saved + ' 家店 · 共 ' + totalQty + ' 个「' + goodsName + '」' +
+        (unmatched > 0 ? ' · ' + unmatched + ' 家未录入未保存（请先去店面管理添加）' : '');
+      showModal('emitSaveResultModal');
     } else {
       showToast(unmatched > 0 ? '识别出的门店都还没录入店面管理，请先添加再识别' : '请至少填一家店的数量');
     }
@@ -11639,7 +11644,7 @@ function confirmOcrResult() {
   const storeNames = loadStoreNames();
   const data = loadData();
   const cfgAll = loadStoreConfig();
-  let saved = 0, unmatched = 0, aliasAdded = 0;
+  let saved = 0, unmatched = 0, aliasAdded = 0, totalQty = 0;
   const isChangWen = !!ocrCurrentResult.isChangWen;
   // 录入物流箱列（index=0）+ 常温筐整箱数列
   ocrCurrentResult.rows.forEach((r, i) => {
@@ -11726,6 +11731,7 @@ function confirmOcrResult() {
       if (isChangWen) rec.qtyWhole = whole;
       data.push(rec);
     }
+    totalQty += qty;
     saved++;
   });
   saveDataArr(data);
@@ -11737,7 +11743,12 @@ function confirmOcrResult() {
   reloadRecordInputs();
   renderTodayOverview();
   if (saved > 0) {
-    showToast('已录入 ' + saved + ' 家店入账' + (unmatched > 0 ? ' · ' + unmatched + ' 家未录入未保存（请先去店面管理添加）' : '') + (aliasAdded > 0 ? '，自动新增 ' + aliasAdded + ' 个别名' : ''));
+    // 保存成功弹窗（与发出页识图/手动录入一致：继续录入/查看记录）；未录门店+自动别名在摘要提醒
+    document.getElementById('emitSaveSummary').textContent =
+      '已录入 ' + saved + ' 家店 · 共 ' + totalQty + ' 个「' + names[goodsIdx] + '」' +
+      (unmatched > 0 ? ' · ' + unmatched + ' 家未录入未保存（请先去店面管理添加）' : '') +
+      (aliasAdded > 0 ? '，自动新增 ' + aliasAdded + ' 个别名' : '');
+    showModal('emitSaveResultModal');
   } else {
     showToast('未匹配到任何店面，请在店面管理里检查别名设置');
   }

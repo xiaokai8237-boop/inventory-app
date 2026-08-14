@@ -1,5 +1,5 @@
 // 物流筐收发管理系统 - Service Worker（离线完整可用）
-const CACHE = 'kuanwei-v299';
+const CACHE = 'kuanwei-v300';
 const ASSETS = [
   '/', '/index.html', '/manifest.json', '/icon-192.png', '/icon-512.png', '/splash-v10-vision.png',
   // 需求8：预缓存 7 张邀请海报 jpg（点击生成海报秒开，不依赖网络）
