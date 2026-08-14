@@ -1,6 +1,6 @@
 {
-  "versionCode": 120,
-  "versionName": "8.2.24",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v8.2.24.apk",
-  "note": "【v8.2.24】到店提醒通知升级：后台到店直接显示筐数模板（店名+各筐数量+打卡提醒），去掉距离提示；店面保存定位/App启动/发出保存后自动同步门店数据。"
+  "versionCode": 121,
+  "versionName": "8.2.26",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v8.2.26.apk",
+  "note": "【v8.2.26】到店提醒增强：定位双通道（被动监听20秒+主动轮询30秒兜底），停车/信号弱也能触发到店提醒；店面坐标更新即时生效。"
 }
