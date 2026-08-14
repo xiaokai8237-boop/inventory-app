@@ -136,7 +136,8 @@ public class ArrivalForegroundService extends Service implements LocationListene
                     // 进半径 → 提醒一次（去重）
                     if (!alarmed.contains(name)) {
                         alarmed.add(name);
-                        notifyArrival(name, (int) d);
+                        JSONArray goods = o.optJSONArray("goods");
+                        notifyArrival(name, goods);
                     }
                 } else if (d > distM * 1.5) {
                     // 出店 1.5 倍半径 → 重置，允许再次提醒
@@ -146,8 +147,8 @@ public class ArrivalForegroundService extends Service implements LocationListene
         } catch (Exception ignored) {}
     }
 
-    /** 发到店通知（高优先级，响铃+震动） */
-    private void notifyArrival(String storeName, int dist) {
+    /** 发到店通知（高优先级，响铃+震动；#275 按模板渲染：店名 + 各筐数量 + 打卡，去掉距离） */
+    private void notifyArrival(String storeName, JSONArray goods) {
         try {
             NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             if (nm == null) return;
@@ -161,10 +162,15 @@ public class ArrivalForegroundService extends Service implements LocationListene
             PendingIntent pi = PendingIntent.getActivity(this, Math.abs(storeName.hashCode()), open,
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
 
+            if (goods == null) goods = new JSONArray();
+            CharSequence compactText = ArrivalMonitorPlugin.buildRichSpannable(goods, true);
+            CharSequence fullText = ArrivalMonitorPlugin.buildRichSpannable(goods, false);
+
             Notification n = new Notification.Builder(this, CHANNEL_ARRIVAL)
                     .setSmallIcon(R.drawable.ic_stat_notify)
                     .setContentTitle("即将到达 " + storeName)
-                    .setContentText("距门店约 " + dist + " 米，准备卸货")
+                    .setContentText(compactText)
+                    .setStyle(new Notification.BigTextStyle().bigText(fullText))
                     .setAutoCancel(true)
                     .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE)
                     .setContentIntent(pi)

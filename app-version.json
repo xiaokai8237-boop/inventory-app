@@ -1,6 +1,6 @@
 {
-  "versionCode": 119,
-  "versionName": "8.2.14",
-  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v8.2.14.apk",
-  "note": "【v8.2.14】管理员界面显示用户最近登录时间。包含此前全部更新：到店提醒修复（后台GPS轮询）、系统返回键逐级返回、键盘弹出隐藏底部Tab、APP名字统一、框名设置页重新设计、拉新奖励、邀请海报等。"
+  "versionCode": 120,
+  "versionName": "8.2.24",
+  "apkUrl": "https://inventory-app-9ql.pages.dev/apk/app-v8.2.24.apk",
+  "note": "【v8.2.24】到店提醒通知升级：后台到店直接显示筐数模板（店名+各筐数量+打卡提醒），去掉距离提示；店面保存定位/App启动/发出保存后自动同步门店数据。"
 }

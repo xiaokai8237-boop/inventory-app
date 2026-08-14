@@ -238,7 +238,7 @@ public class ArrivalMonitorPlugin extends Plugin {
      *  大字；筐名/数量同色；整箱取常温筐 whole；打卡红字
      *  @param compact true=折叠态单行全量；false=展开态分行（筐行/整箱行/打卡行）
      */
-    private CharSequence buildRichSpannable(JSONArray goods, boolean compact) {
+    public static CharSequence buildRichSpannable(JSONArray goods, boolean compact) {
         // v4 定稿鲜艳色（高饱和高亮；无黄无白；在浅色/深色通知栏背景下都清晰）
         final int[] COLORS = { 0xFFFF6D00, 0xFFFF4081, 0xFF18FFFF, 0xFF448AFF, 0xFF00E676 };
         final int CLOCK = 0xFFFF1744; // 打卡亮红

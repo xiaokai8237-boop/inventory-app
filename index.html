@@ -7706,6 +7706,10 @@ function saveEmitRecords() {
   saveDataArr([...filtered, ...records]);
   renderTodayOverview();
   refreshRecordViews();
+  // 到店提醒：当天发出量已更新 → 同步到原生监测，保证后台到店通知显示最新筐数
+  try {
+    if (localStorage.getItem('kuanwei_arrival_on') === '1') syncArrivalRouteToNative();
+  } catch(e) {}
   // 弹保存成功提示框（回到主页 / 切换筐）
   const total = records.reduce((s, r) => s + r.qtyIn, 0);
   document.getElementById('emitSaveSummary').textContent = '已保存 ' + records.length + ' 家店 · 共 ' + total + ' 个「' + goodsName + '」';
