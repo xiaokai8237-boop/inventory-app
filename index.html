@@ -8222,16 +8222,16 @@ function renderEmitVoiceConfirm(nums) {
         <span style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${storeLabel}</span>
         <input type="number" inputmode="numeric" min="0" value="${w}"
           style="width:64px;text-align:center;font-size:16px;font-weight:700;padding:6px 4px;border:1.5px solid rgba(124,232,224,.55);border-radius:8px;background:rgba(124,232,224,.06);color:#7CE8E0;"
-          data-emit-confirm-whole-idx="${i}" oninput="updateEmitConfirmTotal()">
+          data-emit-confirm-whole-idx="${i}" oninput="updateEmitConfirmTotal()" onfocus="this.select()">
         <input type="number" inputmode="numeric" min="0" value="${qty}"
           style="width:64px;text-align:center;font-size:16px;font-weight:700;padding:6px 4px;border:1.5px solid rgba(245,166,35,.55);border-radius:8px;background:rgba(245,166,35,.06);color:#F5A623;"
-          data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()">`;
+          data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()" onfocus="this.select()">`;
       } else {
         row.innerHTML = `
         <span style="flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${storeLabel}</span>
         <input type="number" inputmode="numeric" min="0" value="${qty}"
           style="width:96px;text-align:center;font-size:17px;font-weight:700;padding:6px;border:1.5px solid rgba(245,166,35,.55);border-radius:10px;background:rgba(245,166,35,.06);color:#F5A623;"
-          data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()">`;
+          data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()" onfocus="this.select()">`;
       }
       container.appendChild(row);
     });
@@ -8264,16 +8264,16 @@ function renderEmitVoiceConfirm(nums) {
       <span style="flex:1;font-size:13px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:#E67E22;font-size:11px;">${alias}</span></span>
       <input type="number" inputmode="numeric" min="0" value="${w}"
         style="width:64px;text-align:center;font-size:16px;font-weight:700;padding:6px 4px;border:1.5px solid rgba(124,232,224,.55);border-radius:8px;background:rgba(124,232,224,.06);color:#7CE8E0;"
-        data-emit-confirm-whole-idx="${i}" oninput="updateEmitConfirmTotal()">
+        data-emit-confirm-whole-idx="${i}" oninput="updateEmitConfirmTotal()" onfocus="this.select()">
       <input type="number" inputmode="numeric" min="0" value="${n}"
         style="width:64px;text-align:center;font-size:16px;font-weight:700;padding:6px 4px;border:1.5px solid rgba(245,166,35,.55);border-radius:8px;background:rgba(245,166,35,.06);color:#F5A623;"
-        data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()">`;
+        data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()" onfocus="this.select()">`;
     } else {
       row.innerHTML = `
       <span style="flex:1;font-size:13px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:#E67E22;font-size:11px;">${alias}</span></span>
       <input type="number" inputmode="numeric" min="0" value="${n}"
         style="width:96px;text-align:center;font-size:17px;font-weight:700;padding:6px;border:1.5px solid rgba(124,232,224,.4);border-radius:10px;background:rgba(255,255,255,.07);color:#fff;"
-        data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()">`;
+        data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()" onfocus="this.select()">`;
     }
     container.appendChild(row);
   }
@@ -8354,16 +8354,16 @@ function switchEmitCol(newColName) {
       <span style="flex:1;font-size:13px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:#E67E22;font-size:11px;">${alias}</span></span>
       <input type="number" inputmode="numeric" min="0" value="${w}"
         style="width:64px;text-align:center;font-size:16px;font-weight:700;padding:6px 4px;border:1.5px solid rgba(124,232,224,.55);border-radius:8px;background:rgba(124,232,224,.06);color:#7CE8E0;"
-        data-emit-confirm-whole-idx="${i}" oninput="updateEmitConfirmTotal()">
+        data-emit-confirm-whole-idx="${i}" oninput="updateEmitConfirmTotal()" onfocus="this.select()">
       <input type="number" inputmode="numeric" min="0" value="${n}"
         style="width:64px;text-align:center;font-size:16px;font-weight:700;padding:6px 4px;border:1.5px solid rgba(245,166,35,.55);border-radius:8px;background:rgba(245,166,35,.06);color:#F5A623;"
-        data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()">`;
+        data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()" onfocus="this.select()">`;
     } else {
       row.innerHTML = `
       <span style="flex:1;font-size:13px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${i + 1}. ${escapeHtml(storeName)}<span style="color:#E67E22;font-size:11px;">${alias}</span></span>
       <input type="number" inputmode="numeric" min="0" value="${n}"
         style="width:96px;text-align:center;font-size:17px;font-weight:700;padding:6px;border:1.5px solid rgba(124,232,224,.4);border-radius:10px;background:rgba(255,255,255,.07);color:#fff;"
-        data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()">`;
+        data-emit-confirm-idx="${i}" oninput="updateEmitConfirmTotal()" onfocus="this.select()">`;
     }
     container.appendChild(row);
   });
@@ -11417,12 +11417,12 @@ function refreshOcrQtyCol() {
       : (isConflict
         ? 'width:64px;padding:5px;border:2px solid #F5A623;border-radius:6px;font-size:14px;text-align:center;font-weight:700;color:#F5A623;background:rgba(245,166,35,.12);'
         : 'width:64px;padding:5px;border:1.5px solid #F5A623;border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#F5A623;');
-    html += '<td style="background:' + (isHighConf && !isConflict ? 'rgba(124,232,224,.07);' : (isConflict ? 'rgba(245,166,35,.12);' : 'rgba(245,166,35,.12);')) + '"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="' + qtyStyle + '"></td>';
+    html += '<td style="background:' + (isHighConf && !isConflict ? 'rgba(124,232,224,.07);' : (isConflict ? 'rgba(245,166,35,.12);' : 'rgba(245,166,35,.12);')) + '"><input type="number" id="ocrQty_' + i + '" value="' + v + '" min="0" style="' + qtyStyle + '" onfocus="this.select()"></td>';
     // 整箱数列（常温筐）
     if (isChangWen) {
       const wv = r.whole !== undefined ? r.whole : 0;
       const wholeStyle = 'width:64px;padding:5px;border:1.5px solid rgba(124,232,224,.5);border-radius:6px;font-size:14px;text-align:center;font-weight:600;color:#7CE8E0;background:rgba(124,232,224,.08);';
-      html += '<td style="background:rgba(124,232,224,.05);"><input type="number" id="ocrWhole_' + i + '" value="' + wv + '" min="0" style="' + wholeStyle + '"></td>';
+      html += '<td style="background:rgba(124,232,224,.05);"><input type="number" id="ocrWhole_' + i + '" value="' + wv + '" min="0" style="' + wholeStyle + '" onfocus="this.select()"></td>';
     }
     html += '<td><button onclick="removeOcrRow(' + i + ')" style="background:none;border:none;color:#FF6B6B;font-size:20px;cursor:pointer;padding:0 6px;line-height:1;">×</button></td>';
     html += '</tr>';
