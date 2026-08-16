@@ -262,6 +262,50 @@ export async function onRequest(context) {
     } catch (e) { return json({ error: '查询失败' }, 500); }
   }
 
+  // POST /admin/rebates {adminKey, month?}  用户分红记录（按月/全部，按邀请人分组）
+  if (url.pathname.endsWith('/admin/rebates')) {
+    try {
+      const month = (body.month || '').toString().trim(); // 如 2026-08；空 = 全部
+      const rebates = [];
+      let cursor;
+      do {
+        const page = await env.BACKUP_KV.list({ prefix: 'pay_rebate_', cursor, limit: 200 });
+        for (const k of page.keys) {
+          const raw = await env.BACKUP_KV.get(k.name).catch(() => null);
+          if (raw) {
+            try {
+              const rb = JSON.parse(raw);
+              if (month && rb.month !== month) continue;
+              rebates.push(rb);
+            } catch (e) {}
+          }
+        }
+        cursor = page.cursor;
+      } while (cursor);
+      rebates.sort((a, b) => ((b.paidAt || '') < (a.paidAt || '') ? -1 : ((b.paidAt || '') > (a.paidAt || '') ? 1 : 0)));
+      // 按邀请人分组
+      const byInviter = {};
+      for (const rb of rebates) {
+        const k = rb.inviter || 'unknown';
+        if (!byInviter[k]) byInviter[k] = [];
+        byInviter[k].push(rb);
+      }
+      const list = Object.keys(byInviter).map(inviter => ({
+        inviter,
+        count: byInviter[inviter].length,
+        totalAmount: +byInviter[inviter].reduce((s, r) => s + (r.amount || 0), 0).toFixed(2),
+        totalRebate: +byInviter[inviter].reduce((s, r) => s + (r.rebate || 0), 0).toFixed(2),
+        items: byInviter[inviter]
+      })).sort((a, b) => b.totalRebate - a.totalRebate);
+      return json({
+        ok: true, month,
+        count: rebates.length,
+        totalRebate: +rebates.reduce((s, r) => s + (r.rebate || 0), 0).toFixed(2),
+        list
+      });
+    } catch (e) { return json({ error: '查询失败' }, 500); }
+  }
+
   if (!url.pathname.endsWith('/admin/reset')) return json({ error: 'not found' }, 404);
 
   const phone = (body.phone || '').toString().trim();

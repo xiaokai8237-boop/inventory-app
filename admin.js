@@ -77,6 +77,7 @@ function switchTab(tab) {
   else if (tab === 'grant') renderGrant();
   else if (tab === 'config') renderConfig();
   else if (tab === 'reconcile') renderReconcile();
+  else if (tab === 'rebates') renderRebates();
 }
 
 /* ===== 概览 ===== */
@@ -294,6 +295,48 @@ function loadReconcile() {
       return '<div class="flow-row"><div><div class="flow-amt ' + (ok ? '' : 'un') + '">' + f.amount.toFixed(2) + ' 元</div>' +
         '<div class="flow-meta">' + fmtTime(f.ts) + ' · ' + (ok ? '订单 ' + f.orderNo : '未匹配（' + (f.phone || '未知用户') + '）') + '</div></div>' +
         '<span class="badge ' + (ok ? 'ok' : 'un') + '">' + (ok ? '已开通' : '待处理') + '</span></div>';
+    }).join('');
+  });
+}
+
+/* ===== 用户分红记录（只记录，管理 APP 展示；钱线下给） ===== */
+var rebateCurMonth = today.slice(0, 7); // 当前月 YYYY-MM
+function renderRebates() {
+  var el = document.getElementById('tabContent');
+  // 月份下拉：当年 1 月 ~ 当前月
+  var yr = parseInt(today.slice(0, 4), 10);
+  var curMon = parseInt(today.slice(5, 7), 10);
+  var opts = [];
+  for (var m = 1; m <= curMon; m++) {
+    var ym = yr + '-' + String(m).padStart(2, '0');
+    opts.push('<option value="' + ym + '"' + (ym === rebateCurMonth ? ' selected' : '') + '>' + m + ' 月</option>');
+  }
+  el.innerHTML = '<div class="card"><div class="card-title"><span class="ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>用户分红记录</div>' +
+    '<div style="font-size:11px;color:var(--dim);margin-bottom:10px;">被邀请人开通会员 → 邀请人返 50% 实付金额。仅记录展示，结算线下进行。</div>' +
+    '<select class="f-select" id="rbMonth" onchange="loadRebates()">' + opts.join('') + '</select>' +
+    '<div class="rc-grid" id="rbSummary" style="margin-top:10px;"><div class="rc-cell"><div class="rc-num" style="color:var(--gold);">-</div><div class="rc-lab">分红笔数</div></div><div class="rc-cell"><div class="rc-num" style="color:var(--cyan);">-</div><div class="rc-lab">分红总额(元)</div></div></div></div>' +
+    '<div class="card"><div class="card-title"><span class="ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>按邀请人汇总</div><div id="rbList"><div class="empty">加载中…</div></div></div>';
+  loadRebates();
+}
+function loadRebates() {
+  rebateCurMonth = document.getElementById('rbMonth').value;
+  api('/admin/rebates', { month: rebateCurMonth }).then(function (res) {
+    if (!res || !res.ok) { document.getElementById('rbList').innerHTML = '<div class="empty">加载失败</div>'; return; }
+    document.getElementById('rbSummary').innerHTML =
+      '<div class="rc-cell"><div class="rc-num" style="color:var(--gold);">' + res.count + '</div><div class="rc-lab">分红笔数</div></div>' +
+      '<div class="rc-cell"><div class="rc-num" style="color:var(--cyan);">' + res.totalRebate.toFixed(2) + '</div><div class="rc-lab">分红总额(元)</div></div>';
+    var list = res.list || [];
+    var el = document.getElementById('rbList');
+    if (!list.length) { el.innerHTML = '<div class="empty">该月暂无分红记录</div>'; return; }
+    el.innerHTML = list.map(function (g) {
+      var rows = g.items.map(function (r) {
+        var t = new Date(r.paidAt || '');
+        var hh = String(t.getHours()).padStart(2, '0'), mm = String(t.getMinutes()).padStart(2, '0');
+        return '<div class="flow-row"><div><div class="flow-amt">返 ' + r.rebate.toFixed(2) + ' 元</div>' +
+          '<div class="flow-meta">' + hh + ':' + mm + ' · 被拉用户 ' + r.invitee + ' · 实付 ' + r.amount.toFixed(2) + ' 元</div></div>' +
+          '<span class="badge ok">' + fmtDate(r.paidAt).slice(5) + '</span></div>';
+      }).join('');
+      return '<div style="margin-bottom:10px;"><div style="font-size:13px;font-weight:800;color:var(--gold);padding:6px 2px;">邀请人 ' + g.inviter + ' <span style="font-size:11px;color:var(--cyan);font-weight:700;">共 ' + g.count + ' 笔 · 返 ' + g.totalRebate.toFixed(2) + ' 元</span></div>' + rows + '</div>';
     }).join('');
   });
 }

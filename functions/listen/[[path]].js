@@ -65,6 +65,8 @@ async function handleReport(body, env, json) {
       order.channel = 'listen';
       await env.BACKUP_KV.put('pay_order_' + order.orderNo, JSON.stringify(order));
       await grantVip(env, order.phone, order.planId);
+      // 用户分红：支付成功 → 被邀请人找到邀请人则记一笔（幂等，只从上线后新订单开始）
+      await recordRebate(env, order.phone, order);
       flow.orderNo = order.orderNo;
       flow.status = 'matched';
       flow.phone = order.phone;
@@ -129,6 +131,36 @@ async function grantVip(env, phone, planId) {
     }
     acct.updatedAt = new Date().toISOString();
     await env.BACKUP_KV.put('account_' + phone, JSON.stringify(acct));
+  } catch (e) {}
+}
+
+// ===== 用户分红记录（只记录，管理 APP 展示；钱线下给） =====
+// 支付成功 → 查被邀请人（inviteePhone）的邀请关系 → 找到邀请人则写一条
+// pay_rebate_<inviterPhone>_<orderNo> = {inviter, invitee, amount, rebate, orderNo, paidAt, month}
+async function recordRebate(env, inviteePhone, order) {
+  try {
+    if (!inviteePhone || !order || !order.orderNo) return;
+    // 幂等：同一订单只记一次（防监听+回调双通道重复）
+    const relRaw = await env.BACKUP_KV.get('invite_rel_' + inviteePhone).catch(() => null);
+    if (!relRaw) return; // 该用户没有邀请人（没通过邀请码注册）→ 不分红
+    const rel = JSON.parse(relRaw);
+    const inviterPhone = (rel.inviterPhone || '').toString().trim();
+    if (!inviterPhone) return;
+    const rebateKey = 'pay_rebate_' + inviterPhone + '_' + order.orderNo;
+    if (await env.BACKUP_KV.get(rebateKey).catch(() => null)) return; // 已记过
+    const amount = parseFloat(order.amount) || 0;
+    if (amount <= 0) return;
+    const paidAt = order.paidAt || new Date().toISOString();
+    const month = paidAt.slice(0, 7); // 2026-08
+    await env.BACKUP_KV.put(rebateKey, JSON.stringify({
+      inviter: inviterPhone,
+      invitee: inviteePhone,
+      amount: +amount.toFixed(2),
+      rebate: +(amount * 0.5).toFixed(2),
+      orderNo: order.orderNo,
+      paidAt,
+      month
+    }));
   } catch (e) {}
 }
 async function appendFlow(env, flow) {
